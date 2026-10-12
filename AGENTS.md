@@ -447,6 +447,11 @@ Use **pnpm** (workspaces) as the only package manager.
 -   Dependency install scripts are blocked unless approved under
     `allowBuilds` in `pnpm-workspace.yaml`. Record each decision there
     with a reason.
+-   pnpm refuses package versions that were published too recently
+    (supply-chain protection). Do not bypass it with
+    `minimumReleaseAgeExclude`; use the newest version that passes. pnpm
+    may add such an exclusion automatically during an interactive
+    `pnpm add` — check `pnpm-workspace.yaml` and remove it.
 
 Before introducing a dependency:
 
