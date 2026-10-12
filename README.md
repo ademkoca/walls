@@ -86,6 +86,23 @@ packages/
 -   TypeScript
 -   Express
 
+### Emails in development
+
+Without `RESEND_API_KEY`, the API prints every email, including its
+verification or reset link, to its console instead of sending it.
+
+### First Super Admin
+
+Accounts with admin rights are never created through public registration.
+Bootstrap the first one from the command line:
+
+``` text
+pnpm admin:create --email admin@walls.rs --name "Ana Anić" --locale sr
+```
+
+The new admin receives an email with a single-use link (valid 7 days) to set
+their own password; no password is chosen or shown by the command.
+
 ### Database
 
 -   PostgreSQL
@@ -234,12 +251,13 @@ Then skip `pnpm db:up` and run `pnpm db:migrate`.
 | `pnpm typecheck`     | TypeScript checks in every package              |
 | `pnpm lint`          | ESLint across the repository                    |
 | `pnpm test`          | Unit tests in every package                     |
-| `pnpm test:integration` | Database integration tests (needs `pnpm db:up`) |
+| `pnpm test:integration` | Database and API integration tests (needs PostgreSQL) |
 | `pnpm format`        | Format with Prettier (`format:check` in CI)     |
 | `pnpm db:up` / `db:down` | Start / stop the local PostgreSQL container |
 | `pnpm db:migrate`    | Apply pending migrations to `DATABASE_URL`      |
 | `pnpm db:generate`   | Create a migration after changing the Drizzle schema |
 | `pnpm db:studio`     | Browse the database with Drizzle Studio         |
+| `pnpm admin:create --email <email> --name "<name>"` | Invite a Super Admin (see below) |
 | `pnpm brand:generate` | Regenerate favicons and app icons from the brand SVGs |
 
 ### Database

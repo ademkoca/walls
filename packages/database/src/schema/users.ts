@@ -3,6 +3,7 @@ import { boolean, check, index, pgEnum, pgTable, text, uuid } from 'drizzle-orm/
 import {
   citext,
   id,
+  localeEnum,
   phoneVerificationStatusEnum,
   roleEnum,
   timestamps,
@@ -20,6 +21,8 @@ export const users = pgTable(
     role: roleEnum().notNull(),
     status: userStatusEnum().notNull(),
     emailVerifiedAt: timestamptz(),
+    /** Language of emails sent to the user. */
+    preferredLocale: localeEnum().notNull().default('sr'),
 
     // Public profile (SPEC §19).
     displayName: text().notNull(),

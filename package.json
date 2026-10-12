@@ -11,7 +11,7 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "test:integration": "turbo run test:integration",
+    "test:integration": "turbo run test:integration --concurrency=1",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -20,7 +20,8 @@
     "db:down": "docker compose down",
     "db:generate": "pnpm --filter @walls/database db:generate",
     "db:migrate": "pnpm --filter @walls/database db:migrate",
-    "db:studio": "pnpm --filter @walls/database db:studio"
+    "db:studio": "pnpm --filter @walls/database db:studio",
+    "admin:create": "pnpm --filter @walls/api admin:create"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

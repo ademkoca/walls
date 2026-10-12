@@ -12,3 +12,5 @@ export * from './user/phone';
 export * from './media/image-rules';
 export * from './pricing/money';
 export * from './pricing/price';
+export * from './text/slug';
+export * from './web-routes';

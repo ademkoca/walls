@@ -21,3 +21,8 @@ export function createDatabase({ url, maxConnections = DEFAULT_MAX_CONNECTIONS }
 }
 
 export type Database = ReturnType<typeof createDatabase>['db'];
+
+export type Transaction = Parameters<Parameters<Database['transaction']>[0]>[0];
+
+/** Either the database or an open transaction; repositories accept both. */
+export type DbExecutor = Database | Transaction;
