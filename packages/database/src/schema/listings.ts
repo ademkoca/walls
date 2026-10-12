@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm';
+import type { ListingContent } from '@walls/shared';
 import {
   bigint,
   boolean,
@@ -6,6 +7,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -20,6 +22,7 @@ import {
   mediaTypeEnum,
   priceModeEnum,
   rentalPeriodEnum,
+  reviewStatusEnum,
   sellerTypeEnum,
   timestamps,
   timestamptz,
@@ -217,5 +220,54 @@ export const listingViewsDaily = pgTable(
   (table) => [
     primaryKey({ columns: [table.listingId, table.day] }),
     check('listing_views_daily_views', sql`${table.views} >= 0`),
+  ],
+);
+
+/**
+ * Major edits of a published listing awaiting review (SPEC §6). The live listing stays
+ * relational and unchanged; `content` is the complete proposed version (validated by the
+ * API with the shared schemas) and is written into the relational tables on approval.
+ * Images added by the revision are `listing_media` rows without `approved_at`; images it
+ * removes are listed in `removed_media_ids` and deleted on approval.
+ */
+export const listingRevisions = pgTable(
+  'listing_revisions',
+  {
+    id: id(),
+    listingId: uuid()
+      .notNull()
+      .references(() => listings.id, { onDelete: 'cascade' }),
+    status: reviewStatusEnum().notNull().default('PENDING'),
+    content: jsonb().$type<ListingContent>().notNull(),
+    removedMediaIds: uuid()
+      .array()
+      .notNull()
+      .default(sql`'{}'::uuid[]`),
+    /** The editor who last changed the revision. */
+    updatedById: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    reviewedById: uuid().references(() => users.id, { onDelete: 'restrict' }),
+    reviewedAt: timestamptz(),
+    rejectionReason: text(),
+    ...timestamps(),
+  },
+  (table) => [
+    index().on(table.listingId, table.createdAt),
+    // At most one open revision per listing.
+    uniqueIndex('listing_revisions_one_pending_per_listing')
+      .on(table.listingId)
+      .where(sql`${table.status} = 'PENDING'`),
+    index('listing_revisions_pending_idx')
+      .on(table.updatedAt)
+      .where(sql`${table.status} = 'PENDING'`),
+    check(
+      'listing_revisions_rejected_has_reason',
+      sql`${table.status} <> 'REJECTED' OR ${table.rejectionReason} IS NOT NULL`,
+    ),
+    check(
+      'listing_revisions_reviewed',
+      sql`(${table.status} = 'PENDING') = (${table.reviewedAt} IS NULL)`,
+    ),
   ],
 );

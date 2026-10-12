@@ -9,6 +9,12 @@ export const EmailTemplate = {
   PASSWORD_CHANGED: 'PASSWORD_CHANGED',
   ACCOUNT_SETUP: 'ACCOUNT_SETUP',
   LISTING_SUBMITTED: 'LISTING_SUBMITTED',
+  LISTING_APPROVED: 'LISTING_APPROVED',
+  LISTING_REJECTED: 'LISTING_REJECTED',
+  LISTING_CHANGES_APPROVED: 'LISTING_CHANGES_APPROVED',
+  LISTING_CHANGES_REJECTED: 'LISTING_CHANGES_REJECTED',
+  ACCOUNT_DEACTIVATED: 'ACCOUNT_DEACTIVATED',
+  ACCOUNT_REACTIVATED: 'ACCOUNT_REACTIVATED',
 } as const;
 export type EmailTemplate = (typeof EmailTemplate)[keyof typeof EmailTemplate];
 
@@ -20,6 +26,17 @@ export interface EmailPayloads {
   PASSWORD_CHANGED: { resetLink: string };
   ACCOUNT_SETUP: { displayName: string; link: string };
   LISTING_SUBMITTED: { displayName: string; listingTitle: string; link: string };
+  LISTING_APPROVED: { displayName: string; listingTitle: string; link: string };
+  LISTING_REJECTED: { displayName: string; listingTitle: string; reason: string; link: string };
+  LISTING_CHANGES_APPROVED: { displayName: string; listingTitle: string; link: string };
+  LISTING_CHANGES_REJECTED: {
+    displayName: string;
+    listingTitle: string;
+    reason: string;
+    link: string;
+  };
+  ACCOUNT_DEACTIVATED: { displayName: string; reason: string };
+  ACCOUNT_REACTIVATED: { displayName: string; reason: string; loginLink: string };
 }
 
 interface EmailContent {
@@ -85,6 +102,59 @@ const COPY: Record<Locale, Copy> = {
       ],
       action: { label: 'Pogledaj oglas', url: link },
     }),
+    LISTING_APPROVED: ({ displayName, listingTitle, link }) => ({
+      subject: 'Oglas je objavljen',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `oglas „${listingTitle}" je odobren i sada je javno objavljen.`,
+      ],
+      action: { label: 'Pogledaj oglas', url: link },
+    }),
+    LISTING_REJECTED: ({ displayName, listingTitle, reason, link }) => ({
+      subject: 'Oglas nije odobren',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `oglas „${listingTitle}" nije odobren. Razlog:`,
+        reason,
+        'Vratite oglas u nacrt, izmenite ga i pošaljite ponovo na proveru.',
+      ],
+      action: { label: 'Izmeni oglas', url: link },
+    }),
+    LISTING_CHANGES_APPROVED: ({ displayName, listingTitle, link }) => ({
+      subject: 'Izmene oglasa su objavljene',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `izmene oglasa „${listingTitle}" su odobrene i sada su javno vidljive.`,
+      ],
+      action: { label: 'Pogledaj oglas', url: link },
+    }),
+    LISTING_CHANGES_REJECTED: ({ displayName, listingTitle, reason, link }) => ({
+      subject: 'Izmene oglasa nisu odobrene',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `izmene oglasa „${listingTitle}" nisu odobrene. Objavljena verzija oglasa ostaje nepromenjena. Razlog:`,
+        reason,
+      ],
+      action: { label: 'Izmeni oglas', url: link },
+    }),
+    ACCOUNT_DEACTIVATED: ({ displayName, reason }) => ({
+      subject: 'Vaš nalog je deaktiviran',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `vaš ${brand.name} nalog je deaktiviran. Razlog:`,
+        reason,
+        'Dok je nalog deaktiviran, ne možete se prijaviti, a vaši oglasi nisu javno vidljivi. Ako mislite da je došlo do greške, odgovorite na ovu poruku.',
+      ],
+    }),
+    ACCOUNT_REACTIVATED: ({ displayName, reason, loginLink }) => ({
+      subject: 'Vaš nalog je ponovo aktivan',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `vaš ${brand.name} nalog je ponovo aktiviran. Napomena:`,
+        reason,
+      ],
+      action: { label: 'Prijavite se', url: loginLink },
+    }),
   },
   en: {
     EMAIL_VERIFICATION: ({ displayName, link }) => ({
@@ -137,6 +207,59 @@ const COPY: Record<Locale, Copy> = {
         'The listing cannot be edited while it is in review.',
       ],
       action: { label: 'View listing', url: link },
+    }),
+    LISTING_APPROVED: ({ displayName, listingTitle, link }) => ({
+      subject: 'Your listing is published',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `your listing "${listingTitle}" has been approved and is now public.`,
+      ],
+      action: { label: 'View listing', url: link },
+    }),
+    LISTING_REJECTED: ({ displayName, listingTitle, reason, link }) => ({
+      subject: 'Your listing was not approved',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `your listing "${listingTitle}" was not approved. Reason:`,
+        reason,
+        'Turn the listing back into a draft, update it and submit it for review again.',
+      ],
+      action: { label: 'Edit listing', url: link },
+    }),
+    LISTING_CHANGES_APPROVED: ({ displayName, listingTitle, link }) => ({
+      subject: 'Your listing changes are published',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `the changes to your listing "${listingTitle}" have been approved and are now public.`,
+      ],
+      action: { label: 'View listing', url: link },
+    }),
+    LISTING_CHANGES_REJECTED: ({ displayName, listingTitle, reason, link }) => ({
+      subject: 'Your listing changes were not approved',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `the changes to your listing "${listingTitle}" were not approved. The published version stays as it was. Reason:`,
+        reason,
+      ],
+      action: { label: 'Edit listing', url: link },
+    }),
+    ACCOUNT_DEACTIVATED: ({ displayName, reason }) => ({
+      subject: 'Your account has been deactivated',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `your ${brand.name} account has been deactivated. Reason:`,
+        reason,
+        "While the account is deactivated you can't sign in and your listings aren't publicly visible. If you think this is a mistake, reply to this email.",
+      ],
+    }),
+    ACCOUNT_REACTIVATED: ({ displayName, reason, loginLink }) => ({
+      subject: 'Your account is active again',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `your ${brand.name} account has been reactivated. Note:`,
+        reason,
+      ],
+      action: { label: 'Log in', url: loginLink },
     }),
   },
 };

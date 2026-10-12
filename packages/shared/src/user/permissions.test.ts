@@ -4,9 +4,13 @@ import { Role, UserStatus } from '../enums';
 import { admin, agent, seller, superAdmin } from '../testing/fixtures';
 import {
   canDeactivateUser,
+  canInviteUser,
   canManageUser,
+  canReactivateUser,
   canReviewAgentMatters,
+  canViewAdministration,
   profileChangesRequireApproval,
+  statusAfterReactivation,
 } from './permissions';
 
 const target = (role: Role) => ({ id: `target-${role}`, role });
@@ -72,5 +76,52 @@ describe('deactivating accounts', () => {
     expect(
       canDeactivateUser(admin, { ...target(Role.PRIVATE_SELLER), status: UserStatus.DEACTIVATED }),
     ).toEqual({ allowed: false, reason: DenialReason.INVALID_STATE });
+  });
+});
+
+describe('reactivating accounts (SPEC §2.1)', () => {
+  const deactivatedSeller = {
+    id: 'seller-x',
+    role: Role.PRIVATE_SELLER,
+    status: UserStatus.DEACTIVATED,
+  };
+  const deactivatedAdmin = { id: 'admin-x', role: Role.ADMIN, status: UserStatus.DEACTIVATED };
+
+  it('mirrors who may deactivate', () => {
+    expect(canReactivateUser(admin, deactivatedSeller).allowed).toBe(true);
+    expect(canReactivateUser(admin, deactivatedAdmin).allowed).toBe(false);
+    expect(canReactivateUser(superAdmin, deactivatedAdmin).allowed).toBe(true);
+  });
+
+  it('only applies to deactivated accounts', () => {
+    const active = { ...deactivatedSeller, status: UserStatus.ACTIVE };
+    expect(canReactivateUser(admin, active)).toEqual({
+      allowed: false,
+      reason: DenialReason.INVALID_STATE,
+    });
+  });
+
+  it('returns accounts to where signup stopped', () => {
+    expect(statusAfterReactivation({ hasPassword: true, emailVerified: true })).toBe('ACTIVE');
+    expect(statusAfterReactivation({ hasPassword: true, emailVerified: false })).toBe(
+      'PENDING_VERIFICATION',
+    );
+    expect(statusAfterReactivation({ hasPassword: false, emailVerified: true })).toBe(
+      'PENDING_SETUP',
+    );
+  });
+});
+
+describe('inviting and administration views', () => {
+  it('lets only Super Admins invite Admins', () => {
+    expect(canInviteUser(superAdmin, Role.ADMIN).allowed).toBe(true);
+    expect(canInviteUser(admin, Role.ADMIN).allowed).toBe(false);
+    expect(canInviteUser(superAdmin, Role.SUPER_ADMIN).allowed).toBe(false);
+  });
+
+  it('lets Admins and Super Admins view users and the audit log', () => {
+    expect(canViewAdministration(admin).allowed).toBe(true);
+    expect(canViewAdministration(superAdmin).allowed).toBe(true);
+    expect(canViewAdministration(seller).allowed).toBe(false);
   });
 });

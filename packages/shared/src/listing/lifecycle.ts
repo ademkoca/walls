@@ -1,4 +1,4 @@
-import { ListingStatus, TransactionType } from '../enums';
+import { ListingStatus, TransactionType, UserStatus } from '../enums';
 
 /** Status-changing actions on a listing (SPEC §6). */
 export const ListingAction = {
@@ -61,6 +61,21 @@ export const LISTING_TRANSITIONS: Readonly<Record<ListingAction, TransitionRule>
 
 /** Statuses visible to anonymous visitors (SPEC §46). */
 export const PUBLIC_LISTING_STATUSES: readonly ListingStatus[] = [PUBLISHED];
+
+/**
+ * Whether visitors can see the listing: published, and its creator's account is not
+ * deactivated (SPEC §2.1: a deactivated user's listings are hidden until reactivation).
+ */
+export function isListingPubliclyVisible(
+  listing: { status: ListingStatus; deletedAt: Date | null },
+  creatorStatus: UserStatus,
+): boolean {
+  return (
+    PUBLIC_LISTING_STATUSES.includes(listing.status) &&
+    listing.deletedAt === null &&
+    creatorStatus !== UserStatus.DEACTIVATED
+  );
+}
 
 /** Whether the state machine permits `action` from `status`, ignoring who performs it. */
 export function isTransitionValid(

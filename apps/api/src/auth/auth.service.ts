@@ -6,6 +6,7 @@ import {
   type Locale,
   Role,
   UserStatus,
+  nextFreeSlug,
   slugify,
 } from '@walls/shared';
 import type { LoginInput, RegisterInput, SetPasswordInput } from '@walls/validation';
@@ -98,11 +99,7 @@ export class AuthService {
   /** A slug based on the display name that no other user has, e.g. ana-anic-2. */
   private async uniqueSlug(db: DbExecutor, displayName: string): Promise<string> {
     const base = slugify(displayName) || FALLBACK_SLUG;
-    const taken = new Set(await findSlugsLike(db, base));
-    if (!taken.has(base)) return base;
-    let suffix = 2;
-    while (taken.has(`${base}-${suffix}`)) suffix += 1;
-    return `${base}-${suffix}`;
+    return nextFreeSlug(base, new Set(await findSlugsLike(db, base)));
   }
 
   /** Issues a fresh single-use token; previously emailed links of the same type stop working. */

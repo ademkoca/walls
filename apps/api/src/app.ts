@@ -10,9 +10,12 @@ import type { Config } from './config';
 import { createErrorHandler, notFoundHandler } from './http/error-handler';
 import { type RateLimitRule, requireAllowedOrigin } from './http/security';
 import { ListingMediaService } from './listings/listing-media.service';
+import { ListingReviewService } from './listings/listing-review.service';
 import { listingsRoutes } from './listings/listings.routes';
 import { ListingsService } from './listings/listings.service';
 import { LOCAL_MEDIA_ROUTE, LocalDiskMediaStorage } from './media/local-disk-media-storage';
+import { auditLogRoutes, usersRoutes } from './users/users.routes';
+import { UsersService } from './users/users.service';
 import type { MediaStorage } from './media/media-storage';
 import type { Logger } from './logger';
 
@@ -47,7 +50,9 @@ export function createApp({
   const app = express();
   const authService = new AuthService(db, config);
   const listingsService = new ListingsService(db, config);
-  const mediaService = new ListingMediaService(db, mediaStorage, logger);
+  const mediaService = new ListingMediaService(db, mediaStorage, listingsService, logger);
+  const reviewService = new ListingReviewService(db, config, mediaStorage, logger);
+  const usersService = new UsersService(db, config, authService);
 
   app.disable('x-powered-by');
   app.set('trust proxy', config.trustProxyHops);
@@ -72,8 +77,15 @@ export function createApp({
   api.use('/auth', authRoutes({ db, authService, env: config.env, rateLimits }));
   api.use(
     '/listings',
-    listingsRoutes({ listings: listingsService, media: mediaService, uploadRateLimit }),
+    listingsRoutes({
+      listings: listingsService,
+      media: mediaService,
+      review: reviewService,
+      uploadRateLimit,
+    }),
   );
+  api.use('/users', usersRoutes(usersService));
+  api.use('/audit-log', auditLogRoutes(usersService));
   app.use('/api/v1', api);
 
   app.use(notFoundHandler);

@@ -3,7 +3,10 @@ import {
   DEFAULT_LOCALE,
   type FurnishedStatus,
   type HeatingType,
+  type ListingContentView,
   type ListingDetail,
+  ListingEditMode,
+  ReviewStatus,
   type ListingSubmissionSnapshot,
   Locale,
   PriceMode,
@@ -135,7 +138,8 @@ export interface ListingFormValues {
 
 const numberText = (value: number | null) => (value === null ? '' : String(value));
 
-export function toFormValues(listing: ListingDetail): ListingFormValues {
+/** Form values for a listing's content (live, or proposed by a revision). */
+export function toFormValues(listing: ListingContentView): ListingFormValues {
   const text = (locale: Locale) => {
     const found = listing.texts.find((candidate) => candidate.locale === locale);
     return { title: found?.title ?? '', description: found?.description ?? '' };
@@ -175,6 +179,35 @@ export function toFormValues(listing: ListingDetail): ListingFormValues {
         : { onRequest: true, amount: '', currency: Currency.EUR, period: '', negotiable: false },
     isExactAddressPublic: listing.isExactAddressPublic,
   };
+}
+
+/** A pending revision's proposed content, if the listing has one. */
+export function proposedContent(listing: ListingDetail): ListingContentView | null {
+  return listing.revision?.status === ReviewStatus.PENDING ? listing.revision.content : null;
+}
+
+/**
+ * The content an editor works on. For a published listing with a pending revision that is
+ * the proposal, with the live price and address visibility (those change immediately)
+ * unless the revision changes the transaction type, which takes the price with it.
+ * Mirrors the API's rule.
+ */
+export function editorContent(listing: ListingDetail): ListingContentView {
+  const proposed = proposedContent(listing);
+  if (listing.permissions.editMode !== ListingEditMode.PUBLISHED || !proposed) return listing;
+  const priceInReview = proposed.transactionType !== listing.transactionType;
+  return {
+    ...proposed,
+    price: priceInReview ? proposed.price : listing.price,
+    isExactAddressPublic: listing.isExactAddressPublic,
+  };
+}
+
+/** Images that will remain: all except those a pending revision removes. */
+export function remainingImageCount(listing: Pick<ListingDetail, 'revision'>, imageCount: number) {
+  const removed =
+    listing.revision?.status === ReviewStatus.PENDING ? listing.revision.removedImageIds.length : 0;
+  return imageCount - removed;
 }
 
 /** Parses typed numbers, accepting a decimal comma. Empty → null; garbage → NaN (rejected). */

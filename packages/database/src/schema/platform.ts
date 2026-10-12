@@ -89,5 +89,7 @@ export const auditLogs = pgTable(
   (table) => [
     index().on(table.entityType, table.entityId, table.createdAt),
     index().on(table.actorId, table.createdAt),
+    // The audit log page lists entries newest first.
+    index('audit_logs_created_at_idx').on(table.createdAt.desc()),
   ],
 );

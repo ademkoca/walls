@@ -123,7 +123,10 @@
       "label": "Dashboard navigation",
       "overview": "Overview",
       "listings": "My listings",
-      "viewSite": "View site"
+      "viewSite": "View site",
+      "reviewListings": "Listings",
+      "users": "Users",
+      "auditLog": "Audit log"
     }
   },
   "listings": {
@@ -241,6 +244,13 @@
         "dragHandle": "Reorder image {position}",
         "imageAlt": "Image {position}",
         "empty": "No images yet.",
+        "savedInstantly": "Image changes are saved straight away, so you don't need to save the draft for them.",
+        "savedInstantlyPublished": "Image changes are saved straight away. Added and removed images are sent for review; order and cover change immediately.",
+        "added": "{count, plural, one {# image added.} other {# images added.}}",
+        "removed": "Image removed.",
+        "removalProposed": "The image will be removed once your changes are approved.",
+        "orderSaved": "Image order saved.",
+        "coverSaved": "Cover image changed.",
         "issues": {
           "UNSUPPORTED_TYPE": "format not supported",
           "FILE_TOO_SMALL": "file too small (at least 50 KB)",
@@ -277,7 +287,196 @@
           "images": "at least 3 images"
         },
         "floorAboveTotal": "the floor can't be above the total number of floors"
+      },
+      "published": {
+        "notice": "This listing is published. Price, address visibility and image order change immediately. Other changes are sent for review; the published version stays as it is until they're approved.",
+        "saveChanges": "Save changes",
+        "saved": "Changes saved.",
+        "sentForReview": "Saved. Your changes were sent for review.",
+        "revisionPending": "Changes are waiting for review. The published version stays as it is until they're approved; you can keep editing until then.",
+        "revisionRejected": "Your last changes were not approved. The published version stayed as it was.",
+        "pendingApproval": "Awaiting approval",
+        "toBeRemoved": "Will be removed",
+        "coverMustBeApproved": "Only an approved image can be the cover."
       }
+    }
+  },
+  "listingsReview": {
+    "title": "Listings",
+    "description": "Review submissions and manage every listing on the platform.",
+    "tabs": {
+      "pendingReview": "In review",
+      "pendingEdits": "Edits to review",
+      "published": "Published",
+      "all": "All"
+    },
+    "creator": "Advertiser",
+    "featured": "Featured",
+    "pendingEdits": "Edits pending",
+    "empty": "No listings in this group."
+  },
+  "review": {
+    "title": "Review",
+    "pendingNotice": "This listing is waiting for review. Check the content and images, then approve it or reject it with a reason.",
+    "details": {
+      "creator": "Advertiser",
+      "sellerType": "Advertiser type",
+      "assignedAgent": "Assigned agent",
+      "none": "None",
+      "publishedAt": "Published",
+      "slug": "Listing address"
+    },
+    "approve": "Approve and publish",
+    "approveTitle": "Publish this listing?",
+    "approveDescription": "It will be visible to everyone, and the advertiser will be notified by email.",
+    "approved": "Listing published.",
+    "reject": "Reject",
+    "rejectTitle": "Reject this listing?",
+    "rejectDescription": "The advertiser sees the reason in their dashboard and receives it by email.",
+    "reason": "Reason",
+    "rejected": "Listing rejected.",
+    "markSold": "Mark as sold",
+    "markRented": "Mark as rented",
+    "archive": "Archive",
+    "statusTitle": "Change the listing's status?",
+    "statusDescription": "The listing will no longer be public. This can't be undone.",
+    "statusChanged": "Listing status changed.",
+    "featured": "Featured on the home page",
+    "featuredUntil": "Featured until (optional)",
+    "saveFeatured": "Save",
+    "featuredSaved": "Featuring saved.",
+    "agent": "Assigned agent",
+    "searchAgents": "Search agents by name or email",
+    "noAgents": "No active agents match.",
+    "assign": "Assign",
+    "unassign": "Remove agent",
+    "agentSaved": "Agent assignment saved.",
+    "permanentDelete": "Delete permanently",
+    "permanentDeleteTitle": "Delete this listing permanently?",
+    "permanentDeleteDescription": "The listing, its images and its history are deleted for good; only the audit log keeps a record. This can't be undone.",
+    "confirmWordLabel": "Type {word} to confirm",
+    "confirmWord": "DELETE",
+    "deleted": "Listing deleted permanently.",
+    "cancel": "Cancel"
+  },
+  "revision": {
+    "title": "Changes to review",
+    "description": "The advertiser changed this published listing. Approve to publish the changes, or reject them with a reason; the published version stays as it is.",
+    "changed": "Changed",
+    "showProposed": "Show proposed changes",
+    "showLive": "Show published version",
+    "groups": {
+      "propertyType": "Property type",
+      "transactionType": "Listing type",
+      "texts": "Title and description",
+      "location": "Location",
+      "attributes": "Property details",
+      "amenityCodes": "Features",
+      "price": "Price",
+      "images": "Images"
+    },
+    "imagesAdded": "{count, plural, one {# new image} other {# new images}}",
+    "imagesRemoved": "{count, plural, one {# image to remove} other {# images to remove}}",
+    "approve": "Approve changes",
+    "approveTitle": "Publish these changes?",
+    "approveDescription": "The changes become public right away, and the advertiser will be notified by email.",
+    "approved": "Changes published.",
+    "reject": "Reject changes",
+    "rejectTitle": "Reject these changes?",
+    "rejectDescription": "The published version stays as it is. The advertiser sees the reason and receives it by email.",
+    "rejected": "Changes rejected."
+  },
+  "users": {
+    "title": "Users",
+    "description": "Private seller, agent and administrator accounts.",
+    "search": "Search by name or email",
+    "allRoles": "All roles",
+    "allStatuses": "All statuses",
+    "filter": "Show",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "joined": "Joined"
+    },
+    "empty": "No users match.",
+    "previous": "Previous",
+    "next": "Next",
+    "backToList": "Back to users",
+    "details": {
+      "listings": "Listings created",
+      "emailVerified": "Email confirmed",
+      "yes": "Yes",
+      "no": "No",
+      "joined": "Joined",
+      "deactivatedAt": "Deactivated"
+    },
+    "history": "Account history",
+    "deactivate": "Deactivate account",
+    "deactivateTitle": "Deactivate this account?",
+    "deactivateDescription": "The user is signed out and can't sign in, and their listings are hidden until the account is reactivated. They'll receive the reason by email.",
+    "deactivated": "Account deactivated.",
+    "reactivate": "Reactivate account",
+    "reactivateTitle": "Reactivate this account?",
+    "reactivateDescription": "The user can sign in again and their published listings become visible again. They'll receive your note by email.",
+    "reactivated": "Account reactivated.",
+    "reason": "Reason",
+    "invite": "Invite admin",
+    "inviteTitle": "Invite an administrator",
+    "inviteDescription": "We'll email them a link to set their password (valid for 7 days).",
+    "inviteName": "Full name",
+    "inviteEmail": "Email address",
+    "inviteLanguage": "Email language",
+    "inviteSubmit": "Send invitation",
+    "invited": "Invitation sent."
+  },
+  "auditLog": {
+    "title": "Audit log",
+    "description": "Important actions on the platform, newest first.",
+    "columns": {
+      "time": "Time",
+      "action": "Action",
+      "entity": "Item",
+      "actor": "By",
+      "reason": "Reason"
+    },
+    "system": "System",
+    "empty": "No entries.",
+    "details": "Details",
+    "before": "Before",
+    "after": "After",
+    "listing": "Listing",
+    "user": "User",
+    "actions": {
+      "USER_REGISTERED": "Registered",
+      "USER_EMAIL_VERIFIED": "Email confirmed",
+      "USER_PASSWORD_RESET": "Password reset",
+      "USER_ACCOUNT_SET_UP": "Account set up",
+      "USER_INVITED": "User invited",
+      "USER_DEACTIVATED": "Account deactivated",
+      "USER_REACTIVATED": "Account reactivated",
+      "LISTING_CREATED": "Listing created",
+      "LISTING_SUBMITTED": "Submitted for review",
+      "LISTING_REVISED": "Back to draft",
+      "LISTING_DRAFT_DELETED": "Draft deleted",
+      "LISTING_APPROVED": "Listing approved",
+      "LISTING_REJECTED": "Listing rejected",
+      "LISTING_MARKED_SOLD": "Marked as sold",
+      "LISTING_MARKED_RENTED": "Marked as rented",
+      "LISTING_ARCHIVED": "Archived",
+      "LISTING_FEATURED": "Featured",
+      "LISTING_UNFEATURED": "No longer featured",
+      "LISTING_AGENT_ASSIGNED": "Agent assigned",
+      "LISTING_AGENT_UNASSIGNED": "Agent removed",
+      "LISTING_PERMANENTLY_DELETED": "Deleted permanently",
+      "LISTING_UPDATED_LIVE": "Price or address visibility changed",
+      "LISTING_IMAGES_REORDERED": "Images reordered",
+      "LISTING_REVISION_SAVED": "Changes sent for review",
+      "LISTING_REVISION_WITHDRAWN": "Changes withdrawn",
+      "LISTING_REVISION_APPROVED": "Changes approved",
+      "LISTING_REVISION_REJECTED": "Changes rejected",
+      "LISTING_REVISION_DISCARDED": "Changes discarded"
     }
   },
   "roles": {
@@ -351,6 +550,22 @@
       "GAS_CONNECTION": "Gas connection",
       "ROAD_ACCESS": "Paved road access",
       "BUILDING_PERMIT": "Building permit"
+    },
+    "sellerType": {
+      "PRIVATE_SELLER": "Private seller",
+      "REAL_ESTATE_AGENT": "Real-estate agent"
+    },
+    "role": {
+      "SUPER_ADMIN": "Super Admin",
+      "ADMIN": "Admin",
+      "REAL_ESTATE_AGENT": "Agent",
+      "PRIVATE_SELLER": "Private seller"
+    },
+    "userStatus": {
+      "PENDING_VERIFICATION": "Email not confirmed",
+      "PENDING_SETUP": "Setup pending",
+      "ACTIVE": "Active",
+      "DEACTIVATED": "Deactivated"
     }
   },
   "validation": {

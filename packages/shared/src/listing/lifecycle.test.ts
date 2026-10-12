@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { ListingStatus, TransactionType } from '../enums';
-import { ListingAction, isTransitionValid, nextStatus } from './lifecycle';
+import { ListingStatus, TransactionType, UserStatus } from '../enums';
+import {
+  ListingAction,
+  isListingPubliclyVisible,
+  isTransitionValid,
+  nextStatus,
+} from './lifecycle';
 
 const { DRAFT, PENDING_REVIEW, PUBLISHED, REJECTED, SOLD, RENTED, ARCHIVED } = ListingStatus;
 const { SALE, RENT } = TransactionType;
@@ -46,5 +51,17 @@ describe('listing lifecycle (SPEC §6)', () => {
       isTransitionValid(action, PENDING_REVIEW, SALE),
     );
     expect(fromPending.sort()).toEqual([ListingAction.APPROVE, ListingAction.REJECT].sort());
+  });
+});
+
+describe('public visibility (SPEC §2.1, §46)', () => {
+  const published = { status: ListingStatus.PUBLISHED, deletedAt: null };
+
+  it('shows published listings of active creators only', () => {
+    expect(isListingPubliclyVisible(published, UserStatus.ACTIVE)).toBe(true);
+    expect(isListingPubliclyVisible(published, UserStatus.DEACTIVATED)).toBe(false);
+    expect(
+      isListingPubliclyVisible({ ...published, status: ListingStatus.SOLD }, UserStatus.ACTIVE),
+    ).toBe(false);
   });
 });

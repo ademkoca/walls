@@ -8,33 +8,53 @@ _Last updated: 2026-10-12, in the middle of Phase 4 review._
 
 ## Current status
 
-| Phase | Scope                                                                                 | State                                            |
-| ----- | ------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                     |
-| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                     |
-| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                           |
-| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                           |
-| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                         |
-| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)  |
-| 5     | Listings (creator side)                                                               | Done, reviewed by the user, pushed; **check CI** |
-| 6–10  | Review/admin, agents, public site, inquiries/analytics, hardening                     | Not started                                      |
+| Phase | Scope                                                                                 | State                                                                 |
+| ----- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                                          |
+| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                                          |
+| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                                                |
+| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                                                |
+| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                              |
+| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)                       |
+| 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                                    |
+| **6** | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | **Built and verified, NOT committed.** Waiting for the user's review. |
+| 7–10  | Agents, public site, inquiries/analytics, hardening                                   | Not started                                                           |
 
-**Immediate next step:** the user checks the CI run for the Phase 5 push. Do not start
-Phase 6 until they say so.
+**Immediate next step:** the user reviews Phase 6 (create a Super Admin with
+`pnpm admin:create`, then review a seller's listing). Then commit and push, check CI, and
+wait for the go-ahead for Phase 7.
 
-Phase 5 contents: shared `canCreateListing`/`sellerTypeForRole`, heating/furnished enums,
-`mediaOrderInputSchema`; migrations 0004/0005; API `apps/api/src/listings/*` (create, list,
-get, PATCH draft, soft-delete, submit with `checkSubmissionRequirements` + confirmation
-email, revise, image upload/reorder/remove) and `apps/api/src/media/*` (`MediaStorage` with
-in-memory, local-disk and Cloudinary implementations; image type/size from content via
-`image-size`); web `/dashboard/listings` and `/dashboard/listings/[id]` editor (Leaflet map
-picker, dnd-kit image ordering, live submission checklist using the shared rule, address
-visibility confirmation). Editing **published** listings (minor/major edits) is deferred to
-Phase 6 with revisions; the API answers 409 for now.
+Phase 6 contents:
 
-Verified at the end of Phase 5: format, lint, typecheck, build; unit tests (web 37); integration
-tests 22 database + 51 api (24 new for listings); 5 Playwright E2E tests including the full
-seller listing flow (create → fill → map pin → 3 uploads → submit → "In review").
+- **Review workflow** (`apps/api/src/listings/listing-review.service.ts`): approve (assigns
+  the permanent slug from Serbian title + city via `listingSlugBase`/`nextFreeSlug`, approves
+  images, emails the creator), reject with reason (email), mark sold/rented, archive,
+  feature with optional end date, assign/unassign active agents (history in
+  `listing_assignments`), permanent delete (Super Admin, archived only; deletes files and an
+  orphaned property; the audit entry keeps a summary).
+- **Published edits / revisions** (SPEC §6): `ListingContent` in `@walls/shared`
+  (`mergeListingContent`, `diffListingContent`, key-order-insensitive) + `planPublishedEdit`.
+  Minor edits (price, address visibility, image order/cover) apply immediately and are
+  audited; major edits upsert the single pending row in `listing_revisions` (JSONB `content`
+  = full proposed version, validated by the shared schemas; `removed_media_ids`). Images
+  added to a published listing are `listing_media` rows without `approved_at`. Approval
+  writes the content (price only when the transaction type changes), approves added images,
+  deletes removed ones; rejection deletes added images; leaving PUBLISHED discards a pending
+  revision. Undoing every major change withdraws the revision.
+- **Users** (`apps/api/src/users/*`): list/search, detail, deactivate/reactivate with reason
+  (sessions revoked, email, audit; `statusAfterReactivation`), Super Admin invites Admins;
+  `GET /audit-log` (paged). `isListingPubliclyVisible` (shared) hides a deactivated
+  creator's listings; the public site (Phase 8) must use it.
+- **Web:** role-based dashboard nav; reviewer listing queue with tabs (in review, edits to
+  review, published, all); review panel (approve/reject, status, featuring, agent picker,
+  typed-word confirmation for permanent delete, live/proposed toggle); published-listing
+  editing with revision notices and image badges; users list/detail with invite and
+  (de)activation; audit log page.
+
+Verified at the end of Phase 6: format, lint, typecheck, build; unit tests (shared 160, web
+42); integration tests 22 database + 92 api; 9 Playwright E2E tests (new: reject → resubmit
+→ approve → published edit → approve changes; deactivation blocks login; E2E creates the
+Super Admin with the real `admin:create` script).
 
 ## Repository
 
@@ -134,6 +154,10 @@ seller listing flow (create → fill → map pin → 3 uploads → submit → "I
   reads the catalogue from `@walls/shared`, and a DB test checks the seeded table matches.
 - **"Use my location"** button on the listing map (Phase 5 review): browser geolocation, asked
   only on click; denied/unavailable states explained. Default view stays Belgrade.
+- **Phase 6 decisions:** a deactivated user's listings are hidden from the public site
+  until reactivation (status unchanged); whoever may deactivate may also reactivate (reason,
+  audit, email); a pending revision stays editable until reviewed; Admins never edit listing
+  content (approve/reject only).
 - **Media storage:** Cloudinary when `CLOUDINARY_*` is set (required in production), otherwise
   local disk in development (user's choice until they add credentials).
 - **Images:** JPEG/PNG/WebP/HEIC/HEIF, 50 KB–15 MB, ≥1024 px long side and ≥768 px short side,
@@ -204,6 +228,9 @@ seller listing flow (create → fill → map pin → 3 uploads → submit → "I
   components get gray fills and slate borders for users in dark mode.
 - **`buttonVariants` merges classes** (tailwind-merge via `cn`). Plain `cva` output on a
   `Link` kept both `border-transparent` and `border-border`, and CSS order hid the border.
+- **The email outbox sends in batches of 20**, oldest first. Test helpers must drain it
+  (`lastEmailTo` loops until empty); otherwise a fresh CI database with a backlog makes
+  email assertions flaky. Only the clean-worktree run caught this.
 - **E2E must never use real providers:** the Playwright config loads the root `.env`, so it
   blanks `CLOUDINARY_*` (and `RESEND_API_KEY`) for the API it starts. One run before this fix
   uploaded 3 test images to the user's Cloudinary; they were deleted.
@@ -220,27 +247,27 @@ seller listing flow (create → fill → map pin → 3 uploads → submit → "I
 
 ## Open questions and deferred decisions
 
-- Should Admins/Super Admins edit listing content directly? Currently denied (decide before
-  Phase 6).
-- What happens to a deactivated user's published listings (hide, keep, reassign)? Can admins
-  reactivate accounts? (Phase 6.)
 - Which provider for EUR/RSD exchange rates, and API key? (Phase 8.)
 - When the exact address is hidden, no coordinates are public so no map is shown; should an
   approximate area map be allowed? (Phase 8.)
 - Cloudinary and Resend credentials are needed from the user for production. The Cloudinary
   adapter (signed REST uploads, `f_auto,q_auto` delivery) is written but untested against the
   real service until credentials exist.
-- Phase 5 choices to confirm with the user: the "listing submitted" email goes to the
-  submitter as a confirmation (SPEC §21 doesn't say who receives it; admins get a review
-  queue in Phase 6); admins cannot create listings (like content edits, denied by default);
-  the form fixes the country to Serbia.
+- Phase 5 choices the user has not objected to: the "listing submitted" email goes to the
+  submitter as a confirmation; admins cannot create listings; the form fixes the country to
+  Serbia.
+- Phase 6 choices to confirm: Admins and Super Admins can both read the audit log; listing
+  emails for approval/rejection go to the creator only (not an assigned agent); a deactivated
+  _assigned agent_ does not hide the listing (only the creator's status does) — inquiry
+  routing for that case is a Phase 9 question. Removing an image from a published listing
+  can't be undone except by re-uploading.
+- Super Admins are created only with `pnpm admin:create`; "delete administrators" (SPEC
+  §2.1) is implemented as deactivation (soft, reversible).
 - OSM standard tiles label Serbian places in Cyrillic; the production tile host should offer
   Latin labels (site is Latin-only).
 - Cosmetic, deferred by the user until all phases are done: make the home-page CTAs larger.
 - Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use); set
   `NEXT_PUBLIC_MAP_TILE_URL`. "Find address on map" uses Nominatim on button press only.
-- Still not done for Phase 3 email/deactivation: the deactivation service (reason, audit,
-  email template) is specified but not implemented.
 
 ## Remaining plan (from the approved plan)
 

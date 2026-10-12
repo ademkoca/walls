@@ -1,5 +1,13 @@
 import 'server-only';
-import type { CurrentUser, ListingDetail, ListingSummary } from '@walls/shared';
+import type {
+  AuditLogEntry,
+  CurrentUser,
+  ListingDetail,
+  ListingSummary,
+  Page,
+  UserDetail,
+  UserSummary,
+} from '@walls/shared';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
 import { apiInternalUrl } from '../api-internal-url';
@@ -37,8 +45,46 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   return data?.user ?? null;
 });
 
-export async function getMyListings(): Promise<ListingSummary[] | null> {
-  return (await serverGet<{ listings: ListingSummary[] }>('/listings'))?.listings ?? null;
+/** Builds `path?query` from defined values only. */
+function withQuery(path: string, query: Record<string, string | number | boolean | undefined>) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== '') params.set(key, String(value));
+  }
+  const search = params.toString();
+  return search ? `${path}?${search}` : path;
+}
+
+/** Dashboard listings: the user's own, or every listing for reviewers. */
+export async function getListings(
+  query: { status?: string; pendingRevision?: boolean } = {},
+): Promise<ListingSummary[] | null> {
+  return (
+    (await serverGet<{ listings: ListingSummary[] }>(withQuery('/listings', query)))?.listings ??
+    null
+  );
+}
+
+export async function getUsers(query: {
+  role?: string;
+  status?: string;
+  q?: string;
+  page?: number;
+}): Promise<Page<UserSummary> | null> {
+  return serverGet<Page<UserSummary>>(withQuery('/users', query));
+}
+
+/** Throws NotAccessibleError for 403/404. */
+export async function getUser(id: string): Promise<UserDetail | null> {
+  return (await serverGet<{ user: UserDetail }>(`/users/${encodeURIComponent(id)}`))?.user ?? null;
+}
+
+export async function getAuditLog(query: {
+  entityType?: string;
+  entityId?: string;
+  page?: number;
+}): Promise<Page<AuditLogEntry> | null> {
+  return serverGet<Page<AuditLogEntry>>(withQuery('/audit-log', query));
 }
 
 /** The listing, or null when signed out. Throws NotAccessibleError for 403/404. */

@@ -3,22 +3,14 @@
 import {
   ApiErrorCode,
   ListingAction,
-  ListingEditMode,
+  type ListingContentView,
   type ListingDetail,
+  ListingEditMode,
   type ListingImage,
   ListingStatus,
+  ReviewStatus,
   checkSubmissionRequirements,
 } from '@walls/shared';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@walls/ui/components/alert-dialog';
 import { Alert, AlertDescription, AlertTitle } from '@walls/ui/components/alert';
 import { Button } from '@walls/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
@@ -28,11 +20,13 @@ import { useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useState } from 'react';
 import { FormProvider, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
+import { ConfirmDialog } from '@/components/dashboard/dialogs';
 import { Link, useRouter } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api/errors';
 import { listingsApi } from '@/lib/api/listings';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { ListingStatusBadge } from '../listing-status-badge';
+import { ReviewPanel } from '../review/review-panel';
 import { ListingImages } from './listing-images';
 import {
   AmenitiesSection,
@@ -42,31 +36,59 @@ import {
   PriceSection,
   TextsSection,
 } from './listing-form-sections';
-import { formSubmissionSnapshot, toFormValues, toListingInput } from './listing-form-model';
+import {
+  editorContent,
+  formSubmissionSnapshot,
+  proposedContent,
+  remainingImageCount,
+  toFormValues,
+  toListingInput,
+} from './listing-form-model';
 import { SubmissionChecklist } from './submission-checklist';
 import { useListingForm } from './use-listing-form';
 
 type Busy = 'save' | 'submit' | 'revise' | 'delete' | null;
 
-/** The dashboard listing editor: draft form, images, checklist and lifecycle actions. */
-export function ListingEditor({ initialListing }: { initialListing: ListingDetail }) {
+/**
+ * The dashboard listing page. Editors edit drafts and published listings (SPEC §6) and
+ * manage images; reviewers see the content read-only, with the review panel.
+ */
+export function ListingEditor({
+  initialListing,
+  viewerIsReviewer,
+}: {
+  initialListing: ListingDetail;
+  viewerIsReviewer: boolean;
+}) {
   const t = useTranslations('listings');
+  const tPublished = useTranslations('listings.editor.published');
   const errorMessage = useErrorMessage();
   const router = useRouter();
   const [listing, setListing] = useState(initialListing);
   const [images, setImages] = useState<ListingImage[]>(initialListing.images);
   const [busy, setBusy] = useState<Busy>(null);
   const [confirm, setConfirm] = useState<'submit' | 'delete' | null>(null);
+  // Reviewers look at pending changes by default; they can switch to the live version.
+  const [showProposed, setShowProposed] = useState(true);
 
-  const form = useListingForm(toFormValues(initialListing));
+  const { editMode } = listing.permissions;
+  const editable = editMode !== null;
+  const editingPublished = editMode === ListingEditMode.PUBLISHED;
+
+  /** What the form shows: the editor's working version, or for reviewers live/proposed. */
+  const displayedContent = (next: ListingDetail): ListingContentView =>
+    viewerIsReviewer
+      ? ((showProposed ? proposedContent(next) : null) ?? next)
+      : editorContent(next);
+
+  const form = useListingForm(toFormValues(displayedContent(initialListing)));
   const { isDirty } = form.formState;
   const values = useWatch({ control: form.control });
-  const editable = listing.permissions.editMode === ListingEditMode.DRAFT;
   const canSubmit = listing.permissions.actions.includes(ListingAction.SUBMIT);
   const canRevise = listing.permissions.actions.includes(ListingAction.REVISE);
   // `values` (useWatch) re-renders on every change, so the checklist stays current.
   const issues = checkSubmissionRequirements(
-    formSubmissionSnapshot(form.getValues(), images.length),
+    formSubmissionSnapshot(form.getValues(), remainingImageCount(listing, images.length)),
   );
 
   // Warn before leaving with unsaved changes.
@@ -80,16 +102,32 @@ export function ListingEditor({ initialListing }: { initialListing: ListingDetai
   function applyListing(next: ListingDetail) {
     setListing(next);
     setImages(next.images);
-    form.reset(toFormValues(next));
+    form.reset(toFormValues(displayedContent(next)));
   }
 
-  /** Validates and saves the form. Returns false when validation or the request failed. */
-  async function save(): Promise<boolean> {
-    let saved = false;
+  /**
+   * After an image change on a published listing the server may have created or updated
+   * the pending revision; reload it without discarding unsaved form edits.
+   */
+  async function onImagesChange(next: ListingImage[]) {
+    setImages(next);
+    if (!editingPublished) return;
+    try {
+      const refreshed = await listingsApi.get(listing.id);
+      setListing(refreshed);
+      setImages(refreshed.images);
+    } catch (error) {
+      toast.error(errorMessage(error));
+    }
+  }
+
+  /** Validates and saves the form. Returns the saved listing, or null on failure. */
+  async function save(): Promise<ListingDetail | null> {
+    let saved: ListingDetail | null = null;
     await form.handleSubmit(async (formValues) => {
       try {
-        applyListing(await listingsApi.update(listing.id, toListingInput(formValues)));
-        saved = true;
+        saved = await listingsApi.update(listing.id, toListingInput(formValues));
+        applyListing(saved);
       } catch (error) {
         toast.error(errorMessage(error));
       }
@@ -108,7 +146,16 @@ export function ListingEditor({ initialListing }: { initialListing: ListingDetai
 
   const onSave = () =>
     run('save', async () => {
-      if (await save()) toast.success(t('editor.saved'));
+      const saved = await save();
+      if (!saved) return;
+      const sentForReview = editingPublished && proposedContent(saved) !== null;
+      toast.success(
+        sentForReview
+          ? tPublished('sentForReview')
+          : editingPublished
+            ? tPublished('saved')
+            : t('editor.saved'),
+      );
     });
 
   const onSubmit = () =>
@@ -154,6 +201,8 @@ export function ListingEditor({ initialListing }: { initialListing: ListingDetai
     });
 
   const title = values.texts?.sr?.title?.trim() || t('untitled');
+  const pendingRevision = listing.revision?.status === ReviewStatus.PENDING;
+  const removedImageIds = pendingRevision ? (listing.revision?.removedImageIds ?? []) : [];
 
   return (
     <FormProvider {...form}>
@@ -179,14 +228,14 @@ export function ListingEditor({ initialListing }: { initialListing: ListingDetai
           </div>
         </div>
 
-        <StatusNotice listing={listing} />
+        <StatusNotice listing={listing} viewerIsReviewer={viewerIsReviewer} />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <form
             noValidate
             onSubmit={(event) => {
               event.preventDefault();
-              void onSave();
+              if (editable) void onSave();
             }}
             className="space-y-6"
           >
@@ -217,25 +266,38 @@ export function ListingEditor({ initialListing }: { initialListing: ListingDetai
               <ListingImages
                 listingId={listing.id}
                 images={images}
-                onImagesChange={setImages}
+                onImagesChange={(next) => void onImagesChange(next)}
                 editable={editable}
+                published={listing.publishedAt !== null}
+                removedImageIds={removedImageIds}
               />
             </Section>
           </form>
 
           <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start">
+            {viewerIsReviewer && (
+              <ReviewPanel
+                listing={listing}
+                onChange={applyListing}
+                showProposed={showProposed}
+                onShowProposedChange={(show) => {
+                  setShowProposed(show);
+                  form.reset(toFormValues((show ? proposedContent(listing) : null) ?? listing));
+                }}
+              />
+            )}
             {(editable || canSubmit || canRevise || listing.permissions.canDelete) && (
               <Card>
                 <CardContent className="flex flex-col gap-2">
                   {editable && (
                     <Button
                       type="button"
-                      variant="outline"
+                      variant={editingPublished ? 'default' : 'outline'}
                       disabled={busy !== null || !isDirty}
                       onClick={() => void onSave()}
                     >
                       {busy === 'save' && <Spinner data-icon="inline-start" />}
-                      {t('editor.save')}
+                      {editingPublished ? tPublished('saveChanges') : t('editor.save')}
                     </Button>
                   )}
                   {canSubmit && (
@@ -284,22 +346,22 @@ export function ListingEditor({ initialListing }: { initialListing: ListingDetai
 
       <ConfirmDialog
         open={confirm === 'submit'}
+        onOpenChange={(open) => setConfirm(open ? 'submit' : null)}
         title={t('editor.submitConfirmTitle')}
         description={t('editor.submitConfirmDescription')}
         confirmLabel={t('editor.submit')}
         cancelLabel={t('editor.cancel')}
         onConfirm={() => void onSubmit()}
-        onCancel={() => setConfirm(null)}
       />
       <ConfirmDialog
         open={confirm === 'delete'}
+        onOpenChange={(open) => setConfirm(open ? 'delete' : null)}
         title={t('editor.deleteConfirmTitle')}
         description={t('editor.deleteConfirmDescription')}
         confirmLabel={t('editor.delete')}
         cancelLabel={t('editor.cancel')}
         destructive
         onConfirm={() => void onDelete()}
-        onCancel={() => setConfirm(null)}
       />
     </FormProvider>
   );
@@ -316,24 +378,51 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function StatusNotice({ listing }: { listing: ListingDetail }) {
+function StatusNotice({
+  listing,
+  viewerIsReviewer,
+}: {
+  listing: ListingDetail;
+  viewerIsReviewer: boolean;
+}) {
   const t = useTranslations('listings.editor');
+  const tReview = useTranslations('review');
   const showReason =
     listing.rejectionReason &&
     (listing.status === ListingStatus.REJECTED || listing.status === ListingStatus.DRAFT);
+  const editingPublished = listing.permissions.editMode === ListingEditMode.PUBLISHED;
+  const { revision } = listing;
 
   return (
     <>
       {listing.status === ListingStatus.PENDING_REVIEW && (
         <Alert>
           <InfoIcon />
-          <AlertDescription>{t('pendingNotice')}</AlertDescription>
+          <AlertDescription>
+            {viewerIsReviewer ? tReview('pendingNotice') : t('pendingNotice')}
+          </AlertDescription>
         </Alert>
       )}
-      {listing.status === ListingStatus.PUBLISHED && (
+      {editingPublished && (
         <Alert>
           <InfoIcon />
-          <AlertDescription>{t('publishedNotice')}</AlertDescription>
+          <AlertDescription>{t('published.notice')}</AlertDescription>
+        </Alert>
+      )}
+      {editingPublished && revision?.status === ReviewStatus.PENDING && (
+        <Alert>
+          <InfoIcon />
+          <AlertDescription>{t('published.revisionPending')}</AlertDescription>
+        </Alert>
+      )}
+      {!viewerIsReviewer && revision?.status === ReviewStatus.REJECTED && (
+        <Alert variant="destructive">
+          <CircleAlertIcon />
+          <AlertTitle>{t('rejectionReason')}</AlertTitle>
+          <AlertDescription>
+            <p>{t('published.revisionRejected')}</p>
+            <p className="whitespace-pre-line">{revision.rejectionReason}</p>
+          </AlertDescription>
         </Alert>
       )}
       {showReason && (
@@ -341,48 +430,13 @@ function StatusNotice({ listing }: { listing: ListingDetail }) {
           <CircleAlertIcon />
           <AlertTitle>{t('rejectionReason')}</AlertTitle>
           <AlertDescription>
-            {listing.status === ListingStatus.REJECTED && <p>{t('rejectedNotice')}</p>}
+            {listing.status === ListingStatus.REJECTED && !viewerIsReviewer && (
+              <p>{t('rejectedNotice')}</p>
+            )}
             <p className="whitespace-pre-line">{listing.rejectionReason}</p>
           </AlertDescription>
         </Alert>
       )}
     </>
-  );
-}
-
-function ConfirmDialog({
-  open,
-  title,
-  description,
-  confirmLabel,
-  cancelLabel,
-  destructive,
-  onConfirm,
-  onCancel,
-}: {
-  open: boolean;
-  title: string;
-  description: string;
-  confirmLabel: string;
-  cancelLabel: string;
-  destructive?: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <AlertDialog open={open} onOpenChange={(next) => !next && onCancel()}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-          <AlertDialogAction variant={destructive ? 'destructive' : 'default'} onClick={onConfirm}>
-            {confirmLabel}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }

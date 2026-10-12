@@ -47,11 +47,17 @@ export function ListingImages({
   images,
   onImagesChange,
   editable,
+  published = false,
+  removedImageIds = [],
 }: {
   listingId: string;
   images: ListingImage[];
   onImagesChange: (images: ListingImage[]) => void;
   editable: boolean;
+  /** Published listings: new images await approval and only approved ones can be the cover. */
+  published?: boolean;
+  /** Approved images a pending revision removes. */
+  removedImageIds?: readonly string[];
 }) {
   const t = useTranslations('listings.editor.images');
   const errorMessage = useErrorMessage();
@@ -79,10 +85,12 @@ export function ListingImages({
     if (!editable || files.length === 0) return;
     setFailures([]);
     const failed: string[] = [];
+    let added = 0;
     for (const file of files) {
       setUploading(file.name);
       try {
         onImagesChange(await listingsApi.uploadImage(listingId, file));
+        added += 1;
       } catch (error) {
         failed.push(t('failed', { name: file.name, reason: failureReason(error) }));
         if (error instanceof ApiError && error.code === ApiErrorCode.IMAGE_LIMIT_REACHED) break;
@@ -90,10 +98,12 @@ export function ListingImages({
     }
     setUploading(null);
     setFailures(failed);
+    if (added > 0) toast.success(t('added', { count: added }));
   }
 
   async function save(next: ListingImage[], primaryId: string) {
     const previous = images;
+    const coverChanged = previous.find((image) => image.isPrimary)?.id !== primaryId;
     onImagesChange(next.map((image) => ({ ...image, isPrimary: image.id === primaryId })));
     try {
       onImagesChange(
@@ -102,6 +112,7 @@ export function ListingImages({
           primaryMediaId: primaryId,
         }),
       );
+      toast.success(t(coverChanged ? 'coverSaved' : 'orderSaved'));
     } catch (error) {
       onImagesChange(previous);
       toast.error(errorMessage(error));
@@ -120,6 +131,8 @@ export function ListingImages({
   async function remove(image: ListingImage) {
     try {
       onImagesChange(await listingsApi.removeImage(listingId, image.id));
+      // An approved image of a published listing goes only once the changes are approved.
+      toast.success(t(published && image.approved ? 'removalProposed' : 'removed'));
     } catch (error) {
       toast.error(errorMessage(error));
     }
@@ -135,6 +148,11 @@ export function ListingImages({
           max: LISTING_IMAGE_RULES.maxImagesPerListing,
         })}
       </p>
+      {editable && (
+        <p className="text-sm text-muted-foreground">
+          {t(published ? 'savedInstantlyPublished' : 'savedInstantly')}
+        </p>
+      )}
 
       {editable && (
         <div
@@ -219,6 +237,8 @@ export function ListingImages({
                   image={image}
                   position={index + 1}
                   editable={editable}
+                  awaitingApproval={published && !image.approved}
+                  toBeRemoved={removedImageIds.includes(image.id)}
                   onMakeCover={() => void save(images, image.id)}
                   onRemove={() => void remove(image)}
                 />
@@ -235,16 +255,21 @@ function SortableImage({
   image,
   position,
   editable,
+  awaitingApproval,
+  toBeRemoved,
   onMakeCover,
   onRemove,
 }: {
   image: ListingImage;
   position: number;
   editable: boolean;
+  awaitingApproval: boolean;
+  toBeRemoved: boolean;
   onMakeCover: () => void;
   onRemove: () => void;
 }) {
   const t = useTranslations('listings.editor.images');
+  const tPublished = useTranslations('listings.editor.published');
   const [broken, setBroken] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: image.id,
@@ -258,6 +283,7 @@ function SortableImage({
       className={cn(
         'group relative overflow-hidden rounded-lg border bg-muted',
         isDragging && 'z-10 shadow-lg ring-2 ring-ring',
+        toBeRemoved && 'opacity-60',
       )}
     >
       <div className="aspect-[4/3]">
@@ -277,12 +303,16 @@ function SortableImage({
           />
         )}
       </div>
-      {image.isPrimary && (
-        <Badge className="absolute top-2 left-2">
-          <StarIcon aria-hidden />
-          {t('cover')}
-        </Badge>
-      )}
+      <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+        {image.isPrimary && (
+          <Badge>
+            <StarIcon aria-hidden />
+            {t('cover')}
+          </Badge>
+        )}
+        {awaitingApproval && <Badge variant="secondary">{tPublished('pendingApproval')}</Badge>}
+        {toBeRemoved && <Badge variant="destructive">{tPublished('toBeRemoved')}</Badge>}
+      </div>
       {editable && (
         <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-card/90 p-1">
           <Button
@@ -297,7 +327,7 @@ function SortableImage({
             <GripVerticalIcon />
           </Button>
           <div className="flex gap-1">
-            {!image.isPrimary && (
+            {!image.isPrimary && !awaitingApproval && !toBeRemoved && (
               <Button
                 type="button"
                 variant="ghost"
@@ -309,16 +339,18 @@ function SortableImage({
                 <StarIcon />
               </Button>
             )}
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={t('remove')}
-              title={t('remove')}
-              onClick={onRemove}
-            >
-              <Trash2Icon />
-            </Button>
+            {!toBeRemoved && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                aria-label={t('remove')}
+                title={t('remove')}
+                onClick={onRemove}
+              >
+                <Trash2Icon />
+              </Button>
+            )}
           </div>
         </div>
       )}

@@ -1,16 +1,43 @@
 import {
   type DbExecutor,
   amenities,
+  listingAssignments,
   listingMedia,
+  listingRevisions,
   listingStatusHistory,
   listingTexts,
   listings,
   properties,
   propertyAmenities,
   propertyLocations,
+  users,
 } from '@walls/database';
-import { DEFAULT_LOCALE, MediaType } from '@walls/shared';
-import { and, asc, count, desc, eq, isNull, or, sql } from 'drizzle-orm';
+import {
+  DEFAULT_LOCALE,
+  type ListingContent,
+  type ListingStatus,
+  MediaType,
+  ReviewStatus,
+  type UserReference,
+} from '@walls/shared';
+import {
+  type SQL,
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  exists,
+  inArray,
+  isNull,
+  like,
+  ne,
+  or,
+  sql,
+} from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
+
+const assignedAgents = alias(users, 'assigned_agent');
 
 export type ListingRow = typeof listings.$inferSelect;
 export type NewListing = typeof listings.$inferInsert;
@@ -22,16 +49,21 @@ export type ListingTextRow = typeof listingTexts.$inferSelect;
 export type MediaRow = typeof listingMedia.$inferSelect;
 export type NewMedia = typeof listingMedia.$inferInsert;
 export type StatusHistoryEntry = typeof listingStatusHistory.$inferInsert;
+export type RevisionRow = typeof listingRevisions.$inferSelect;
 
 /** A listing with everything the dashboard editor shows. */
 export interface ListingAggregate {
   listing: ListingRow;
   property: PropertyRow;
+  creator: UserReference;
+  assignedAgent: UserReference | null;
   location: LocationRow | null;
   texts: ListingTextRow[];
   amenityCodes: string[];
-  /** Images only, in display order. */
+  /** Images only, in display order (approved and revision-added). */
   images: MediaRow[];
+  /** The pending revision, or the latest revision when it was rejected. */
+  revision: RevisionRow | null;
 }
 
 export async function insertProperty(db: DbExecutor, property: NewProperty): Promise<PropertyRow> {
@@ -59,15 +91,23 @@ export async function findListingAggregate(
   id: string,
 ): Promise<ListingAggregate | undefined> {
   const [row] = await db
-    .select({ listing: listings, property: properties, location: propertyLocations })
+    .select({
+      listing: listings,
+      property: properties,
+      location: propertyLocations,
+      creator: { id: users.id, displayName: users.displayName },
+      assignedAgent: { id: assignedAgents.id, displayName: assignedAgents.displayName },
+    })
     .from(listings)
     .innerJoin(properties, eq(properties.id, listings.propertyId))
+    .innerJoin(users, eq(users.id, listings.createdById))
+    .leftJoin(assignedAgents, eq(assignedAgents.id, listings.assignedAgentId))
     .leftJoin(propertyLocations, eq(propertyLocations.propertyId, properties.id))
     .where(eq(listings.id, id))
     .limit(1);
   if (!row) return undefined;
 
-  const [texts, amenityRows, images] = await Promise.all([
+  const [texts, amenityRows, images, revision] = await Promise.all([
     db.select().from(listingTexts).where(eq(listingTexts.listingId, id)),
     db
       .select({ code: propertyAmenities.amenityCode })
@@ -76,23 +116,57 @@ export async function findListingAggregate(
       .where(eq(propertyAmenities.propertyId, row.property.id))
       .orderBy(asc(amenities.sortOrder)),
     findImages(db, id),
+    findVisibleRevision(db, id),
   ]);
-  return { ...row, texts, amenityCodes: amenityRows.map((amenity) => amenity.code), images };
+  return {
+    ...row,
+    texts,
+    amenityCodes: amenityRows.map((amenity) => amenity.code),
+    images,
+    revision,
+  };
 }
 
 export interface ListingSummaryRow {
   listing: ListingRow;
+  creator: UserReference;
   propertyType: PropertyRow['propertyType'];
   title: string | null;
   city: string | null;
   coverImageUrl: string | null;
   imageCount: number;
+  hasPendingRevision: boolean;
 }
 
-/** Listings the user created or is assigned to, newest change first. Deleted drafts are excluded. */
-export async function findListingsForEditor(
+/**
+ * Dashboard listing rows, newest change first. Deleted drafts are always excluded.
+ * `editorId` limits the rows to listings that user created or is assigned to.
+ */
+const pendingRevisionExists = exists(
+  sql`(select 1 from ${listingRevisions} where ${listingRevisions.listingId} = ${listings.id} and ${listingRevisions.status} = ${ReviewStatus.PENDING})`,
+);
+
+export interface SummaryFilter {
+  editorId?: string;
+  status?: ListingStatus;
+  pendingRevision?: boolean;
+}
+
+function summaryConditions(filter: SummaryFilter): SQL[] {
+  const conditions: SQL[] = [isNull(listings.deletedAt)];
+  if (filter.pendingRevision) conditions.push(pendingRevisionExists);
+  if (filter.editorId) {
+    conditions.push(
+      or(eq(listings.createdById, filter.editorId), eq(listings.assignedAgentId, filter.editorId))!,
+    );
+  }
+  if (filter.status) conditions.push(eq(listings.status, filter.status));
+  return conditions;
+}
+
+export async function findListingSummaries(
   db: DbExecutor,
-  userId: string,
+  filter: SummaryFilter,
 ): Promise<ListingSummaryRow[]> {
   const imageStats = db
     .select({
@@ -111,26 +185,24 @@ export async function findListingsForEditor(
   const rows = await db
     .select({
       listing: listings,
+      creator: { id: users.id, displayName: users.displayName },
       propertyType: properties.propertyType,
       title: listingTexts.title,
       city: propertyLocations.city,
       coverImageUrl: imageStats.coverImageUrl,
       imageCount: imageStats.imageCount,
+      hasPendingRevision: sql<boolean>`${pendingRevisionExists}`,
     })
     .from(listings)
     .innerJoin(properties, eq(properties.id, listings.propertyId))
+    .innerJoin(users, eq(users.id, listings.createdById))
     .leftJoin(propertyLocations, eq(propertyLocations.propertyId, properties.id))
     .leftJoin(
       listingTexts,
       and(eq(listingTexts.listingId, listings.id), eq(listingTexts.locale, DEFAULT_LOCALE)),
     )
     .leftJoin(imageStats, eq(imageStats.listingId, listings.id))
-    .where(
-      and(
-        or(eq(listings.createdById, userId), eq(listings.assignedAgentId, userId)),
-        isNull(listings.deletedAt),
-      ),
-    )
+    .where(and(...summaryConditions(filter)))
     .orderBy(desc(listings.updatedAt));
 
   return rows.map((row) => ({ ...row, imageCount: row.imageCount ?? 0 }));
@@ -227,4 +299,148 @@ export async function writeImageOrder(
       .set({ sortOrder, isPrimary: mediaId === primaryId })
       .where(and(eq(listingMedia.id, mediaId), eq(listingMedia.listingId, listingId)));
   }
+}
+
+/** Listing slugs that `base` could collide with: `base` itself and `base-N`. */
+export async function findListingSlugsLike(db: DbExecutor, base: string): Promise<string[]> {
+  const rows = await db
+    .select({ slug: listings.slug })
+    .from(listings)
+    .where(or(eq(listings.slug, base), like(listings.slug, `${base}-%`)));
+  return rows.flatMap((row) => (row.slug ? [row.slug] : []));
+}
+
+/** Marks every not-yet-approved image of the listing as approved (shown publicly). */
+export async function approvePendingImages(db: DbExecutor, listingId: string): Promise<void> {
+  await db
+    .update(listingMedia)
+    .set({ approvedAt: new Date() })
+    .where(and(eq(listingMedia.listingId, listingId), isNull(listingMedia.approvedAt)));
+}
+
+export async function insertAssignment(
+  db: DbExecutor,
+  assignment: typeof listingAssignments.$inferInsert,
+): Promise<void> {
+  await db.insert(listingAssignments).values(assignment);
+}
+
+/** Storage keys of every media file of the listing, for cleanup after deletion. */
+export async function findMediaStorageKeys(db: DbExecutor, listingId: string): Promise<string[]> {
+  const rows = await db
+    .select({ key: listingMedia.storageKey })
+    .from(listingMedia)
+    .where(eq(listingMedia.listingId, listingId));
+  return rows.map((row) => row.key);
+}
+
+/**
+ * Permanently deletes a listing and everything that belongs only to it (texts, media rows,
+ * history; via cascades), and its property when no other listing uses it. Audit entries
+ * are kept.
+ */
+export async function deleteListingPermanently(
+  db: DbExecutor,
+  listing: Pick<ListingRow, 'id' | 'propertyId'>,
+): Promise<void> {
+  await db.delete(listings).where(eq(listings.id, listing.id));
+  const [other] = await db
+    .select({ id: listings.id })
+    .from(listings)
+    .where(and(eq(listings.propertyId, listing.propertyId), ne(listings.id, listing.id)))
+    .limit(1);
+  if (!other) await db.delete(properties).where(eq(properties.id, listing.propertyId));
+}
+
+/** The pending revision, or the latest one if it was rejected (approved ones are history). */
+export async function findVisibleRevision(
+  db: DbExecutor,
+  listingId: string,
+): Promise<RevisionRow | null> {
+  const [latest] = await db
+    .select()
+    .from(listingRevisions)
+    .where(eq(listingRevisions.listingId, listingId))
+    .orderBy(desc(listingRevisions.createdAt))
+    .limit(1);
+  return latest && latest.status !== ReviewStatus.APPROVED ? latest : null;
+}
+
+export async function findPendingRevision(
+  db: DbExecutor,
+  listingId: string,
+): Promise<RevisionRow | undefined> {
+  const [revision] = await db
+    .select()
+    .from(listingRevisions)
+    .where(
+      and(
+        eq(listingRevisions.listingId, listingId),
+        eq(listingRevisions.status, ReviewStatus.PENDING),
+      ),
+    );
+  return revision;
+}
+
+/** Creates the listing's pending revision or replaces its content. */
+export async function savePendingRevision(
+  db: DbExecutor,
+  revision: {
+    listingId: string;
+    content: ListingContent;
+    removedMediaIds: string[];
+    updatedById: string;
+  },
+): Promise<void> {
+  const pending = await findPendingRevision(db, revision.listingId);
+  if (pending) {
+    await db
+      .update(listingRevisions)
+      .set({
+        content: revision.content,
+        removedMediaIds: revision.removedMediaIds,
+        updatedById: revision.updatedById,
+      })
+      .where(eq(listingRevisions.id, pending.id));
+  } else {
+    await db.insert(listingRevisions).values(revision);
+  }
+}
+
+export async function deleteRevision(db: DbExecutor, id: string): Promise<void> {
+  await db.delete(listingRevisions).where(eq(listingRevisions.id, id));
+}
+
+export async function closeRevision(
+  db: DbExecutor,
+  id: string,
+  outcome: { status: 'APPROVED' | 'REJECTED'; reviewedById: string; rejectionReason?: string },
+): Promise<void> {
+  await db
+    .update(listingRevisions)
+    .set({ ...outcome, reviewedAt: new Date() })
+    .where(eq(listingRevisions.id, id));
+}
+
+/** Deletes media rows by id; returns their storage keys for cleanup. */
+export async function deleteMediaRows(
+  db: DbExecutor,
+  listingId: string,
+  mediaIds: readonly string[],
+): Promise<string[]> {
+  if (mediaIds.length === 0) return [];
+  const rows = await db
+    .delete(listingMedia)
+    .where(and(eq(listingMedia.listingId, listingId), inArray(listingMedia.id, [...mediaIds])))
+    .returning({ key: listingMedia.storageKey });
+  return rows.map((row) => row.key);
+}
+
+/** Images a pending revision added (not yet approved). */
+export async function unapprovedImageIds(db: DbExecutor, listingId: string): Promise<string[]> {
+  const rows = await db
+    .select({ id: listingMedia.id })
+    .from(listingMedia)
+    .where(and(eq(listingMedia.listingId, listingId), isNull(listingMedia.approvedAt)));
+  return rows.map((row) => row.id);
 }

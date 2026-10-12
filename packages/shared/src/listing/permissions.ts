@@ -174,6 +174,16 @@ export function canAssignAgent(actor: Actor, listing: ListingAccessContext): Dec
   return firstDenial(() => requireActive(actor), reviewerOnly(actor), notDeleted(listing));
 }
 
+/** Approving or rejecting the pending major edits of a published listing (SPEC §6). */
+export function canReviewRevision(actor: Actor, listing: ListingAccessContext): Decision {
+  return firstDenial(
+    () => requireActive(actor),
+    reviewerOnly(actor),
+    notDeleted(listing),
+    inStatus(listing, [ListingStatus.PUBLISHED]),
+  );
+}
+
 /** Featuring only makes sense for listings visitors can see. */
 export function canSetFeatured(actor: Actor, listing: ListingAccessContext): Decision {
   return firstDenial(

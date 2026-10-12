@@ -1,5 +1,13 @@
-import { ImageIssue, LISTING_IMAGE_RULES } from '@walls/shared';
-import { idParamSchema, listingInputSchema, mediaOrderInputSchema } from '@walls/validation';
+import { ImageIssue, LISTING_IMAGE_RULES, ListingAction } from '@walls/shared';
+import {
+  assignAgentInputSchema,
+  idParamSchema,
+  listingInputSchema,
+  listingListQuerySchema,
+  mediaOrderInputSchema,
+  rejectListingInputSchema,
+  setFeaturedInputSchema,
+} from '@walls/validation';
 import { type RequestHandler, Router } from 'express';
 import multer from 'multer';
 import { authenticated, requireAuth } from '../http/auth-context';
@@ -7,6 +15,7 @@ import { invalidImage, validationFailed } from '../http/errors';
 import { type RateLimitRule, limitByIp } from '../http/security';
 import { parseBody } from '../http/validate';
 import type { ListingMediaService } from './listing-media.service';
+import type { ListingReviewService, SimpleReviewerAction } from './listing-review.service';
 import type { ListingsService } from './listings.service';
 
 const STATUS_CREATED = 201;
@@ -41,16 +50,18 @@ function singleImageUpload(): RequestHandler {
 export function listingsRoutes(deps: {
   listings: ListingsService;
   media: ListingMediaService;
+  review: ListingReviewService;
   uploadRateLimit: RateLimitRule;
 }): Router {
-  const { listings, media } = deps;
+  const { listings, media, review } = deps;
   const router = Router();
   router.use(authenticated);
 
   const listingId = (params: { id?: string }) => idParamSchema.parse(params.id);
 
   router.get('/', async (req, res) => {
-    res.json({ listings: await listings.listForEditor(requireAuth(req).actor) });
+    const query = listingListQuerySchema.parse(req.query);
+    res.json({ listings: await listings.list(requireAuth(req).actor, query) });
   });
 
   router.post('/', async (req, res) => {
@@ -64,7 +75,7 @@ export function listingsRoutes(deps: {
   router.patch('/:id', async (req, res) => {
     const input = parseBody(listingInputSchema, req);
     res.json({
-      listing: await listings.updateDraft(requireAuth(req).actor, listingId(req.params), input),
+      listing: await listings.update(requireAuth(req).actor, listingId(req.params), input),
     });
   });
 
@@ -108,6 +119,65 @@ export function listingsRoutes(deps: {
     res.json({
       images: await media.removeImage(requireAuth(req).actor, listingId(req.params), mediaId),
     });
+  });
+
+  // Reviewer actions (Admin / Super Admin); the service checks the role and the state.
+  router.post('/:id/approve', async (req, res) => {
+    res.json({ listing: await review.approve(requireAuth(req).actor, listingId(req.params)) });
+  });
+
+  router.post('/:id/reject', async (req, res) => {
+    const { reason } = parseBody(rejectListingInputSchema, req);
+    res.json({
+      listing: await review.reject(requireAuth(req).actor, listingId(req.params), reason),
+    });
+  });
+
+  const statusRoutes: Record<string, SimpleReviewerAction> = {
+    'mark-sold': ListingAction.MARK_SOLD,
+    'mark-rented': ListingAction.MARK_RENTED,
+    archive: ListingAction.ARCHIVE,
+  };
+  for (const [path, action] of Object.entries(statusRoutes)) {
+    router.post(`/:id/${path}`, async (req, res) => {
+      res.json({
+        listing: await review.changeStatus(requireAuth(req).actor, listingId(req.params), action),
+      });
+    });
+  }
+
+  router.put('/:id/featured', async (req, res) => {
+    const input = parseBody(setFeaturedInputSchema, req);
+    res.json({
+      listing: await review.setFeatured(requireAuth(req).actor, listingId(req.params), input),
+    });
+  });
+
+  router.put('/:id/assignment', async (req, res) => {
+    const input = parseBody(assignAgentInputSchema, req);
+    res.json({
+      listing: await review.assignAgent(requireAuth(req).actor, listingId(req.params), input),
+    });
+  });
+
+  // Pending major edits of a published listing (SPEC §6).
+  router.post('/:id/revision/approve', async (req, res) => {
+    res.json({
+      listing: await review.approveRevision(requireAuth(req).actor, listingId(req.params)),
+    });
+  });
+
+  router.post('/:id/revision/reject', async (req, res) => {
+    const { reason } = parseBody(rejectListingInputSchema, req);
+    res.json({
+      listing: await review.rejectRevision(requireAuth(req).actor, listingId(req.params), reason),
+    });
+  });
+
+  /** Super Admin only, archived listings only; the UI asks for explicit confirmation. */
+  router.delete('/:id/permanent', async (req, res) => {
+    await review.permanentlyDelete(requireAuth(req).actor, listingId(req.params));
+    res.status(STATUS_NO_CONTENT).end();
   });
 
   return router;

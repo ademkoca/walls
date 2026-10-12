@@ -20,6 +20,7 @@ import {
   canEditListing,
   canPerformListingAction,
   canPermanentlyDeleteListing,
+  canReviewRevision,
   canSetFeatured,
   canViewListing,
   sellerTypeForRole,
@@ -242,5 +243,17 @@ describe('creating listings', () => {
   it('requires an active account', () => {
     const unverified = { ...seller, status: UserStatus.PENDING_VERIFICATION };
     expect(canCreateListing(unverified)).toEqual(denied(DenialReason.ACCOUNT_INACTIVE));
+  });
+});
+
+describe('reviewing revisions of published listings (SPEC §6)', () => {
+  it('lets reviewers review revisions of published listings only', () => {
+    expect(canReviewRevision(admin, listing({ status: ListingStatus.PUBLISHED }))).toEqual(allowed);
+    expect(canReviewRevision(admin, listing({ status: ListingStatus.SOLD }))).toEqual(
+      denied(DenialReason.INVALID_STATE),
+    );
+    expect(canReviewRevision(seller, listing({ status: ListingStatus.PUBLISHED }))).toEqual(
+      denied(DenialReason.ROLE_NOT_PERMITTED),
+    );
   });
 });

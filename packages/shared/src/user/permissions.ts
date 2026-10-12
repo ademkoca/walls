@@ -68,6 +68,50 @@ export function canDeactivateUser(
   );
 }
 
+/**
+ * Reactivating a deactivated account: allowed to whoever may deactivate it (SPEC §2.1).
+ * Like deactivation, it needs a reason, is audited and is emailed to the user.
+ */
+export function canReactivateUser(
+  actor: Actor,
+  target: UserTarget & { status: UserStatus },
+): Decision {
+  return firstDenial(
+    () => canActOnOtherUser(actor, target, DEACTIVATABLE_ROLES),
+    () => (target.status === UserStatus.DEACTIVATED ? allow() : deny(DenialReason.INVALID_STATE)),
+  );
+}
+
+/**
+ * The status a reactivated account returns to: active only when it had completed signup;
+ * otherwise it continues where it stopped (email verification or account setup).
+ */
+export function statusAfterReactivation(account: {
+  hasPassword: boolean;
+  emailVerified: boolean;
+}): UserStatus {
+  if (!account.hasPassword) return UserStatus.PENDING_SETUP;
+  if (!account.emailVerified) return UserStatus.PENDING_VERIFICATION;
+  return UserStatus.ACTIVE;
+}
+
+/** Inviting a new account of `role` (an Admin, by a Super Admin); see MANAGEABLE_ROLES. */
+export function canInviteUser(actor: Actor, role: Role): Decision {
+  return firstDenial(
+    () => requireActive(actor),
+    () =>
+      MANAGEABLE_ROLES[actor.role].includes(role) ? allow() : deny(DenialReason.ROLE_NOT_PERMITTED),
+  );
+}
+
+/** Listing users and reading the audit log: Admins and Super Admins. */
+export function canViewAdministration(actor: Actor): Decision {
+  return firstDenial(
+    () => requireActive(actor),
+    () => (isReviewer(actor) ? allow() : deny(DenialReason.ROLE_NOT_PERMITTED)),
+  );
+}
+
 /** Reviewing agent applications and agent profile change requests (SPEC §2.1, §4). */
 export function canReviewAgentMatters(actor: Actor): Decision {
   return firstDenial(

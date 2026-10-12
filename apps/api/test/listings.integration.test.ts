@@ -9,67 +9,18 @@ import { type ListingDetail, type ListingSummary, Role } from '@walls/shared';
 import { eq } from 'drizzle-orm';
 import { afterAll, describe, expect, it } from 'vitest';
 import { createTestContext, errorOf, testImage } from './helpers';
+import {
+  LISTINGS,
+  addImages,
+  completeApartment,
+  createListing,
+  detailOf,
+  image,
+  imagesOf,
+} from './listing-fixtures';
 
 const ctx = createTestContext();
 afterAll(ctx.close);
-
-const LISTINGS = '/api/v1/listings';
-
-type Client = Awaited<ReturnType<typeof ctx.signedInUser>>['client'];
-
-const detailOf = (response: { body: unknown }) =>
-  (response.body as { listing: ListingDetail }).listing;
-const imagesOf = (response: { body: unknown }) =>
-  (response.body as { images: ListingDetail['images'] }).images;
-
-async function createListing(client: Client): Promise<string> {
-  const response = await client.post(LISTINGS);
-  expect(response.status).toBe(201);
-  return (response.body as { id: string }).id;
-}
-
-/** Everything SPEC §39 requires for an apartment, apart from the images. */
-const completeApartment = {
-  propertyType: 'APARTMENT',
-  transactionType: 'SALE',
-  texts: [
-    { locale: 'sr', title: 'Trosoban stan na Vračaru', description: 'Svetao stan blizu Hrama.' },
-    { locale: 'en', title: '', description: '' },
-  ],
-  location: {
-    country: 'RS',
-    city: 'Beograd',
-    municipality: 'Vračar',
-    street: 'Njegoševa',
-    streetNumber: '12a',
-    latitude: 44.8,
-    longitude: 20.47,
-  },
-  attributes: {
-    floorArea: 74.5,
-    bedrooms: 2,
-    bathrooms: 1,
-    floor: 3,
-    totalFloors: 5,
-    heatingType: 'DISTRICT',
-    furnishedStatus: 'SEMI_FURNISHED',
-  },
-  amenityCodes: ['ELEVATOR', 'BALCONY'],
-  price: { mode: 'FIXED', amount: 189000, currency: 'EUR', period: null, negotiable: true },
-};
-
-let sharedImage: Buffer | undefined;
-async function image() {
-  sharedImage ??= await testImage();
-  return sharedImage;
-}
-
-async function addImages(client: Client, id: string, count: number) {
-  for (let index = 0; index < count; index += 1) {
-    const response = await client.upload(`${LISTINGS}/${id}/images`, await image());
-    expect(response.status).toBe(201);
-  }
-}
 
 describe('creating listings (SPEC §2.1, §5)', () => {
   it('creates an empty draft owned by the private seller, with no assigned agent', async () => {

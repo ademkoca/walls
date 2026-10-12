@@ -3,61 +3,56 @@ import {
   type Actor,
   DEFAULT_LOCALE,
   ListingAction,
+  type ListingContent,
   type ListingDetail,
   ListingEditMode,
+  ListingField,
   ListingStatus,
   type ListingSummary,
-  PriceMode,
-  TransactionType,
   canCreateListing,
   canDeleteDraft,
   canEditListing,
   canPerformListingAction,
   canViewListing,
   checkSubmissionRequirements,
-  isAmenityAllowed,
+  contentSubmissionSnapshot,
+  diffListingContent,
+  isReviewer,
+  mergeListingContent,
   nextStatus,
+  planPublishedEdit,
+  requireActive,
   sellerTypeForRole,
-  toMinorUnits,
 } from '@walls/shared';
-import type { ListingInput } from '@walls/validation';
+import type { ListingInput, ListingListQuery } from '@walls/validation';
 import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
 import { findUserById } from '../auth/auth.repository';
 import type { Config } from '../config';
 import { enqueueEmail } from '../email/outbox';
 import { EmailTemplate } from '../email/templates';
-import {
-  AppError,
-  ErrorCode,
-  assertAllowed,
-  notFound,
-  submissionIncomplete,
-  validationFailed,
-} from '../http/errors';
+import { assertAllowed, notFound, submissionIncomplete, validationFailed } from '../http/errors';
 import { webPageUrl } from '../http/web-links';
+import { liveContent, writeContent } from './listing-content';
 import {
   accessContext,
-  submissionSnapshot,
+  pendingRevision,
   toListingDetail,
   toListingSummary,
+  workingImageCount,
 } from './listing-view';
 import {
   type ListingAggregate,
-  type NewListing,
+  deleteRevision,
   findListingAggregate,
-  findListingsForEditor,
+  findListingSummaries,
   insertListing,
   insertProperty,
   insertStatusHistory,
   lockListing,
-  replaceAmenities,
-  replaceTexts,
+  savePendingRevision,
   updateListing,
-  updateProperty,
   upsertLocation,
 } from './listings.repository';
-
-const STATUS_CONFLICT = 409;
 
 /** Dashboard path of a listing; used for email links. */
 export const listingDashboardPath = (id: string) => `/dashboard/listings/${id}`;
@@ -74,48 +69,57 @@ export async function loadViewableListing(
   return aggregate;
 }
 
-/**
- * Locks a listing the actor may edit as a draft. Published listings are edited through
- * revisions (Phase 6), so they are rejected here for now.
- */
-export async function lockEditableDraft(db: DbExecutor, actor: Actor, id: string) {
+/** Every content group, for writing a whole draft. */
+const ALL_CONTENT_FIELDS: ReadonlySet<ListingField> = new Set([
+  ListingField.PROPERTY_TYPE,
+  ListingField.TRANSACTION_TYPE,
+  ListingField.TEXT,
+  ListingField.LOCATION,
+  ListingField.ATTRIBUTES,
+  ListingField.AMENITIES,
+  ListingField.PRICE,
+  ListingField.EXACT_ADDRESS_VISIBILITY,
+]);
+
+/** Minor edits of a published listing that the PATCH body can carry (SPEC §6). */
+const IMMEDIATE_CONTENT_FIELDS: ReadonlySet<ListingField> = new Set([
+  ListingField.PRICE,
+  ListingField.EXACT_ADDRESS_VISIBILITY,
+]);
+
+/** Locks a listing the actor may edit now, and tells whether it is a draft or published. */
+export async function lockEditable(db: DbExecutor, actor: Actor, id: string) {
   const listing = await lockListing(db, id);
   if (!listing) throw notFound();
   const decision = canEditListing(actor, accessContext(listing));
   assertAllowed(decision);
-  if (decision.allowed && decision.mode !== ListingEditMode.DRAFT) {
-    throw new AppError(
-      STATUS_CONFLICT,
-      ErrorCode.INVALID_STATE,
-      'Editing published listings is not available yet',
-    );
-  }
-  return listing;
+  return { listing, mode: decision.allowed ? decision.mode : ListingEditMode.DRAFT };
 }
 
-/** English text is optional (SPEC §31): an empty translation is not stored, so pages fall back to Serbian. */
-function textsToStore(texts: NonNullable<ListingInput['texts']>) {
-  return texts.filter(
-    (text) => text.locale === DEFAULT_LOCALE || text.title !== '' || text.description !== '',
-  );
-}
-
-function priceColumns(price: NonNullable<ListingInput['price']>): Partial<NewListing> {
-  if (price.mode === PriceMode.ON_REQUEST) {
-    return {
-      priceMode: PriceMode.ON_REQUEST,
-      priceAmountMinor: null,
-      priceCurrency: null,
-      pricePeriod: null,
-      priceNegotiable: false,
-    };
-  }
+/**
+ * The base an edit of a published listing applies to: the pending revision's proposal,
+ * with the live values of the fields that change immediately (price follows the revision
+ * only when the revision changes the transaction type).
+ */
+function publishedEditBase(aggregate: ListingAggregate): ListingContent {
+  const live = liveContent(aggregate);
+  const pending = pendingRevision(aggregate);
+  if (!pending) return live;
+  const priceInReview = pending.content.transactionType !== live.transactionType;
   return {
-    priceMode: PriceMode.FIXED,
-    priceAmountMinor: toMinorUnits(price.amount, price.currency),
-    priceCurrency: price.currency,
-    pricePeriod: price.period,
-    priceNegotiable: price.negotiable,
+    ...pending.content,
+    price: priceInReview ? pending.content.price : live.price,
+    isExactAddressPublic: live.isExactAddressPublic,
+  };
+}
+
+/** The content values of the given groups, for audit entries. */
+function pickFields(content: ListingContent, fields: ReadonlySet<ListingField>) {
+  return {
+    ...(fields.has(ListingField.PRICE) ? { price: content.price } : {}),
+    ...(fields.has(ListingField.EXACT_ADDRESS_VISIBILITY)
+      ? { isExactAddressPublic: content.isExactAddressPublic }
+      : {}),
   };
 }
 
@@ -153,8 +157,17 @@ export class ListingsService {
     });
   }
 
-  async listForEditor(actor: Actor): Promise<ListingSummary[]> {
-    const rows = await findListingsForEditor(this.db, actor.id);
+  /**
+   * Dashboard listings: every listing for reviewers (they manage all listings), otherwise
+   * the listings the user created or is assigned to.
+   */
+  async list(actor: Actor, query: ListingListQuery): Promise<ListingSummary[]> {
+    assertAllowed(requireActive(actor));
+    const rows = await findListingSummaries(this.db, {
+      ...(isReviewer(actor) ? {} : { editorId: actor.id }),
+      ...(query.status ? { status: query.status } : {}),
+      ...(query.pendingRevision ? { pendingRevision: true } : {}),
+    });
     return rows.map(toListingSummary);
   }
 
@@ -163,80 +176,103 @@ export class ListingsService {
   }
 
   /**
-   * Saves a draft. Each section present in the input replaces that section; absent
-   * sections are left unchanged. Drafts may be incomplete.
+   * Saves an edit. Each section present in the input replaces that section; absent sections
+   * are kept. Drafts may be incomplete. For published listings, minor changes apply now and
+   * major ones become (or update) the pending revision (SPEC §6).
    */
-  async updateDraft(actor: Actor, id: string, input: ListingInput): Promise<ListingDetail> {
+  async update(actor: Actor, id: string, input: ListingInput): Promise<ListingDetail> {
     await this.db.transaction(async (tx) => {
-      const listing = await lockEditableDraft(tx, actor, id);
+      const { listing, mode } = await lockEditable(tx, actor, id);
+      const aggregate = (await findListingAggregate(tx, id))!;
+      const base =
+        mode === ListingEditMode.PUBLISHED ? publishedEditBase(aggregate) : liveContent(aggregate);
+      const merged = mergeListingContent(base, input);
+      if (!merged.ok) throw validationFailed(merged.path, merged.message);
 
-      const transactionType =
-        input.transactionType === undefined ? listing.transactionType : input.transactionType;
-      const price = input.price ? priceColumns(input.price) : {};
-      // The database only allows a rental period on RENT listings; check the merged state.
-      const period = input.price ? (price.pricePeriod ?? null) : listing.pricePeriod;
-      if (period !== null && transactionType !== TransactionType.RENT) {
-        throw validationFailed(['price', 'period'], 'Only rental listings have a rental period');
+      if (mode === ListingEditMode.DRAFT) {
+        await writeContent(tx, listing, merged.content, ALL_CONTENT_FIELDS);
+      } else {
+        await this.savePublishedEdit(tx, actor, aggregate, merged.content);
       }
-
-      // Features must apply to the (possibly new) property type (SPEC §10).
-      const current = (await findListingAggregate(tx, id))!;
-      const propertyType = input.propertyType ?? current.property.propertyType;
-      if (input.amenityCodes) {
-        if (!input.amenityCodes.every((code) => isAmenityAllowed(propertyType, code))) {
-          throw validationFailed(
-            ['amenityCodes'],
-            'A feature does not apply to this property type',
-          );
-        }
-        await replaceAmenities(tx, listing.propertyId, input.amenityCodes);
-      } else if (input.propertyType) {
-        const kept = current.amenityCodes.filter((code) => isAmenityAllowed(propertyType, code));
-        if (kept.length !== current.amenityCodes.length) {
-          await replaceAmenities(tx, listing.propertyId, kept);
-        }
-      }
-      if (input.texts) await replaceTexts(tx, id, textsToStore(input.texts));
-      if (input.location) {
-        await upsertLocation(tx, {
-          propertyId: listing.propertyId,
-          country: input.location.country ?? null,
-          city: input.location.city ?? null,
-          municipality: input.location.municipality ?? null,
-          neighborhood: input.location.neighborhood ?? null,
-          street: input.location.street ?? null,
-          streetNumber: input.location.streetNumber ?? null,
-          postalCode: input.location.postalCode ?? null,
-          latitude: input.location.latitude ?? null,
-          longitude: input.location.longitude ?? null,
-        });
-      }
-      await updateProperty(tx, listing.propertyId, {
-        ...(input.propertyType ? { propertyType: input.propertyType } : {}),
-        ...(input.attributes
-          ? {
-              floorArea: input.attributes.floorArea ?? null,
-              plotArea: input.attributes.plotArea ?? null,
-              bedrooms: input.attributes.bedrooms ?? null,
-              bathrooms: input.attributes.bathrooms ?? null,
-              floor: input.attributes.floor ?? null,
-              totalFloors: input.attributes.totalFloors ?? null,
-              yearBuilt: input.attributes.yearBuilt ?? null,
-              parkingSpaces: input.attributes.parkingSpaces ?? null,
-              heatingType: input.attributes.heatingType ?? null,
-              furnishedStatus: input.attributes.furnishedStatus ?? null,
-            }
-          : {}),
-      });
-      await updateListing(tx, id, {
-        ...(input.transactionType ? { transactionType: input.transactionType } : {}),
-        ...price,
-        ...(input.isExactAddressPublic === undefined
-          ? {}
-          : { isExactAddressPublic: input.isExactAddressPublic }),
-      });
     });
     return this.get(actor, id);
+  }
+
+  /**
+   * Re-plans a published listing's edits after its images changed: images added or removed
+   * by an editor need review, so the pending revision is created or kept up to date.
+   */
+  async syncPublishedEdit(tx: DbExecutor, actor: Actor, id: string): Promise<void> {
+    const aggregate = (await findListingAggregate(tx, id))!;
+    await this.savePublishedEdit(tx, actor, aggregate, publishedEditBase(aggregate));
+  }
+
+  /**
+   * Applies an edit of a published listing: minor changes now (audited), major ones into the
+   * pending revision. The proposed version must stay complete enough to be published.
+   */
+  private async savePublishedEdit(
+    tx: DbExecutor,
+    actor: Actor,
+    aggregate: ListingAggregate,
+    proposed: ListingContent,
+  ): Promise<void> {
+    const { listing } = aggregate;
+    const live = liveContent(aggregate);
+    const pending = pendingRevision(aggregate);
+    const removedMediaIds = pending?.removedMediaIds ?? [];
+    const imagesChanged =
+      removedMediaIds.length > 0 || aggregate.images.some((image) => image.approvedAt === null);
+
+    const issues = checkSubmissionRequirements(
+      contentSubmissionSnapshot(proposed, workingImageCount(aggregate)),
+    );
+    if (issues.length > 0) throw submissionIncomplete(issues);
+
+    const changed = diffListingContent(live, proposed);
+    if (imagesChanged) changed.push(ListingField.MEDIA_SET);
+    const plan = planPublishedEdit(changed);
+
+    const immediate = new Set(
+      plan.immediate.filter((field) => IMMEDIATE_CONTENT_FIELDS.has(field)),
+    );
+    if (immediate.size > 0) {
+      await writeContent(tx, listing, proposed, immediate);
+      await recordAudit(tx, {
+        actorId: actor.id,
+        action: AuditAction.LISTING_UPDATED_LIVE,
+        entityType: AuditEntity.LISTING,
+        entityId: listing.id,
+        before: pickFields(live, immediate),
+        after: pickFields(proposed, immediate),
+      });
+    }
+
+    if (plan.requiresReview.length > 0) {
+      await savePendingRevision(tx, {
+        listingId: listing.id,
+        content: proposed,
+        removedMediaIds,
+        updatedById: actor.id,
+      });
+      await recordAudit(tx, {
+        actorId: actor.id,
+        action: AuditAction.LISTING_REVISION_SAVED,
+        entityType: AuditEntity.LISTING,
+        entityId: listing.id,
+        after: { fields: plan.requiresReview },
+      });
+    } else if (pending) {
+      // Every major change was undone: nothing is left to review.
+      await deleteRevision(tx, pending.id);
+      await recordAudit(tx, {
+        actorId: actor.id,
+        action: AuditAction.LISTING_REVISION_WITHDRAWN,
+        entityType: AuditEntity.LISTING,
+        entityId: listing.id,
+      });
+    }
+    await updateListing(tx, listing.id, {});
   }
 
   /** Soft-deletes a draft; the record and its history are kept (SPEC §24). */
@@ -263,7 +299,9 @@ export class ListingsService {
       assertAllowed(canPerformListingAction(actor, accessContext(listing), ListingAction.SUBMIT));
 
       const aggregate = (await findListingAggregate(tx, id))!;
-      const issues = checkSubmissionRequirements(submissionSnapshot(aggregate));
+      const issues = checkSubmissionRequirements(
+        contentSubmissionSnapshot(liveContent(aggregate), aggregate.images.length),
+      );
       if (issues.length > 0) throw submissionIncomplete(issues);
 
       const toStatus = nextStatus(ListingAction.SUBMIT);

@@ -1,19 +1,30 @@
 import {
   type Actor,
   type ListingAccessContext,
+  type ListingContent,
   type ListingDetail,
-  type ListingSubmissionSnapshot,
+  ListingEditMode,
+  type ListingImage,
+  type ListingRevisionView,
   type ListingSummary,
-  type Price,
-  PriceMode,
-  type PriceView,
+  ReviewStatus,
   availableListingActions,
+  canAssignAgent,
   canDeleteDraft,
   canEditListing,
+  canPermanentlyDeleteListing,
+  canSetFeatured,
   checkSubmissionRequirements,
-  fromMinorUnits,
+  contentSubmissionSnapshot,
 } from '@walls/shared';
-import type { ListingAggregate, ListingRow, ListingSummaryRow } from './listings.repository';
+import { contentView, liveContent } from './listing-content';
+import type {
+  ListingAggregate,
+  ListingRow,
+  ListingSummaryRow,
+  MediaRow,
+  RevisionRow,
+} from './listings.repository';
 
 export function accessContext(listing: ListingRow): ListingAccessContext {
   return {
@@ -25,114 +36,91 @@ export function accessContext(listing: ListingRow): ListingAccessContext {
   };
 }
 
-/** The stored price in the domain shape (minor units). */
-export function storedPrice(listing: ListingRow): Price {
-  if (
-    listing.priceMode === PriceMode.FIXED &&
-    listing.priceAmountMinor !== null &&
-    listing.priceCurrency !== null
-  ) {
-    return {
-      mode: PriceMode.FIXED,
-      amountMinor: listing.priceAmountMinor,
-      currency: listing.priceCurrency,
-      period: listing.pricePeriod,
-      negotiable: listing.priceNegotiable,
-    };
-  }
-  return { mode: PriceMode.ON_REQUEST };
-}
-
-function priceView(listing: ListingRow): PriceView {
-  const price = storedPrice(listing);
-  if (price.mode === PriceMode.ON_REQUEST) return price;
-  const { amountMinor, ...rest } = price;
-  return { ...rest, amount: fromMinorUnits(amountMinor, price.currency) };
-}
-
-export function submissionSnapshot(aggregate: ListingAggregate): ListingSubmissionSnapshot {
-  const { listing, property, location } = aggregate;
+export function toListingImage(image: MediaRow): ListingImage {
   return {
-    propertyType: property.propertyType,
-    transactionType: listing.transactionType,
-    texts: aggregate.texts,
-    location: {
-      country: location?.country ?? null,
-      city: location?.city ?? null,
-      street: location?.street ?? null,
-      streetNumber: location?.streetNumber ?? null,
-      latitude: location?.latitude ?? null,
-      longitude: location?.longitude ?? null,
-    },
-    attributes: {
-      floorArea: property.floorArea,
-      plotArea: property.plotArea,
-      bedrooms: property.bedrooms,
-      bathrooms: property.bathrooms,
-      floor: property.floor,
-      totalFloors: property.totalFloors,
-    },
-    price: storedPrice(listing),
-    imageCount: aggregate.images.length,
+    id: image.id,
+    url: image.url,
+    isPrimary: image.isPrimary,
+    approved: image.approvedAt !== null,
+    width: image.width,
+    height: image.height,
+  };
+}
+
+/** The pending revision of an aggregate, if any (not a rejected one). */
+export function pendingRevision(aggregate: ListingAggregate): RevisionRow | null {
+  return aggregate.revision?.status === ReviewStatus.PENDING ? aggregate.revision : null;
+}
+
+/**
+ * The content editors are working on: the pending revision's proposal for a published
+ * listing, otherwise the live content.
+ */
+export function workingContent(aggregate: ListingAggregate): ListingContent {
+  return pendingRevision(aggregate)?.content ?? liveContent(aggregate);
+}
+
+/** Images of the working version: everything except images a pending revision removes. */
+export function workingImageCount(aggregate: ListingAggregate): number {
+  const removed = new Set(pendingRevision(aggregate)?.removedMediaIds ?? []);
+  return aggregate.images.filter((image) => !removed.has(image.id)).length;
+}
+
+function revisionView(revision: RevisionRow | null): ListingRevisionView | null {
+  if (!revision || revision.status === ReviewStatus.APPROVED) return null;
+  return {
+    id: revision.id,
+    status: revision.status,
+    content: contentView(revision.content),
+    removedImageIds: revision.removedMediaIds,
+    rejectionReason: revision.rejectionReason,
+    updatedAt: revision.updatedAt.toISOString(),
   };
 }
 
 export function toListingDetail(aggregate: ListingAggregate, actor: Actor): ListingDetail {
-  const { listing, property, location } = aggregate;
+  const { listing } = aggregate;
   const context = accessContext(listing);
   const edit = canEditListing(actor, context);
+  const live = contentView(liveContent(aggregate));
+  // Editors of a published listing see what blocks their proposed version.
+  const checked =
+    edit.allowed && edit.mode === ListingEditMode.PUBLISHED
+      ? workingContent(aggregate)
+      : liveContent(aggregate);
 
   return {
     id: listing.id,
     status: listing.status,
     sellerType: listing.sellerType,
-    propertyType: property.propertyType,
-    transactionType: listing.transactionType,
-    texts: aggregate.texts.map(({ locale, title, description }) => ({
-      locale,
-      title,
-      description,
-    })),
-    location: {
-      country: location?.country ?? null,
-      city: location?.city ?? null,
-      municipality: location?.municipality ?? null,
-      neighborhood: location?.neighborhood ?? null,
-      street: location?.street ?? null,
-      streetNumber: location?.streetNumber ?? null,
-      postalCode: location?.postalCode ?? null,
-      latitude: location?.latitude ?? null,
-      longitude: location?.longitude ?? null,
-    },
-    attributes: {
-      floorArea: property.floorArea,
-      plotArea: property.plotArea,
-      bedrooms: property.bedrooms,
-      bathrooms: property.bathrooms,
-      floor: property.floor,
-      totalFloors: property.totalFloors,
-      yearBuilt: property.yearBuilt,
-      parkingSpaces: property.parkingSpaces,
-      heatingType: property.heatingType,
-      furnishedStatus: property.furnishedStatus,
-    },
-    amenityCodes: aggregate.amenityCodes,
-    price: priceView(listing),
-    isExactAddressPublic: listing.isExactAddressPublic,
+    creator: aggregate.creator,
+    assignedAgent: aggregate.assignedAgent,
+    slug: listing.slug,
+    publishedAt: listing.publishedAt?.toISOString() ?? null,
+    isFeatured: listing.isFeatured,
+    featuredUntil: listing.featuredUntil?.toISOString() ?? null,
+    propertyType: live.propertyType,
+    transactionType: live.transactionType,
+    texts: live.texts,
+    location: live.location,
+    attributes: live.attributes,
+    amenityCodes: live.amenityCodes,
+    price: live.price,
+    isExactAddressPublic: live.isExactAddressPublic,
     rejectionReason: listing.rejectionReason,
-    images: aggregate.images.map((image) => ({
-      id: image.id,
-      url: image.url,
-      isPrimary: image.isPrimary,
-      width: image.width,
-      height: image.height,
-    })),
+    images: aggregate.images.map(toListingImage),
+    revision: revisionView(aggregate.revision),
     permissions: {
       editMode: edit.allowed ? edit.mode : null,
       canDelete: canDeleteDraft(actor, context).allowed,
       actions: availableListingActions(actor, context),
+      canAssignAgent: canAssignAgent(actor, context).allowed,
+      canSetFeatured: canSetFeatured(actor, context).allowed,
+      canPermanentlyDelete: canPermanentlyDeleteListing(actor, context).allowed,
     },
-    submissionIssues: checkSubmissionRequirements(submissionSnapshot(aggregate)),
+    submissionIssues: checkSubmissionRequirements(
+      contentSubmissionSnapshot(checked, workingImageCount(aggregate)),
+    ),
     createdAt: listing.createdAt.toISOString(),
     updatedAt: listing.updatedAt.toISOString(),
   };
@@ -148,6 +136,9 @@ export function toListingSummary(row: ListingSummaryRow): ListingSummary {
     city: row.city,
     coverImageUrl: row.coverImageUrl,
     imageCount: row.imageCount,
+    creator: row.creator,
+    isFeatured: row.listing.isFeatured,
+    hasPendingRevision: row.hasPendingRevision,
     updatedAt: row.listing.updatedAt.toISOString(),
   };
 }

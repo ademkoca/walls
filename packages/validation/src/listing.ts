@@ -3,6 +3,7 @@ import {
   FurnishedStatus,
   HeatingType,
   LISTING_IMAGE_RULES,
+  ListingStatus,
   Locale,
   PriceMode,
   PropertyType,
@@ -204,3 +205,29 @@ export const mediaOrderInputSchema = z
     path: ['primaryMediaId'],
   });
 export type MediaOrderInput = z.infer<typeof mediaOrderInputSchema>;
+
+/** Listing list filter (dashboard). Reviewers see every listing; editors only their own. */
+export const listingListQuerySchema = z.strictObject({
+  status: z.enum(enumValues(ListingStatus)).optional(),
+  /** Only published listings with major edits waiting for review. */
+  pendingRevision: z.stringbool().optional(),
+});
+export type ListingListQuery = z.infer<typeof listingListQuerySchema>;
+
+/** Featuring a published listing (SPEC §22); `featuredUntil` is optional and only when featured. */
+export const setFeaturedInputSchema = z
+  .strictObject({
+    featured: z.boolean(),
+    featuredUntil: z.iso.datetime({ offset: true }).nullable(),
+  })
+  .refine(({ featured, featuredUntil }) => featured || featuredUntil === null, {
+    message: 'Only featured listings have an end date',
+    path: ['featuredUntil'],
+  });
+export type SetFeaturedInput = z.infer<typeof setFeaturedInputSchema>;
+
+/** Assigning an agent to a listing, or removing the assignment with null (SPEC §5). */
+export const assignAgentInputSchema = z.strictObject({
+  agentId: z.uuid().nullable(),
+});
+export type AssignAgentInput = z.infer<typeof assignAgentInputSchema>;

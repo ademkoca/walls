@@ -58,9 +58,11 @@ export function createTestContext(
   });
   const emails = new RecordingEmailService();
 
-  /** Delivers queued emails and returns the most recent one sent to `to`. */
+  /** Delivers every queued email (the outbox sends in batches) and returns the latest to `to`. */
   async function lastEmailTo(to: string): Promise<EmailMessage | undefined> {
-    await processOutbox(db, emails, logger);
+    while ((await processOutbox(db, emails, logger)) > 0) {
+      // Keep going until the outbox is empty.
+    }
     return emails.sent.filter((email) => email.to === to).at(-1);
   }
 

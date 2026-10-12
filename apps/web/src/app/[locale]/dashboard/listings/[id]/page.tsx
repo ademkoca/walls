@@ -1,9 +1,10 @@
+import { isReviewer } from '@walls/shared';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { ListingEditor } from '@/components/listings/editor/listing-editor';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
-import { NotAccessibleError, getListing } from '@/lib/api/server';
+import { NotAccessibleError, getCurrentUser, getListing } from '@/lib/api/server';
 
 export async function generateMetadata({
   params,
@@ -27,9 +28,15 @@ export default async function ListingEditorPage({
 }: PageProps<'/[locale]/dashboard/listings/[id]'>) {
   await resolveLocale(params);
   const { id } = await params;
-  const listing = await loadListing(id);
+  const [listing, user] = await Promise.all([loadListing(id), getCurrentUser()]);
   // The dashboard layout already redirects signed-out visitors.
-  if (!listing) return null;
+  if (!listing || !user) return null;
 
-  return <ListingEditor key={listing.id} initialListing={listing} />;
+  return (
+    <ListingEditor
+      key={`${listing.id}-${listing.updatedAt}`}
+      initialListing={listing}
+      viewerIsReviewer={isReviewer(user)}
+    />
+  );
 }

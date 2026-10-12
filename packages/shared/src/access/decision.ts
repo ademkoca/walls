@@ -29,7 +29,7 @@ export interface Actor {
 }
 
 /** Admins and Super Admins review listings and manage platform data (SPEC §2.1). */
-export function isReviewer(actor: Actor): boolean {
+export function isReviewer(actor: Pick<Actor, 'role'>): boolean {
   return actor.role === Role.ADMIN || actor.role === Role.SUPER_ADMIN;
 }
 

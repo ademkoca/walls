@@ -54,3 +54,28 @@ export function slugify(text: string, maxLength: number = SLUG_MAX_LENGTH): stri
     .slice(0, maxLength)
     .replace(/-+$/, '');
 }
+
+/**
+ * The first of `base`, `base-2`, `base-3`, … that is not in `taken`. Callers load the taken
+ * slugs that start with `base` and rely on a unique index for concurrent writers.
+ */
+export function nextFreeSlug(base: string, taken: ReadonlySet<string>): string {
+  if (!taken.has(base)) return base;
+  let suffix = 2;
+  while (taken.has(`${base}-${suffix}`)) suffix += 1;
+  return `${base}-${suffix}`;
+}
+
+const LISTING_SLUG_FALLBACK = 'nekretnina';
+
+/**
+ * Stable public URL segment for a listing, from its Serbian title and city (SPEC §32), e.g.
+ * "trosoban-stan-na-vracaru-beograd". Assigned at first publication and never changed.
+ */
+export function listingSlugBase(title: string, city: string | null): string {
+  const titleSlug = slugify(title);
+  const citySlug = city ? slugify(city) : '';
+  const cityInTitle = citySlug !== '' && `-${titleSlug}-`.includes(`-${citySlug}-`);
+  const parts = cityInTitle ? [titleSlug] : [titleSlug, citySlug];
+  return slugify(parts.filter(Boolean).join('-')) || LISTING_SLUG_FALLBACK;
+}

@@ -1,4 +1,5 @@
 import type { ListingSummary } from '@walls/shared';
+import { Badge } from '@walls/ui/components/badge';
 import {
   Table,
   TableBody,
@@ -12,18 +13,28 @@ import { getFormatter, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { ListingStatusBadge } from './listing-status-badge';
 
-/** The editor's listings, newest change first. */
-export async function ListingsTable({ listings }: { listings: ListingSummary[] }) {
+/** Dashboard listings, newest change first. Reviewers also see who advertises each one. */
+export async function ListingsTable({
+  listings,
+  showCreator = false,
+}: {
+  listings: ListingSummary[];
+  showCreator?: boolean;
+}) {
   const t = await getTranslations('listings');
+  const tReview = await getTranslations('listingsReview');
   const tEnums = await getTranslations('enums');
   const format = await getFormatter();
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-card">
+    <div className="overflow-x-auto rounded-lg border bg-card">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>{t('columns.listing')}</TableHead>
+            {showCreator && (
+              <TableHead className="hidden lg:table-cell">{tReview('creator')}</TableHead>
+            )}
             <TableHead>{t('columns.status')}</TableHead>
             <TableHead className="hidden md:table-cell">{t('columns.images')}</TableHead>
             <TableHead className="hidden md:table-cell">{t('columns.updated')}</TableHead>
@@ -67,8 +78,19 @@ export async function ListingsTable({ listings }: { listings: ListingSummary[] }
                     </span>
                   </Link>
                 </TableCell>
+                {showCreator && (
+                  <TableCell className="hidden text-muted-foreground lg:table-cell">
+                    {listing.creator.displayName}
+                  </TableCell>
+                )}
                 <TableCell>
-                  <ListingStatusBadge status={listing.status} />
+                  <div className="flex flex-wrap gap-1">
+                    <ListingStatusBadge status={listing.status} />
+                    {listing.hasPendingRevision && (
+                      <Badge variant="secondary">{tReview('pendingEdits')}</Badge>
+                    )}
+                    {listing.isFeatured && <Badge variant="outline">{tReview('featured')}</Badge>}
+                  </div>
                 </TableCell>
                 <TableCell className="hidden text-muted-foreground md:table-cell">
                   {t('imageCount', { count: listing.imageCount })}

@@ -1,8 +1,14 @@
 'use client';
 
-import { type Role, sellerTypeForRole } from '@walls/shared';
+import { type Role, isReviewer, sellerTypeForRole } from '@walls/shared';
 import { cn } from '@walls/ui/lib/utils';
-import { Building2Icon, ExternalLinkIcon, LayoutDashboardIcon } from 'lucide-react';
+import {
+  Building2Icon,
+  ExternalLinkIcon,
+  HistoryIcon,
+  LayoutDashboardIcon,
+  UsersIcon,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 
@@ -19,6 +25,24 @@ const DASHBOARD_NAV = [
     icon: Building2Icon,
     // Private sellers and agents advertise listings (canCreateListing).
     show: (role: Role) => sellerTypeForRole(role) !== null,
+  },
+  {
+    href: '/dashboard/listings',
+    labelKey: 'reviewListings',
+    icon: Building2Icon,
+    show: (role: Role) => isReviewer({ role }),
+  },
+  {
+    href: '/dashboard/users',
+    labelKey: 'users',
+    icon: UsersIcon,
+    show: (role: Role) => isReviewer({ role }),
+  },
+  {
+    href: '/dashboard/audit-log',
+    labelKey: 'auditLog',
+    icon: HistoryIcon,
+    show: (role: Role) => isReviewer({ role }),
   },
 ] as const;
 

@@ -123,7 +123,10 @@
       "label": "Navigacija kontrolne table",
       "overview": "Pregled",
       "listings": "Moji oglasi",
-      "viewSite": "Pogledaj sajt"
+      "viewSite": "Pogledaj sajt",
+      "reviewListings": "Oglasi",
+      "users": "Korisnici",
+      "auditLog": "Dnevnik izmena"
     }
   },
   "listings": {
@@ -241,6 +244,13 @@
         "dragHandle": "Promeni redosled slike {position}",
         "imageAlt": "Slika {position}",
         "empty": "Još nema slika.",
+        "savedInstantly": "Izmene slika čuvaju se odmah, pa zbog njih ne morate da čuvate nacrt.",
+        "savedInstantlyPublished": "Izmene slika čuvaju se odmah. Dodate i uklonjene slike šaljemo na proveru; redosled i naslovna menjaju se odmah.",
+        "added": "{count, plural, one {Dodata je # slika.} few {Dodate su # slike.} other {Dodato je # slika.}}",
+        "removed": "Slika je uklonjena.",
+        "removalProposed": "Slika će biti uklonjena kada vaše izmene budu odobrene.",
+        "orderSaved": "Redosled slika je sačuvan.",
+        "coverSaved": "Naslovna slika je promenjena.",
         "issues": {
           "UNSUPPORTED_TYPE": "format nije podržan",
           "FILE_TOO_SMALL": "datoteka je premala (najmanje 50 KB)",
@@ -277,7 +287,196 @@
           "images": "najmanje 3 slike"
         },
         "floorAboveTotal": "sprat ne može biti veći od ukupnog broja spratova"
+      },
+      "published": {
+        "notice": "Oglas je objavljen. Cena, vidljivost adrese i redosled slika menjaju se odmah. Ostale izmene šaljemo na proveru; objavljena verzija ostaje ista dok ih ne odobrimo.",
+        "saveChanges": "Sačuvaj izmene",
+        "saved": "Izmene su sačuvane.",
+        "sentForReview": "Sačuvano. Izmene su poslate na proveru.",
+        "revisionPending": "Izmene čekaju proveru. Objavljena verzija ostaje nepromenjena dok ih ne odobrimo; do tada možete nastaviti sa izmenama.",
+        "revisionRejected": "Poslednje izmene nisu odobrene. Objavljena verzija je ostala ista.",
+        "pendingApproval": "Čeka odobrenje",
+        "toBeRemoved": "Biće uklonjena",
+        "coverMustBeApproved": "Naslovna može biti samo odobrena slika."
       }
+    }
+  },
+  "listingsReview": {
+    "title": "Oglasi",
+    "description": "Pregledajte prijave i upravljajte svim oglasima na platformi.",
+    "tabs": {
+      "pendingReview": "Na proveri",
+      "pendingEdits": "Izmene za proveru",
+      "published": "Objavljeni",
+      "all": "Svi"
+    },
+    "creator": "Oglašivač",
+    "featured": "Izdvojen",
+    "pendingEdits": "Izmene na proveri",
+    "empty": "U ovoj grupi nema oglasa."
+  },
+  "review": {
+    "title": "Provera",
+    "pendingNotice": "Oglas čeka proveru. Pregledajte sadržaj i slike, pa ga odobrite ili odbijte uz obrazloženje.",
+    "details": {
+      "creator": "Oglašivač",
+      "sellerType": "Vrsta oglašivača",
+      "assignedAgent": "Dodeljeni agent",
+      "none": "Nema",
+      "publishedAt": "Objavljen",
+      "slug": "Adresa oglasa"
+    },
+    "approve": "Odobri i objavi",
+    "approveTitle": "Objaviti oglas?",
+    "approveDescription": "Oglas će biti vidljiv svima, a oglašivač će dobiti obaveštenje emailom.",
+    "approved": "Oglas je objavljen.",
+    "reject": "Odbij",
+    "rejectTitle": "Odbiti oglas?",
+    "rejectDescription": "Oglašivač vidi razlog u kontrolnoj tabli i dobija ga emailom.",
+    "reason": "Razlog",
+    "rejected": "Oglas je odbijen.",
+    "markSold": "Označi kao prodat",
+    "markRented": "Označi kao izdat",
+    "archive": "Arhiviraj",
+    "statusTitle": "Promeniti status oglasa?",
+    "statusDescription": "Oglas više neće biti javno vidljiv. Ova radnja se ne može poništiti.",
+    "statusChanged": "Status oglasa je promenjen.",
+    "featured": "Izdvojen na početnoj strani",
+    "featuredUntil": "Izdvojen do (opciono)",
+    "saveFeatured": "Sačuvaj",
+    "featuredSaved": "Izdvajanje je sačuvano.",
+    "agent": "Dodeljeni agent",
+    "searchAgents": "Pretražite agente po imenu ili emailu",
+    "noAgents": "Nema aktivnih agenata koji odgovaraju pretrazi.",
+    "assign": "Dodeli",
+    "unassign": "Ukloni agenta",
+    "agentSaved": "Dodela agenta je sačuvana.",
+    "permanentDelete": "Trajno obriši",
+    "permanentDeleteTitle": "Trajno obrisati oglas?",
+    "permanentDeleteDescription": "Oglas, njegove slike i istorija biće trajno obrisani; ostaje samo zapis u dnevniku izmena. Ova radnja se ne može poništiti.",
+    "confirmWordLabel": "Upišite {word} za potvrdu",
+    "confirmWord": "OBRIŠI",
+    "deleted": "Oglas je trajno obrisan.",
+    "cancel": "Otkaži"
+  },
+  "revision": {
+    "title": "Izmene za proveru",
+    "description": "Oglašivač je izmenio objavljeni oglas. Odobrite da izmene budu objavljene ili ih odbijte uz razlog; objavljena verzija ostaje ista.",
+    "changed": "Izmenjeno",
+    "showProposed": "Prikaži predložene izmene",
+    "showLive": "Prikaži objavljenu verziju",
+    "groups": {
+      "propertyType": "Vrsta nekretnine",
+      "transactionType": "Vrsta oglasa",
+      "texts": "Naslov i opis",
+      "location": "Lokacija",
+      "attributes": "Karakteristike",
+      "amenityCodes": "Dodatno",
+      "price": "Cena",
+      "images": "Slike"
+    },
+    "imagesAdded": "{count, plural, one {# nova slika} few {# nove slike} other {# novih slika}}",
+    "imagesRemoved": "{count, plural, one {# slika za uklanjanje} few {# slike za uklanjanje} other {# slika za uklanjanje}}",
+    "approve": "Odobri izmene",
+    "approveTitle": "Objaviti izmene?",
+    "approveDescription": "Izmene će odmah postati javno vidljive, a oglašivač će dobiti obaveštenje emailom.",
+    "approved": "Izmene su objavljene.",
+    "reject": "Odbij izmene",
+    "rejectTitle": "Odbiti izmene?",
+    "rejectDescription": "Objavljena verzija ostaje ista. Oglašivač vidi razlog i dobija ga emailom.",
+    "rejected": "Izmene su odbijene."
+  },
+  "users": {
+    "title": "Korisnici",
+    "description": "Nalozi privatnih prodavaca, agenata i administratora.",
+    "search": "Pretraga po imenu ili emailu",
+    "allRoles": "Sve uloge",
+    "allStatuses": "Svi statusi",
+    "filter": "Prikaži",
+    "columns": {
+      "name": "Ime",
+      "email": "Email",
+      "role": "Uloga",
+      "status": "Status",
+      "joined": "Registrovan"
+    },
+    "empty": "Nijedan korisnik ne odgovara pretrazi.",
+    "previous": "Prethodna",
+    "next": "Sledeća",
+    "backToList": "Nazad na korisnike",
+    "details": {
+      "listings": "Kreirani oglasi",
+      "emailVerified": "Email potvrđen",
+      "yes": "Da",
+      "no": "Ne",
+      "joined": "Registrovan",
+      "deactivatedAt": "Deaktiviran"
+    },
+    "history": "Istorija naloga",
+    "deactivate": "Deaktiviraj nalog",
+    "deactivateTitle": "Deaktivirati nalog?",
+    "deactivateDescription": "Korisnik će biti odjavljen i neće moći da se prijavi, a njegovi oglasi biće sakriveni dok se nalog ponovo ne aktivira. Razlog će dobiti emailom.",
+    "deactivated": "Nalog je deaktiviran.",
+    "reactivate": "Ponovo aktiviraj nalog",
+    "reactivateTitle": "Ponovo aktivirati nalog?",
+    "reactivateDescription": "Korisnik će moći ponovo da se prijavi, a njegovi objavljeni oglasi ponovo će biti vidljivi. Napomenu će dobiti emailom.",
+    "reactivated": "Nalog je ponovo aktivan.",
+    "reason": "Razlog",
+    "invite": "Pozovi administratora",
+    "inviteTitle": "Pozovite administratora",
+    "inviteDescription": "Poslaćemo poziv emailom sa linkom za postavljanje lozinke (važi 7 dana).",
+    "inviteName": "Ime i prezime",
+    "inviteEmail": "Email adresa",
+    "inviteLanguage": "Jezik emailova",
+    "inviteSubmit": "Pošalji poziv",
+    "invited": "Poziv je poslat."
+  },
+  "auditLog": {
+    "title": "Dnevnik izmena",
+    "description": "Važne radnje na platformi, od najnovijih.",
+    "columns": {
+      "time": "Vreme",
+      "action": "Radnja",
+      "entity": "Objekat",
+      "actor": "Izvršio",
+      "reason": "Razlog"
+    },
+    "system": "Sistem",
+    "empty": "Nema zapisa.",
+    "details": "Detalji",
+    "before": "Pre",
+    "after": "Posle",
+    "listing": "Oglas",
+    "user": "Korisnik",
+    "actions": {
+      "USER_REGISTERED": "Registracija",
+      "USER_EMAIL_VERIFIED": "Potvrda emaila",
+      "USER_PASSWORD_RESET": "Resetovanje lozinke",
+      "USER_ACCOUNT_SET_UP": "Podešavanje naloga",
+      "USER_INVITED": "Poziv korisnika",
+      "USER_DEACTIVATED": "Deaktivacija naloga",
+      "USER_REACTIVATED": "Ponovna aktivacija naloga",
+      "LISTING_CREATED": "Novi oglas",
+      "LISTING_SUBMITTED": "Slanje na proveru",
+      "LISTING_REVISED": "Vraćanje u nacrt",
+      "LISTING_DRAFT_DELETED": "Brisanje nacrta",
+      "LISTING_APPROVED": "Odobrenje oglasa",
+      "LISTING_REJECTED": "Odbijanje oglasa",
+      "LISTING_MARKED_SOLD": "Označen kao prodat",
+      "LISTING_MARKED_RENTED": "Označen kao izdat",
+      "LISTING_ARCHIVED": "Arhiviranje",
+      "LISTING_FEATURED": "Izdvajanje",
+      "LISTING_UNFEATURED": "Uklanjanje izdvajanja",
+      "LISTING_AGENT_ASSIGNED": "Dodela agenta",
+      "LISTING_AGENT_UNASSIGNED": "Uklanjanje agenta",
+      "LISTING_PERMANENTLY_DELETED": "Trajno brisanje",
+      "LISTING_UPDATED_LIVE": "Izmena cene ili vidljivosti adrese",
+      "LISTING_IMAGES_REORDERED": "Promena redosleda slika",
+      "LISTING_REVISION_SAVED": "Izmene poslate na proveru",
+      "LISTING_REVISION_WITHDRAWN": "Izmene povučene",
+      "LISTING_REVISION_APPROVED": "Odobrenje izmena",
+      "LISTING_REVISION_REJECTED": "Odbijanje izmena",
+      "LISTING_REVISION_DISCARDED": "Izmene odbačene"
     }
   },
   "roles": {
@@ -351,6 +550,22 @@
       "GAS_CONNECTION": "Gasni priključak",
       "ROAD_ACCESS": "Asfaltni put",
       "BUILDING_PERMIT": "Građevinska dozvola"
+    },
+    "sellerType": {
+      "PRIVATE_SELLER": "Privatni prodavac",
+      "REAL_ESTATE_AGENT": "Agent za nekretnine"
+    },
+    "role": {
+      "SUPER_ADMIN": "Super administrator",
+      "ADMIN": "Administrator",
+      "REAL_ESTATE_AGENT": "Agent",
+      "PRIVATE_SELLER": "Privatni prodavac"
+    },
+    "userStatus": {
+      "PENDING_VERIFICATION": "Email nije potvrđen",
+      "PENDING_SETUP": "Čeka podešavanje",
+      "ACTIVE": "Aktivan",
+      "DEACTIVATED": "Deaktiviran"
     }
   },
   "validation": {

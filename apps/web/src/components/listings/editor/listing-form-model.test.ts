@@ -8,6 +8,8 @@ import { listingInputSchema } from '@walls/validation';
 import { describe, expect, it } from 'vitest';
 import {
   VISIBLE_ATTRIBUTES,
+  editorContent,
+  remainingImageCount,
   formPathFor,
   formSubmissionSnapshot,
   parseNumber,
@@ -19,6 +21,12 @@ const emptyListing: ListingDetail = {
   id: 'listing-1',
   status: 'DRAFT',
   sellerType: 'PRIVATE_SELLER',
+  creator: { id: 'seller-1', displayName: 'Ana Anić' },
+  assignedAgent: null,
+  slug: null,
+  publishedAt: null,
+  isFeatured: false,
+  featuredUntil: null,
   propertyType: null,
   transactionType: null,
   texts: [],
@@ -50,7 +58,15 @@ const emptyListing: ListingDetail = {
   isExactAddressPublic: false,
   rejectionReason: null,
   images: [],
-  permissions: { editMode: 'DRAFT', canDelete: true, actions: ['SUBMIT'] },
+  permissions: {
+    editMode: 'DRAFT',
+    canDelete: true,
+    actions: ['SUBMIT'],
+    canAssignAgent: false,
+    canSetFeatured: false,
+    canPermanentlyDelete: false,
+  },
+  revision: null,
   submissionIssues: [],
   createdAt: '2026-10-12T00:00:00.000Z',
   updatedAt: '2026-10-12T00:00:00.000Z',
@@ -142,5 +158,48 @@ describe('live submission checklist', () => {
     expect(
       checkSubmissionRequirements(formSubmissionSnapshot(values, 2)).map((issue) => issue.field),
     ).toEqual(['images']);
+  });
+});
+
+describe('editing a published listing', () => {
+  const published: ListingDetail = {
+    ...emptyListing,
+    status: 'PUBLISHED',
+    transactionType: 'SALE',
+    price: { mode: 'FIXED', amount: 100000, currency: 'EUR', period: null, negotiable: false },
+    permissions: { ...emptyListing.permissions, editMode: 'PUBLISHED', actions: [] },
+  };
+  const revision = (content: Partial<ListingDetail>) => ({
+    id: 'revision-1',
+    status: 'PENDING' as const,
+    content: { ...published, ...content },
+    removedImageIds: ['image-1'],
+    rejectionReason: null,
+    updatedAt: published.updatedAt,
+  });
+
+  it('starts from the proposal, keeping the live price that changes immediately', () => {
+    const listing = {
+      ...published,
+      revision: revision({
+        texts: [{ locale: 'sr' as const, title: 'Predlog', description: 'Opis' }],
+        price: { mode: 'ON_REQUEST' as const },
+      }),
+    };
+    expect(editorContent(listing).texts[0]?.title).toBe('Predlog');
+    expect(editorContent(listing).price).toEqual(published.price);
+    expect(remainingImageCount(listing, 4)).toBe(3);
+  });
+
+  it('takes the proposed price when the revision changes the transaction type', () => {
+    const rent = {
+      mode: 'FIXED' as const,
+      amount: 700,
+      currency: 'EUR' as const,
+      period: 'MONTH' as const,
+      negotiable: false,
+    };
+    const listing = { ...published, revision: revision({ transactionType: 'RENT', price: rent }) };
+    expect(editorContent(listing).price).toEqual(rent);
   });
 });

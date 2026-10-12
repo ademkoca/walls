@@ -91,6 +91,8 @@ Can:
 
 Account deactivation (both Admins and Super Admins): an Admin may deactivate private-seller and agent accounts, for example for abuse; a Super Admin may additionally deactivate Admin accounts. A deactivation always requires a written reason, is recorded in the audit log, and the affected user is notified by email. Nobody can deactivate their own account, and Super Admin accounts cannot be deactivated through the application.
 
+While an account is deactivated, the user cannot sign in (existing sessions end) and the listings they created are hidden from the public site; the listings keep their status and reappear when the account is reactivated. Whoever may deactivate an account may also reactivate it; reactivation likewise requires a written reason, is audit-logged, and the user is notified by email.
+
 Admins cannot:
 
 -   create/delete administrators
@@ -298,7 +300,9 @@ A creator (or other user authorized to edit the listing) may edit a `PUBLISHED` 
 -   `isExactAddressPublic`
 -   reordering media or changing the primary/cover image among already-approved images
 
-**Major edits — require Admin/Super Admin review:** every other change, including title, description, property type, property attributes, location, amenities, and adding or removing media. Major edits are saved as a pending revision. The currently published version stays public, unchanged, until an Admin/Super Admin approves the revision; a rejected revision includes a rejection reason and the live listing is unaffected. A listing has at most one open revision at a time.
+**Major edits — require Admin/Super Admin review:** every other change, including title, description, property type, property attributes, location, amenities, and adding or removing media. Major edits are saved as a pending revision. The currently published version stays public, unchanged, until an Admin/Super Admin approves the revision; a rejected revision includes a rejection reason and the live listing is unaffected. A listing has at most one open revision at a time. Until it is reviewed, further major edits update that same pending revision, so the reviewer always sees the latest version.
+
+Admins and Super Admins do not edit listing content themselves; they approve, or reject with a reason, and the creator makes the changes.
 
 ------------------------------------------------------------------------
 
