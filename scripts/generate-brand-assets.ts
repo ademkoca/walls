@@ -1,5 +1,6 @@
 /**
- * Generates raster brand assets for the web app from the SVG sources in packages/ui/brand/.
+ * Generates raster brand assets for the web app (favicons, app icons, link preview image)
+ * from the SVG sources in packages/ui/brand/.
  * Run with `pnpm brand:generate` after changing a brand SVG or brand colors, and commit the output.
  */
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -17,6 +18,10 @@ const APPLE_ICON_SIZE = 180;
 const PWA_ICON_SIZES = [192, 512];
 /** Share of a padded icon's width taken by the mark; stays inside the 80% maskable safe zone. */
 const PADDED_MARK_SCALE = 0.6;
+/** Open Graph / social preview card size recommended by Facebook, LinkedIn and X. */
+const OPEN_GRAPH_SIZE = { width: 1200, height: 630 } as const;
+/** Share of the card height taken by the stacked logo. */
+const OPEN_GRAPH_LOGO_SCALE = 0.48;
 /** Render SVGs larger than the target and downscale, for crisp edges at small sizes. */
 const SUPERSAMPLE = 4;
 const CSS_DPI = 72;
@@ -40,6 +45,22 @@ async function renderPaddedIcon(svg: Buffer, size: number): Promise<Buffer> {
     create: { width: size, height: size, channels: 4, background: brand.colors.cream },
   })
     .composite([{ input: mark, gravity: 'center' }])
+    .png()
+    .toBuffer();
+}
+
+/** The stacked logo centred on a cream card, used as the default link preview image. */
+async function renderOpenGraphImage(logoSvg: Buffer): Promise<Buffer> {
+  const height = Math.round(OPEN_GRAPH_SIZE.height * OPEN_GRAPH_LOGO_SCALE);
+  const { height: svgHeight = height } = await sharp(logoSvg).metadata();
+  const logo = await sharp(logoSvg, {
+    density: Math.ceil((CSS_DPI * height * SUPERSAMPLE) / svgHeight),
+  })
+    .resize({ height })
+    .png()
+    .toBuffer();
+  return sharp({ create: { ...OPEN_GRAPH_SIZE, channels: 4, background: brand.colors.cream } })
+    .composite([{ input: logo, gravity: 'center' }])
     .png()
     .toBuffer();
 }
@@ -73,6 +94,7 @@ function encodeIco(images: { size: number; png: Buffer }[]): Buffer {
 
 async function main(): Promise<void> {
   const markSvg = await readFile(path.join(brandDir, brand.assets.mark));
+  const stackedLogoSvg = await readFile(path.join(brandDir, brand.assets.logoStacked));
   await mkdir(webIconsDir, { recursive: true });
 
   const outputs: Record<string, Buffer> = {
@@ -82,6 +104,11 @@ async function main(): Promise<void> {
       ),
     ),
     [path.join(webAppDir, 'apple-icon.png')]: await renderPaddedIcon(markSvg, APPLE_ICON_SIZE),
+    // Next.js serves app/opengraph-image.png (and its .alt.txt) as the default og:image.
+    [path.join(webAppDir, 'opengraph-image.png')]: await renderOpenGraphImage(stackedLogoSvg),
+    [path.join(webAppDir, 'opengraph-image.alt.txt')]: Buffer.from(
+      `${brand.name} ${brand.descriptor} logo`,
+    ),
   };
   for (const size of PWA_ICON_SIZES) {
     outputs[path.join(webIconsDir, `icon-${size}.png`)] = await renderPaddedIcon(markSvg, size);

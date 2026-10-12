@@ -21,6 +21,7 @@ The authoritative product and technical requirements are defined in:
 - **Slate gray:** `#6B7280`
 - **Cream:** `#F8F7F4`
 - **White:** `#FFFFFF`
+- **Typeface:** Montserrat (headings and body)
 
 Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Text on orange must be charcoal: white on orange fails WCAG contrast.
 

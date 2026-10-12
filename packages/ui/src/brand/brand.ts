@@ -12,10 +12,21 @@ export const brand = {
   domain: 'walls.rs',
   siteUrl: 'https://walls.rs',
 
-  /** Source SVGs, relative to `packages/ui/brand/`. Never edit these by hand. */
+  /**
+   * Logo files, relative to `packages/ui/brand/`. Never edit them by hand: the variants
+   * are generated from the source artwork by `pnpm brand:generate`.
+   */
   assets: {
-    /** Stacked lockup: mark above the WALLS wordmark and REAL ESTATE descriptor. */
-    logoStacked: 'walls-logo.svg',
+    /** Approved source artwork. Its wordmark is live text, so do not use it directly. */
+    sourceArtwork: 'walls-logo.svg',
+    /** Mark above the WALLS wordmark and REAL ESTATE descriptor, text outlined. */
+    logoStacked: 'walls-logo-stacked.svg',
+    /** Stacked lockup for dark surfaces. */
+    logoStackedInverse: 'walls-logo-stacked-inverse.svg',
+    /** Mark beside the wordmark, for headers. */
+    logoHorizontal: 'walls-logo-horizontal.svg',
+    /** Horizontal lockup for dark surfaces, e.g. the footer. */
+    logoHorizontalInverse: 'walls-logo-horizontal-inverse.svg',
     /** Mark only; also the source for favicons and app icons. */
     mark: 'favicon.svg',
   },
@@ -39,7 +50,9 @@ export const brand = {
   },
 
   typography: {
-    /** Typeface of the logo wordmark. The UI typeface is decided in Phase 4. */
+    /** Typeface for all UI text, headings and body. */
+    ui: 'Montserrat',
+    /** Typeface of the logo wordmark (already outlined in the logo files). */
     wordmark: 'Montserrat',
   },
 } as const;

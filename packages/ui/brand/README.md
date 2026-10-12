@@ -4,33 +4,51 @@ Source files for the Walls brand. Brand values used in code (name, domain, color
 live in [`../src/brand/brand.ts`](../src/brand/brand.ts); components and scripts read them from
 there.
 
-## Source SVGs
+## Source artwork
 
-These SVGs are the source of truth. Do not edit them by hand; replace them with new exports.
+These files are the source of truth. Do not edit them by hand; replace them with new exports.
 
-| File             | Content                                                      | Status                                                        |
-| ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------- |
-| `walls-logo.svg` | Stacked lockup: mark, `WALLS` wordmark, `REAL ESTATE`        | Wordmark is live text (Montserrat); outlined export requested |
-| `favicon.svg`    | Mark only                                                    | Final                                                         |
+| File             | Content                                               |
+| ---------------- | ----------------------------------------------------- |
+| `walls-logo.svg` | Approved stacked artwork: mark, `WALLS`, `REAL ESTATE` |
+| `favicon.svg`    | Mark only                                             |
 
-Planned variants, derived once the outlined `walls-logo.svg` arrives:
+`walls-logo.svg` sets the wordmark as live text in Montserrat, which renders in a fallback
+font wherever Montserrat is not installed. Never use it directly; use the generated variants.
 
-- **Horizontal lockup**: mark to the left of the wordmark, for the site and dashboard header.
-- **Inverse**: light wordmark for the charcoal footer and other dark surfaces.
+## Generated logo variants
+
+`pnpm brand:generate` converts the wordmark to vector outlines using the real Montserrat font
+(from `@fontsource/montserrat`), keeping the artwork's sizes, weights, letter spacing and
+baselines, and writes these files (commit the output):
+
+| File                                | Use                                       |
+| ----------------------------------- | ----------------------------------------- |
+| `walls-logo-stacked.svg`            | Stacked lockup on light surfaces          |
+| `walls-logo-stacked-inverse.svg`    | Stacked lockup on dark surfaces           |
+| `walls-logo-horizontal.svg`         | Mark beside the wordmark, e.g. the header |
+| `walls-logo-horizontal-inverse.svg` | Horizontal lockup on dark surfaces        |
+
+Inverse variants replace charcoal with cream; orange is unchanged. All variants are cropped to
+the artwork's edges, so layouts add their own clear space. In the horizontal lockup the text block is
+vertically centred on the mark and separated from it by a quarter of the mark’s height;
+`REAL ESTATE` is centred under `WALLS`.
 
 ## Generated rasters
 
-`pnpm brand:generate` renders these from `favicon.svg` (commit the output):
+The same command renders these:
 
-| Output                                       | Use                                   |
-| -------------------------------------------- | ------------------------------------- |
-| `apps/web/src/app/favicon.ico` (16/32/48)    | Legacy favicon                        |
-| `apps/web/src/app/icon.svg`                  | Scalable favicon (copy of the mark)   |
-| `apps/web/src/app/apple-icon.png` (180)      | iOS home-screen icon, cream backdrop  |
-| `apps/web/public/icons/icon-{192,512}.png`   | Web app manifest icons, cream backdrop |
+| Output                                        | Source                     | Use                                    |
+| --------------------------------------------- | -------------------------- | -------------------------------------- |
+| `apps/web/src/app/favicon.ico` (16/32/48)     | `favicon.svg`              | Legacy favicon                         |
+| `apps/web/src/app/icon.svg`                   | `favicon.svg`              | Scalable favicon (copy of the mark)    |
+| `apps/web/src/app/apple-icon.png` (180)       | `favicon.svg`              | iOS home-screen icon, cream backdrop   |
+| `apps/web/public/icons/icon-{192,512}.png`    | `favicon.svg`              | Web app manifest icons, cream backdrop |
+| `apps/web/src/app/opengraph-image.png` (1200×630) and `.alt.txt` | `walls-logo-stacked.svg` | Default link preview image |
 
-The Open Graph image (1200×630) is added once the outlined wordmark is available, so the
-wordmark doesn't render in a fallback font.
+## Typography
+
+Montserrat is the typeface for all UI text, headings and body (`brand.typography.ui`).
 
 ## Color usage
 
