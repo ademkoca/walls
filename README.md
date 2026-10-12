@@ -1,0 +1,308 @@
+# Walls — Real Estate Platform
+
+A modern real-estate listing platform for Serbia, with public property browsing, private-seller accounts, professionally approved real-estate agents, and an administrative dashboard for reviewing listings and managing inquiries and platform operations.
+
+## Project Status
+
+MVP specification phase / active development.
+
+The authoritative product and technical requirements are defined in:
+
+-   [`SPEC.md`](./SPEC.md)
+-   [`AGENTS.md`](./AGENTS.md)
+
+## Brand identity
+
+- **Brand:** Walls
+- **Domain:** [walls.rs](https://walls.rs)
+- **Logo:** approved geometric architectural mark with the WALLS wordmark; SVG sources in [`packages/ui/brand/`](./packages/ui/brand/README.md).
+- **Primary orange:** `#FF6A00`
+- **Charcoal:** `#171B1E`
+- **Slate gray:** `#6B7280`
+- **Cream:** `#F8F7F4`
+- **White:** `#FFFFFF`
+
+Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Text on orange must be charcoal: white on orange fails WCAG contrast.
+
+## Architecture
+
+``` text
+                    ┌─────────────────────┐
+                    │   Public Website    │
+                    │      Next.js        │
+                    └──────────┬──────────┘
+                               │
+                               │ REST API
+                               ▼
+                    ┌─────────────────────┐
+                    │      Express API    │
+                    │      Node.js/TS     │
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    ▼                     ▼
+          ┌──────────────────┐   ┌──────────────────┐
+          │   PostgreSQL     │   │ External Services│
+          │   Supabase       │   │                  │
+          └──────────────────┘   │ Cloudinary       │
+                                 │ Resend            │
+                                 │ Exchange Rates    │
+                                 │ OpenStreetMap     │
+                                 └──────────────────┘
+```
+
+## Applications
+
+``` text
+apps/
+├── web/       # Public website + authenticated dashboard
+└── api/       # Express backend
+```
+
+Shared packages:
+
+``` text
+packages/
+├── shared/
+├── validation/
+├── database/
+└── ui/
+```
+
+## Technology
+
+### Frontend
+
+-   Next.js
+-   TypeScript
+-   Tailwind CSS
+-   shadcn/ui
+-   React Hook Form
+-   Zod
+
+### Backend
+
+-   Node.js
+-   TypeScript
+-   Express
+
+### Database
+
+-   PostgreSQL
+-   Drizzle ORM
+-   Supabase
+
+### Authentication
+
+-   Email/password
+-   HTTP-only secure cookies
+-   Role-based access control
+
+### Media
+
+-   Cloudinary
+
+### Email
+
+-   Resend
+
+### Maps
+
+-   OpenStreetMap-based provider
+
+### Hosting
+
+-   Netlify --- frontend
+-   Render --- API
+-   Supabase --- PostgreSQL
+
+## Accounts and roles
+
+The application has four roles:
+
+``` text
+SUPER_ADMIN
+ADMIN
+REAL_ESTATE_AGENT
+PRIVATE_SELLER
+```
+
+Private sellers register with email/password and can create an active seller account after verifying their email. Ordinary public registration does not allow users to choose the real-estate-agent role.
+
+Prospective real-estate agents use the separate **“For real-estate agents”** application flow and submit professional details plus supporting proof. An Admin or Super Admin must approve the application before an active agent account and public agent profile are created.
+
+Private sellers can manage their own listings and have public seller profile pages. Agents can manage listings they are authorized to advertise, subject to server-side access rules and optional admin assignment. `createdBy`, seller/advertiser type, and `assignedAgent` are separate concepts.
+
+Both private sellers and approved agents submit listings for review. Admins/Super Admins must approve listings before they appear publicly.
+
+Phone verification is not required for MVP. Public contact details must clearly label phone numbers as verified or unverified; users cannot self-mark a number as verified.
+
+Admins can manage all listings and approved agents. Super Admins additionally manage administrators and permanent deletion.
+
+## Listing Workflow
+
+``` text
+DRAFT
+  ↓
+PENDING_REVIEW
+  ↓
+PUBLISHED
+  ↓
+SOLD / RENTED
+  ↓
+ARCHIVED
+```
+
+Rejected listings return to Draft with a rejection reason.
+
+## Property Types
+
+The initial platform supports:
+
+-   Apartment
+-   House
+-   Villa
+-   Office
+-   Retail / Commercial
+-   Warehouse
+-   Land
+-   Garage
+-   Other
+
+## Transaction Types
+
+-   Sale
+-   Rent
+
+## Languages
+
+MVP supports:
+
+-   Serbian
+-   English
+
+## Local Development
+
+### Prerequisites
+
+-   Node.js 22.18 or newer (see `.nvmrc`)
+-   pnpm, version pinned in the root `package.json` `packageManager`
+    field
+-   Docker, for the local PostgreSQL database
+
+Install pnpm once with `npm install -g pnpm` or the
+[standalone installer](https://pnpm.io/installation). Any recent pnpm
+switches to the pinned version automatically. Corepack 0.34 and older
+cannot run pnpm 12, so do not rely on `corepack enable`.
+
+Do not use `npm` or `yarn` in this repository.
+
+### Setup
+
+``` text
+pnpm install
+cp .env.example .env      # then fill in the values you need
+pnpm db:up                # start PostgreSQL in Docker
+pnpm dev                  # API on :4000, web on :3000
+```
+
+Both apps read the single root `.env` file in development.
+
+### Scripts
+
+| Command              | Purpose                                         |
+| -------------------- | ----------------------------------------------- |
+| `pnpm dev`           | Run all apps in watch mode                      |
+| `pnpm build`         | Production build of all apps                    |
+| `pnpm typecheck`     | TypeScript checks in every package              |
+| `pnpm lint`          | ESLint across the repository                    |
+| `pnpm test`          | Unit tests in every package                     |
+| `pnpm format`        | Format with Prettier (`format:check` in CI)     |
+| `pnpm db:up` / `db:down` | Start / stop the local PostgreSQL container |
+| `pnpm brand:generate` | Regenerate favicons and app icons from the brand SVGs |
+
+Database migrations are added in Phase 2.
+
+### Repository layout
+
+``` text
+apps/web            Next.js public website and dashboard
+apps/api            Express REST API
+packages/shared     Domain rules shared by API and web
+packages/validation Shared Zod schemas
+packages/database   Drizzle schema, migrations, database client
+packages/ui         Design system and brand configuration
+scripts/            Repository maintenance scripts
+```
+
+## Environment Variables
+
+Environment configuration should include variables for:
+
+``` text
+DATABASE_URL
+SESSION_SECRET
+CLOUDINARY_*
+RESEND_API_KEY
+EXCHANGE_RATE_API_KEY
+```
+
+The exact variables should be documented in `.env.example`.
+
+Never commit real credentials.
+
+## Development Rules
+
+Read [`AGENTS.md`](./AGENTS.md) before making implementation changes.
+
+Read [`SPEC.md`](./SPEC.md) before changing product behavior.
+
+The most important rule is:
+
+> Do not invent product requirements when the specification does not
+> define them. Ask before making an important business decision.
+
+## MVP Scope
+
+The MVP includes:
+
+-   property listings
+-   private-seller registration and email verification
+-   private-seller dashboard and public seller profiles
+-   separate real-estate-agent application with proof and admin approval
+-   phone verification-status labels (without phone verification workflow)
+-   sale/rent support
+-   property search
+-   filtering and sorting
+-   property detail pages
+-   agent profiles
+-   listing creation/editing
+-   listing review and approval
+-   listing assignment
+-   agent management
+-   authentication
+-   approved-agent account setup/invitation email
+-   agent application review
+-   profile-change approval
+-   image/media management
+-   maps
+-   inquiries
+-   email notifications
+-   EUR/RSD conversion
+-   basic analytics
+-   audit logging
+-   Serbian/English localization
+-   SEO
+-   responsive design
+
+The MVP does not include payments, buyer-only accounts, favorites, saved
+searches, Google login, MFA, phone verification, map-based search, full CRM
+functionality, or native mobile applications. Users who want to advertise a property must have a verified private-seller account or an approved agent account.
+
+## Source of Truth
+
+`SPEC.md` defines product and domain behavior.
+
+`AGENTS.md` defines coding-agent behavior and engineering rules.
+
+`README.md` provides project orientation and setup information.
