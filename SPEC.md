@@ -73,6 +73,7 @@ Can:
 -   manage featured listings
 -   view platform analytics
 -   manage system-level settings
+-   deactivate Admin, agent, and private-seller accounts
 -   permanently delete archived records where permitted
 
 ### Admin
@@ -86,6 +87,9 @@ Can:
 -   manage inquiries
 -   manage featured listings
 -   view platform analytics
+-   deactivate private-seller and agent accounts (see below)
+
+Account deactivation (both Admins and Super Admins): an Admin may deactivate private-seller and agent accounts, for example for abuse; a Super Admin may additionally deactivate Admin accounts. A deactivation always requires a written reason, is recorded in the audit log, and the affected user is notified by email. Nobody can deactivate their own account, and Super Admin accounts cannot be deactivated through the application.
 
 Admins cannot:
 
@@ -438,6 +442,8 @@ Additional fields may include:
 
 The original listing currency/value is the authoritative stored price.
 
+Price is optional. A listing has either a fixed price (amount, currency, rental period for `RENT` listings, and `priceNegotiable`) **or** "price on request" — never both. The listing form uses a single control that switches between the two modes; choosing "price on request" clears any entered amount. Listings with price on request display "Price on request" and sort after priced listings when sorting by price.
+
 ------------------------------------------------------------------------
 
 # 12. Currency Conversion
@@ -478,7 +484,7 @@ Listings should support structured location data:
 
 Exact address visibility is controlled per listing.
 
-A real-estate agent can decide whether the exact address is public.
+The user who manages the listing — a private seller or an agent — decides whether the exact address is public. The exact address is **hidden by default** to prevent accidental location leakage. Before the user makes it public, the UI must clearly warn them that the street address and exact map location will become visible to everyone, and ask them to confirm.
 
 Recommended field:
 
@@ -541,6 +547,13 @@ isPrimary
 altText
 createdAt
 ```
+
+Listing image limits:
+
+-   formats: JPEG, PNG, WebP, HEIC/HEIF, checked by file content (signature), not only by extension
+-   file size: 50 KB to 15 MB per image
+-   dimensions: at least 1024 px on the longer side and 768 px on the shorter side (portrait and landscape both accepted)
+-   at most 30 images per listing
 
 Use Cloudinary for image/media storage and delivery in the MVP.
 
@@ -705,6 +718,7 @@ The system should support transactional email for:
 -   new inquiry
 -   email/phone change requests
 -   approval/rejection of profile changes
+-   account deactivated (including the reason)
 
 Use Resend for MVP, behind an `EmailService` abstraction.
 
@@ -768,6 +782,11 @@ Only Super Admin may permanently delete archived listings.
 Permanent deletion should require an explicit confirmation step.
 
 Prefer soft-delete/archive semantics wherever practical.
+
+Draft deletion:
+
+-   The listing creator may delete their own listing while it is in `DRAFT`. Deletion is a soft delete: the draft disappears from the creator's dashboard but the record and its audit trail are retained.
+-   A listing in `PENDING_REVIEW` cannot be withdrawn or deleted by its creator; it stays in review until an Admin/Super Admin approves or rejects it.
 
 ------------------------------------------------------------------------
 
@@ -1263,6 +1282,18 @@ At minimum, publication/review submission requires:
 
 The exact set of required attributes may depend on property type.
 
+Required for review submission:
+
+| Applies to | Required |
+|---|---|
+| All property types | property type; transaction type; Serbian title and description; country; city; street and street number; map location (latitude/longitude); at least 3 valid images |
+| All types except `LAND` | floor area (m²) |
+| `LAND` | plot area (m²) |
+| `APARTMENT`, `HOUSE`, `VILLA` | number of bedrooms and bathrooms |
+| `APARTMENT` | floor and total number of floors (floor may not exceed total floors) |
+
+If a fixed price is supplied it must be valid: a positive amount and a currency, with a rental period for `RENT` listings and no rental period for `SALE` listings. Contact information comes from the advertiser's verified account.
+
 ------------------------------------------------------------------------
 
 # 40. Error Handling
@@ -1472,6 +1503,7 @@ Do not prematurely implement these features.
 -   Admin can provide rejection reasons.
 -   Admin can manage all inquiries.
 -   Admin can feature listings.
+-   Admin can deactivate private-seller and agent accounts; a reason is required, the action is audit-logged, and the user is notified by email.
 -   Admin cannot permanently delete listings.
 -   Admin cannot manage Super Admins.
 
@@ -1479,6 +1511,7 @@ Do not prematurely implement these features.
 
 -   Super Admin can perform all Admin actions.
 -   Super Admin can manage administrators.
+-   Super Admin can deactivate Admin accounts, with a reason.
 -   Super Admin can permanently delete archived listings where
     permitted.
 
