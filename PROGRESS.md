@@ -170,6 +170,11 @@ crash and the OS dark mode restyling components (see Gotchas).
   throws "MenuGroupContext is missing" when opened outside `DropdownMenuGroup`. The error
   only appears when the menu opens, so it slips past typecheck, lint and build. This crashed
   the account menu in Phase 4 review; fixed in `user-menu.tsx`.
+- **ESLint needs Next's generated route types.** `PageProps`/`LayoutProps` are globals from
+  `next typegen` (`apps/web/.next/types`, gitignored). CI lints a fresh checkout, so the root
+  `lint` script runs `pnpm --filter @walls/web typegen` first (needs `API_INTERNAL_URL`, which CI
+  and `.env` provide). Local runs hid this because the files already existed: before pushing,
+  reproduce CI in a clean worktree (`git worktree add <dir> HEAD`, no `.env`, CI's env vars).
 - **Tailwind's default `dark:` variant follows the OS setting.** Walls is light-only, so
   `globals.css` ties `dark:` to a `.dark` class that nothing sets; otherwise shadcn
   components get gray fills and slate borders for users in dark mode.

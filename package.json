@@ -13,7 +13,7 @@
     "test": "turbo run test",
     "test:integration": "turbo run test:integration --concurrency=1",
     "test:e2e": "pnpm --filter @walls/e2e test:e2e",
-    "lint": "eslint .",
+    "lint": "pnpm --filter @walls/web typegen && eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "brand:generate": "node scripts/generate-logo-variants.ts && node scripts/generate-brand-assets.ts",
