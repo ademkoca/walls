@@ -395,6 +395,32 @@ Examples:
 -   Pets allowed
 -   Smoking allowed
 
+Heating type and furnished status are structured, optional property
+fields rather than amenities (so "Central heating" and "Furnished" are not
+in the amenity list):
+
+-   Heating type: `DISTRICT` (district heating, "CG"), `INDIVIDUAL_CENTRAL`
+    (central heating for one unit or building, "etažno", "EG"), `ELECTRIC`,
+    `GAS`, `STORAGE_HEATERS` ("TA"), `UNDERFLOOR`, `HEAT_PUMP`, `SOLID_FUEL`,
+    `OTHER`, `NONE`
+-   Furnished status: `FURNISHED`, `SEMI_FURNISHED`, `UNFURNISHED`
+
+Features offered per property type (the server rejects others):
+
+| Property type | Features |
+|---|---|
+| Apartment | elevator, air conditioning, balcony, terrace, garden, parking, garage, security system, internet, pets allowed, smoking allowed |
+| House | air conditioning, balcony, terrace, garden, parking, garage, security system, internet, pets allowed, smoking allowed, sewage, gas connection |
+| Villa | as House, plus elevator |
+| Office | elevator, air conditioning, balcony, terrace, parking, garage, security system, internet, smoking allowed |
+| Retail | elevator, air conditioning, terrace, parking, security system, internet |
+| Warehouse | elevator, air conditioning, parking, security system, internet |
+| Garage | elevator (car lift), security system |
+| Land | electricity, water, sewage, gas connection, paved road access, building permit |
+| Other | all features |
+
+When the property type changes, features that don't apply to the new type are removed.
+
 Avoid creating a generic dynamic field builder for MVP.
 
 ------------------------------------------------------------------------

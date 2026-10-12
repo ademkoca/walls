@@ -1,4 +1,17 @@
-import { ApiErrorCode, Role } from '@walls/shared';
+import {
+  AMENITIES,
+  ApiErrorCode,
+  FurnishedStatus,
+  HeatingType,
+  ImageIssue,
+  ListingStatus,
+  PriceMode,
+  PropertyType,
+  RentalPeriod,
+  Role,
+  TransactionType,
+  checkSubmissionRequirements,
+} from '@walls/shared';
 import { describe, expect, it } from 'vitest';
 import en from '../../messages/en.json';
 import sr from '../../messages/sr.json';
@@ -51,5 +64,60 @@ describe('translation catalogues (SPEC §31)', () => {
     for (const role of Object.values(Role)) {
       expect(catalogues.sr[`roles.${role}`], role).toBeDefined();
     }
+  });
+
+  it('label every listing enum value', () => {
+    const enums = {
+      propertyType: PropertyType,
+      transactionType: TransactionType,
+      listingStatus: ListingStatus,
+      heatingType: HeatingType,
+      furnishedStatus: FurnishedStatus,
+      rentalPeriod: RentalPeriod,
+    };
+    for (const [name, values] of Object.entries(enums)) {
+      for (const value of Object.values(values)) {
+        expect(catalogues.sr[`enums.${name}.${value}`], `${name}.${value}`).toBeDefined();
+      }
+    }
+    for (const amenity of AMENITIES) {
+      expect(catalogues.sr[`enums.amenity.${amenity}`], amenity).toBeDefined();
+    }
+    for (const issue of Object.values(ImageIssue)) {
+      expect(catalogues.sr[`listings.editor.images.issues.${issue}`], issue).toBeDefined();
+    }
+  });
+
+  it('describe every field the submission checklist can report', () => {
+    // An empty listing of each type triggers every "required" issue for that type.
+    for (const propertyType of Object.values(PropertyType)) {
+      const issues = checkSubmissionRequirements({
+        propertyType,
+        transactionType: null,
+        texts: [],
+        location: {
+          country: null,
+          city: null,
+          street: null,
+          streetNumber: null,
+          latitude: null,
+          longitude: null,
+        },
+        attributes: {
+          floorArea: null,
+          plotArea: null,
+          bedrooms: null,
+          bathrooms: null,
+          floor: null,
+          totalFloors: null,
+        },
+        price: { mode: PriceMode.ON_REQUEST },
+        imageCount: 0,
+      });
+      for (const { field } of issues) {
+        expect(catalogues.sr[`listings.editor.checklist.fields.${field}`], field).toBeDefined();
+      }
+    }
+    expect(catalogues.sr['listings.editor.checklist.fields.price']).toBeDefined();
   });
 });

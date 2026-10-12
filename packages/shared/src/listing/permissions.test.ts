@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DenialReason } from '../access/decision';
-import { ListingStatus, TransactionType, UserStatus } from '../enums';
+import { ListingStatus, SellerType, TransactionType, UserStatus } from '../enums';
 import {
   admin,
   agent,
@@ -15,12 +15,14 @@ import {
   ListingEditMode,
   availableListingActions,
   canAssignAgent,
+  canCreateListing,
   canDeleteDraft,
   canEditListing,
   canPerformListingAction,
   canPermanentlyDeleteListing,
   canSetFeatured,
   canViewListing,
+  sellerTypeForRole,
 } from './permissions';
 
 const denied = (reason: DenialReason) => ({ allowed: false, reason });
@@ -220,5 +222,25 @@ describe('admin-only operations', () => {
     expect(
       canPermanentlyDeleteListing(superAdmin, listing({ status: ListingStatus.PUBLISHED })),
     ).toEqual(denied(DenialReason.INVALID_STATE));
+  });
+});
+
+describe('creating listings', () => {
+  it('lets active private sellers and agents create listings with their own seller type', () => {
+    expect(canCreateListing(seller)).toEqual(allowed);
+    expect(canCreateListing(agent)).toEqual(allowed);
+    expect(sellerTypeForRole(seller.role)).toBe(SellerType.PRIVATE_SELLER);
+    expect(sellerTypeForRole(agent.role)).toBe(SellerType.REAL_ESTATE_AGENT);
+  });
+
+  it('does not let admins create listings', () => {
+    expect(canCreateListing(admin)).toEqual(denied(DenialReason.ROLE_NOT_PERMITTED));
+    expect(canCreateListing(superAdmin)).toEqual(denied(DenialReason.ROLE_NOT_PERMITTED));
+    expect(sellerTypeForRole(admin.role)).toBeNull();
+  });
+
+  it('requires an active account', () => {
+    const unverified = { ...seller, status: UserStatus.PENDING_VERIFICATION };
+    expect(canCreateListing(unverified)).toEqual(denied(DenialReason.ACCOUNT_INACTIVE));
   });
 });

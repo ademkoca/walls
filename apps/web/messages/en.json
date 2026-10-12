@@ -118,11 +118,166 @@
     "title": "Dashboard",
     "welcome": "Welcome, {name}",
     "signedInAs": "You're signed in as {role}.",
-    "comingSoon": "Managing listings, inquiries and your account is coming soon.",
+    "comingSoon": "Inquiries, account settings and administration are coming soon.",
     "nav": {
       "label": "Dashboard navigation",
       "overview": "Overview",
+      "listings": "My listings",
       "viewSite": "View site"
+    }
+  },
+  "listings": {
+    "title": "My listings",
+    "description": "Drafts, listings in review and published listings.",
+    "new": "New listing",
+    "untitled": "Untitled listing",
+    "emptyTitle": "You have no listings yet",
+    "emptyDescription": "Create your first listing. Save it as a draft and send it for review when it's ready.",
+    "columns": {
+      "listing": "Listing",
+      "status": "Status",
+      "images": "Images",
+      "updated": "Updated"
+    },
+    "imageCount": "{count, plural, one {# image} other {# images}}",
+    "loadFailed": "Your listings can't be loaded right now.",
+    "notFound": "This listing doesn't exist or you don't have access to it.",
+    "backToList": "Back to listings",
+    "editor": {
+      "save": "Save draft",
+      "saved": "Draft saved.",
+      "unsaved": "You have unsaved changes.",
+      "submit": "Submit for review",
+      "submitted": "Listing submitted for review.",
+      "submitConfirmTitle": "Submit this listing for review?",
+      "submitConfirmDescription": "While it's in review you can't edit or withdraw it. Our team will check it and email you the outcome.",
+      "revise": "Edit and resubmit",
+      "revised": "The listing is a draft again. Make your changes and submit it again.",
+      "delete": "Delete draft",
+      "deleted": "Draft deleted.",
+      "deleteConfirmTitle": "Delete this draft?",
+      "deleteConfirmDescription": "The draft will disappear from your list. This can't be undone.",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "pendingNotice": "This listing is in review and can't be changed until our team has checked it.",
+      "rejectedNotice": "This listing was rejected. Read the reason, turn the listing back into a draft, update it and submit it again.",
+      "rejectionReason": "Reason for rejection",
+      "publishedNotice": "This listing is published. Editing published listings is coming soon.",
+      "readOnlyNotice": "This listing can't be changed right now.",
+      "requiredHint": "Fields marked * are required before you can submit for review.",
+      "sections": {
+        "basics": "Basics",
+        "description": "Title and description",
+        "descriptionHint": "Serbian text is required. English is optional; without it, the English page shows the Serbian text.",
+        "location": "Location",
+        "details": "Property details",
+        "amenities": "Features",
+        "price": "Price",
+        "images": "Images"
+      },
+      "fields": {
+        "propertyType": "Property type",
+        "transactionType": "Listing type",
+        "choose": "Choose",
+        "chooseTypeFirst": "Choose the property type first.",
+        "title": "Title",
+        "description": "Description",
+        "languageSr": "Serbian",
+        "languageEn": "English (optional)",
+        "country": "Country",
+        "countryValue": "Serbia",
+        "city": "City",
+        "municipality": "Municipality",
+        "neighborhood": "Neighborhood",
+        "street": "Street",
+        "streetNumber": "Number",
+        "postalCode": "Postal code",
+        "mapLocation": "Exact location on the map",
+        "mapHint": "Click the map, drag the marker, or use your current location if you're at the property.",
+        "findOnMap": "Find address on map",
+        "addressNotFound": "Address not found. Place the marker yourself.",
+        "useMyLocation": "Use my location",
+        "locating": "Finding your location…",
+        "locationDenied": "Location access is blocked. Allow it in your browser settings or place the marker yourself.",
+        "locationUnavailable": "Your location couldn't be determined. Place the marker yourself.",
+        "clearLocation": "Remove marker",
+        "floorArea": "Floor area (m²)",
+        "plotArea": "Plot area (m²)",
+        "bedrooms": "Bedrooms",
+        "bathrooms": "Bathrooms",
+        "floor": "Floor",
+        "floorHint": "0 is the ground floor; negative numbers are below ground.",
+        "totalFloors": "Total floors",
+        "yearBuilt": "Year built",
+        "parkingSpaces": "Parking spaces",
+        "heatingType": "Heating",
+        "furnishedStatus": "Furnishing",
+        "notSpecified": "Not specified",
+        "priceOnRequest": "Price on request",
+        "priceOnRequestHint": "Visitors will see \"Price on request\" instead of an amount.",
+        "amount": "Amount",
+        "currency": "Currency",
+        "period": "Period",
+        "negotiable": "Price is negotiable"
+      },
+      "address": {
+        "public": "Show the exact address publicly",
+        "publicHint": "When off, visitors only see the city, municipality and neighborhood.",
+        "confirmTitle": "Show the exact address to everyone?",
+        "confirmDescription": "The street, number and exact map location will be visible to every visitor. Only turn this on if you want the address to be public.",
+        "confirm": "Show address"
+      },
+      "images": {
+        "upload": "Add images",
+        "drop": "Drag images here or",
+        "rules": "JPEG, PNG, WebP or HEIC, 50 KB to 15 MB, at least 1024 × 768 pixels. At least {min}, at most {max} images.",
+        "count": "{count} / {max}",
+        "uploading": "Uploading {name}…",
+        "failed": "{name}: {reason}",
+        "cover": "Cover",
+        "makeCover": "Make cover image",
+        "remove": "Remove image",
+        "moveHint": "Drag images to change their order. The cover doesn't have to be first.",
+        "dragHandle": "Reorder image {position}",
+        "imageAlt": "Image {position}",
+        "empty": "No images yet.",
+        "issues": {
+          "UNSUPPORTED_TYPE": "format not supported",
+          "FILE_TOO_SMALL": "file too small (at least 50 KB)",
+          "FILE_TOO_LARGE": "file too large (at most 15 MB)",
+          "DIMENSIONS_TOO_SMALL": "image too small (at least 1024 × 768 pixels)"
+        }
+      },
+      "checklist": {
+        "title": "Ready for review",
+        "ready": "This listing has everything needed for review.",
+        "missing": "Before submitting, add:",
+        "fields": {
+          "propertyType": "the property type",
+          "transactionType": "the listing type",
+          "title": "a Serbian title",
+          "description": "a Serbian description",
+          "location": {
+            "country": "the country",
+            "city": "the city",
+            "street": "the street",
+            "streetNumber": "the street number",
+            "latitude": "the exact map location",
+            "longitude": "the exact map location"
+          },
+          "attributes": {
+            "floorArea": "the floor area",
+            "plotArea": "the plot area",
+            "bedrooms": "the number of bedrooms",
+            "bathrooms": "the number of bathrooms",
+            "floor": "the floor",
+            "totalFloors": "the total number of floors"
+          },
+          "price": "a valid price",
+          "images": "at least 3 images"
+        },
+        "floorAboveTotal": "the floor can't be above the total number of floors"
+      }
     }
   },
   "roles": {
@@ -130,6 +285,73 @@
     "ADMIN": "an Admin",
     "REAL_ESTATE_AGENT": "a real-estate agent",
     "PRIVATE_SELLER": "a private seller"
+  },
+  "enums": {
+    "propertyType": {
+      "APARTMENT": "Apartment",
+      "HOUSE": "House",
+      "VILLA": "Villa",
+      "OFFICE": "Office",
+      "RETAIL": "Retail / commercial",
+      "WAREHOUSE": "Warehouse",
+      "LAND": "Land",
+      "GARAGE": "Garage",
+      "OTHER": "Other"
+    },
+    "transactionType": {
+      "SALE": "Sale",
+      "RENT": "Rent"
+    },
+    "listingStatus": {
+      "DRAFT": "Draft",
+      "PENDING_REVIEW": "In review",
+      "PUBLISHED": "Published",
+      "REJECTED": "Rejected",
+      "SOLD": "Sold",
+      "RENTED": "Rented",
+      "ARCHIVED": "Archived"
+    },
+    "heatingType": {
+      "DISTRICT": "District heating (CG)",
+      "INDIVIDUAL_CENTRAL": "Individual central heating (EG)",
+      "ELECTRIC": "Electric",
+      "GAS": "Gas",
+      "STORAGE_HEATERS": "Storage heaters (TA)",
+      "UNDERFLOOR": "Underfloor heating",
+      "HEAT_PUMP": "Heat pump",
+      "SOLID_FUEL": "Solid fuel",
+      "OTHER": "Other",
+      "NONE": "No heating"
+    },
+    "furnishedStatus": {
+      "FURNISHED": "Furnished",
+      "SEMI_FURNISHED": "Semi-furnished",
+      "UNFURNISHED": "Unfurnished"
+    },
+    "rentalPeriod": {
+      "DAY": "per day",
+      "WEEK": "per week",
+      "MONTH": "per month"
+    },
+    "amenity": {
+      "ELEVATOR": "Elevator",
+      "AIR_CONDITIONING": "Air conditioning",
+      "BALCONY": "Balcony",
+      "TERRACE": "Terrace",
+      "GARDEN": "Garden",
+      "PARKING": "Parking",
+      "GARAGE": "Garage",
+      "SECURITY_SYSTEM": "Security system",
+      "INTERNET": "Internet",
+      "PETS_ALLOWED": "Pets allowed",
+      "SMOKING_ALLOWED": "Smoking allowed",
+      "ELECTRICITY": "Electricity",
+      "WATER": "Water",
+      "SEWAGE": "Sewage",
+      "GAS_CONNECTION": "Gas connection",
+      "ROAD_ACCESS": "Paved road access",
+      "BUILDING_PERMIT": "Building permit"
+    }
   },
   "validation": {
     "required": "This field is required.",
@@ -154,6 +376,9 @@
     "NOT_FOUND": "We couldn't find what you were looking for.",
     "INVALID_STATE": "This action isn't possible right now.",
     "CONFLICT": "This conflicts with existing data.",
+    "SUBMISSION_INCOMPLETE": "The listing is missing information required for review.",
+    "INVALID_IMAGE": "The image doesn't meet the requirements.",
+    "IMAGE_LIMIT_REACHED": "The listing already has the maximum number of images.",
     "RATE_LIMITED": "Too many attempts. Wait a moment and try again.",
     "EXTERNAL_SERVICE_FAILED": "An external service is unavailable. Try again later.",
     "INTERNAL_ERROR": "Something went wrong. Please try again."

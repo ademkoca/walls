@@ -98,6 +98,12 @@ packages/
   in `packages/ui/src/styles/globals.css` derives every color from the brand
   palette.
 
+### Listing images and maps in development
+
+Without `CLOUDINARY_*`, uploaded listing images are stored in `apps/api/.media`
+(`LOCAL_MEDIA_DIR`) and served by the API through the web proxy. Production requires
+Cloudinary. Maps use OpenStreetMap tiles by default (`NEXT_PUBLIC_MAP_TILE_URL` to change).
+
 ### Emails in development
 
 Without `RESEND_API_KEY`, the API prints every email, including its

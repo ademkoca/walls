@@ -63,6 +63,33 @@ export const PropertyType = {
 } as const;
 export type PropertyType = ValueOf<typeof PropertyType>;
 
+/** Main heating system (SPEC §10). Serbian listings commonly abbreviate these as CG, EG, TA. */
+export const HeatingType = {
+  /** District heating ("centralno grejanje", CG). */
+  DISTRICT: 'DISTRICT',
+  /** Central heating for a single unit or building, e.g. a gas boiler ("etažno grejanje", EG). */
+  INDIVIDUAL_CENTRAL: 'INDIVIDUAL_CENTRAL',
+  /** Electric radiators or heaters. */
+  ELECTRIC: 'ELECTRIC',
+  GAS: 'GAS',
+  /** Electric storage heaters ("TA peći"). */
+  STORAGE_HEATERS: 'STORAGE_HEATERS',
+  UNDERFLOOR: 'UNDERFLOOR',
+  HEAT_PUMP: 'HEAT_PUMP',
+  /** Wood, coal or pellets. */
+  SOLID_FUEL: 'SOLID_FUEL',
+  OTHER: 'OTHER',
+  NONE: 'NONE',
+} as const;
+export type HeatingType = ValueOf<typeof HeatingType>;
+
+export const FurnishedStatus = {
+  FURNISHED: 'FURNISHED',
+  SEMI_FURNISHED: 'SEMI_FURNISHED',
+  UNFURNISHED: 'UNFURNISHED',
+} as const;
+export type FurnishedStatus = ValueOf<typeof FurnishedStatus>;
+
 export const Currency = {
   EUR: 'EUR',
   RSD: 'RSD',

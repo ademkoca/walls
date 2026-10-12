@@ -1,3 +1,4 @@
+import { AMENITIES } from '@walls/shared';
 import { eq, sql } from 'drizzle-orm';
 import { afterAll, describe, expect, it } from 'vitest';
 import { createDatabase } from '../src/client';
@@ -9,23 +10,10 @@ const { db, close } = createDatabase({ url: testDatabaseUrl() });
 afterAll(close);
 
 describe('migrations', () => {
-  it('seed the amenity catalogue from SPEC §10', async () => {
+  // Heating and furnished status are structured property fields, not amenities (SPEC §10).
+  it('seed the amenity catalogue in the order of @walls/shared', async () => {
     const rows = await db.select().from(amenities).orderBy(amenities.sortOrder);
-    expect(rows.map((row) => row.code)).toEqual([
-      'ELEVATOR',
-      'AIR_CONDITIONING',
-      'CENTRAL_HEATING',
-      'FURNISHED',
-      'BALCONY',
-      'TERRACE',
-      'GARDEN',
-      'PARKING',
-      'GARAGE',
-      'SECURITY_SYSTEM',
-      'INTERNET',
-      'PETS_ALLOWED',
-      'SMOKING_ALLOWED',
-    ]);
+    expect(rows.map((row) => row.code)).toEqual(AMENITIES);
   });
 });
 

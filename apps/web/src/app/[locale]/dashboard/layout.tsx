@@ -44,7 +44,7 @@ export default async function DashboardLayout({
           >
             <Logo tone="inverse" className="w-32" />
           </Link>
-          <DashboardNav />
+          <DashboardNav role={user.role} />
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">

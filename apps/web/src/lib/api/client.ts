@@ -10,13 +10,15 @@ type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 /**
  * Calls the API from the browser. Resolves with the parsed JSON body (or undefined for
- * 202/204) and rejects with ApiError or NetworkError.
+ * 202/204) and rejects with ApiError or NetworkError. A `FormData` body is sent as
+ * multipart (file uploads); anything else as JSON.
  */
 export async function apiFetch<T = undefined>(
   path: string,
   options: { method?: Method; body?: unknown; signal?: AbortSignal } = {},
 ): Promise<T> {
   const { method = 'GET', body, signal } = options;
+  const isJson = body !== undefined && !(body instanceof FormData);
   let response: Response;
   try {
     response = await fetch(`${API_BASE_PATH}${path}`, {
@@ -24,9 +26,9 @@ export async function apiFetch<T = undefined>(
       credentials: 'same-origin',
       headers: {
         Accept: 'application/json',
-        ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...(isJson ? { 'Content-Type': 'application/json' } : {}),
       },
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      ...(body === undefined ? {} : { body: isJson ? JSON.stringify(body) : body }),
       ...(signal ? { signal } : {}),
     });
   } catch (error) {

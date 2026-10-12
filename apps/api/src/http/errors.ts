@@ -1,4 +1,11 @@
-import { type ApiErrorBody, ApiErrorCode, DenialReason } from '@walls/shared';
+import {
+  type ApiErrorBody,
+  ApiErrorCode,
+  type Decision,
+  DenialReason,
+  type ImageIssue,
+  type SubmissionIssue,
+} from '@walls/shared';
 
 export { ApiErrorCode as ErrorCode } from '@walls/shared';
 export type { ApiErrorBody as ErrorBody } from '@walls/shared';
@@ -32,6 +39,7 @@ const HTTP_STATUS = {
   FORBIDDEN: 403,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  UNPROCESSABLE: 422,
 } as const;
 
 /** Maps a domain authorization denial to an HTTP error. */
@@ -76,3 +84,38 @@ export const invalidToken = () =>
     ApiErrorCode.INVALID_TOKEN,
     'This link is invalid or has expired',
   );
+
+export const notFound = () =>
+  new AppError(HTTP_STATUS.NOT_FOUND, ApiErrorCode.NOT_FOUND, 'Not found');
+
+/** A field-level validation failure detected after schema parsing, in the ZodError shape. */
+export const validationFailed = (path: (string | number)[], message: string) =>
+  new AppError(HTTP_STATUS.BAD_REQUEST, ApiErrorCode.VALIDATION_FAILED, 'The request is invalid', [
+    { path, message, code: 'custom' },
+  ]);
+
+export const submissionIncomplete = (issues: readonly SubmissionIssue[]) =>
+  new AppError(
+    HTTP_STATUS.UNPROCESSABLE,
+    ApiErrorCode.SUBMISSION_INCOMPLETE,
+    'The listing is missing data required for review',
+    { issues },
+  );
+
+/** `issues` lists every image rule the upload breaks. */
+export const invalidImage = (issues: readonly ImageIssue[]) =>
+  new AppError(HTTP_STATUS.UNPROCESSABLE, ApiErrorCode.INVALID_IMAGE, 'The image is not valid', {
+    issues,
+  });
+
+export const imageLimitReached = () =>
+  new AppError(
+    HTTP_STATUS.CONFLICT,
+    ApiErrorCode.IMAGE_LIMIT_REACHED,
+    'The listing already has the maximum number of images',
+  );
+
+/** Throws the HTTP error for a denied decision. */
+export function assertAllowed(decision: Decision): void {
+  if (!decision.allowed) throw errorFromDenial(decision.reason);
+}

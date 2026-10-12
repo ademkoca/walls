@@ -8,6 +8,7 @@ export const EmailTemplate = {
   PASSWORD_RESET: 'PASSWORD_RESET',
   PASSWORD_CHANGED: 'PASSWORD_CHANGED',
   ACCOUNT_SETUP: 'ACCOUNT_SETUP',
+  LISTING_SUBMITTED: 'LISTING_SUBMITTED',
 } as const;
 export type EmailTemplate = (typeof EmailTemplate)[keyof typeof EmailTemplate];
 
@@ -18,6 +19,7 @@ export interface EmailPayloads {
   PASSWORD_RESET: { link: string };
   PASSWORD_CHANGED: { resetLink: string };
   ACCOUNT_SETUP: { displayName: string; link: string };
+  LISTING_SUBMITTED: { displayName: string; listingTitle: string; link: string };
 }
 
 interface EmailContent {
@@ -74,6 +76,15 @@ const COPY: Record<Locale, Copy> = {
       ],
       action: { label: 'Podesi nalog', url: link },
     }),
+    LISTING_SUBMITTED: ({ displayName, listingTitle, link }) => ({
+      subject: 'Oglas je poslat na proveru',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `oglas „${listingTitle}" je poslat na proveru. Naš tim će ga pregledati i javiti vam kada bude objavljen ili ako je potrebno nešto da izmenite.`,
+        'Dok je oglas na proveri, ne može se menjati.',
+      ],
+      action: { label: 'Pogledaj oglas', url: link },
+    }),
   },
   en: {
     EMAIL_VERIFICATION: ({ displayName, link }) => ({
@@ -117,6 +128,15 @@ const COPY: Record<Locale, Copy> = {
         `The link is valid for ${setupDays} days.`,
       ],
       action: { label: 'Set up account', url: link },
+    }),
+    LISTING_SUBMITTED: ({ displayName, listingTitle, link }) => ({
+      subject: 'Your listing was submitted for review',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `your listing "${listingTitle}" has been submitted for review. Our team will check it and let you know when it is published or if anything needs to change.`,
+        'The listing cannot be edited while it is in review.',
+      ],
+      action: { label: 'View listing', url: link },
     }),
   },
 };

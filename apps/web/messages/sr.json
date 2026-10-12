@@ -118,11 +118,166 @@
     "title": "Kontrolna tabla",
     "welcome": "Dobro došli, {name}",
     "signedInAs": "Prijavljeni ste kao {role}.",
-    "comingSoon": "Upravljanje oglasima, upitima i nalogom stiže uskoro.",
+    "comingSoon": "Upiti, podešavanja naloga i administracija stižu uskoro.",
     "nav": {
       "label": "Navigacija kontrolne table",
       "overview": "Pregled",
+      "listings": "Moji oglasi",
       "viewSite": "Pogledaj sajt"
+    }
+  },
+  "listings": {
+    "title": "Moji oglasi",
+    "description": "Nacrti, oglasi na proveri i objavljeni oglasi.",
+    "new": "Novi oglas",
+    "untitled": "Oglas bez naslova",
+    "emptyTitle": "Još nemate oglasa",
+    "emptyDescription": "Napravite prvi oglas. Možete ga čuvati kao nacrt i poslati na proveru kada bude spreman.",
+    "columns": {
+      "listing": "Oglas",
+      "status": "Status",
+      "images": "Slike",
+      "updated": "Izmenjen"
+    },
+    "imageCount": "{count, plural, one {# slika} few {# slike} other {# slika}}",
+    "loadFailed": "Oglasi trenutno ne mogu da se učitaju.",
+    "notFound": "Oglas ne postoji ili mu nemate pristup.",
+    "backToList": "Nazad na oglase",
+    "editor": {
+      "save": "Sačuvaj nacrt",
+      "saved": "Nacrt je sačuvan.",
+      "unsaved": "Imate nesačuvane izmene.",
+      "submit": "Pošalji na proveru",
+      "submitted": "Oglas je poslat na proveru.",
+      "submitConfirmTitle": "Poslati oglas na proveru?",
+      "submitConfirmDescription": "Dok je oglas na proveri ne možete ga menjati niti povući. Naš tim će ga pregledati i javiti vam ishod emailom.",
+      "revise": "Izmeni i pošalji ponovo",
+      "revised": "Oglas je vraćen u nacrt. Izmenite ga i pošaljite ponovo.",
+      "delete": "Obriši nacrt",
+      "deleted": "Nacrt je obrisan.",
+      "deleteConfirmTitle": "Obrisati ovaj nacrt?",
+      "deleteConfirmDescription": "Nacrt će nestati sa vaše liste. Ova radnja se ne može poništiti.",
+      "cancel": "Otkaži",
+      "confirm": "Potvrdi",
+      "pendingNotice": "Oglas je na proveri i ne može se menjati dok ga naš tim ne pregleda.",
+      "rejectedNotice": "Oglas je odbijen. Pročitajte razlog, vratite oglas u nacrt, izmenite ga i pošaljite ponovo.",
+      "rejectionReason": "Razlog odbijanja",
+      "publishedNotice": "Oglas je objavljen. Izmene objavljenih oglasa biće dostupne uskoro.",
+      "readOnlyNotice": "Ovaj oglas se trenutno ne može menjati.",
+      "requiredHint": "Polja označena sa * su obavezna za slanje na proveru.",
+      "sections": {
+        "basics": "Osnovno",
+        "description": "Naslov i opis",
+        "descriptionHint": "Tekst na srpskom je obavezan. Engleski je opcioni; bez njega engleska stranica prikazuje srpski tekst.",
+        "location": "Lokacija",
+        "details": "Karakteristike",
+        "amenities": "Dodatno",
+        "price": "Cena",
+        "images": "Slike"
+      },
+      "fields": {
+        "propertyType": "Vrsta nekretnine",
+        "transactionType": "Vrsta oglasa",
+        "choose": "Izaberite",
+        "chooseTypeFirst": "Prvo izaberite vrstu nekretnine.",
+        "title": "Naslov",
+        "description": "Opis",
+        "languageSr": "Srpski",
+        "languageEn": "Engleski (opciono)",
+        "country": "Država",
+        "countryValue": "Srbija",
+        "city": "Grad",
+        "municipality": "Opština",
+        "neighborhood": "Naselje",
+        "street": "Ulica",
+        "streetNumber": "Broj",
+        "postalCode": "Poštanski broj",
+        "mapLocation": "Tačna lokacija na mapi",
+        "mapHint": "Kliknite na mapu, prevucite oznaku ili iskoristite svoju trenutnu lokaciju ako ste kod nekretnine.",
+        "findOnMap": "Pronađi adresu na mapi",
+        "addressNotFound": "Adresa nije pronađena. Postavite oznaku ručno.",
+        "useMyLocation": "Koristi moju lokaciju",
+        "locating": "Tražimo vašu lokaciju…",
+        "locationDenied": "Pristup lokaciji je blokiran. Dozvolite ga u podešavanjima pregledača ili postavite oznaku ručno.",
+        "locationUnavailable": "Vaša lokacija nije mogla biti određena. Postavite oznaku ručno.",
+        "clearLocation": "Ukloni oznaku",
+        "floorArea": "Površina (m²)",
+        "plotArea": "Površina placa (m²)",
+        "bedrooms": "Broj spavaćih soba",
+        "bathrooms": "Broj kupatila",
+        "floor": "Sprat",
+        "floorHint": "0 je prizemlje; negativan broj je ispod zemlje.",
+        "totalFloors": "Ukupno spratova",
+        "yearBuilt": "Godina izgradnje",
+        "parkingSpaces": "Parking mesta",
+        "heatingType": "Grejanje",
+        "furnishedStatus": "Nameštenost",
+        "notSpecified": "Nije navedeno",
+        "priceOnRequest": "Cena na upit",
+        "priceOnRequestHint": "Kupci će videti „Cena na upit” umesto iznosa.",
+        "amount": "Iznos",
+        "currency": "Valuta",
+        "period": "Period",
+        "negotiable": "Cena je za dogovor"
+      },
+      "address": {
+        "public": "Prikaži tačnu adresu javno",
+        "publicHint": "Kada je isključeno, posetioci vide samo grad, opštinu i naselje.",
+        "confirmTitle": "Prikazati tačnu adresu svima?",
+        "confirmDescription": "Ulica, broj i tačna lokacija na mapi biće vidljivi svim posetiocima sajta. Uključite ovo samo ako želite da adresa bude javna.",
+        "confirm": "Prikaži adresu"
+      },
+      "images": {
+        "upload": "Dodaj slike",
+        "drop": "Prevucite slike ovde ili",
+        "rules": "JPEG, PNG, WebP ili HEIC, od 50 KB do 15 MB, najmanje 1024 × 768 piksela. Najmanje {min}, najviše {max} slika.",
+        "count": "{count} / {max}",
+        "uploading": "Otpremanje {name}…",
+        "failed": "{name}: {reason}",
+        "cover": "Naslovna",
+        "makeCover": "Postavi kao naslovnu",
+        "remove": "Ukloni sliku",
+        "moveHint": "Prevucite slike da promenite redosled. Prva slika ne mora biti naslovna.",
+        "dragHandle": "Promeni redosled slike {position}",
+        "imageAlt": "Slika {position}",
+        "empty": "Još nema slika.",
+        "issues": {
+          "UNSUPPORTED_TYPE": "format nije podržan",
+          "FILE_TOO_SMALL": "datoteka je premala (najmanje 50 KB)",
+          "FILE_TOO_LARGE": "datoteka je prevelika (najviše 15 MB)",
+          "DIMENSIONS_TOO_SMALL": "slika je premala (najmanje 1024 × 768 piksela)"
+        }
+      },
+      "checklist": {
+        "title": "Spremnost za proveru",
+        "ready": "Oglas ima sve što je potrebno za proveru.",
+        "missing": "Pre slanja na proveru dopunite:",
+        "fields": {
+          "propertyType": "vrstu nekretnine",
+          "transactionType": "vrstu oglasa",
+          "title": "naslov na srpskom",
+          "description": "opis na srpskom",
+          "location": {
+            "country": "državu",
+            "city": "grad",
+            "street": "ulicu",
+            "streetNumber": "broj",
+            "latitude": "tačnu lokaciju na mapi",
+            "longitude": "tačnu lokaciju na mapi"
+          },
+          "attributes": {
+            "floorArea": "površinu",
+            "plotArea": "površinu placa",
+            "bedrooms": "broj spavaćih soba",
+            "bathrooms": "broj kupatila",
+            "floor": "sprat",
+            "totalFloors": "ukupan broj spratova"
+          },
+          "price": "ispravnu cenu",
+          "images": "najmanje 3 slike"
+        },
+        "floorAboveTotal": "sprat ne može biti veći od ukupnog broja spratova"
+      }
     }
   },
   "roles": {
@@ -130,6 +285,73 @@
     "ADMIN": "administrator",
     "REAL_ESTATE_AGENT": "agent za nekretnine",
     "PRIVATE_SELLER": "privatni prodavac"
+  },
+  "enums": {
+    "propertyType": {
+      "APARTMENT": "Stan",
+      "HOUSE": "Kuća",
+      "VILLA": "Vila",
+      "OFFICE": "Kancelarijski prostor",
+      "RETAIL": "Lokal",
+      "WAREHOUSE": "Magacin",
+      "LAND": "Plac",
+      "GARAGE": "Garaža",
+      "OTHER": "Ostalo"
+    },
+    "transactionType": {
+      "SALE": "Prodaja",
+      "RENT": "Izdavanje"
+    },
+    "listingStatus": {
+      "DRAFT": "Nacrt",
+      "PENDING_REVIEW": "Na proveri",
+      "PUBLISHED": "Objavljen",
+      "REJECTED": "Odbijen",
+      "SOLD": "Prodat",
+      "RENTED": "Izdat",
+      "ARCHIVED": "Arhiviran"
+    },
+    "heatingType": {
+      "DISTRICT": "Centralno grejanje (CG)",
+      "INDIVIDUAL_CENTRAL": "Etažno grejanje (EG)",
+      "ELECTRIC": "Struja",
+      "GAS": "Gas",
+      "STORAGE_HEATERS": "TA peći",
+      "UNDERFLOOR": "Podno grejanje",
+      "HEAT_PUMP": "Toplotna pumpa",
+      "SOLID_FUEL": "Čvrsto gorivo",
+      "OTHER": "Drugo",
+      "NONE": "Bez grejanja"
+    },
+    "furnishedStatus": {
+      "FURNISHED": "Namešten",
+      "SEMI_FURNISHED": "Polunamešten",
+      "UNFURNISHED": "Prazan"
+    },
+    "rentalPeriod": {
+      "DAY": "dnevno",
+      "WEEK": "nedeljno",
+      "MONTH": "mesečno"
+    },
+    "amenity": {
+      "ELEVATOR": "Lift",
+      "AIR_CONDITIONING": "Klima uređaj",
+      "BALCONY": "Balkon",
+      "TERRACE": "Terasa",
+      "GARDEN": "Dvorište",
+      "PARKING": "Parking",
+      "GARAGE": "Garaža",
+      "SECURITY_SYSTEM": "Alarm / video nadzor",
+      "INTERNET": "Internet",
+      "PETS_ALLOWED": "Kućni ljubimci dozvoljeni",
+      "SMOKING_ALLOWED": "Pušenje dozvoljeno",
+      "ELECTRICITY": "Struja",
+      "WATER": "Voda",
+      "SEWAGE": "Kanalizacija",
+      "GAS_CONNECTION": "Gasni priključak",
+      "ROAD_ACCESS": "Asfaltni put",
+      "BUILDING_PERMIT": "Građevinska dozvola"
+    }
   },
   "validation": {
     "required": "Ovo polje je obavezno.",
@@ -154,6 +376,9 @@
     "NOT_FOUND": "Traženi sadržaj nije pronađen.",
     "INVALID_STATE": "Ova radnja trenutno nije moguća.",
     "CONFLICT": "Došlo je do konflikta sa postojećim podacima.",
+    "SUBMISSION_INCOMPLETE": "Oglasu nedostaju podaci potrebni za proveru.",
+    "INVALID_IMAGE": "Slika ne ispunjava uslove.",
+    "IMAGE_LIMIT_REACHED": "Oglas već ima najveći dozvoljeni broj slika.",
     "RATE_LIMITED": "Previše pokušaja. Sačekajte malo i pokušajte ponovo.",
     "EXTERNAL_SERVICE_FAILED": "Spoljni servis trenutno nije dostupan. Pokušajte ponovo kasnije.",
     "INTERNAL_ERROR": "Došlo je do greške. Pokušajte ponovo."

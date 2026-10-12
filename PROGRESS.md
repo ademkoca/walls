@@ -8,25 +8,33 @@ _Last updated: 2026-10-12, in the middle of Phase 4 review._
 
 ## Current status
 
-| Phase | Scope                                                                                 | State                                                                |
-| ----- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                                         |
-| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                                         |
-| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                                               |
-| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                                               |
-| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                             |
-| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, reviewed by the user, pushed (check CI incl. the new E2E step) |
-| **5** | Listings (creator side)                                                               | **In progress**                                                      |
-| 6–10  | Review/admin, agents, public site, inquiries/analytics, hardening                     | Not started                                                          |
+| Phase | Scope                                                                                 | State                                            |
+| ----- | ------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                     |
+| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                     |
+| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                           |
+| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                           |
+| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                         |
+| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)  |
+| 5     | Listings (creator side)                                                               | Done, reviewed by the user, pushed; **check CI** |
+| 6–10  | Review/admin, agents, public site, inquiries/analytics, hardening                     | Not started                                      |
 
-**Immediate next step:** Phase 5 (see Remaining plan). Ask the user for the open Phase 5
-questions (heating/furnished values, Cloudinary credentials) when they become blocking.
+**Immediate next step:** the user checks the CI run for the Phase 5 push. Do not start
+Phase 6 until they say so.
 
-Verified at the end of Phase 4: format, lint, typecheck, build all pass; unit tests
-133 shared + 29 validation + 20 web + 8 api; integration tests 22 database + 27 api;
-4 Playwright E2E tests (register → verify → login → account menu → logout in en and sr,
-wrong password, dark-mode theme check). Fixed during the user's review: the account menu
-crash and the OS dark mode restyling components (see Gotchas).
+Phase 5 contents: shared `canCreateListing`/`sellerTypeForRole`, heating/furnished enums,
+`mediaOrderInputSchema`; migrations 0004/0005; API `apps/api/src/listings/*` (create, list,
+get, PATCH draft, soft-delete, submit with `checkSubmissionRequirements` + confirmation
+email, revise, image upload/reorder/remove) and `apps/api/src/media/*` (`MediaStorage` with
+in-memory, local-disk and Cloudinary implementations; image type/size from content via
+`image-size`); web `/dashboard/listings` and `/dashboard/listings/[id]` editor (Leaflet map
+picker, dnd-kit image ordering, live submission checklist using the shared rule, address
+visibility confirmation). Editing **published** listings (minor/major edits) is deferred to
+Phase 6 with revisions; the API answers 409 for now.
+
+Verified at the end of Phase 5: format, lint, typecheck, build; unit tests (web 37); integration
+tests 22 database + 51 api (24 new for listings); 5 Playwright E2E tests including the full
+seller listing flow (create → fill → map pin → 3 uploads → submit → "In review").
 
 ## Repository
 
@@ -111,7 +119,23 @@ crash and the OS dark mode restyling components (see Gotchas).
 - **Price is optional:** fixed price **or** "price on request", never both (UI switch). On-request
   listings sort last by price.
 - **Exact address hidden by default;** sellers and agents may make it public after a UI warning
-  and confirmation (UI part still to build).
+  and confirmation (built in Phase 5).
+- **Heating and furnished status** (Phase 5) are structured optional fields, not amenities:
+  heating `DISTRICT` (CG), `INDIVIDUAL_CENTRAL` (etažno, EG), `ELECTRIC`, `GAS`,
+  `STORAGE_HEATERS` (TA), `UNDERFLOOR`, `HEAT_PUMP`, `SOLID_FUEL`, `OTHER`, `NONE`; furnished
+  `FURNISHED`/`SEMI_FURNISHED`/`UNFURNISHED`. The `CENTRAL_HEATING` and `FURNISHED` amenities
+  were removed (migration 0005). The user approved the structured option; I corrected my own
+  offer afterwards (I had mislabelled EG as electric) by adding `INDIVIDUAL_CENTRAL`.
+- **Features per property type** (Phase 5 review): `AMENITIES_BY_PROPERTY_TYPE` in
+  `@walls/shared` (table in SPEC §10), enforced by the API; features that stop applying are
+  dropped when the type changes. Land gets new utility features (electricity, water, sewage,
+  gas connection, road access, building permit; migration 0006); House/Villa also get sewage
+  and gas connection; "Other" gets everything. The `/amenities` endpoint was removed: the web
+  reads the catalogue from `@walls/shared`, and a DB test checks the seeded table matches.
+- **"Use my location"** button on the listing map (Phase 5 review): browser geolocation, asked
+  only on click; denied/unavailable states explained. Default view stays Belgrade.
+- **Media storage:** Cloudinary when `CLOUDINARY_*` is set (required in production), otherwise
+  local disk in development (user's choice until they add credentials).
 - **Images:** JPEG/PNG/WebP/HEIC/HEIF, 50 KB–15 MB, ≥1024 px long side and ≥768 px short side,
   max 30 per listing, checked by file signature.
 - **Drafts:** creator may soft-delete a draft; a PENDING_REVIEW listing cannot be withdrawn.
@@ -180,6 +204,9 @@ crash and the OS dark mode restyling components (see Gotchas).
   components get gray fills and slate borders for users in dark mode.
 - **`buttonVariants` merges classes** (tailwind-merge via `cn`). Plain `cva` output on a
   `Link` kept both `border-transparent` and `border-border`, and CSS order hid the border.
+- **E2E must never use real providers:** the Playwright config loads the root `.env`, so it
+  blanks `CLOUDINARY_*` (and `RESEND_API_KEY`) for the API it starts. One run before this fix
+  uploaded 3 test images to the user's Cloudinary; they were deleted.
 - **Playwright sets `NODE_ENV=test` for child processes**, which breaks `next build`
   ("Cannot read properties of null (reading 'useContext')"); the web server entry in
   `e2e/playwright.config.ts` forces `NODE_ENV=production`.
@@ -198,13 +225,20 @@ crash and the OS dark mode restyling components (see Gotchas).
 - What happens to a deactivated user's published listings (hide, keep, reassign)? Can admins
   reactivate accounts? (Phase 6.)
 - Which provider for EUR/RSD exchange rates, and API key? (Phase 8.)
-- Heating types and furnished-status values for the listing form (spec doesn't define them;
-  ask in Phase 5).
 - When the exact address is hidden, no coordinates are public so no map is shown; should an
   approximate area map be allowed? (Phase 8.)
-- Cloudinary and Resend credentials are needed from the user for Phase 5 / production.
+- Cloudinary and Resend credentials are needed from the user for production. The Cloudinary
+  adapter (signed REST uploads, `f_auto,q_auto` delivery) is written but untested against the
+  real service until credentials exist.
+- Phase 5 choices to confirm with the user: the "listing submitted" email goes to the
+  submitter as a confirmation (SPEC §21 doesn't say who receives it; admins get a review
+  queue in Phase 6); admins cannot create listings (like content edits, denied by default);
+  the form fixes the country to Serbia.
+- OSM standard tiles label Serbian places in Cyrillic; the production tile host should offer
+  Latin labels (site is Latin-only).
 - Cosmetic, deferred by the user until all phases are done: make the home-page CTAs larger.
-- Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use).
+- Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use); set
+  `NEXT_PUBLIC_MAP_TILE_URL`. "Find address on map" uses Nominatim on button press only.
 - Still not done for Phase 3 email/deactivation: the deactivation service (reason, audit,
   email template) is specified but not implemented.
 

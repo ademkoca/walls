@@ -29,6 +29,27 @@
       "when": 1791803447023,
       "tag": "0003_user_preferred_locale",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791809847874,
+      "tag": "0004_heating_and_furnished_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791809848361,
+      "tag": "0005_remove_heating_and_furnished_amenities",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791814256380,
+      "tag": "0006_land_utility_amenities",
+      "breakpoints": true
     }
   ]
 }

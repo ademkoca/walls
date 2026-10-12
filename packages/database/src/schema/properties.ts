@@ -12,7 +12,14 @@ import {
   text,
   uuid,
 } from 'drizzle-orm/pg-core';
-import { id, propertyTypeEnum, timestamps, timestamptz } from './columns';
+import {
+  furnishedStatusEnum,
+  heatingTypeEnum,
+  id,
+  propertyTypeEnum,
+  timestamps,
+  timestamptz,
+} from './columns';
 import { users } from './users';
 
 const area = () => numeric({ precision: 12, scale: 2, mode: 'number' });
@@ -41,6 +48,8 @@ export const properties = pgTable(
     totalFloors: smallint(),
     yearBuilt: smallint(),
     parkingSpaces: smallint(),
+    heatingType: heatingTypeEnum(),
+    furnishedStatus: furnishedStatusEnum(),
     ...timestamps(),
   },
   (table) => [

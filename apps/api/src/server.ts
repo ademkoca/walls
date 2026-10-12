@@ -4,6 +4,7 @@ import { loadConfig } from './config';
 import { createEmailService } from './email/create-email-service';
 import { startOutboxWorker } from './email/outbox';
 import { createLogger } from './logger';
+import { createMediaStorage } from './media/create-media-storage';
 
 const OUTBOX_POLL_INTERVAL_MS = 5_000;
 
@@ -12,7 +13,9 @@ const logger = createLogger(config);
 const { db, close: closeDatabase } = createDatabase({ url: config.databaseUrl });
 const emailService = createEmailService(config, logger);
 
-const server = createApp({ db, config, logger }).listen(config.port, () => {
+const mediaStorage = createMediaStorage(config, logger);
+
+const server = createApp({ db, config, logger, mediaStorage }).listen(config.port, () => {
   logger.info({ port: config.port, env: config.env }, 'API listening');
 });
 const stopOutboxWorker = startOutboxWorker(db, emailService, logger, OUTBOX_POLL_INTERVAL_MS);

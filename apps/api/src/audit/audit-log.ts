@@ -7,11 +7,16 @@ export const AuditAction = {
   USER_PASSWORD_RESET: 'USER_PASSWORD_RESET',
   USER_ACCOUNT_SET_UP: 'USER_ACCOUNT_SET_UP',
   USER_INVITED: 'USER_INVITED',
+  LISTING_CREATED: 'LISTING_CREATED',
+  LISTING_SUBMITTED: 'LISTING_SUBMITTED',
+  LISTING_REVISED: 'LISTING_REVISED',
+  LISTING_DRAFT_DELETED: 'LISTING_DRAFT_DELETED',
 } as const;
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];
 
 export const AuditEntity = {
   USER: 'USER',
+  LISTING: 'LISTING',
 } as const;
 export type AuditEntity = (typeof AuditEntity)[keyof typeof AuditEntity];
 

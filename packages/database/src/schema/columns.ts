@@ -1,5 +1,7 @@
 import {
   Currency,
+  FurnishedStatus,
+  HeatingType,
   InquiryStatus,
   ListingStatus,
   Locale,
@@ -24,6 +26,8 @@ export const sellerTypeEnum = pgEnum('seller_type', enumValues(SellerType));
 export const listingStatusEnum = pgEnum('listing_status', enumValues(ListingStatus));
 export const transactionTypeEnum = pgEnum('transaction_type', enumValues(TransactionType));
 export const propertyTypeEnum = pgEnum('property_type', enumValues(PropertyType));
+export const heatingTypeEnum = pgEnum('heating_type', enumValues(HeatingType));
+export const furnishedStatusEnum = pgEnum('furnished_status', enumValues(FurnishedStatus));
 export const currencyEnum = pgEnum('currency', enumValues(Currency));
 export const rentalPeriodEnum = pgEnum('rental_period', enumValues(RentalPeriod));
 export const priceModeEnum = pgEnum('price_mode', enumValues(PriceMode));

@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { listingInputSchema, priceInputSchema, rejectListingInputSchema } from './listing';
+import {
+  listingInputSchema,
+  mediaOrderInputSchema,
+  priceInputSchema,
+  rejectListingInputSchema,
+} from './listing';
 
 const fixedEur = {
   mode: 'FIXED',
@@ -113,5 +118,45 @@ describe('rejection reason', () => {
     expect(rejectListingInputSchema.parse({ reason: ' Missing photos ' })).toEqual({
       reason: 'Missing photos',
     });
+  });
+});
+
+describe('heating and furnished status', () => {
+  it('accepts the defined values and null', () => {
+    const attributes = { heatingType: 'DISTRICT', furnishedStatus: 'SEMI_FURNISHED' };
+    expect(listingInputSchema.safeParse({ attributes }).success).toBe(true);
+    expect(
+      listingInputSchema.safeParse({ attributes: { heatingType: null, furnishedStatus: null } })
+        .success,
+    ).toBe(true);
+  });
+
+  it('rejects unknown values', () => {
+    expect(listingInputSchema.safeParse({ attributes: { heatingType: 'FIREPLACE' } }).success).toBe(
+      false,
+    );
+  });
+});
+
+describe('media order', () => {
+  const ids = ['5f0c6b2e-8f5d-4d6e-9a43-0c6f6c1f0a01', '5f0c6b2e-8f5d-4d6e-9a43-0c6f6c1f0a02'];
+
+  it('accepts an order whose cover image is listed', () => {
+    expect(mediaOrderInputSchema.safeParse({ mediaIds: ids, primaryMediaId: ids[1] }).success).toBe(
+      true,
+    );
+  });
+
+  it('rejects duplicates and a cover image that is not listed', () => {
+    expect(
+      mediaOrderInputSchema.safeParse({ mediaIds: [ids[0], ids[0]], primaryMediaId: ids[0] })
+        .success,
+    ).toBe(false);
+    expect(
+      mediaOrderInputSchema.safeParse({
+        mediaIds: [ids[0]],
+        primaryMediaId: ids[1],
+      }).success,
+    ).toBe(false);
   });
 });

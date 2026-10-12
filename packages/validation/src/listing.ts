@@ -1,5 +1,8 @@
 import {
   Currency,
+  FurnishedStatus,
+  HeatingType,
+  LISTING_IMAGE_RULES,
   Locale,
   PriceMode,
   PropertyType,
@@ -90,6 +93,8 @@ export const propertyAttributesInputSchema = z
         }),
     ),
     parkingSpaces: optionalNullable(z.number().int().min(0).max(L.maxParkingSpaces)),
+    heatingType: optionalNullable(z.enum(enumValues(HeatingType))),
+    furnishedStatus: optionalNullable(z.enum(enumValues(FurnishedStatus))),
   })
   .refine(
     ({ floor, totalFloors }) => floor == null || totalFloors == null || floor <= totalFloors,
@@ -177,3 +182,25 @@ export const rejectListingInputSchema = z.strictObject({
   reason: reasonSchema,
 });
 export type RejectListingInput = z.infer<typeof rejectListingInputSchema>;
+
+/** Route parameter identifying a listing or media item. */
+export const idParamSchema = z.uuid();
+
+/**
+ * New order of a listing's images, first to last, and the cover image. Must list every
+ * current image exactly once (checked by the API against the stored images).
+ */
+export const mediaOrderInputSchema = z
+  .strictObject({
+    mediaIds: z
+      .array(z.uuid())
+      .min(1)
+      .max(LISTING_IMAGE_RULES.maxImagesPerListing)
+      .refine((ids) => new Set(ids).size === ids.length, { message: 'Duplicate image' }),
+    primaryMediaId: z.uuid(),
+  })
+  .refine(({ mediaIds, primaryMediaId }) => mediaIds.includes(primaryMediaId), {
+    message: 'The cover image must be one of the listed images',
+    path: ['primaryMediaId'],
+  });
+export type MediaOrderInput = z.infer<typeof mediaOrderInputSchema>;

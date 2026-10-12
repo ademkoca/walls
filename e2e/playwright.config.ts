@@ -25,6 +25,12 @@ const apiEnv = {
   SESSION_SECRET: 'e2e-session-secret-that-is-long-enough-1234567890',
   WEB_ORIGIN,
   RESEND_API_KEY: '',
+  // Never touch real providers from tests, even when the root .env configures them.
+  CLOUDINARY_CLOUD_NAME: '',
+  CLOUDINARY_API_KEY: '',
+  CLOUDINARY_API_SECRET: '',
+  // Uploads stay inside the gitignored output folder.
+  LOCAL_MEDIA_DIR: path.join(import.meta.dirname, '.output/media'),
   LOG_LEVEL: 'info',
 };
 

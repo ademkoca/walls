@@ -21,6 +21,12 @@ export const ApiErrorCode = {
   NOT_FOUND: 'NOT_FOUND',
   INVALID_STATE: 'INVALID_STATE',
   CONFLICT: 'CONFLICT',
+  /** 422: the listing misses data required for review; `details.issues` lists what. */
+  SUBMISSION_INCOMPLETE: 'SUBMISSION_INCOMPLETE',
+  /** 422: an uploaded image breaks the image rules; `details.issues` lists how. */
+  INVALID_IMAGE: 'INVALID_IMAGE',
+  /** 409: the listing already has the maximum number of images. */
+  IMAGE_LIMIT_REACHED: 'IMAGE_LIMIT_REACHED',
   RATE_LIMITED: 'RATE_LIMITED',
   EXTERNAL_SERVICE_FAILED: 'EXTERNAL_SERVICE_FAILED',
   INTERNAL_ERROR: 'INTERNAL_ERROR',

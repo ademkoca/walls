@@ -8,7 +8,7 @@ import {
   isReviewer,
   requireActive,
 } from '../access/decision';
-import { ListingStatus, Role, type TransactionType } from '../enums';
+import { ListingStatus, Role, SellerType, type TransactionType } from '../enums';
 import {
   LISTING_TRANSITIONS,
   ListingAction,
@@ -54,6 +54,33 @@ const editorOnly = (actor: Actor, listing: ListingAccessContext) => (): Decision
 const inStatus =
   (listing: ListingAccessContext, statuses: readonly ListingStatus[]) => (): Decision =>
     statuses.includes(listing.status) ? allow() : deny(DenialReason.INVALID_STATE);
+
+/**
+ * The seller type a new listing gets from its creator's role (SPEC §5), or null when the
+ * role does not advertise listings. Never taken from client input.
+ */
+export function sellerTypeForRole(role: Role): SellerType | null {
+  switch (role) {
+    case Role.PRIVATE_SELLER:
+      return SellerType.PRIVATE_SELLER;
+    case Role.REAL_ESTATE_AGENT:
+      return SellerType.REAL_ESTATE_AGENT;
+    default:
+      return null;
+  }
+}
+
+/**
+ * Creating a listing: private sellers and approved agents advertise properties (SPEC §2.1).
+ * Admins manage listings but do not create them; like direct content edits by admins, that
+ * is an open product question, so it is denied by default.
+ */
+export function canCreateListing(actor: Actor): Decision {
+  return firstDenial(
+    () => requireActive(actor),
+    () => (sellerTypeForRole(actor.role) ? allow() : deny(DenialReason.ROLE_NOT_PERMITTED)),
+  );
+}
 
 /** Viewing a listing in the dashboard (public visibility is a separate rule). */
 export function canViewListing(actor: Actor, listing: ListingAccessContext): Decision {
