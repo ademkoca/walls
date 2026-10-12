@@ -5,10 +5,12 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": ["NEXT_PUBLIC_*"],
+      "env": ["NEXT_PUBLIC_*", "API_INTERNAL_URL"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
-    "typecheck": {},
+    "typecheck": {
+      "passThroughEnv": ["API_INTERNAL_URL"]
+    },
     "test": {},
     "dev": {
       "cache": false,
