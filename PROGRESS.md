@@ -4,28 +4,28 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-12. Phase 8 (public site) is built and verified locally, not yet
-committed; the user is reviewing it._
+_Last updated: 2026-10-13. Phase 8 (public site) committed and pushed (`6732a82`); the user
+checks CI and says when Phase 9 starts._
 
 ## Current status
 
-| Phase | Scope                                                                                 | State                                                     |
-| ----- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                              |
-| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                              |
-| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                                    |
-| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                                    |
-| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                  |
-| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)           |
-| 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                        |
-| 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                        |
-| 7     | Agents: applications, profiles and change requests, public agent/seller pages         | Done, pushed (`bd75757`); PROGRESS update `a6f0838`       |
-| **8** | Public site: home, search, listing page, EUR/RSD, SEO                                 | **Built, verified locally, not committed.** User reviews. |
-| 9–10  | Inquiries/analytics, hardening                                                        | Not started                                               |
+| Phase | Scope                                                                                 | State                                               |
+| ----- | ------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                        |
+| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                        |
+| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                              |
+| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                              |
+| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                            |
+| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)     |
+| 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                  |
+| 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                  |
+| 7     | Agents: applications, profiles and change requests, public agent/seller pages         | Done, pushed (`bd75757`); PROGRESS update `a6f0838` |
+| **8** | Public site: home, search, listing page, EUR/RSD, SEO                                 | **Pushed (`6732a82`).** Waiting for CI + go-ahead.  |
+| 9–10  | Inquiries/analytics, hardening                                                        | Not started                                         |
 
-**Immediate next step:** wait for the user's Phase 8 review. Fix what it finds; commit only
-when asked, push only when asked (reproduce CI in a clean worktree first). Then wait for CI
-and the go-ahead for Phase 9.
+**Immediate next step:** wait. The user checks GitHub CI for `6732a82` and says when to
+start Phase 9 (the user already reviewed Phase 8 on desktop and iPhone; gallery, menu and map
+work). Do not start Phase 9 before that.
 
 **How the user reviews Phase 8:** the dev DB is migrated to `0011` (the running `pnpm dev`
 API reloaded and fetched the NBS rate, 117.3693 on 2026-10-12). Open `/` and `/en`, search
@@ -83,7 +83,7 @@ Phase 8 contents:
   schema, NBS provider, config; E2E `public-site.spec.ts` (home search → filters → listing →
   RSD → Serbian page keeps RSD → sitemap). E2E API uses the fixed rate 117.2.
 
-Verified at the end of Phase 8 (local, not yet in a clean worktree): format, lint,
+Verified at the end of Phase 8 (also in a clean worktree with CI's env, before pushing): format, lint,
 typecheck, build; unit tests (shared 181, validation 50, web 43, api 12); integration 22
 database + 138 api; 12 Playwright E2E tests. Pages checked at 1280 px and 390 px: no
 horizontal overflow, no browser errors.
