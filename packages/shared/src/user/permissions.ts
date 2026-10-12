@@ -9,6 +9,7 @@ import {
   requireActive,
 } from '../access/decision';
 import { Role, UserStatus } from '../enums';
+import { hasPublicProfile } from './profile';
 
 type RoleMatrix = Readonly<Record<Role, readonly Role[]>>;
 
@@ -123,4 +124,12 @@ export function canReviewAgentMatters(actor: Actor): Decision {
 /** Whether a user's own profile changes need Admin approval before taking effect (SPEC §4). */
 export function profileChangesRequireApproval(role: Role): boolean {
   return role === Role.REAL_ESTATE_AGENT;
+}
+
+/** Editing one's own public profile: active private sellers and agents (SPEC §4). */
+export function canEditOwnProfile(actor: Actor): Decision {
+  return firstDenial(
+    () => requireActive(actor),
+    () => (hasPublicProfile(actor.role) ? allow() : deny(DenialReason.ROLE_NOT_PERMITTED)),
+  );
 }

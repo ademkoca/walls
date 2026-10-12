@@ -1,5 +1,6 @@
 import type { Role, UserStatus } from '../enums';
 import type { UserReference } from './listings';
+import type { AgentApplicationFileView } from './profiles';
 
 /** Administration shapes (users and the audit log). Dates are ISO 8601 strings. */
 
@@ -17,6 +18,15 @@ export interface UserDetail extends UserSummary {
   emailVerified: boolean;
   /** Listings the user created (any status, excluding deleted drafts). */
   listingCount: number;
+  /**
+   * For agents: the approved application their account was created from, kept with its
+   * private proof files as evidence of eligibility (SPEC §2.1).
+   */
+  agentApplication: {
+    id: string;
+    reviewedAt: string | null;
+    files: AgentApplicationFileView[];
+  } | null;
   permissions: { canDeactivate: boolean; canReactivate: boolean };
 }
 

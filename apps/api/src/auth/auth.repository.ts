@@ -66,7 +66,7 @@ export async function consumeToken(
   db: DbExecutor,
   type: AuthTokenType,
   tokenHash: string,
-): Promise<{ userId: string } | undefined> {
+): Promise<{ userId: string; newEmail: string | null } | undefined> {
   const [token] = await db
     .update(authTokens)
     .set({ usedAt: sql`now()` })
@@ -78,7 +78,7 @@ export async function consumeToken(
         gt(authTokens.expiresAt, sql`now()`),
       ),
     )
-    .returning({ userId: authTokens.userId });
+    .returning({ userId: authTokens.userId, newEmail: authTokens.newEmail });
   return token;
 }
 
@@ -127,4 +127,24 @@ export async function deleteSession(db: DbExecutor, sessionId: string): Promise<
 
 export async function deleteSessionsForUser(db: DbExecutor, userId: string): Promise<void> {
   await db.delete(userSessions).where(eq(userSessions.userId, userId));
+}
+
+/** The address a user is changing to, while its verification link is still valid. */
+export async function findPendingEmailChange(
+  db: DbExecutor,
+  userId: string,
+): Promise<string | null> {
+  const [token] = await db
+    .select({ newEmail: authTokens.newEmail })
+    .from(authTokens)
+    .where(
+      and(
+        eq(authTokens.userId, userId),
+        eq(authTokens.type, 'EMAIL_CHANGE'),
+        isNull(authTokens.usedAt),
+        gt(authTokens.expiresAt, sql`now()`),
+      ),
+    )
+    .limit(1);
+  return token?.newEmail ?? null;
 }

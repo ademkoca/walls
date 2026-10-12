@@ -4,6 +4,7 @@ export const TOKEN_TTL_HOURS = {
   PASSWORD_RESET: 1,
   /** Agents and admins invited by email get a week to finish setting up their account. */
   ACCOUNT_SETUP: 24 * 7,
+  EMAIL_CHANGE: 24,
 } as const;
 
 const HOUR_MS = 60 * 60 * 1000;

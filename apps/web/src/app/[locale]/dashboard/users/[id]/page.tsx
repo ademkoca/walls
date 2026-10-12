@@ -1,10 +1,19 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
+import { buttonVariants } from '@walls/ui/components/button';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@walls/ui/components/card';
 import { ArrowLeftIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { AuditTable } from '@/components/admin/audit-table';
+import { ProofFileList } from '@/components/admin/proof-file-list';
 import { UserAccountActions } from '@/components/admin/user-account-actions';
 import { UserStatusBadge } from '@/components/admin/user-status-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
@@ -78,6 +87,38 @@ export default async function UserPage({ params }: PageProps<'/[locale]/dashboar
           </dl>
         </CardContent>
       </Card>
+
+      {user.agentApplication && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t('agentApplication.title')}</CardTitle>
+            <CardDescription>
+              {user.agentApplication.reviewedAt
+                ? t('agentApplication.approvedOn', {
+                    date: format.dateTime(new Date(user.agentApplication.reviewedAt), {
+                      dateStyle: 'medium',
+                    }),
+                  })
+                : null}{' '}
+              {t('agentApplication.private')}
+            </CardDescription>
+            <CardAction>
+              <Link
+                href={`/dashboard/agent-applications/${user.agentApplication.id}`}
+                className={buttonVariants({ variant: 'outline', size: 'sm' })}
+              >
+                {t('agentApplication.view')}
+              </Link>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            <ProofFileList
+              applicationId={user.agentApplication.id}
+              files={user.agentApplication.files}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {history && history.items.length > 0 && (
         <Card>

@@ -15,6 +15,7 @@ coverage/
 
 # Local uploads in development (LOCAL_MEDIA_DIR)
 .media/
+.private-files/
 
 # Playwright output
 e2e/.output/

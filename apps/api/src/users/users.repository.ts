@@ -2,8 +2,7 @@ import { type DbExecutor, auditLogs, listings, users } from '@walls/database';
 import type { Role, UserStatus } from '@walls/shared';
 import { type SQL, and, count, desc, eq, ilike, isNull, or } from 'drizzle-orm';
 
-/** Rows per page in administration lists. */
-export const ADMIN_PAGE_SIZE = 50;
+import { ADMIN_PAGE_SIZE } from '../http/paging';
 
 export interface UserFilter {
   role?: Role;

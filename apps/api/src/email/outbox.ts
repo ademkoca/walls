@@ -29,19 +29,27 @@ const retryDelayMs = (attempts: number) => BASE_RETRY_DELAY_MS * 2 ** (attempts 
 /**
  * Sends due emails. Rows are locked with SKIP LOCKED, so several API instances never
  * send the same email. Payloads are cleared once sent (or given up on) because they can
- * contain single-use links. Returns the number of emails processed.
+ * contain single-use links. `recipient` limits the run to one address (used by scripts
+ * that must not deliver other people's mail). Returns the number of emails processed.
  */
 export async function processOutbox(
   db: Database,
   emailService: EmailService,
   logger: Logger,
-  batchSize: number = DEFAULT_BATCH_SIZE,
+  options: { batchSize?: number; recipient?: string } = {},
 ): Promise<number> {
+  const { batchSize = DEFAULT_BATCH_SIZE, recipient } = options;
   return db.transaction(async (tx) => {
     const due = await tx
       .select()
       .from(emailOutbox)
-      .where(and(eq(emailOutbox.status, 'PENDING'), lte(emailOutbox.nextAttemptAt, sql`now()`)))
+      .where(
+        and(
+          eq(emailOutbox.status, 'PENDING'),
+          lte(emailOutbox.nextAttemptAt, sql`now()`),
+          recipient === undefined ? undefined : eq(emailOutbox.recipientEmail, recipient),
+        ),
+      )
       .orderBy(asc(emailOutbox.createdAt))
       .limit(batchSize)
       .for('update', { skipLocked: true });

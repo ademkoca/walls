@@ -1,23 +1,48 @@
 'use client';
 
-import { type Role, isReviewer, sellerTypeForRole } from '@walls/shared';
+import {
+  type ReviewQueueCounts,
+  type Role,
+  hasPublicProfile,
+  isReviewer,
+  sellerTypeForRole,
+} from '@walls/shared';
 import { cn } from '@walls/ui/lib/utils';
 import {
+  BriefcaseBusinessIcon,
   Building2Icon,
   ExternalLinkIcon,
   HistoryIcon,
   LayoutDashboardIcon,
+  UserPenIcon,
+  UserRoundIcon,
   UsersIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/navigation';
 
+const reviewer = (role: Role) => isReviewer({ role });
+
 /**
  * Dashboard sections. `show` mirrors the API's permissions so users only see sections they
- * can use; the API still authorizes every request. Later phases add inquiries, reviews and
- * administration.
+ * can use; the API still authorizes every request. `waiting` picks the reviewer's count of
+ * items that need attention.
  */
-const DASHBOARD_NAV = [
+const DASHBOARD_NAV: readonly {
+  href: string;
+  labelKey:
+    | 'overview'
+    | 'listings'
+    | 'reviewListings'
+    | 'agentApplications'
+    | 'profileChanges'
+    | 'users'
+    | 'auditLog'
+    | 'profile';
+  icon: typeof UsersIcon;
+  show: (role: Role) => boolean;
+  waiting?: (counts: ReviewQueueCounts) => number;
+}[] = [
   { href: '/dashboard', labelKey: 'overview', icon: LayoutDashboardIcon, show: () => true },
   {
     href: '/dashboard/listings',
@@ -30,23 +55,40 @@ const DASHBOARD_NAV = [
     href: '/dashboard/listings',
     labelKey: 'reviewListings',
     icon: Building2Icon,
-    show: (role: Role) => isReviewer({ role }),
+    show: reviewer,
+    waiting: (counts) => counts.listings + counts.listingRevisions,
   },
   {
-    href: '/dashboard/users',
-    labelKey: 'users',
-    icon: UsersIcon,
-    show: (role: Role) => isReviewer({ role }),
+    href: '/dashboard/agent-applications',
+    labelKey: 'agentApplications',
+    icon: BriefcaseBusinessIcon,
+    show: reviewer,
+    waiting: (counts) => counts.agentApplications,
   },
   {
-    href: '/dashboard/audit-log',
-    labelKey: 'auditLog',
-    icon: HistoryIcon,
-    show: (role: Role) => isReviewer({ role }),
+    href: '/dashboard/profile-changes',
+    labelKey: 'profileChanges',
+    icon: UserPenIcon,
+    show: reviewer,
+    waiting: (counts) => counts.profileChanges,
   },
-] as const;
+  { href: '/dashboard/users', labelKey: 'users', icon: UsersIcon, show: reviewer },
+  { href: '/dashboard/audit-log', labelKey: 'auditLog', icon: HistoryIcon, show: reviewer },
+  {
+    href: '/dashboard/profile',
+    labelKey: 'profile',
+    icon: UserRoundIcon,
+    show: hasPublicProfile,
+  },
+];
 
-export function DashboardNav({ role }: { role: Role }) {
+export function DashboardNav({
+  role,
+  counts = null,
+}: {
+  role: Role;
+  counts?: ReviewQueueCounts | null;
+}) {
   const t = useTranslations('dashboard.nav');
   const pathname = usePathname();
   const itemClass =
@@ -54,25 +96,39 @@ export function DashboardNav({ role }: { role: Role }) {
 
   return (
     <nav aria-label={t('label')} className="flex flex-row gap-1 lg:flex-col">
-      {DASHBOARD_NAV.filter((item) => item.show(role)).map(({ href, labelKey, icon: Icon }) => {
-        const active = href === '/dashboard' ? pathname === href : pathname.startsWith(href);
-        return (
-          <Link
-            key={href}
-            href={href}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              itemClass,
-              active
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-            )}
-          >
-            <Icon />
-            {t(labelKey)}
-          </Link>
-        );
-      })}
+      {DASHBOARD_NAV.filter((item) => item.show(role)).map(
+        ({ href, labelKey, icon: Icon, waiting }) => {
+          const active =
+            href === '/dashboard'
+              ? pathname === href
+              : pathname === href || pathname.startsWith(`${href}/`);
+          const count = counts && waiting ? waiting(counts) : 0;
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? 'page' : undefined}
+              className={cn(
+                itemClass,
+                active
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                  : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+              )}
+            >
+              <Icon />
+              <span className="flex-1">{t(labelKey)}</span>
+              {count > 0 && (
+                <span
+                  className="rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+                  aria-label={t('waiting', { count })}
+                >
+                  {count}
+                </span>
+              )}
+            </Link>
+          );
+        },
+      )}
       <Link
         href="/"
         className={cn(itemClass, 'text-sidebar-foreground/80 hover:bg-sidebar-accent lg:mt-4')}

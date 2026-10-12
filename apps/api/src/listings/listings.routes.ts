@@ -1,4 +1,4 @@
-import { ImageIssue, LISTING_IMAGE_RULES, ListingAction } from '@walls/shared';
+import { LISTING_IMAGE_RULES, ListingAction } from '@walls/shared';
 import {
   assignAgentInputSchema,
   idParamSchema,
@@ -8,11 +8,11 @@ import {
   rejectListingInputSchema,
   setFeaturedInputSchema,
 } from '@walls/validation';
-import { type RequestHandler, Router } from 'express';
-import multer from 'multer';
+import { Router } from 'express';
 import { authenticated, requireAuth } from '../http/auth-context';
-import { invalidImage, validationFailed } from '../http/errors';
+import { validationFailed } from '../http/errors';
 import { type RateLimitRule, limitByIp } from '../http/security';
+import { UPLOAD_FIELD, singleImageUpload } from '../http/uploads';
 import { parseBody } from '../http/validate';
 import type { ListingMediaService } from './listing-media.service';
 import type { ListingReviewService, SimpleReviewerAction } from './listing-review.service';
@@ -20,32 +20,6 @@ import type { ListingsService } from './listings.service';
 
 const STATUS_CREATED = 201;
 const STATUS_NO_CONTENT = 204;
-const UPLOAD_FIELD = 'file';
-
-/**
- * Accepts one image per request, kept in memory (at most 15 MB) and validated from its
- * content by the media service. Oversized files are cut off by multer before buffering.
- */
-function singleImageUpload(): RequestHandler {
-  const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: LISTING_IMAGE_RULES.maxBytes, files: 1, fields: 0, parts: 1 },
-  }).single(UPLOAD_FIELD);
-
-  return (req, res, next) => {
-    upload(req, res, (error: unknown) => {
-      if (error instanceof multer.MulterError) {
-        next(
-          error.code === 'LIMIT_FILE_SIZE'
-            ? invalidImage([ImageIssue.FILE_TOO_LARGE])
-            : validationFailed([UPLOAD_FIELD], 'Send exactly one file in the "file" field'),
-        );
-        return;
-      }
-      next(error);
-    });
-  };
-}
 
 export function listingsRoutes(deps: {
   listings: ListingsService;
@@ -95,7 +69,7 @@ export function listingsRoutes(deps: {
   router.post(
     '/:id/images',
     limitByIp(deps.uploadRateLimit),
-    singleImageUpload(),
+    singleImageUpload(LISTING_IMAGE_RULES.maxBytes),
     async (req, res) => {
       if (!req.file) throw validationFailed([UPLOAD_FIELD], 'An image file is required');
       const images = await media.addImage(

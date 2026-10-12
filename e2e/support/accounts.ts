@@ -14,7 +14,9 @@ const SETUP_LINK = /https?:\/\/\S+\/setup-account\?token=[A-Za-z0-9_-]+/;
  * account setup from the emailed link and logs in.
  */
 export async function signInAsSuperAdmin(page: Page): Promise<TestUser> {
-  const admin = { ...newTestUser(), name: 'Sanja Superadmin' };
+  const user = newTestUser();
+  // A unique name: parallel runs would otherwise race for the same profile slug.
+  const admin = { ...user, name: `Sanja Superadmin ${user.email.slice(0, 4)}` };
   const { stdout } = await run(
     'pnpm',
     [

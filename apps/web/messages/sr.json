@@ -21,7 +21,8 @@
     "dashboard": "Kontrolna tabla",
     "logout": "Odjava",
     "openMenu": "Otvori meni",
-    "accountMenu": "Meni naloga"
+    "accountMenu": "Meni naloga",
+    "profile": "Moj profil"
   },
   "language": {
     "label": "Jezik",
@@ -112,6 +113,16 @@
       "success": "Nalog je aktivan. Prijavite se izabranom lozinkom.",
       "goToLogin": "Prijavite se",
       "missingToken": "Link za podešavanje naloga nije potpun. Otvorite ga direktno iz poruke koju ste dobili."
+    },
+    "confirmEmail": {
+      "title": "Potvrdite novu email adresu",
+      "description": "Potvrdite promenu da bi ovo postala adresa kojom se prijavljujete.",
+      "submit": "Potvrdi email adresu",
+      "changed": "Vaša email adresa je promenjena. Koristite je pri sledećoj prijavi.",
+      "awaitingApproval": "Nova email adresa je potvrđena. Primeniće se kada naš tim odobri izmene vašeg profila.",
+      "missingToken": "Ovaj link je nepotpun. Otvorite ga direktno iz emaila koji ste dobili.",
+      "requestNew": "Zatražite novi link na stranici svog profila.",
+      "goToProfile": "Idi na moj profil"
     }
   },
   "dashboard": {
@@ -126,7 +137,11 @@
       "viewSite": "Pogledaj sajt",
       "reviewListings": "Oglasi",
       "users": "Korisnici",
-      "auditLog": "Dnevnik izmena"
+      "auditLog": "Dnevnik izmena",
+      "profile": "Moj profil",
+      "agentApplications": "Prijave agenata",
+      "profileChanges": "Izmene profila",
+      "waiting": "Na čekanju: {count}"
     }
   },
   "listings": {
@@ -429,7 +444,13 @@
     "inviteEmail": "Email adresa",
     "inviteLanguage": "Jezik emailova",
     "inviteSubmit": "Pošalji poziv",
-    "invited": "Poziv je poslat."
+    "invited": "Poziv je poslat.",
+    "agentApplication": {
+      "title": "Prijava za agenta",
+      "approvedOn": "Odobrena {date}.",
+      "private": "Dokazi se čuvaju kao potvrda ispunjenosti uslova i vide ih samo administratori.",
+      "view": "Pogledaj prijavu"
+    }
   },
   "auditLog": {
     "title": "Dnevnik izmena",
@@ -476,8 +497,19 @@
       "LISTING_REVISION_WITHDRAWN": "Izmene povučene",
       "LISTING_REVISION_APPROVED": "Odobrenje izmena",
       "LISTING_REVISION_REJECTED": "Odbijanje izmena",
-      "LISTING_REVISION_DISCARDED": "Izmene odbačene"
-    }
+      "LISTING_REVISION_DISCARDED": "Izmene odbačene",
+      "USER_PROFILE_UPDATED": "Profil izmenjen",
+      "USER_EMAIL_CHANGE_REQUESTED": "Zatražena promena email adrese",
+      "USER_EMAIL_CHANGED": "Email adresa promenjena",
+      "PROFILE_CHANGE_SAVED": "Izmene profila poslate na proveru",
+      "PROFILE_CHANGE_WITHDRAWN": "Izmene profila povučene",
+      "PROFILE_CHANGE_APPROVED": "Izmene profila odobrene",
+      "PROFILE_CHANGE_REJECTED": "Izmene profila odbijene",
+      "AGENT_APPLICATION_SUBMITTED": "Primljena prijava agenta",
+      "AGENT_APPLICATION_APPROVED": "Prijava agenta odobrena",
+      "AGENT_APPLICATION_REJECTED": "Prijava agenta odbijena"
+    },
+    "agentApplication": "Prijava"
   },
   "roles": {
     "SUPER_ADMIN": "super administrator",
@@ -566,6 +598,15 @@
       "PENDING_SETUP": "Čeka podešavanje",
       "ACTIVE": "Aktivan",
       "DEACTIVATED": "Deaktiviran"
+    },
+    "reviewStatus": {
+      "PENDING": "Na čekanju",
+      "APPROVED": "Odobreno",
+      "REJECTED": "Odbijeno"
+    },
+    "locale": {
+      "sr": "srpski",
+      "en": "engleski"
     }
   },
   "validation": {
@@ -596,6 +637,229 @@
     "IMAGE_LIMIT_REACHED": "Oglas već ima najveći dozvoljeni broj slika.",
     "RATE_LIMITED": "Previše pokušaja. Sačekajte malo i pokušajte ponovo.",
     "EXTERNAL_SERVICE_FAILED": "Spoljni servis trenutno nije dostupan. Pokušajte ponovo kasnije.",
-    "INTERNAL_ERROR": "Došlo je do greške. Pokušajte ponovo."
+    "INTERNAL_ERROR": "Došlo je do greške. Pokušajte ponovo.",
+    "INVALID_FILE": "Datoteka ne ispunjava uslove.",
+    "EMAIL_IN_USE": "Ova email adresa već pripada nalogu."
+  },
+  "agentApplication": {
+    "title": "Oglašavajte kao agent za nekretnine",
+    "intro": "Agenti objavljuju oglase pod svojim profilom agenta. Pošaljite nam svoje podatke i dokaz da radite kao agent; naš tim proverava svaku prijavu pre nego što se otvori nalog agenta.",
+    "stepsTitle": "Kako funkcioniše",
+    "steps": {
+      "apply": "Pošaljite podatke i dokaz, na primer licencu ili potvrdu o zaposlenju u agenciji.",
+      "review": "Naš tim proverava prijavu i javlja vam ishod emailom.",
+      "setup": "Nakon odobrenja postavljate lozinku iz emaila i možete da objavljujete oglase."
+    },
+    "sellerNote": "Prodajete svoju nekretninu? Ne treba vam nalog agenta.",
+    "sellerLink": "Registrujte se kao privatni prodavac",
+    "formTitle": "Prijava",
+    "fields": {
+      "fullName": "Ime i prezime",
+      "email": "Email adresa",
+      "emailHint": "Nalog agenta koristiće ovu adresu. Ne sme već pripadati nalogu na Walls.",
+      "phone": "Broj telefona",
+      "phoneHint": "Prikazuje se na vašem javnom profilu agenta.",
+      "agencyName": "Agencija (opciono)",
+      "files": "Dokaz"
+    },
+    "filesHint": "PDF, JPG ili PNG, do {maxMb} MB po datoteci, najviše {max} datoteka. Vidi ih samo naš tim.",
+    "chooseFiles": "Izaberi datoteke",
+    "removeFile": "Ukloni {name}",
+    "noFiles": "Dodajte bar jednu datoteku.",
+    "tooManyFiles": "Možete poslati najviše {max} datoteka.",
+    "fileTooLarge": "{name} je veća od {maxMb} MB.",
+    "fileWrongType": "{name} nije PDF, JPG ili PNG datoteka.",
+    "fileIssues": {
+      "UNSUPPORTED_TYPE": "nije PDF, JPG ili PNG datoteka",
+      "FILE_TOO_LARGE": "datoteka je prevelika",
+      "EMPTY_FILE": "prazna datoteka"
+    },
+    "submit": "Pošalji prijavu",
+    "successTitle": "Hvala na prijavi",
+    "successDescription": "Poslali smo potvrdu na {email}. Javićemo vam se emailom kada naš tim pregleda vašu prijavu."
+  },
+  "agentApplications": {
+    "title": "Prijave agenata",
+    "description": "Proverite podatke i dokaze svakog kandidata pre nego što odobrite nalog agenta.",
+    "tabs": {
+      "PENDING": "Na čekanju",
+      "APPROVED": "Odobrene",
+      "REJECTED": "Odbijene"
+    },
+    "columns": {
+      "name": "Kandidat",
+      "email": "Email",
+      "agency": "Agencija",
+      "files": "Datoteke",
+      "submitted": "Primljeno"
+    },
+    "empty": "Ovde nema prijava.",
+    "backToList": "Nazad na prijave",
+    "details": {
+      "email": "Email",
+      "phone": "Telefon",
+      "agency": "Agencija",
+      "language": "Jezik",
+      "submitted": "Primljeno",
+      "reviewedBy": "Pregledao/la",
+      "reviewedAt": "Pregledano",
+      "account": "Nalog agenta",
+      "none": "—"
+    },
+    "files": "Dokazi",
+    "filesPrivate": "Privatno: vide ih samo administratori.",
+    "openFile": "Otvori {name}",
+    "emailInUse": "Ova email adresa sada pripada postojećem nalogu, pa prijava ne može biti odobrena. Odbijte je i zamolite kandidata da se prijavi sa drugom adresom.",
+    "approve": "Odobri agenta",
+    "approveTitle": "Odobriti ovog agenta?",
+    "approveDescription": "Od ovih podataka otvara se nalog agenta, a kandidat dobija email da postavi lozinku.",
+    "approved": "Prijava je odobrena. Kandidatu je poslat email.",
+    "reject": "Odbij",
+    "rejectTitle": "Odbiti ovu prijavu?",
+    "rejectDescription": "Kandidat dobija razlog emailom. Nalog se ne otvara.",
+    "reason": "Razlog (šalje se kandidatu)",
+    "rejected": "Prijava je odbijena.",
+    "rejectionReason": "Razlog odbijanja"
+  },
+  "profile": {
+    "title": "Moj profil",
+    "description": "Ono što posetioci vide na vašoj javnoj stranici profila.",
+    "viewPublic": "Pogledaj javni profil",
+    "approvalNotice": "Naš tim proverava izmene profila agenta pre nego što postanu javne.",
+    "pendingNotice": "Vaše izmene čekaju proveru. Javni profil ostaje isti dok ih ne odobrimo; do tada možete nastaviti sa izmenama.",
+    "rejectedNotice": "Vaše poslednje izmene nisu odobrene. Razlog:",
+    "showingProposed": "Obrazac prikazuje vaše izmene koje čekaju proveru.",
+    "sections": {
+      "public": "Javni profil",
+      "contact": "Kontakt podaci",
+      "picture": "Profilna slika",
+      "email": "Email za prijavu"
+    },
+    "fields": {
+      "displayName": "Ime",
+      "bio": "O vama",
+      "bioHint": "Nekoliko rečenica za stranicu vašeg profila.",
+      "agencyName": "Agencija",
+      "phone": "Broj telefona",
+      "phonePublic": "Prikaži moj broj telefona na profilu",
+      "phoneAlwaysPublic": "Broj telefona agenta uvek se prikazuje na profilu.",
+      "emailPublic": "Prikaži moju email adresu na profilu"
+    },
+    "phoneStatus": {
+      "UNVERIFIED": "Nije verifikovan",
+      "VERIFIED": "Verifikovan"
+    },
+    "phoneStatusHint": "Brojevi telefona prikazuju se kao neverifikovani; ne možete ih sami verifikovati.",
+    "save": "Sačuvaj profil",
+    "submitForReview": "Pošalji izmene na proveru",
+    "saved": "Profil je sačuvan.",
+    "sentForReview": "Izmene su poslate na proveru.",
+    "unchanged": "Nema izmena za čuvanje.",
+    "discard": "Odbaci izmene",
+    "discardTitle": "Odbaciti izmene?",
+    "discardDescription": "Vaš javni profil ostaje isti.",
+    "discarded": "Izmene su odbačene.",
+    "cancel": "Otkaži",
+    "avatar": {
+      "upload": "Dodaj sliku",
+      "replace": "Promeni sliku",
+      "remove": "Ukloni sliku",
+      "rules": "JPEG, PNG, WebP ili HEIC, najmanje 200 × 200 piksela, do 10 MB.",
+      "uploaded": "Slika je promenjena.",
+      "uploadedForReview": "Slika je poslata na proveru.",
+      "removed": "Slika je uklonjena.",
+      "alt": "Profilna slika: {name}"
+    },
+    "email": {
+      "current": "Trenutna adresa",
+      "pending": "Čeka potvrdu: {email}",
+      "pendingHint": "Otvorite link koji smo poslali na novu adresu da biste je potvrdili.",
+      "change": "Promeni email adresu",
+      "newEmail": "Nova email adresa",
+      "currentPassword": "Trenutna lozinka",
+      "send": "Pošalji link za potvrdu",
+      "sent": "Poslali smo link za potvrdu na {email}.",
+      "cancel": "Otkaži promenu",
+      "cancelled": "Promena email adrese je otkazana.",
+      "agentNote": "Kada potvrdite novu adresu, promenu mora odobriti i naš tim."
+    }
+  },
+  "profileChanges": {
+    "title": "Izmene profila",
+    "description": "Izmene profila agenata postaju javne tek nakon odobrenja.",
+    "tabs": {
+      "PENDING": "Na čekanju",
+      "APPROVED": "Odobrene",
+      "REJECTED": "Odbijene"
+    },
+    "columns": {
+      "agent": "Agent",
+      "changes": "Izmene",
+      "updated": "Poslednja izmena"
+    },
+    "empty": "Ovde nema izmena profila.",
+    "backToList": "Nazad na izmene profila",
+    "compare": {
+      "field": "Polje",
+      "live": "Trenutno",
+      "proposed": "Predlog"
+    },
+    "fields": {
+      "DISPLAY_NAME": "Ime",
+      "BIO": "O agentu",
+      "AGENCY_NAME": "Agencija",
+      "PHONE": "Broj telefona",
+      "PHONE_PUBLIC": "Telefon javno prikazan",
+      "EMAIL_PUBLIC": "Email javno prikazan",
+      "AVATAR": "Profilna slika",
+      "EMAIL": "Email za prijavu"
+    },
+    "emptyValue": "—",
+    "yes": "Da",
+    "no": "Ne",
+    "viewUser": "Pogledaj nalog",
+    "approve": "Odobri izmene",
+    "approveTitle": "Objaviti ove izmene profila?",
+    "approveDescription": "Javni profil agenta se ažurira i agent dobija obaveštenje emailom.",
+    "approved": "Izmene profila su odobrene.",
+    "reject": "Odbij",
+    "rejectTitle": "Odbiti ove izmene?",
+    "rejectDescription": "Javni profil ostaje isti. Agent dobija razlog emailom.",
+    "reason": "Razlog (šalje se agentu)",
+    "rejected": "Izmene profila su odbijene.",
+    "rejectionReason": "Razlog odbijanja",
+    "reviewedBy": "Pregledao/la: {name}"
+  },
+  "publicProfile": {
+    "agentsTitle": "Agenti za nekretnine",
+    "agentsDescription": "Agenti koje je odobrio Walls i nekretnine koje oglašavaju.",
+    "agentsEmpty": "Još nema agenata.",
+    "listingCount": "{count, plural, =0 {Nema oglasa} one {# oglas} few {# oglasa} other {# oglasa}}",
+    "approvedAgent": "Odobren agent",
+    "approvedAgentHint": "Walls je proverio profesionalne podatke ovog agenta.",
+    "privateSeller": "Privatni prodavac",
+    "phoneVerified": "Verifikovan",
+    "phoneUnverified": "Nije verifikovan",
+    "phoneUnverifiedHint": "Walls nije verifikovao ovaj broj telefona.",
+    "contact": "Kontakt",
+    "noContact": "Nema javnih kontakt podataka.",
+    "memberSince": "Na Walls od {date}",
+    "listingsTitle": "Oglasi",
+    "noListings": "Trenutno nema objavljenih oglasa.",
+    "previous": "Prethodna",
+    "next": "Sledeća",
+    "avatarAlt": "Profilna slika: {name}"
+  },
+  "listingCard": {
+    "priceOnRequest": "Cena na upit",
+    "perPeriod": "{price} / {period}",
+    "period": {
+      "DAY": "dan",
+      "WEEK": "nedelja",
+      "MONTH": "mesec"
+    },
+    "area": "{area} m²",
+    "bedrooms": "{count, plural, one {# spavaća soba} few {# spavaće sobe} other {# spavaćih soba}}",
+    "noImage": "Nema slike"
   }
 }

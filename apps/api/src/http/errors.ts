@@ -108,6 +108,19 @@ export const invalidImage = (issues: readonly ImageIssue[]) =>
     issues,
   });
 
+/** `files` lists, per uploaded file name, every rule the file breaks. */
+export const invalidFile = (files: readonly { name: string; issues: readonly string[] }[]) =>
+  new AppError(HTTP_STATUS.UNPROCESSABLE, ApiErrorCode.INVALID_FILE, 'A file is not valid', {
+    files,
+  });
+
+export const emailInUse = () =>
+  new AppError(
+    HTTP_STATUS.CONFLICT,
+    ApiErrorCode.EMAIL_IN_USE,
+    'This email address already belongs to an account',
+  );
+
 export const imageLimitReached = () =>
   new AppError(
     HTTP_STATUS.CONFLICT,

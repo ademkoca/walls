@@ -27,6 +27,10 @@ export const ApiErrorCode = {
   INVALID_IMAGE: 'INVALID_IMAGE',
   /** 409: the listing already has the maximum number of images. */
   IMAGE_LIMIT_REACHED: 'IMAGE_LIMIT_REACHED',
+  /** 422: an uploaded document breaks the file rules; `details.files` lists how. */
+  INVALID_FILE: 'INVALID_FILE',
+  /** 409: the email address already belongs to an account. */
+  EMAIL_IN_USE: 'EMAIL_IN_USE',
   RATE_LIMITED: 'RATE_LIMITED',
   EXTERNAL_SERVICE_FAILED: 'EXTERNAL_SERVICE_FAILED',
   INTERNAL_ERROR: 'INTERNAL_ERROR',

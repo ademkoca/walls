@@ -21,7 +21,8 @@
     "dashboard": "Dashboard",
     "logout": "Log out",
     "openMenu": "Open menu",
-    "accountMenu": "Account menu"
+    "accountMenu": "Account menu",
+    "profile": "My profile"
   },
   "language": {
     "label": "Language",
@@ -112,6 +113,16 @@
       "success": "Your account is active. Log in with the password you chose.",
       "goToLogin": "Log in",
       "missingToken": "This setup link is incomplete. Open it directly from the email you received."
+    },
+    "confirmEmail": {
+      "title": "Confirm your new email address",
+      "description": "Confirm the change to make this the email address you log in with.",
+      "submit": "Confirm email address",
+      "changed": "Your email address has been changed. Use it the next time you log in.",
+      "awaitingApproval": "Your new email address is confirmed. It takes effect once our team approves your profile changes.",
+      "missingToken": "This link is incomplete. Open it directly from the email you received.",
+      "requestNew": "Request a new link from your profile page.",
+      "goToProfile": "Go to my profile"
     }
   },
   "dashboard": {
@@ -126,7 +137,11 @@
       "viewSite": "View site",
       "reviewListings": "Listings",
       "users": "Users",
-      "auditLog": "Audit log"
+      "auditLog": "Audit log",
+      "profile": "My profile",
+      "agentApplications": "Agent applications",
+      "profileChanges": "Profile changes",
+      "waiting": "{count} waiting"
     }
   },
   "listings": {
@@ -429,7 +444,13 @@
     "inviteEmail": "Email address",
     "inviteLanguage": "Email language",
     "inviteSubmit": "Send invitation",
-    "invited": "Invitation sent."
+    "invited": "Invitation sent.",
+    "agentApplication": {
+      "title": "Agent application",
+      "approvedOn": "Approved on {date}.",
+      "private": "The proof files are kept as evidence of eligibility and are visible to administrators only.",
+      "view": "View application"
+    }
   },
   "auditLog": {
     "title": "Audit log",
@@ -476,8 +497,19 @@
       "LISTING_REVISION_WITHDRAWN": "Changes withdrawn",
       "LISTING_REVISION_APPROVED": "Changes approved",
       "LISTING_REVISION_REJECTED": "Changes rejected",
-      "LISTING_REVISION_DISCARDED": "Changes discarded"
-    }
+      "LISTING_REVISION_DISCARDED": "Changes discarded",
+      "USER_PROFILE_UPDATED": "Profile updated",
+      "USER_EMAIL_CHANGE_REQUESTED": "Email change requested",
+      "USER_EMAIL_CHANGED": "Email address changed",
+      "PROFILE_CHANGE_SAVED": "Profile changes sent for review",
+      "PROFILE_CHANGE_WITHDRAWN": "Profile changes withdrawn",
+      "PROFILE_CHANGE_APPROVED": "Profile changes approved",
+      "PROFILE_CHANGE_REJECTED": "Profile changes rejected",
+      "AGENT_APPLICATION_SUBMITTED": "Agent application received",
+      "AGENT_APPLICATION_APPROVED": "Agent application approved",
+      "AGENT_APPLICATION_REJECTED": "Agent application rejected"
+    },
+    "agentApplication": "Application"
   },
   "roles": {
     "SUPER_ADMIN": "a Super Admin",
@@ -566,6 +598,15 @@
       "PENDING_SETUP": "Setup pending",
       "ACTIVE": "Active",
       "DEACTIVATED": "Deactivated"
+    },
+    "reviewStatus": {
+      "PENDING": "Waiting",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "locale": {
+      "sr": "Serbian",
+      "en": "English"
     }
   },
   "validation": {
@@ -596,6 +637,229 @@
     "IMAGE_LIMIT_REACHED": "The listing already has the maximum number of images.",
     "RATE_LIMITED": "Too many attempts. Wait a moment and try again.",
     "EXTERNAL_SERVICE_FAILED": "An external service is unavailable. Try again later.",
-    "INTERNAL_ERROR": "Something went wrong. Please try again."
+    "INTERNAL_ERROR": "Something went wrong. Please try again.",
+    "INVALID_FILE": "A file doesn't meet the requirements.",
+    "EMAIL_IN_USE": "This email address already belongs to an account."
+  },
+  "agentApplication": {
+    "title": "Advertise as a real-estate agent",
+    "intro": "Agents publish listings under their own agent profile. Tell us about yourself and send proof that you work as an agent; our team reviews every application before an agent account is created.",
+    "stepsTitle": "How it works",
+    "steps": {
+      "apply": "Send your details and proof, such as a licence or an employment confirmation from your agency.",
+      "review": "Our team checks your application and emails you the outcome.",
+      "setup": "Once approved, you set your password from the email and can start publishing listings."
+    },
+    "sellerNote": "Selling your own property? You don't need an agent account.",
+    "sellerLink": "Register as a private seller",
+    "formTitle": "Application",
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email address",
+      "emailHint": "Your agent account will use this address. It can't already belong to a Walls account.",
+      "phone": "Phone number",
+      "phoneHint": "Shown on your public agent profile.",
+      "agencyName": "Agency (optional)",
+      "files": "Proof"
+    },
+    "filesHint": "PDF, JPG or PNG, up to {maxMb} MB each, at most {max} files. Only our team can see them.",
+    "chooseFiles": "Choose files",
+    "removeFile": "Remove {name}",
+    "noFiles": "Add at least one file.",
+    "tooManyFiles": "You can send at most {max} files.",
+    "fileTooLarge": "{name} is larger than {maxMb} MB.",
+    "fileWrongType": "{name} isn't a PDF, JPG or PNG file.",
+    "fileIssues": {
+      "UNSUPPORTED_TYPE": "not a PDF, JPG or PNG file",
+      "FILE_TOO_LARGE": "file too large",
+      "EMPTY_FILE": "empty file"
+    },
+    "submit": "Send application",
+    "successTitle": "Thank you for applying",
+    "successDescription": "We've sent a confirmation to {email}. You'll hear from us by email once our team has reviewed your application."
+  },
+  "agentApplications": {
+    "title": "Agent applications",
+    "description": "Check each applicant's details and proof before approving an agent account.",
+    "tabs": {
+      "PENDING": "Waiting",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "columns": {
+      "name": "Applicant",
+      "email": "Email",
+      "agency": "Agency",
+      "files": "Files",
+      "submitted": "Received"
+    },
+    "empty": "No applications here.",
+    "backToList": "Back to applications",
+    "details": {
+      "email": "Email",
+      "phone": "Phone",
+      "agency": "Agency",
+      "language": "Language",
+      "submitted": "Received",
+      "reviewedBy": "Reviewed by",
+      "reviewedAt": "Reviewed",
+      "account": "Agent account",
+      "none": "—"
+    },
+    "files": "Proof files",
+    "filesPrivate": "Private: visible to administrators only.",
+    "openFile": "Open {name}",
+    "emailInUse": "This email address now belongs to an existing account, so the application can't be approved. Reject it and ask the applicant to apply with another address.",
+    "approve": "Approve agent",
+    "approveTitle": "Approve this agent?",
+    "approveDescription": "An agent account is created from these details and the applicant receives an email to set their password.",
+    "approved": "Application approved. The applicant has been emailed.",
+    "reject": "Reject",
+    "rejectTitle": "Reject this application?",
+    "rejectDescription": "The applicant receives the reason by email. No account is created.",
+    "reason": "Reason (sent to the applicant)",
+    "rejected": "Application rejected.",
+    "rejectionReason": "Reason for rejection"
+  },
+  "profile": {
+    "title": "My profile",
+    "description": "What visitors see on your public profile page.",
+    "viewPublic": "View public profile",
+    "approvalNotice": "Changes to your agent profile are checked by our team before they become public.",
+    "pendingNotice": "Your changes are waiting for review. Your public profile stays as it is until they're approved; you can keep editing until then.",
+    "rejectedNotice": "Your last changes were not approved. Reason:",
+    "showingProposed": "The form shows your changes waiting for review.",
+    "sections": {
+      "public": "Public profile",
+      "contact": "Contact details",
+      "picture": "Profile picture",
+      "email": "Login email"
+    },
+    "fields": {
+      "displayName": "Name",
+      "bio": "About you",
+      "bioHint": "A few sentences for your profile page.",
+      "agencyName": "Agency",
+      "phone": "Phone number",
+      "phonePublic": "Show my phone number on my profile",
+      "phoneAlwaysPublic": "Agents' phone numbers are always shown on their profile.",
+      "emailPublic": "Show my email address on my profile"
+    },
+    "phoneStatus": {
+      "UNVERIFIED": "Not verified",
+      "VERIFIED": "Verified"
+    },
+    "phoneStatusHint": "Phone numbers are shown as not verified; you can't verify them yourself.",
+    "save": "Save profile",
+    "submitForReview": "Send changes for review",
+    "saved": "Profile saved.",
+    "sentForReview": "Your changes were sent for review.",
+    "unchanged": "There are no changes to save.",
+    "discard": "Discard changes",
+    "discardTitle": "Discard your changes?",
+    "discardDescription": "Your public profile stays as it is.",
+    "discarded": "Changes discarded.",
+    "cancel": "Cancel",
+    "avatar": {
+      "upload": "Upload picture",
+      "replace": "Change picture",
+      "remove": "Remove picture",
+      "rules": "JPEG, PNG, WebP or HEIC, at least 200 × 200 pixels, up to 10 MB.",
+      "uploaded": "Picture updated.",
+      "uploadedForReview": "Picture sent for review.",
+      "removed": "Picture removed.",
+      "alt": "Profile picture of {name}"
+    },
+    "email": {
+      "current": "Current address",
+      "pending": "Waiting for confirmation: {email}",
+      "pendingHint": "Open the link we sent to the new address to confirm it.",
+      "change": "Change email address",
+      "newEmail": "New email address",
+      "currentPassword": "Current password",
+      "send": "Send confirmation link",
+      "sent": "We've sent a confirmation link to {email}.",
+      "cancel": "Cancel change",
+      "cancelled": "Email change cancelled.",
+      "agentNote": "After you confirm the new address, the change also needs our team's approval."
+    }
+  },
+  "profileChanges": {
+    "title": "Profile changes",
+    "description": "Agents' profile changes become public only after approval.",
+    "tabs": {
+      "PENDING": "Waiting",
+      "APPROVED": "Approved",
+      "REJECTED": "Rejected"
+    },
+    "columns": {
+      "agent": "Agent",
+      "changes": "Changes",
+      "updated": "Last change"
+    },
+    "empty": "No profile changes here.",
+    "backToList": "Back to profile changes",
+    "compare": {
+      "field": "Field",
+      "live": "Current",
+      "proposed": "Proposed"
+    },
+    "fields": {
+      "DISPLAY_NAME": "Name",
+      "BIO": "About",
+      "AGENCY_NAME": "Agency",
+      "PHONE": "Phone number",
+      "PHONE_PUBLIC": "Phone shown publicly",
+      "EMAIL_PUBLIC": "Email shown publicly",
+      "AVATAR": "Profile picture",
+      "EMAIL": "Login email"
+    },
+    "emptyValue": "—",
+    "yes": "Yes",
+    "no": "No",
+    "viewUser": "View account",
+    "approve": "Approve changes",
+    "approveTitle": "Publish these profile changes?",
+    "approveDescription": "The agent's public profile is updated and they're notified by email.",
+    "approved": "Profile changes approved.",
+    "reject": "Reject",
+    "rejectTitle": "Reject these changes?",
+    "rejectDescription": "The public profile stays as it is. The agent receives the reason by email.",
+    "reason": "Reason (sent to the agent)",
+    "rejected": "Profile changes rejected.",
+    "rejectionReason": "Reason for rejection",
+    "reviewedBy": "Reviewed by {name}"
+  },
+  "publicProfile": {
+    "agentsTitle": "Real-estate agents",
+    "agentsDescription": "Agents approved by Walls and the properties they advertise.",
+    "agentsEmpty": "No agents yet.",
+    "listingCount": "{count, plural, =0 {No listings} one {# listing} other {# listings}}",
+    "approvedAgent": "Approved agent",
+    "approvedAgentHint": "Walls checked this agent's professional details.",
+    "privateSeller": "Private seller",
+    "phoneVerified": "Verified",
+    "phoneUnverified": "Not verified",
+    "phoneUnverifiedHint": "Walls hasn't verified this phone number.",
+    "contact": "Contact",
+    "noContact": "No public contact details.",
+    "memberSince": "On Walls since {date}",
+    "listingsTitle": "Listings",
+    "noListings": "No published listings at the moment.",
+    "previous": "Previous",
+    "next": "Next",
+    "avatarAlt": "Profile picture of {name}"
+  },
+  "listingCard": {
+    "priceOnRequest": "Price on request",
+    "perPeriod": "{price} / {period}",
+    "period": {
+      "DAY": "day",
+      "WEEK": "week",
+      "MONTH": "month"
+    },
+    "area": "{area} m²",
+    "bedrooms": "{count, plural, one {# bedroom} other {# bedrooms}}",
+    "noImage": "No image"
   }
 }

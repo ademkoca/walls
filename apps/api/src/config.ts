@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { z } from 'zod';
-import type { CloudinaryCredentials } from './media/cloudinary-media-storage';
+import type { CloudinaryCredentials } from './media/cloudinary-client';
 
 const MIN_SECRET_LENGTH = 32;
 const DEFAULT_PORT = 4000;
@@ -20,6 +20,8 @@ const envSchema = z
     WEB_ORIGIN: z.url(),
     /** Number of reverse proxies in front of the API, used to read the client IP. */
     TRUST_PROXY_HOPS: z.coerce.number().int().min(0).default(0),
+    /** Auth requests (register, login, reset, …) allowed per IP every 15 minutes. */
+    AUTH_RATE_LIMIT_PER_IP: z.coerce.number().int().positive().default(30),
     RESEND_API_KEY: z.string().optional(),
     EMAIL_FROM: z.string().min(1).default('Walls <no-reply@walls.rs>'),
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
@@ -27,6 +29,8 @@ const envSchema = z
     CLOUDINARY_API_SECRET: z.string().optional(),
     /** Development only: where uploads are stored when Cloudinary is not configured. */
     LOCAL_MEDIA_DIR: z.string().min(1).default('.media'),
+    /** Development only: private documents (agent proof files) without Cloudinary. */
+    LOCAL_PRIVATE_FILES_DIR: z.string().min(1).default('.private-files'),
   })
   .refine((env) => env.NODE_ENV !== 'production' || Boolean(env.RESEND_API_KEY), {
     message: 'RESEND_API_KEY is required in production',
@@ -54,11 +58,15 @@ export interface Config {
   /** Origin of the web app: allowed origin for state-changing requests and base for email links. */
   webOrigin: string;
   trustProxyHops: number;
+  /** Auth requests per IP per 15 minutes (tests that share one IP raise it). */
+  authRateLimitPerIp: number;
   email: { resendApiKey: string | undefined; from: string };
   media: {
     /** Absent outside production when not configured; uploads then go to `localDirectory`. */
     cloudinary: CloudinaryCredentials | undefined;
     localDirectory: string;
+    /** Never served directly; see LocalDiskPrivateFileStorage. */
+    localPrivateDirectory: string;
   };
 }
 
@@ -80,6 +88,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     sessionSecret: parsed.SESSION_SECRET,
     webOrigin: new URL(parsed.WEB_ORIGIN).origin,
     trustProxyHops: parsed.TRUST_PROXY_HOPS,
+    authRateLimitPerIp: parsed.AUTH_RATE_LIMIT_PER_IP,
     email: { resendApiKey: parsed.RESEND_API_KEY || undefined, from: parsed.EMAIL_FROM },
     media: {
       cloudinary:
@@ -91,6 +100,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
             }
           : undefined,
       localDirectory: path.resolve(parsed.LOCAL_MEDIA_DIR),
+      localPrivateDirectory: path.resolve(parsed.LOCAL_PRIVATE_FILES_DIR),
     },
   };
 }

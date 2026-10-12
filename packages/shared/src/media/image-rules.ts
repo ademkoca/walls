@@ -56,3 +56,20 @@ export function checkListingImage(image: MeasuredImage): ImageIssue[] {
 export function canAddListingImage(currentCount: number): boolean {
   return currentCount < LISTING_IMAGE_RULES.maxImagesPerListing;
 }
+
+/** Profile pictures: the listing image formats, square-ish crops of any common size. */
+export const AVATAR_IMAGE_RULES = {
+  allowedMimeTypes: LISTING_IMAGE_RULES.allowedMimeTypes,
+  maxBytes: 10 * BYTES_PER_MB,
+  minSidePx: 200,
+} as const;
+
+export function checkAvatarImage(image: MeasuredImage): ImageIssue[] {
+  const issues: ImageIssue[] = [];
+  if (!isAllowedImageMimeType(image.mimeType)) issues.push(ImageIssue.UNSUPPORTED_TYPE);
+  if (image.bytes > AVATAR_IMAGE_RULES.maxBytes) issues.push(ImageIssue.FILE_TOO_LARGE);
+  if (Math.min(image.width, image.height) < AVATAR_IMAGE_RULES.minSidePx) {
+    issues.push(ImageIssue.DIMENSIONS_TOO_SMALL);
+  }
+  return issues;
+}

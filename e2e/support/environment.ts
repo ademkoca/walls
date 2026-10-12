@@ -33,7 +33,10 @@ export const API_ENV = {
   CLOUDINARY_API_SECRET: '',
   // Uploads stay inside the gitignored output folder.
   LOCAL_MEDIA_DIR: path.resolve(import.meta.dirname, '../.output/media'),
+  LOCAL_PRIVATE_FILES_DIR: path.resolve(import.meta.dirname, '../.output/private-files'),
   LOG_LEVEL: 'info',
+  // Every test browser shares one IP; the production default (30) would throttle the suite.
+  AUTH_RATE_LIMIT_PER_IP: '10000',
 };
 
 export const WEB_ENV = {

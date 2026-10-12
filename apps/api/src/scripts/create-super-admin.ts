@@ -51,8 +51,11 @@ async function main(): Promise<void> {
       },
       null,
     );
-    // Deliver the setup email now rather than waiting for the API's outbox worker.
-    await processOutbox(db, createEmailService(config, logger), logger);
+    // Deliver the setup email now rather than waiting for the API's outbox worker; only
+    // this one, so other queued mail is still sent (and logged) by the API.
+    await processOutbox(db, createEmailService(config, logger), logger, {
+      recipient: user.email,
+    });
     console.info(
       `Super Admin ${user.email} created. They must open the emailed link to set a password.`,
     );

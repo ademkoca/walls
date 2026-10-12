@@ -6,7 +6,13 @@ import type { AppLocale } from '@/i18n/routing';
 export async function privatePageMetadata(
   locale: AppLocale,
   titleKey:
-    'login' | 'register' | 'verifyEmail' | 'forgotPassword' | 'resetPassword' | 'setupAccount',
+    | 'login'
+    | 'register'
+    | 'verifyEmail'
+    | 'forgotPassword'
+    | 'resetPassword'
+    | 'setupAccount'
+    | 'confirmEmail',
 ): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'auth' });
   return { title: t(`${titleKey}.title`), robots: { index: false, follow: false } };

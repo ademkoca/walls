@@ -11,6 +11,7 @@ import { insertUser } from '../src/auth/auth.repository';
 import { hashPassword } from '../src/auth/passwords';
 import { type EmailMessage, RecordingEmailService } from '../src/email/email-service';
 import { InMemoryMediaStorage } from '../src/media/media-storage';
+import { InMemoryPrivateFileStorage } from '../src/media/private-file-storage';
 import { Role, UserStatus } from '@walls/shared';
 import sharp from 'sharp';
 import { processOutbox } from '../src/email/outbox';
@@ -32,8 +33,13 @@ export const testConfig: Config = {
   sessionSecret: 'test-session-secret-that-is-long-enough-123',
   webOrigin: WEB_ORIGIN,
   trustProxyHops: 0,
+  authRateLimitPerIp: 30,
   email: { resendApiKey: undefined, from: 'Walls <test@walls.rs>' },
-  media: { cloudinary: undefined, localDirectory: '/nonexistent' },
+  media: {
+    cloudinary: undefined,
+    localDirectory: '/nonexistent',
+    localPrivateDirectory: '/nonexistent',
+  },
 };
 
 export function uniqueEmail(): string {
@@ -42,18 +48,23 @@ export function uniqueEmail(): string {
 
 /** An app wired to the test database, with emails and media captured in memory. */
 export function createTestContext(
-  overrides: Partial<Pick<AppDependencies, 'rateLimits' | 'uploadRateLimit'>> = {},
+  overrides: Partial<
+    Pick<AppDependencies, 'rateLimits' | 'uploadRateLimit' | 'applicationRateLimit'>
+  > = {},
 ) {
   const logger = pino({ level: 'silent' });
   const { db, close } = createDatabase({ url: testConfig.databaseUrl, maxConnections: 5 });
   const media = new InMemoryMediaStorage();
+  const privateFiles = new InMemoryPrivateFileStorage();
   const app = createApp({
     db,
     config: testConfig,
     logger,
     mediaStorage: media,
+    privateFiles,
     rateLimits: GENEROUS_LIMITS,
     uploadRateLimit: GENEROUS_LIMITS.perIp,
+    applicationRateLimit: GENEROUS_LIMITS.perIp,
     ...overrides,
   });
   const emails = new RecordingEmailService();
@@ -80,6 +91,18 @@ export function createTestContext(
       delete: (path: string) => agent.delete(path).set('Origin', WEB_ORIGIN),
       upload: (path: string, file: Buffer, filename = 'photo.jpg') =>
         agent.post(path).set('Origin', WEB_ORIGIN).attach('file', file, filename),
+      /** A multipart form with text fields and files under `fileField`. */
+      multipart: (
+        path: string,
+        fields: Record<string, string>,
+        files: { data: Buffer; name: string }[],
+        fileField = 'files',
+      ) => {
+        let request = agent.post(path).set('Origin', WEB_ORIGIN);
+        for (const [name, value] of Object.entries(fields)) request = request.field(name, value);
+        for (const file of files) request = request.attach(fileField, file.data, file.name);
+        return request;
+      },
     };
   }
 
@@ -105,7 +128,7 @@ export function createTestContext(
     return { user, client: signedIn };
   }
 
-  return { app, db, close, emails, media, lastEmailTo, client, signedInUser };
+  return { app, db, close, emails, media, privateFiles, lastEmailTo, client, signedInUser };
 }
 
 /** Extracts the single-use token from an emailed link. */

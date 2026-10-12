@@ -10,7 +10,11 @@ export async function Pager({
   page,
   hasMore,
 }: {
-  pathname: '/dashboard/users' | '/dashboard/audit-log';
+  pathname:
+    | '/dashboard/users'
+    | '/dashboard/audit-log'
+    | '/dashboard/agent-applications'
+    | '/dashboard/profile-changes';
   query: Record<string, string>;
   page: number;
   hasMore: boolean;

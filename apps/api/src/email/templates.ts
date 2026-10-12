@@ -15,6 +15,15 @@ export const EmailTemplate = {
   LISTING_CHANGES_REJECTED: 'LISTING_CHANGES_REJECTED',
   ACCOUNT_DEACTIVATED: 'ACCOUNT_DEACTIVATED',
   ACCOUNT_REACTIVATED: 'ACCOUNT_REACTIVATED',
+  AGENT_APPLICATION_RECEIVED: 'AGENT_APPLICATION_RECEIVED',
+  AGENT_APPLICATION_EMAIL_IN_USE: 'AGENT_APPLICATION_EMAIL_IN_USE',
+  AGENT_APPLICATION_DUPLICATE: 'AGENT_APPLICATION_DUPLICATE',
+  AGENT_APPLICATION_APPROVED: 'AGENT_APPLICATION_APPROVED',
+  AGENT_APPLICATION_REJECTED: 'AGENT_APPLICATION_REJECTED',
+  EMAIL_CHANGE_VERIFICATION: 'EMAIL_CHANGE_VERIFICATION',
+  EMAIL_CHANGED: 'EMAIL_CHANGED',
+  PROFILE_CHANGES_APPROVED: 'PROFILE_CHANGES_APPROVED',
+  PROFILE_CHANGES_REJECTED: 'PROFILE_CHANGES_REJECTED',
 } as const;
 export type EmailTemplate = (typeof EmailTemplate)[keyof typeof EmailTemplate];
 
@@ -37,6 +46,15 @@ export interface EmailPayloads {
   };
   ACCOUNT_DEACTIVATED: { displayName: string; reason: string };
   ACCOUNT_REACTIVATED: { displayName: string; reason: string; loginLink: string };
+  AGENT_APPLICATION_RECEIVED: { fullName: string };
+  AGENT_APPLICATION_EMAIL_IN_USE: { fullName: string; loginLink: string; applyLink: string };
+  AGENT_APPLICATION_DUPLICATE: { fullName: string };
+  AGENT_APPLICATION_APPROVED: { displayName: string; link: string };
+  AGENT_APPLICATION_REJECTED: { fullName: string; reason: string };
+  EMAIL_CHANGE_VERIFICATION: { displayName: string; newEmail: string; link: string };
+  EMAIL_CHANGED: { displayName: string; newEmail: string };
+  PROFILE_CHANGES_APPROVED: { displayName: string; link: string };
+  PROFILE_CHANGES_REJECTED: { displayName: string; reason: string; link: string };
 }
 
 interface EmailContent {
@@ -155,6 +173,73 @@ const COPY: Record<Locale, Copy> = {
       ],
       action: { label: 'Prijavite se', url: loginLink },
     }),
+    AGENT_APPLICATION_RECEIVED: ({ fullName }) => ({
+      subject: 'Primili smo vašu prijavu za agente',
+      paragraphs: [
+        `Zdravo ${fullName},`,
+        `hvala na prijavi za agente na ${brand.name}. Naš tim će pregledati vaše podatke i dokaze i javiti vam ishod emailom.`,
+      ],
+    }),
+    AGENT_APPLICATION_EMAIL_IN_USE: ({ fullName, loginLink, applyLink }) => ({
+      subject: 'Prijava za agente nije primljena',
+      paragraphs: [
+        `Zdravo ${fullName},`,
+        `primili smo prijavu za agente sa ove email adrese, ali ona već pripada nalogu na ${brand.name}. Nalog agenta mora imati svoju email adresu, pa vas molimo da se prijavite ponovo sa drugom adresom.`,
+        `Ako niste vi poslali prijavu, zanemarite ovu poruku. Svom postojećem nalogu možete pristupiti ovde: ${loginLink}`,
+      ],
+      action: { label: 'Pošalji novu prijavu', url: applyLink },
+    }),
+    AGENT_APPLICATION_DUPLICATE: ({ fullName }) => ({
+      subject: 'Vaša prijava za agente je već u obradi',
+      paragraphs: [
+        `Zdravo ${fullName},`,
+        'sa ove email adrese već imamo prijavu za agente koja čeka proveru, pa novu prijavu nismo sačuvali. Javićemo vam ishod emailom.',
+      ],
+    }),
+    AGENT_APPLICATION_APPROVED: ({ displayName, link }) => ({
+      subject: 'Vaša prijava za agente je odobrena',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `vaša prijava za agente na ${brand.name} je odobrena. Postavite lozinku da biste aktivirali nalog agenta i počeli da objavljujete oglase.`,
+        `Link važi ${setupDays} dana.`,
+      ],
+      action: { label: 'Podesi nalog', url: link },
+    }),
+    AGENT_APPLICATION_REJECTED: ({ fullName, reason }) => ({
+      subject: 'Vaša prijava za agente nije odobrena',
+      paragraphs: [`Zdravo ${fullName},`, 'vaša prijava za agente nije odobrena. Razlog:', reason],
+    }),
+    EMAIL_CHANGE_VERIFICATION: ({ displayName, newEmail, link }) => ({
+      subject: 'Potvrdite novu email adresu',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `potvrdite da želite da ${newEmail} bude nova email adresa vašeg naloga na ${brand.name}.`,
+        `Link važi ${TOKEN_TTL_HOURS.EMAIL_CHANGE} sata. Ako niste vi zatražili promenu, zanemarite ovu poruku.`,
+      ],
+      action: { label: 'Potvrdi adresu', url: link },
+    }),
+    EMAIL_CHANGED: ({ displayName, newEmail }) => ({
+      subject: 'Email adresa naloga je promenjena',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `email adresa vašeg naloga na ${brand.name} je promenjena u ${newEmail}. Od sada se prijavljujete tom adresom.`,
+        'Ako niste vi napravili ovu promenu, odmah nam odgovorite na ovaj email.',
+      ],
+    }),
+    PROFILE_CHANGES_APPROVED: ({ displayName, link }) => ({
+      subject: 'Izmene profila su odobrene',
+      paragraphs: [`Zdravo ${displayName},`, 'izmene vašeg profila su odobrene i sada su javne.'],
+      action: { label: 'Pogledaj profil', url: link },
+    }),
+    PROFILE_CHANGES_REJECTED: ({ displayName, reason, link }) => ({
+      subject: 'Izmene profila nisu odobrene',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        'izmene vašeg profila nisu odobrene; javni profil je ostao isti. Razlog:',
+        reason,
+      ],
+      action: { label: 'Uredi profil', url: link },
+    }),
   },
   en: {
     EMAIL_VERIFICATION: ({ displayName, link }) => ({
@@ -260,6 +345,80 @@ const COPY: Record<Locale, Copy> = {
         reason,
       ],
       action: { label: 'Log in', url: loginLink },
+    }),
+    AGENT_APPLICATION_RECEIVED: ({ fullName }) => ({
+      subject: 'We received your agent application',
+      paragraphs: [
+        `Hello ${fullName},`,
+        `thank you for applying as an agent on ${brand.name}. Our team will review your details and proof and email you the outcome.`,
+      ],
+    }),
+    AGENT_APPLICATION_EMAIL_IN_USE: ({ fullName, loginLink, applyLink }) => ({
+      subject: 'Your agent application was not received',
+      paragraphs: [
+        `Hello ${fullName},`,
+        `we received an agent application from this email address, but it already belongs to a ${brand.name} account. An agent account needs its own email address, so please apply again with a different one.`,
+        `If you didn't send this application, you can ignore this email. You can log in to your existing account here: ${loginLink}`,
+      ],
+      action: { label: 'Apply again', url: applyLink },
+    }),
+    AGENT_APPLICATION_DUPLICATE: ({ fullName }) => ({
+      subject: 'Your agent application is already in review',
+      paragraphs: [
+        `Hello ${fullName},`,
+        "we already have an agent application from this email address waiting for review, so we didn't save the new one. We'll email you the outcome.",
+      ],
+    }),
+    AGENT_APPLICATION_APPROVED: ({ displayName, link }) => ({
+      subject: 'Your agent application was approved',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `your agent application on ${brand.name} has been approved. Set a password to activate your agent account and start publishing listings.`,
+        `The link is valid for ${setupDays} days.`,
+      ],
+      action: { label: 'Set up account', url: link },
+    }),
+    AGENT_APPLICATION_REJECTED: ({ fullName, reason }) => ({
+      subject: 'Your agent application was not approved',
+      paragraphs: [
+        `Hello ${fullName},`,
+        'your agent application was not approved. Reason:',
+        reason,
+      ],
+    }),
+    EMAIL_CHANGE_VERIFICATION: ({ displayName, newEmail, link }) => ({
+      subject: 'Confirm your new email address',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `please confirm that you want ${newEmail} to be the new email address of your ${brand.name} account.`,
+        `The link is valid for ${TOKEN_TTL_HOURS.EMAIL_CHANGE} hours. If you didn't ask for this change, ignore this email.`,
+      ],
+      action: { label: 'Confirm address', url: link },
+    }),
+    EMAIL_CHANGED: ({ displayName, newEmail }) => ({
+      subject: 'Your account email address was changed',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `the email address of your ${brand.name} account was changed to ${newEmail}. From now on, log in with that address.`,
+        "If you didn't make this change, reply to this email right away.",
+      ],
+    }),
+    PROFILE_CHANGES_APPROVED: ({ displayName, link }) => ({
+      subject: 'Your profile changes were approved',
+      paragraphs: [
+        `Hello ${displayName},`,
+        'your profile changes have been approved and are now public.',
+      ],
+      action: { label: 'View profile', url: link },
+    }),
+    PROFILE_CHANGES_REJECTED: ({ displayName, reason, link }) => ({
+      subject: 'Your profile changes were not approved',
+      paragraphs: [
+        `Hello ${displayName},`,
+        'your profile changes were not approved; your public profile stays as it was. Reason:',
+        reason,
+      ],
+      action: { label: 'Edit profile', url: link },
     }),
   },
 };

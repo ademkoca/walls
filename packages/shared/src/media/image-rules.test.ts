@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  AVATAR_IMAGE_RULES,
   ImageIssue,
   LISTING_IMAGE_RULES,
   canAddListingImage,
+  checkAvatarImage,
   checkListingImage,
 } from './image-rules';
 
@@ -52,5 +54,23 @@ describe('listing image rules (SPEC §15)', () => {
   it('caps the number of images per listing', () => {
     expect(canAddListingImage(LISTING_IMAGE_RULES.maxImagesPerListing - 1)).toBe(true);
     expect(canAddListingImage(LISTING_IMAGE_RULES.maxImagesPerListing)).toBe(false);
+  });
+});
+
+describe('profile pictures', () => {
+  const avatar = { mimeType: 'image/jpeg', bytes: 30_000, width: 400, height: 300 };
+
+  it('accepts small files of at least 200 px on each side', () => {
+    expect(checkAvatarImage(avatar)).toEqual([]);
+  });
+
+  it('rejects tiny, oversized and unsupported images', () => {
+    expect(checkAvatarImage({ ...avatar, height: 199 })).toEqual([ImageIssue.DIMENSIONS_TOO_SMALL]);
+    expect(checkAvatarImage({ ...avatar, bytes: AVATAR_IMAGE_RULES.maxBytes + 1 })).toEqual([
+      ImageIssue.FILE_TOO_LARGE,
+    ]);
+    expect(checkAvatarImage({ ...avatar, mimeType: 'image/gif' })).toEqual([
+      ImageIssue.UNSUPPORTED_TYPE,
+    ]);
   });
 });

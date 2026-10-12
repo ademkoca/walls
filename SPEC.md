@@ -159,6 +159,14 @@ An agent application contains:
 
 No licence/registry number is collected in the MVP. Proof files are private: they are visible only to Admins/Super Admins and are never exposed publicly.
 
+Application rules:
+
+-   An agent account needs its own email address. An application from an email that already belongs to a Walls account (for example a private seller) is not saved; the applicant is told by email to apply with a different address. Accounts never change role. The form's response is the same either way, so it does not reveal which addresses are registered.
+-   An email address can have only one application waiting for review at a time; after a rejection the applicant may apply again.
+-   The applicant receives a confirmation email. Admins are not emailed about new applications; the dashboard shows how many are waiting.
+-   A rejection reason is required and is included in the email to the applicant.
+-   Applications and their proof files are kept after review. An approved agent's application and proof stay available to Admins/Super Admins from the agent's account, as evidence of eligibility for internal controls or official inspections.
+
 ------------------------------------------------------------------------
 
 # 3. Authentication
@@ -210,6 +218,8 @@ Approval rules by account type:
 
 -   **Agents:** changes to any public profile field (display name, bio, profile picture, phone number, email address) are submitted as change requests and take effect only after Admin/Super Admin approval. An email change additionally requires verifying the new address.
 -   **Private sellers:** permitted profile changes take effect immediately and are audited. An email change requires verifying the new address.
+
+An agent has at most one pending change request. Until it is reviewed, further changes update that same request (so the reviewer always sees the latest version), and the agent may discard it. A rejected request includes a reason, emailed to the agent; the public profile stays unchanged.
 
 All important profile changes should be auditable.
 
@@ -691,6 +701,8 @@ Public private-seller pages show:
 -   contact information the seller has chosen to make public
 -   phone verification status alongside the phone number
 -   all currently public listings attributed to that seller
+
+Contact details on public profiles: an agent's phone number is always shown; a private seller chooses whether to show theirs. An email address is shown only when its owner opts in (for agents, that choice is part of the reviewed profile change). An agent's page lists the public listings the agent created and those assigned to them.
 
 A public profile must not expose internal/admin-only information, email addresses unless explicitly configured for public display, agent application documents, identity evidence, or other verification evidence. The public site must not label an agent as approved/verified unless the agent application was approved by an Admin/Super Admin. Phone verification status is separate from professional agent approval.
 

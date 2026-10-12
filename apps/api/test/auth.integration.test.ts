@@ -342,7 +342,7 @@ describe('invited account setup', () => {
         { email, displayName: 'Dup', role: 'SUPER_ADMIN', locale: 'sr' },
         null,
       ),
-    ).rejects.toThrow('already exists');
+    ).rejects.toThrow('already belongs to an account');
   });
 });
 

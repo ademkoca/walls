@@ -1,7 +1,14 @@
 import 'server-only';
 import type {
+  AgentApplicationDetail,
+  AgentApplicationSummary,
   AuditLogEntry,
   CurrentUser,
+  MyProfile,
+  ProfileChangeRequestDetail,
+  ProfileChangeRequestSummary,
+  ReviewQueueCounts,
+  ReviewStatus,
   ListingDetail,
   ListingSummary,
   Page,
@@ -46,7 +53,10 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 });
 
 /** Builds `path?query` from defined values only. */
-function withQuery(path: string, query: Record<string, string | number | boolean | undefined>) {
+export function withQuery(
+  path: string,
+  query: Record<string, string | number | boolean | undefined>,
+) {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
     if (value !== undefined && value !== '') params.set(key, String(value));
@@ -92,5 +102,50 @@ export async function getListing(id: string): Promise<ListingDetail | null> {
   return (
     (await serverGet<{ listing: ListingDetail }>(`/listings/${encodeURIComponent(id)}`))?.listing ??
     null
+  );
+}
+
+export async function getMyProfile(): Promise<MyProfile | null> {
+  return (await serverGet<{ profile: MyProfile }>('/me/profile'))?.profile ?? null;
+}
+
+/** Waiting items for the reviewer navigation. */
+export async function getReviewQueueCounts(): Promise<ReviewQueueCounts | null> {
+  return (await serverGet<{ counts: ReviewQueueCounts }>('/review-queue/counts'))?.counts ?? null;
+}
+
+export async function getAgentApplications(query: {
+  status: ReviewStatus;
+  page: number;
+}): Promise<Page<AgentApplicationSummary> | null> {
+  return serverGet<Page<AgentApplicationSummary>>(withQuery('/agent-applications', query));
+}
+
+/** Throws NotAccessibleError for 403/404. */
+export async function getAgentApplication(id: string): Promise<AgentApplicationDetail | null> {
+  return (
+    (
+      await serverGet<{ application: AgentApplicationDetail }>(
+        `/agent-applications/${encodeURIComponent(id)}`,
+      )
+    )?.application ?? null
+  );
+}
+
+export async function getProfileChanges(query: {
+  status: ReviewStatus;
+  page: number;
+}): Promise<Page<ProfileChangeRequestSummary> | null> {
+  return serverGet<Page<ProfileChangeRequestSummary>>(withQuery('/profile-changes', query));
+}
+
+/** Throws NotAccessibleError for 403/404. */
+export async function getProfileChange(id: string): Promise<ProfileChangeRequestDetail | null> {
+  return (
+    (
+      await serverGet<{ request: ProfileChangeRequestDetail }>(
+        `/profile-changes/${encodeURIComponent(id)}`,
+      )
+    )?.request ?? null
   );
 }

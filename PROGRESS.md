@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-12, in the middle of Phase 4 review._
+_Last updated: 2026-10-12, Phase 7 built and waiting for the user's review._
 
 ## Current status
 
@@ -17,12 +17,45 @@ _Last updated: 2026-10-12, in the middle of Phase 4 review._
 | Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                              |
 | 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)                       |
 | 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                                    |
-| **6** | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | **Built and verified, NOT committed.** Waiting for the user's review. |
-| 7–10  | Agents, public site, inquiries/analytics, hardening                                   | Not started                                                           |
+| 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                                    |
+| **7** | Agents: applications, profiles and change requests, public agent/seller pages         | **Built and verified, NOT committed.** Waiting for the user's review. |
+| 8–10  | Public site, inquiries/analytics, hardening                                           | Not started                                                           |
 
-**Immediate next step:** the user reviews Phase 6 (create a Super Admin with
-`pnpm admin:create`, then review a seller's listing). Then commit and push, check CI, and
-wait for the go-ahead for Phase 7.
+**Immediate next step:** the user reviews Phase 7 (apply at `/en/for-agents`, approve as a
+Super Admin, set up the agent from the emailed link, edit profiles, look at `/agents`). Then
+commit and push, check CI, and wait for the go-ahead for Phase 8.
+
+Phase 7 contents:
+
+- **Agent applications** (`apps/api/src/agents/*`): public multipart `POST /agent-applications`
+  (fields + 1–5 proof files, PDF/JPG/PNG ≤ 10 MB, type from the file signature, UTF-8 file
+  names), rate-limited per IP. Same 202 answer whether or not the email is registered; a
+  registered email or a second pending application gets an explanatory email instead.
+  Files go to `PrivateFileStorage` (Cloudinary `authenticated` raw files / local
+  `.private-files`), served only to Admins via `GET /agent-applications/:id/files/:fileId`
+  (no-store, sandbox CSP). Approve creates a `PENDING_SETUP` agent (phone, agency from the
+  application) via `AuthService.inviteInTransaction` with the `AGENT_APPLICATION_APPROVED`
+  setup email; reject needs a reason, which is emailed.
+- **Own profile** (`apps/api/src/profiles/*`, `GET/PUT /me/profile`, avatar upload/remove,
+  `DELETE /me/profile/change-request`): sellers' changes apply immediately (audited
+  `USER_PROFILE_UPDATED`); agents' changes go to the single pending `profile_change_requests`
+  row (complete proposed version; edits update it; equal-to-live withdraws it). A changed
+  phone is set `UNVERIFIED`. Replaced/rejected pictures are deleted from storage.
+- **Email change** (`/me/email-change`, `POST /auth/confirm-email-change`): current password,
+  link to the new address (24 h), old address notified on change. Agents' verified new
+  address joins their change request and changes on approval.
+- **Admin review** of profile changes (`/profile-changes`), live vs proposed table.
+- **Public profiles** (`/public/agents`, `/public/agents/:slug`, `/public/sellers/:slug`):
+  active users only; agent pages list created + assigned public listings; phone always with
+  its verification label; email only if public. Web pages `/agents`, `/agents/[slug]`,
+  `/sellers/[slug]` (rendered per request, no data cache), first `ListingCard` (links to
+  `/properties/[slug]`, which Phase 8 builds).
+- **Web:** `/for-agents` application form, `/confirm-email`, dashboard `My profile`,
+  `Agent applications`, `Profile changes` (nav shows waiting counts from
+  `GET /review-queue/counts`), audit entries for applications.
+
+Verified at the end of Phase 7: format, lint, typecheck, build; unit tests (shared 175,
+validation 45, web 43); integration tests 22 database + 124 api; 11 Playwright E2E tests.
 
 Phase 6 contents:
 
@@ -158,6 +191,14 @@ Super Admin with the real `admin:create` script).
   until reactivation (status unchanged); whoever may deactivate may also reactivate (reason,
   audit, email); a pending revision stays editable until reviewed; Admins never edit listing
   content (approve/reject only).
+- **Phase 7 decisions:** an agent application from an email that already has an account is
+  refused (agents need their own address; accounts never change role), told by email so the
+  form never reveals registered addresses; agents' phones are always public, sellers choose,
+  email only on opt-in; one pending profile change request, editable until reviewed; Admins
+  are not emailed about new applications (dashboard counts instead); the application
+  rejection reason is emailed; agent pages list created + assigned listings. Proof files
+  are kept after review as evidence of eligibility and shown on the agent's account page
+  (user's request during review).
 - **Media storage:** Cloudinary when `CLOUDINARY_*` is set (required in production), otherwise
   local disk in development (user's choice until they add credentials).
 - **Images:** JPEG/PNG/WebP/HEIC/HEIF, 50 KB–15 MB, ≥1024 px long side and ≥768 px short side,
@@ -237,6 +278,18 @@ Super Admin with the real `admin:create` script).
 - **Playwright sets `NODE_ENV=test` for child processes**, which breaks `next build`
   ("Cannot read properties of null (reading 'useContext')"); the web server entry in
   `e2e/playwright.config.ts` forces `NODE_ENV=production`.
+- **`admin:create` must only send its own email.** It used to run the whole outbox, so in
+  parallel E2E runs it printed other users' verification emails to its own output and the
+  tests never saw them. `processOutbox` now takes a `recipient` filter.
+- **E2E starts from an empty database** (`db:reset-test`): integration tests leave hundreds
+  of unsent emails in `walls_test`, which delayed E2E emails past their timeout.
+- **One IP for every E2E browser:** the auth limit (30 per 15 min per IP) throttled the
+  suite; `AUTH_RATE_LIMIT_PER_IP` is raised only in the E2E API environment.
+- **`Intl` with locale `sr` writes month names in Cyrillic.** next-intl formats with the
+  routing locale, so print month/day names with `intlLocale()` (`sr-Latn`).
+- **multer decodes file names as Latin-1** unless `defParamCharset: 'utf8'` is set.
+- **Public data must not be cached by `fetch`:** a prefetched `<Link>` cached an agent's old
+  profile, so the approved version did not show. Public reads use `cache: 'no-store'` for now.
 - Prettier reformats files; re-read a file before string-replacing it in scripts.
 - Tools generate `AGENTS.md` blocks (root: Turborepo; `apps/web/AGENTS.md`: Next.js) that are
   committed on purpose.
@@ -266,6 +319,13 @@ Super Admin with the real `admin:create` script).
 - OSM standard tiles label Serbian places in Cyrillic; the production tile host should offer
   Latin labels (site is Latin-only).
 - Cosmetic, deferred by the user until all phases are done: make the home-page CTAs larger.
+- Phase 7 choices to confirm: profile pictures are
+  JPEG/PNG/WebP/HEIC, ≥ 200 × 200 px, ≤ 10 MB; profile slugs never change when the name
+  changes; changing the login email needs the current password; an approved agent's public
+  page appears only once they have set their password. The Cloudinary private-file adapter
+  (`authenticated` raw uploads + signed download) is untested against the real service.
+- Parallel invitations with the same name can collide on the profile slug (unique
+  violation → 500); rare, not fixed.
 - Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use); set
   `NEXT_PUBLIC_MAP_TILE_URL`. "Find address on map" uses Nominatim on button press only.
 

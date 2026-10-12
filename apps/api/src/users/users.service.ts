@@ -14,6 +14,7 @@ import {
   statusAfterReactivation,
 } from '@walls/shared';
 import type { AuditLogQuery, InviteAdminInput, UserListQuery } from '@walls/validation';
+import { findApplicationOfUser } from '../agents/agent-applications.repository';
 import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
 import {
   type UserRow,
@@ -27,13 +28,8 @@ import { enqueueEmail } from '../email/outbox';
 import { EmailTemplate } from '../email/templates';
 import { assertAllowed, notFound } from '../http/errors';
 import { webPageUrl } from '../http/web-links';
-import {
-  ADMIN_PAGE_SIZE,
-  countListingsCreatedBy,
-  findAuditEntries,
-  findUsers,
-  lockUser,
-} from './users.repository';
+import { toPage } from '../http/paging';
+import { countListingsCreatedBy, findAuditEntries, findUsers, lockUser } from './users.repository';
 
 function toUserSummary(user: UserRow): UserSummary {
   return {
@@ -44,15 +40,6 @@ function toUserSummary(user: UserRow): UserSummary {
     status: user.status,
     createdAt: user.createdAt.toISOString(),
     deactivatedAt: user.deactivatedAt?.toISOString() ?? null,
-  };
-}
-
-/** Trims the extra row fetched to detect a next page. */
-function toPage<Row, Item>(rows: Row[], page: number, map: (row: Row) => Item): Page<Item> {
-  return {
-    items: rows.slice(0, ADMIN_PAGE_SIZE).map(map),
-    page,
-    hasMore: rows.length > ADMIN_PAGE_SIZE,
   };
 }
 
@@ -82,10 +69,23 @@ export class UsersService {
     assertAllowed(canViewAdministration(actor));
     const user = await findUserById(this.db, id);
     if (!user) throw notFound();
+    const application = await findApplicationOfUser(this.db, id);
     return {
       ...toUserSummary(user),
       emailVerified: user.emailVerifiedAt !== null,
       listingCount: await countListingsCreatedBy(this.db, id),
+      agentApplication: application
+        ? {
+            id: application.application.id,
+            reviewedAt: application.application.reviewedAt?.toISOString() ?? null,
+            files: application.files.map((file) => ({
+              id: file.id,
+              fileName: file.originalFileName,
+              mimeType: file.mimeType,
+              bytes: file.bytes,
+            })),
+          }
+        : null,
       permissions: {
         canDeactivate: canDeactivateUser(actor, user).allowed,
         canReactivate: canReactivateUser(actor, user).allowed,

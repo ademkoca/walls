@@ -8,7 +8,8 @@ import { LanguageSwitcher } from '@/components/layout/language-switcher';
 import { MAIN_CONTENT_ID, SkipLink } from '@/components/layout/skip-link';
 import { UserMenu } from '@/components/layout/user-menu';
 import { Link, redirect } from '@/i18n/navigation';
-import { getCurrentUser } from '@/lib/api/server';
+import { isReviewer } from '@walls/shared';
+import { getCurrentUser, getReviewQueueCounts } from '@/lib/api/server';
 
 export async function generateMetadata({
   params,
@@ -33,6 +34,9 @@ export default async function DashboardLayout({
     return null;
   }
 
+  // Waiting items for the reviewer navigation; refreshed on every dashboard navigation.
+  const counts = isReviewer(user) ? await getReviewQueueCounts() : null;
+
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
       <SkipLink />
@@ -44,7 +48,7 @@ export default async function DashboardLayout({
           >
             <Logo tone="inverse" className="w-32" />
           </Link>
-          <DashboardNav role={user.role} />
+          <DashboardNav role={user.role} counts={counts} />
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">

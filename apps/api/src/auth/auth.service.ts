@@ -14,7 +14,7 @@ import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
 import type { Config } from '../config';
 import { enqueueEmail } from '../email/outbox';
 import { EmailTemplate } from '../email/templates';
-import { AppError, ErrorCode, invalidToken } from '../http/errors';
+import { AppError, ErrorCode, emailInUse, invalidToken } from '../http/errors';
 import { webPageUrl } from '../http/web-links';
 import {
   type UserRow,
@@ -38,7 +38,6 @@ import { generateToken, hashToken } from './tokens';
 
 const STATUS_UNAUTHORIZED = 401;
 const STATUS_FORBIDDEN = 403;
-const STATUS_CONFLICT = 409;
 const FALLBACK_SLUG = 'user';
 const USER_AGENT_MAX_LENGTH = 500;
 
@@ -324,45 +323,96 @@ export class AuthService {
 
   /**
    * Creates an account that its owner activates by setting a password from an emailed
-   * link. Used for Super Admin bootstrap now, and for approved agents and invited admins
-   * later. Passwords are never sent or shared (SPEC §3).
+   * link: invited Admins, approved agents and the bootstrap Super Admin. Passwords are
+   * never sent or shared (SPEC §3).
    */
   async inviteUser(input: InviteInput, invitedById: string | null): Promise<UserRow> {
-    return this.db.transaction(async (tx) => {
-      if (await findUserByEmail(tx, input.email)) {
-        throw new AppError(
-          STATUS_CONFLICT,
-          ErrorCode.CONFLICT,
-          'A user with this email already exists',
-        );
-      }
-      const user = await insertUser(tx, {
-        email: input.email,
-        role: input.role,
-        status: UserStatus.PENDING_SETUP,
-        displayName: input.displayName,
-        slug: await this.uniqueSlug(tx, input.displayName),
-        preferredLocale: input.locale,
-      });
-      const token = await this.issueToken(tx, user.id, 'ACCOUNT_SETUP');
-      await recordAudit(tx, {
-        actorId: invitedById,
-        action: AuditAction.USER_INVITED,
-        entityType: AuditEntity.USER,
-        entityId: user.id,
-        after: { role: user.role, status: user.status },
-      });
-      await enqueueEmail(tx, {
-        template: EmailTemplate.ACCOUNT_SETUP,
-        to: user.email,
-        locale: user.preferredLocale,
-        payload: {
-          displayName: user.displayName,
-          link: this.link(user.preferredLocale, AUTH_PAGE_PATHS.setupAccount, { token }),
-        },
-      });
-      return user;
+    return this.db.transaction((tx) => this.inviteInTransaction(tx, input, invitedById));
+  }
+
+  /** `inviteUser` inside the caller's transaction, with the email template to send. */
+  async inviteInTransaction(
+    tx: DbExecutor,
+    input: InviteInput & { phone?: string; agencyName?: string | null },
+    invitedById: string | null,
+    template:
+      | typeof EmailTemplate.ACCOUNT_SETUP
+      | typeof EmailTemplate.AGENT_APPLICATION_APPROVED = EmailTemplate.ACCOUNT_SETUP,
+  ): Promise<UserRow> {
+    if (await findUserByEmail(tx, input.email)) throw emailInUse();
+    const user = await insertUser(tx, {
+      email: input.email,
+      role: input.role,
+      status: UserStatus.PENDING_SETUP,
+      displayName: input.displayName,
+      slug: await this.uniqueSlug(tx, input.displayName),
+      preferredLocale: input.locale,
+      ...(input.phone ? { phone: input.phone } : {}),
+      ...(input.agencyName ? { agencyName: input.agencyName } : {}),
     });
+    const token = await this.issueToken(tx, user.id, 'ACCOUNT_SETUP');
+    await recordAudit(tx, {
+      actorId: invitedById,
+      action: AuditAction.USER_INVITED,
+      entityType: AuditEntity.USER,
+      entityId: user.id,
+      after: { role: user.role, status: user.status },
+    });
+    await enqueueEmail(tx, {
+      template,
+      to: user.email,
+      locale: user.preferredLocale,
+      payload: {
+        displayName: user.displayName,
+        link: this.link(user.preferredLocale, AUTH_PAGE_PATHS.setupAccount, { token }),
+      },
+    });
+    return user;
+  }
+
+  /** Checks a signed-in user's password again, e.g. before changing their email. */
+  async verifyCurrentPassword(user: UserRow, password: string): Promise<void> {
+    if (!user.passwordHash || !(await verifyPassword(password, user.passwordHash))) {
+      throw new AppError(
+        STATUS_FORBIDDEN,
+        ErrorCode.INVALID_CREDENTIALS,
+        'The current password is incorrect',
+      );
+    }
+  }
+
+  /** Emails a link that confirms `newEmail` as the user's new address. */
+  async sendEmailChangeLink(tx: DbExecutor, user: UserRow, newEmail: string): Promise<void> {
+    const token = generateToken();
+    await deleteUnusedTokens(tx, user.id, 'EMAIL_CHANGE');
+    await insertAuthToken(tx, {
+      userId: user.id,
+      type: 'EMAIL_CHANGE',
+      tokenHash: this.hash(token),
+      newEmail,
+      expiresAt: expiresInHours(TOKEN_TTL_HOURS.EMAIL_CHANGE),
+    });
+    await enqueueEmail(tx, {
+      template: EmailTemplate.EMAIL_CHANGE_VERIFICATION,
+      to: newEmail,
+      locale: user.preferredLocale,
+      payload: {
+        displayName: user.displayName,
+        newEmail,
+        link: this.link(user.preferredLocale, AUTH_PAGE_PATHS.confirmEmail, { token }),
+      },
+    });
+  }
+
+  /** Redeems an email-change link; returns the user and the address it confirmed. */
+  async consumeEmailChangeToken(
+    tx: DbExecutor,
+    token: string,
+  ): Promise<{ user: UserRow; newEmail: string }> {
+    const consumed = await consumeToken(tx, 'EMAIL_CHANGE', this.hash(token));
+    const user = consumed && (await findUserById(tx, consumed.userId));
+    if (!user || !consumed.newEmail || user.status !== UserStatus.ACTIVE) throw invalidToken();
+    return { user, newEmail: consumed.newEmail };
   }
 
   /** Completes an invited account: sets the password and activates it. */

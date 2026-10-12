@@ -1,6 +1,6 @@
 'use client';
 
-import type { CurrentUser } from '@walls/shared';
+import { type CurrentUser, hasPublicProfile } from '@walls/shared';
 import { Avatar, AvatarFallback } from '@walls/ui/components/avatar';
 import {
   DropdownMenu,
@@ -11,25 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@walls/ui/components/dropdown-menu';
-import { LayoutDashboardIcon, LogOutIcon } from 'lucide-react';
+import { LayoutDashboardIcon, LogOutIcon, UserRoundIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Link, useRouter } from '@/i18n/navigation';
 import { authApi } from '@/lib/api/auth';
+import { initials } from '@/lib/initials';
 import { useErrorMessage } from '@/lib/use-error-message';
 
-const MAX_INITIALS = 2;
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, MAX_INITIALS)
-    .map((part) => part[0]?.toUpperCase())
-    .join('');
-}
-
-/** Account menu for a signed-in user: dashboard link and logout. */
+/** Account menu for a signed-in user: dashboard and profile links, and logout. */
 export function UserMenu({ user, onLoggedOut }: { user: CurrentUser; onLoggedOut?: () => void }) {
   const t = useTranslations('nav');
   const router = useRouter();
@@ -71,6 +61,12 @@ export function UserMenu({ user, onLoggedOut }: { user: CurrentUser; onLoggedOut
           <LayoutDashboardIcon />
           {t('dashboard')}
         </DropdownMenuItem>
+        {hasPublicProfile(user.role) && (
+          <DropdownMenuItem render={<Link href="/dashboard/profile" />}>
+            <UserRoundIcon />
+            {t('profile')}
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => void logout()}>
           <LogOutIcon />
           {t('logout')}

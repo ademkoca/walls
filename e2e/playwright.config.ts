@@ -28,8 +28,10 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      // Migrate, then run the API with its log (which carries the emailed links) in a file.
-      command: `mkdir -p ${path.dirname(API_LOG_FILE)} && pnpm --filter @walls/database db:migrate && pnpm --filter @walls/api exec tsx src/server.ts > ${API_LOG_FILE} 2>&1`,
+      // Start from an empty, migrated test database (integration tests leave unsent emails
+      // behind, which would delay ours), then run the API with its log (which carries the
+      // emailed links) in a file.
+      command: `mkdir -p ${path.dirname(API_LOG_FILE)} && pnpm --filter @walls/database db:reset-test && pnpm --filter @walls/api exec tsx src/server.ts > ${API_LOG_FILE} 2>&1`,
       cwd: REPO_ROOT,
       url: `${API_ORIGIN}/health`,
       env: API_ENV,

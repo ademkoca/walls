@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { check, index, integer, pgTable, text, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
-import { citext, id, reviewStatusEnum, timestamps, timestamptz } from './columns';
+import { citext, id, localeEnum, reviewStatusEnum, timestamps, timestamptz } from './columns';
 import { users } from './users';
 
 /** "For real-estate agents" applications, reviewed by Admins/Super Admins (SPEC §2.1). */
@@ -12,6 +12,8 @@ export const agentApplications = pgTable(
     email: citext().notNull(),
     phone: text().notNull(),
     agencyName: text(),
+    /** Language of the emails sent to the applicant and of the resulting account. */
+    locale: localeEnum().notNull().default('sr'),
     status: reviewStatusEnum().notNull().default('PENDING'),
     rejectionReason: text(),
     reviewedById: uuid().references(() => users.id, { onDelete: 'restrict' }),
@@ -54,10 +56,12 @@ export const agentApplicationFiles = pgTable(
     /** Detected from the file content, not taken from the client. */
     mimeType: text().notNull(),
     bytes: integer().notNull(),
+    /** Upload order within the application. */
+    position: integer().notNull(),
     createdAt: timestamptz().notNull().defaultNow(),
   },
   (table) => [
-    index().on(table.applicationId),
+    uniqueIndex('agent_application_files_position').on(table.applicationId, table.position),
     check('agent_application_files_bytes', sql`${table.bytes} > 0`),
   ],
 );

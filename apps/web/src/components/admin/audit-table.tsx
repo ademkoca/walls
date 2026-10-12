@@ -20,6 +20,12 @@ export async function AuditTable({
 }) {
   const t = await getTranslations('auditLog');
   const format = await getFormatter();
+  const entityLabel = (entityType: string) =>
+    entityType === 'LISTING'
+      ? t('listing')
+      : entityType === 'AGENT_APPLICATION'
+        ? t('agentApplication')
+        : t('user');
   // Codes without a translation (added later) are shown as they are.
   const actionLabel = (action: string) => {
     const key = `actions.${action}` as Parameters<typeof t>[0];
@@ -66,10 +72,7 @@ export async function AuditTable({
               </TableCell>
               {showEntity && (
                 <TableCell className="hidden md:table-cell">
-                  <EntityLink
-                    entry={entry}
-                    label={entry.entityType === 'LISTING' ? t('listing') : t('user')}
-                  />
+                  <EntityLink entry={entry} label={entityLabel(entry.entityType)} />
                 </TableCell>
               )}
               <TableCell className="hidden text-muted-foreground md:table-cell">
@@ -92,7 +95,9 @@ function EntityLink({ entry, label }: { entry: AuditLogEntry; label: string }) {
       ? `/dashboard/listings/${entry.entityId}`
       : entry.entityType === 'USER'
         ? `/dashboard/users/${entry.entityId}`
-        : null;
+        : entry.entityType === 'AGENT_APPLICATION'
+          ? `/dashboard/agent-applications/${entry.entityId}`
+          : null;
   const text = `${label} ${entry.entityId.slice(0, 8)}`;
   return href ? (
     <Link href={href} className="hover:underline">
