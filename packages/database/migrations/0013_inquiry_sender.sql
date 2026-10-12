@@ -1,0 +1,3 @@
+ALTER TABLE "inquiries" ADD COLUMN "sender_user_id" uuid;--> statement-breakpoint
+ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_sender_user_id_users_id_fk" FOREIGN KEY ("sender_user_id") REFERENCES "public"."users"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "inquiries_sender_user_id_created_at_index" ON "inquiries" USING btree ("sender_user_id","created_at");

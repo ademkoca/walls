@@ -235,6 +235,27 @@ export const listingViewsDaily = pgTable(
 );
 
 /**
+ * Visitors already counted for a listing on a day, so a visitor counts once per day
+ * (decision, Phase 9). `visitorHash` is an HMAC of IP address and browser with a key that
+ * changes every day: it cannot be traced back to a person or linked across days. Rows of
+ * past days are deleted; only `listing_views_daily` keeps the counts.
+ */
+export const listingViewVisitors = pgTable(
+  'listing_view_visitors',
+  {
+    listingId: uuid()
+      .notNull()
+      .references(() => listings.id, { onDelete: 'cascade' }),
+    day: date({ mode: 'string' }).notNull(),
+    visitorHash: text().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.listingId, table.day, table.visitorHash] }),
+    index().on(table.day),
+  ],
+);
+
+/**
  * Major edits of a published listing awaiting review (SPEC §6). The live listing stays
  * relational and unchanged; `content` is the complete proposed version (validated by the
  * API with the shared schemas) and is written into the relational tables on approval.

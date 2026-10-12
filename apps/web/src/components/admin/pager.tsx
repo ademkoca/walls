@@ -14,7 +14,9 @@ export async function Pager({
     | '/dashboard/users'
     | '/dashboard/audit-log'
     | '/dashboard/agent-applications'
-    | '/dashboard/profile-changes';
+    | '/dashboard/profile-changes'
+    | '/dashboard/inquiries'
+    | '/dashboard/inquiries/sent';
   query: Record<string, string>;
   page: number;
   hasMore: boolean;

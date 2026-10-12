@@ -58,7 +58,7 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
     visitor.getByText('The advertiser keeps the exact address private.', { exact: false }),
   ).toBeVisible();
   await expect(visitor.getByText('Dobračina')).toHaveCount(0);
-  await expect(visitor.getByText(user.name)).toBeVisible();
+  await expect(visitor.getByText(user.name, { exact: true })).toBeVisible();
 
   // Prices in dinars, converted at the cached rate, with the price as listed.
   await visitor.getByRole('button', { name: 'RSD', exact: true }).click();

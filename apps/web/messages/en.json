@@ -144,7 +144,6 @@
     "title": "Dashboard",
     "welcome": "Welcome, {name}",
     "signedInAs": "You're signed in as {role}.",
-    "comingSoon": "Inquiries, account settings and administration are coming soon.",
     "nav": {
       "label": "Dashboard navigation",
       "overview": "Overview",
@@ -156,8 +155,12 @@
       "profile": "My profile",
       "agentApplications": "Agent applications",
       "profileChanges": "Profile changes",
-      "waiting": "{count} waiting"
-    }
+      "waiting": "{count} waiting",
+      "inquiries": "Inquiries"
+    },
+    "newInquiries": "{count, plural, =0 {No new inquiries} one {# new inquiry} other {# new inquiries}}",
+    "openInquiries": "Open inquiries",
+    "platformTitle": "Platform"
   },
   "listings": {
     "title": "My listings",
@@ -522,9 +525,11 @@
       "PROFILE_CHANGE_REJECTED": "Profile changes rejected",
       "AGENT_APPLICATION_SUBMITTED": "Agent application received",
       "AGENT_APPLICATION_APPROVED": "Agent application approved",
-      "AGENT_APPLICATION_REJECTED": "Agent application rejected"
+      "AGENT_APPLICATION_REJECTED": "Agent application rejected",
+      "INQUIRY_STATUS_CHANGED": "Inquiry status changed"
     },
-    "agentApplication": "Application"
+    "agentApplication": "Application",
+    "inquiry": "Inquiry"
   },
   "roles": {
     "SUPER_ADMIN": "a Super Admin",
@@ -622,6 +627,11 @@
     "locale": {
       "sr": "Serbian",
       "en": "English"
+    },
+    "inquiryStatus": {
+      "NEW": "New",
+      "CONTACTED": "Contacted",
+      "CLOSED": "Closed"
     }
   },
   "validation": {
@@ -965,5 +975,90 @@
       "groundFloor": "Ground floor",
       "floorOf": "{floor} of {total}"
     }
+  },
+  "inquiry": {
+    "title": "Contact the advertiser",
+    "to": "Your message goes to {name}.",
+    "contact": "Send an inquiry",
+    "fields": {
+      "name": "Your name",
+      "email": "Email address",
+      "phone": "Phone (optional)",
+      "message": "Message",
+      "website": "Website"
+    },
+    "messagePlaceholder": "Hello, I am interested in this property…",
+    "privacy": "Only the advertiser receives your details, to reply to you.",
+    "submit": "Send message",
+    "sentTitle": "Message sent",
+    "sentDescription": "{name} will reply to you at {email}.",
+    "sendAnother": "Send another message",
+    "sendingAs": "Sending as {name} ({email}). Replies come to this address.",
+    "ownListing": "This is your listing. Inquiries about it are in your dashboard.",
+    "openInquiries": "Open inquiries",
+    "sentHistory": "You can find it under Sent in your dashboard inquiries.",
+    "viewSent": "View sent inquiries"
+  },
+  "inquiries": {
+    "title": "Inquiries",
+    "description": "Messages from visitors about your listings.",
+    "descriptionAdmin": "Messages from visitors about every listing.",
+    "empty": {
+      "NEW": "No new inquiries.",
+      "CONTACTED": "No inquiries marked as contacted.",
+      "CLOSED": "No closed inquiries."
+    },
+    "columns": {
+      "visitor": "From",
+      "listing": "Listing",
+      "message": "Message",
+      "received": "Received"
+    },
+    "readOnly": "Read only",
+    "readOnlyHint": "The agent assigned to this listing handles this inquiry. You can read it but not change its status.",
+    "untitled": "Untitled listing",
+    "backToList": "All inquiries",
+    "from": "From",
+    "email": "Email",
+    "phone": "Phone",
+    "noPhone": "Not given",
+    "message": "Message",
+    "listing": "Listing",
+    "received": "Received",
+    "recipient": "Handled by",
+    "assignedAgent": "Assigned agent",
+    "status": "Status",
+    "reply": "Reply by email",
+    "viewListing": "View public page",
+    "openListing": "Open listing",
+    "markContacted": "Mark as contacted",
+    "close": "Close",
+    "reopen": "Mark as new",
+    "statusChanged": "Status updated.",
+    "sentTab": "Sent",
+    "sentTitle": "Sent inquiries",
+    "sentDescription": "Inquiries you sent about other listings while signed in. Replies arrive by email.",
+    "sentEmpty": "You haven’t sent any inquiries while signed in.",
+    "sentTo": "To {name}",
+    "registeredUser": "Walls account",
+    "registeredUserHint": "Sent while signed in: the name and email are those of the sender’s Walls account."
+  },
+  "analytics": {
+    "listingTitle": "Views and inquiries",
+    "totalViews": "Views",
+    "inquiries": "Inquiries",
+    "chartTitle": "Views in the last {days} days",
+    "chartLabel": "{total, plural, one {# view} other {# views}} in the last {days} days",
+    "dayViews": "{date}: {count, plural, one {# view} other {# views}}",
+    "hint": "Each visitor counts once a day. Your own visits and those of Walls staff are not counted.",
+    "listings": "Listings",
+    "published": "Published",
+    "pendingReview": "In review",
+    "sold": "Sold",
+    "rented": "Rented",
+    "inquiriesTotal": "Inquiries",
+    "inquiriesNew": "New inquiries",
+    "viewsTotal": "Property views",
+    "views30": "Views, last 30 days"
   }
 }

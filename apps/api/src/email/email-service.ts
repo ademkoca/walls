@@ -5,6 +5,8 @@ export interface EmailMessage {
   subject: string;
   html: string;
   text: string;
+  /** Where replies go, e.g. the visitor who sent an inquiry. */
+  replyTo?: string;
 }
 
 /** Sends transactional email. Business logic depends only on this interface (SPEC §21). */
@@ -30,6 +32,7 @@ export class ResendEmailService implements EmailService {
         subject: message.subject,
         html: message.html,
         text: message.text,
+        ...(message.replyTo ? { reply_to: message.replyTo } : {}),
       }),
     });
     if (!response.ok) {

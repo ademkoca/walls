@@ -9,7 +9,7 @@ import { MAIN_CONTENT_ID, SkipLink } from '@/components/layout/skip-link';
 import { UserMenu } from '@/components/layout/user-menu';
 import { Link, redirect } from '@/i18n/navigation';
 import { isReviewer } from '@walls/shared';
-import { getCurrentUser, getReviewQueueCounts } from '@/lib/api/server';
+import { getCurrentUser, getInquiryCounts, getReviewQueueCounts } from '@/lib/api/server';
 
 export async function generateMetadata({
   params,
@@ -34,8 +34,12 @@ export default async function DashboardLayout({
     return null;
   }
 
-  // Waiting items for the reviewer navigation; refreshed on every dashboard navigation.
-  const counts = isReviewer(user) ? await getReviewQueueCounts() : null;
+  // Items needing attention, for the navigation; refreshed on every dashboard navigation.
+  const [review, inquiries] = await Promise.all([
+    isReviewer(user) ? getReviewQueueCounts() : null,
+    getInquiryCounts(),
+  ]);
+  const counts = { review, inquiries };
 
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">

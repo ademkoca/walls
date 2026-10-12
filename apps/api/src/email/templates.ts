@@ -24,6 +24,7 @@ export const EmailTemplate = {
   EMAIL_CHANGED: 'EMAIL_CHANGED',
   PROFILE_CHANGES_APPROVED: 'PROFILE_CHANGES_APPROVED',
   PROFILE_CHANGES_REJECTED: 'PROFILE_CHANGES_REJECTED',
+  INQUIRY_RECEIVED: 'INQUIRY_RECEIVED',
 } as const;
 export type EmailTemplate = (typeof EmailTemplate)[keyof typeof EmailTemplate];
 
@@ -55,12 +56,22 @@ export interface EmailPayloads {
   EMAIL_CHANGED: { displayName: string; newEmail: string };
   PROFILE_CHANGES_APPROVED: { displayName: string; link: string };
   PROFILE_CHANGES_REJECTED: { displayName: string; reason: string; link: string };
+  INQUIRY_RECEIVED: {
+    displayName: string;
+    listingTitle: string;
+    visitorName: string;
+    visitorEmail: string;
+    visitorPhone: string | null;
+    message: string;
+    link: string;
+  };
 }
 
 interface EmailContent {
   subject: string;
   paragraphs: string[];
   action?: { label: string; url: string };
+  replyTo?: string;
 }
 
 type Copy = { [T in EmailTemplate]: (payload: EmailPayloads[T]) => EmailContent };
@@ -239,6 +250,26 @@ const COPY: Record<Locale, Copy> = {
         reason,
       ],
       action: { label: 'Uredi profil', url: link },
+    }),
+    INQUIRY_RECEIVED: ({
+      displayName,
+      listingTitle,
+      visitorName,
+      visitorEmail,
+      visitorPhone,
+      message,
+      link,
+    }) => ({
+      subject: `Novi upit za oglas: ${listingTitle}`,
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `${visitorName} vam je poslao/la upit za oglas „${listingTitle}”:`,
+        message,
+        `Email: ${visitorEmail}` + (visitorPhone ? ` · Telefon: ${visitorPhone}` : ''),
+        'Odgovorom na ovu poruku pišete direktno pošiljaocu. Status upita menjate na kontrolnoj tabli.',
+      ],
+      action: { label: 'Otvori upit', url: link },
+      replyTo: visitorEmail,
     }),
   },
   en: {
@@ -420,6 +451,26 @@ const COPY: Record<Locale, Copy> = {
       ],
       action: { label: 'Edit profile', url: link },
     }),
+    INQUIRY_RECEIVED: ({
+      displayName,
+      listingTitle,
+      visitorName,
+      visitorEmail,
+      visitorPhone,
+      message,
+      link,
+    }) => ({
+      subject: `New inquiry about: ${listingTitle}`,
+      paragraphs: [
+        `Hello ${displayName},`,
+        `${visitorName} sent you an inquiry about your listing "${listingTitle}":`,
+        message,
+        `Email: ${visitorEmail}` + (visitorPhone ? ` · Phone: ${visitorPhone}` : ''),
+        'Reply to this email to write to the sender directly. Change the inquiry status in your dashboard.',
+      ],
+      action: { label: 'Open inquiry', url: link },
+      replyTo: visitorEmail,
+    }),
   },
 };
 
@@ -438,7 +489,7 @@ export function renderEmail<T extends EmailTemplate>(
   template: T,
   locale: Locale,
   payload: EmailPayloads[T],
-): { subject: string; html: string; text: string } {
+): { subject: string; html: string; text: string; replyTo?: string } {
   const content = (COPY[locale][template] as (payload: EmailPayloads[T]) => EmailContent)(payload);
   const subject = `${content.subject} – ${brand.name}`;
 
@@ -450,7 +501,9 @@ export function renderEmail<T extends EmailTemplate>(
 
   const html = [
     `<div style="font-family:Arial,sans-serif;color:${brand.colors.charcoal};max-width:560px">`,
-    ...content.paragraphs.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`),
+    ...content.paragraphs.map(
+      (paragraph) => `<p style="white-space:pre-line">${escapeHtml(paragraph)}</p>`,
+    ),
     content.action
       ? `<p><a href="${escapeHtml(content.action.url)}" style="background:${brand.colors.orange};color:${brand.colors.charcoal};padding:12px 20px;text-decoration:none;font-weight:bold;display:inline-block">${escapeHtml(content.action.label)}</a></p>`
       : '',
@@ -458,5 +511,5 @@ export function renderEmail<T extends EmailTemplate>(
     '</div>',
   ].join('');
 
-  return { subject, html, text };
+  return { subject, html, text, ...(content.replyTo ? { replyTo: content.replyTo } : {}) };
 }

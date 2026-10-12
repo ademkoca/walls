@@ -5,13 +5,17 @@ import {
   publicListingPath,
 } from '@walls/shared';
 import { Badge } from '@walls/ui/components/badge';
-import { CheckIcon, ChevronLeftIcon, MapPinIcon } from 'lucide-react';
+import { buttonVariants } from '@walls/ui/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
+import { CheckIcon, ChevronLeftIcon, MailIcon, MapPinIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { AdvertiserCard } from '@/components/listing/advertiser-card';
+import { InquiryForm } from '@/components/listing/inquiry-form';
 import { ListingGallery } from '@/components/listing/listing-gallery';
 import { ListingMap } from '@/components/listing/listing-map';
+import { ViewReporter } from '@/components/listing/view-reporter';
 import { PriceTag } from '@/components/public/price-tag';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link, getPathname } from '@/i18n/navigation';
@@ -88,11 +92,12 @@ function structuredData(listing: PublicListingDetail, locale: AppLocale) {
 export default async function ListingPage({ params }: PageProps<'/[locale]/properties/[slug]'>) {
   const locale = await resolveLocale(params);
   const { slug } = await params;
-  const [listing, pricing, t, tEnums, format] = await Promise.all([
+  const [listing, pricing, t, tEnums, tInquiry, format] = await Promise.all([
     getPublicListing(slug),
     getPricing(),
     getTranslations('listing'),
     getTranslations('enums'),
+    getTranslations('inquiry'),
     getFormatter(),
   ]);
   if (!listing) notFound();
@@ -141,6 +146,7 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
         // JSON-LD, escaped by jsonLd() so the text cannot close the script tag.
         dangerouslySetInnerHTML={{ __html: jsonLd(structuredData(listing, locale)) }}
       />
+      <ViewReporter slug={listing.slug} />
       <Link
         href="/properties"
         className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -167,6 +173,14 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
           {listing.price.mode === PriceMode.FIXED && listing.price.negotiable && (
             <Badge variant="outline">{t('negotiable')}</Badge>
           )}
+          {/* On narrow screens the form is far down the page. */}
+          <a
+            href="#inquiry"
+            className={buttonVariants({ className: 'mt-2 flex w-full sm:w-auto lg:hidden' })}
+          >
+            <MailIcon data-icon="inline-start" />
+            {tInquiry('contact')}
+          </a>
         </div>
       </header>
 
@@ -240,6 +254,21 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
         </div>
 
         <aside className="space-y-4 self-start lg:sticky lg:top-24">
+          <Card id="inquiry" className="scroll-mt-24">
+            <CardHeader>
+              <CardTitle className="text-base">{tInquiry('title')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* An inquiry goes to the assigned agent, or else the advertiser (SPEC §20). */}
+              <InquiryForm
+                slug={listing.slug}
+                recipientName={(listing.assignedAgent ?? listing.advertiser).displayName}
+                ownerSlugs={[listing.advertiser.slug, listing.assignedAgent?.slug].filter(
+                  (value) => value !== undefined,
+                )}
+              />
+            </CardContent>
+          </Card>
           <AdvertiserCard title={t('advertiser')} profile={listing.advertiser} />
           {listing.assignedAgent && (
             <AdvertiserCard title={t('assignedAgent')} profile={listing.assignedAgent} />

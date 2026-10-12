@@ -1,20 +1,38 @@
 import { describe, expect, it } from 'vitest';
 import { DenialReason } from '../access/decision';
-import { UserStatus } from '../enums';
+import { Role, UserStatus } from '../enums';
 import { admin, agent, otherAgent, otherSeller, seller } from '../testing/fixtures';
-import { canManageInquiry, canViewInquiry, resolveInquiryRecipientId } from './permissions';
+import {
+  canManageInquiry,
+  canViewInquiry,
+  isOwnListing,
+  keepsSentInquiries,
+  resolveInquiryRecipientId,
+} from './permissions';
 
 describe('inquiry routing (SPEC §20)', () => {
   it('routes to the advertiser when no agent is assigned', () => {
-    expect(resolveInquiryRecipientId({ createdById: seller.id, assignedAgentId: null })).toBe(
+    expect(resolveInquiryRecipientId({ createdById: seller.id, assignedAgent: null })).toBe(
       seller.id,
     );
   });
 
   it('routes to the assigned agent only, when there is one', () => {
-    expect(resolveInquiryRecipientId({ createdById: seller.id, assignedAgentId: agent.id })).toBe(
-      agent.id,
-    );
+    expect(
+      resolveInquiryRecipientId({
+        createdById: seller.id,
+        assignedAgent: { id: agent.id, status: UserStatus.ACTIVE },
+      }),
+    ).toBe(agent.id);
+  });
+
+  it('routes to the advertiser when the assigned agent was deactivated (decision, Phase 9)', () => {
+    expect(
+      resolveInquiryRecipientId({
+        createdById: seller.id,
+        assignedAgent: { id: agent.id, status: UserStatus.DEACTIVATED },
+      }),
+    ).toBe(seller.id);
   });
 });
 
@@ -45,5 +63,21 @@ describe('inquiry access', () => {
       allowed: false,
       reason: DenialReason.ACCOUNT_INACTIVE,
     });
+  });
+});
+
+describe('inquiries sent by signed-in users (decision, Phase 9)', () => {
+  it('keeps a sent history for private sellers and agents only', () => {
+    expect(keepsSentInquiries(Role.PRIVATE_SELLER)).toBe(true);
+    expect(keepsSentInquiries(Role.REAL_ESTATE_AGENT)).toBe(true);
+    expect(keepsSentInquiries(Role.ADMIN)).toBe(false);
+    expect(keepsSentInquiries(Role.SUPER_ADMIN)).toBe(false);
+  });
+
+  it('treats the creator and the assigned agent as owners of the listing', () => {
+    const listing = { createdById: seller.id, assignedAgentId: agent.id };
+    expect(isOwnListing(seller.id, listing)).toBe(true);
+    expect(isOwnListing(agent.id, listing)).toBe(true);
+    expect(isOwnListing(otherSeller.id, listing)).toBe(false);
   });
 });

@@ -9,7 +9,12 @@ import { type AuthRateLimits, authRoutes } from './auth/auth.routes';
 import { AuthService } from './auth/auth.service';
 import { loadSession } from './auth/session.middleware';
 import type { Config } from './config';
+import { analyticsRoutes } from './analytics/analytics.routes';
+import { AnalyticsService } from './analytics/analytics.service';
+import { ListingViewsService } from './analytics/listing-views';
 import type { ExchangeRatesService } from './exchange-rates/exchange-rates.service';
+import { inquiriesRoutes } from './inquiries/inquiries.routes';
+import { InquiriesService } from './inquiries/inquiries.service';
 import { createErrorHandler, notFoundHandler } from './http/error-handler';
 import { type RateLimitRule, requireAllowedOrigin } from './http/security';
 import { ListingMediaService } from './listings/listing-media.service';
@@ -56,6 +61,12 @@ export const DEFAULT_APPLICATION_RATE_LIMIT: RateLimitRule = {
   limit: 10,
 };
 
+/** Inquiries per IP: a visitor contacting a few advertisers; more looks like spam. */
+export const DEFAULT_INQUIRY_RATE_LIMIT: RateLimitRule = { windowMs: 60 * MINUTE_MS, limit: 5 };
+
+/** Listing view reports per IP: plenty for browsing, low enough to stop flooding. */
+export const DEFAULT_VIEW_RATE_LIMIT: RateLimitRule = { windowMs: 60 * MINUTE_MS, limit: 600 };
+
 export interface AppDependencies {
   db: Database;
   config: Config;
@@ -66,6 +77,8 @@ export interface AppDependencies {
   rateLimits?: AuthRateLimits;
   uploadRateLimit?: RateLimitRule;
   applicationRateLimit?: RateLimitRule;
+  inquiryRateLimit?: RateLimitRule;
+  viewRateLimit?: RateLimitRule;
 }
 
 export function createApp({
@@ -78,6 +91,8 @@ export function createApp({
   rateLimits = authRateLimits(config),
   uploadRateLimit = DEFAULT_UPLOAD_RATE_LIMIT,
   applicationRateLimit = DEFAULT_APPLICATION_RATE_LIMIT,
+  inquiryRateLimit = DEFAULT_INQUIRY_RATE_LIMIT,
+  viewRateLimit = DEFAULT_VIEW_RATE_LIMIT,
 }: AppDependencies): Express {
   const app = express();
   const authService = new AuthService(db, config);
@@ -96,6 +111,9 @@ export function createApp({
   const profileChangesService = new ProfileChangesService(db, config, mediaStorage, logger);
   const publicService = new PublicService(db);
   const publicListingsService = new PublicListingsService(db, exchangeRates);
+  const inquiriesService = new InquiriesService(db, config, logger);
+  const viewsService = new ListingViewsService(db, config.sessionSecret);
+  const analyticsService = new AnalyticsService(db);
 
   app.disable('x-powered-by');
   app.set('trust proxy', config.trustProxyHops);
@@ -128,6 +146,10 @@ export function createApp({
       profiles: publicService,
       listings: publicListingsService,
       rates: exchangeRates,
+      inquiries: inquiriesService,
+      views: viewsService,
+      inquiryRateLimit,
+      viewRateLimit,
     }),
   );
   api.use(
@@ -163,6 +185,8 @@ export function createApp({
       uploadRateLimit,
     }),
   );
+  api.use('/inquiries', inquiriesRoutes(inquiriesService));
+  api.use('/analytics', analyticsRoutes(analyticsService));
   api.use('/users', usersRoutes(usersService));
   api.use('/audit-log', auditLogRoutes(usersService));
   app.use('/api/v1', api);

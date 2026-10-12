@@ -31,7 +31,7 @@ export const phoneSchema = z
 const optionalText = (max: number) => z.string().trim().max(max);
 
 /** An optional phone number: empty, or a valid number. */
-const optionalPhoneSchema = z
+export const optionalPhoneSchema = z
   .string()
   .trim()
   .max(L.phoneMaxLength)

@@ -4,8 +4,9 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-13. Phase 8 (public site) committed and pushed (`6732a82`); the user
-checks CI and says when Phase 9 starts._
+_Last updated: 2026-10-13. Phase 9 (inquiries, sent history, analytics) committed and pushed
+(the "feat(inquiries)" commit after `58824fe`); the user checks CI and says when Phase 10
+starts._
 
 ## Current status
 
@@ -20,19 +21,82 @@ checks CI and says when Phase 9 starts._
 | 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                  |
 | 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                  |
 | 7     | Agents: applications, profiles and change requests, public agent/seller pages         | Done, pushed (`bd75757`); PROGRESS update `a6f0838` |
-| **8** | Public site: home, search, listing page, EUR/RSD, SEO                                 | **Pushed (`6732a82`).** Waiting for CI + go-ahead.  |
-| 9–10  | Inquiries/analytics, hardening                                                        | Not started                                         |
+| 8     | Public site: home, search, listing page, EUR/RSD, SEO                                 | Done, pushed (`6732a82`), CI green                  |
+| **9** | Inquiries, notifications, analytics                                                   | **Pushed.** Waiting for CI + go-ahead.              |
+| 10    | Hardening and deployment                                                              | Not started                                         |
 
-**Immediate next step:** wait. The user checks GitHub CI for `6732a82` and says when to
-start Phase 9 (the user already reviewed Phase 8 on desktop and iPhone; gallery, menu and map
-work). Do not start Phase 9 before that.
+**Immediate next step:** wait. The user checks GitHub CI for the Phase 9 commit and says
+when to start Phase 10 (ask the Phase 10 questions first, see "Phase 10 starting notes"). Do
+not start Phase 10 before that.
 
-**How the user reviews Phase 8:** the dev DB is migrated to `0011` (the running `pnpm dev`
-API reloaded and fetched the NBS rate, 117.3693 on 2026-10-12). Open `/` and `/en`, search
-from the home page, use the filters and sort on `/properties`, open a listing (one published
-listing in the dev DB: "Kuća na Dedinju", address hidden → circle), switch EUR/RSD in the
-header, switch language, look at `/sitemap.xml` and `/robots.txt`. Making the exact address
-public (listing editor) shows a pin instead.
+**How the user reviews Phase 9:** the dev DB is migrated to `0013`. Send an inquiry from a
+listing page (form in the sidebar; "Send an inquiry" button on phones), read it in the API
+console (dev prints emails), sign in as the listing's seller: "Inquiries" in the dashboard
+navigation shows the new count; open it, change its status. The listing's dashboard page shows
+views and inquiries; an Admin's overview shows platform totals. Views are counted from the
+browser once per visitor per day, never for the listing's own seller/agent or for Admins, so
+view a listing signed out (or in a private window) to see the count change. Signed in as
+another seller or an agent, the form sends under your account and the inquiry appears under
+Inquiries → Sent; on your own listing the form is replaced by a note.
+
+Phase 9 contents:
+
+- **Inquiries API** (`apps/api/src/inquiries/*`): public `POST
+/public/listings/:slug/inquiries` (anonymous; `inquiryInputSchema` incl. the `website` trap
+  field; per-IP limit 5/hour via `limitByIp`; per email+listing 3/24 h in the service → 429
+  `RATE_LIMITED`; trap filled → dropped, same 201). Recipient from
+  `resolveInquiryRecipientId({ createdById, assignedAgent })` (deactivated agent → creator);
+  `assignedAgentId` stores the listing's agent at the time. Email `INQUIRY_RECEIVED` to the
+  recipient with `replyTo` = visitor (new `EmailMessage.replyTo`, Resend `reply_to`; email
+  paragraphs keep line breaks). Dashboard: `GET /inquiries?status=&page=` (Admins: all;
+  others: received + about listings they created, `canManage` false for read-only),
+  `GET /inquiries/:id` (`canViewInquiry`), `PUT /inquiries/:id/status` (`canManageInquiry`,
+  audited `INQUIRY_STATUS_CHANGED`, entity `INQUIRY`), `GET /inquiries/counts` (`{ new }`:
+  inquiries the user manages; all new ones for Admins).
+- **Views and analytics** (`apps/api/src/analytics/*`): public `POST
+/public/listings/:slug/views` (204, per-IP limit 600/hour) → `ListingViewsService.record`:
+  skips automated user agents (`isAutomatedClient`), the listing's creator/assigned agent and
+  Admins (session cookie), then inserts `(listing, day, visitorHash)` into
+  `listing_view_visitors` (`ON CONFLICT DO NOTHING`) and, if new, increments
+  `listing_views_daily`. `visitorHash` = HMAC(HMAC(SESSION_SECRET, day), ip + UA); earlier
+  days' rows are deleted once a day per process. `GET /analytics/listings/:id` (who may open
+  the listing: `loadViewableListing`) → total views, inquiry count, 30 days of views;
+  `GET /analytics/platform` (Admins) → listings by status, inquiries total/new, views
+  total/30 days. Days are Serbian time (`analyticsDay`, `lastDays`, `fillDays` in
+  `@walls/shared`).
+- **Sent history (added after the user's first review):** `inquiries.sender_user_id`
+  (migration `0013_inquiry_sender`) links inquiries sent by a signed-in private seller or
+  agent (`keepsSentInquiries`); the API takes the account's name and email (form values
+  ignored), refuses inquiries about your own listing (`isOwnListing`: creator or assigned
+  agent → 403), and serves `GET /inquiries/sent` (`SentInquiry`: listing, recipient name,
+  message, time; no status). Admins send like anonymous visitors. `InquiryDetail` has
+  `fromRegisteredUser` (a "Walls account" badge for the recipient). Web: the form shows
+  "Sending as …" and hides name/email for those users, a note instead of the form on your own
+  listing (session slug vs advertiser/agent slug), and `/dashboard/inquiries/sent` ("Sent"
+  tab, private sellers and agents only).
+- **Database:** `0012_listing_view_visitors`, `0013_inquiry_sender`.
+- **Web:** `InquiryForm` + `ViewReporter` on the listing page (form card first in the sidebar,
+  `#inquiry` anchor button on narrow screens; recipient name = assigned agent, else
+  advertiser); dashboard "Inquiries" nav item with new-count badge (`NavCounts` =
+  review-queue counts + inquiry counts), `/dashboard/inquiries` (status tabs, read-only badge,
+  pager) and `/dashboard/inquiries/[id]` (message, contact, reply by email, status buttons,
+  read-only notice); overview page with the new-inquiry card and platform stats for Admins
+  (`PlatformStats`); listing editor `insights` slot showing `ListingAnalyticsCard` (stats +
+  `ViewsChart`, a CSS bar chart) for listings that were published. Audit table entity map
+  (`ENTITIES`) includes inquiries. Removed `dashboard.comingSoon`.
+- **Tests:** `inquiries.integration.test.ts` (routing incl. deactivated agent, read-only
+  creator, strangers, trap field, both limits, validation, sold → 404, status changes +
+  audit, admin counts), `analytics.integration.test.ts` (once per visitor per day, crawlers /
+  owner / admin not counted, next day counts again and old fingerprints are deleted, access,
+  platform totals); unit tests for routing, days, inquiry schema, bot detection and the
+  fingerprint; E2E `inquiries.spec.ts` (visitor sends → seller badge → detail → contacted →
+  listing stats 1 view / 1 inquiry → admin platform stats).
+
+Verified at the end of Phase 9 incl. the sent history (also in a clean worktree with CI's
+env, before pushing): format, lint, typecheck, build; unit tests (shared 187, validation 53, web 43,
+api 14); integration 22 database + 155 api; 13 Playwright E2E tests. An intermittent E2E failure (an image
+upload answering 422) was caused by parallel tests writing the same fixture photo files;
+`listingPhotos()` now writes uniquely named files.
 
 Phase 8 contents:
 
@@ -252,6 +316,16 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Currency (Phase 8):** NBS official middle rate via kurs.resenje.org (free, no key);
   prices shown in EUR by default, converted prices marked "≈" with the listed price beside
   them; the EUR/RSD choice is a preference cookie (language still only from the URL).
+- **Inquiries (Phase 9):** trap field + per-IP (5/h) and per-email-per-listing (3/24 h)
+  limits, no captcha; a deactivated assigned agent's inquiries go to the creator; replies to
+  the notification email go to the visitor; no confirmation email to the visitor; status moves
+  freely between new/contacted/closed (audited).
+- **Sent inquiries (Phase 9):** signed-in private sellers and agents keep a "Sent" history
+  (without the recipient's status); replies stay by email. A two-way inbox is deferred until
+  after the MVP (SPEC §44).
+- **Analytics (Phase 9):** a view counts once per visitor per day (daily-keyed anonymous
+  fingerprint, from the browser, not crawlers, not the listing's own seller/agent or Admins);
+  Admins see platform + all listings, sellers/agents see their own listings' numbers.
 - **Hidden address map (Phase 8):** an approximate-area circle (~500 m across, no pin,
   never centred on the property).
 - **Inquiries:** if an agent is assigned, only that agent receives/manages the inquiry; the
@@ -349,6 +423,12 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   and hourly when older than 12 h, so a sleeping free-tier instance refreshes on wake. One
   row per refresh in `exchange_rates`; pages never call the provider. Search converts with the
   rate as a SQL parameter.
+- **Views are reported by the browser** (`ViewReporter`), not counted during server render:
+  Next prefetches and re-renders (e.g. currency switch) would otherwise count. The API reads
+  the session cookie to skip the owner and Admins.
+- **Client IP matters for views and inquiry limits:** behind the web proxy every request comes
+  from the Next server unless `TRUST_PROXY_HOPS` is right (production: Netlify + Render).
+  In dev and E2E all visitors share one IP; tests tell visitors apart by user agent.
 - **Approximate area** is grid snapping, not a random offset: the repo is public, so any
   offset derived from public data could be reversed, and random offsets can be averaged.
 - **Search** uses Postgres full text with the "simple" configuration plus prefix matching
@@ -424,6 +504,9 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Postgres `numeric` comes back padded** ("117.3693000000"); the rate view trims it.
 - **`unaccent()` is not IMMUTABLE**, so generated columns/indexes use `walls_unaccent`;
   Supabase keeps extensions in the `extensions` schema, hence its `search_path`.
+- **E2E fixtures must not share file names:** tests run in parallel, so photos written to
+  one fixed path were sometimes read half-written by another test (upload → 422, passing on
+  retry). `listingPhotos()` writes new, uniquely named files on every call.
 - Prettier reformats files; re-read a file before string-replacing it in scripts.
 - Tools generate `AGENTS.md` blocks (root: Turborepo; `apps/web/AGENTS.md`: Next.js) that are
   committed on purpose.
@@ -434,6 +517,10 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 
 ## Open questions and deferred decisions
 
+- Phase 9 choices to confirm: inquiry status changes are free in every direction; the
+  inquiry list has new/contacted/closed tabs (no "all" tab); a listing's analytics card
+  appears once it has been published; analytics show 30 days; the listing creator does not
+  get an email when an inquiry goes to the assigned agent (SPEC §20: the agent only).
 - Phase 8 choices to confirm: bedroom/bathroom filters mean "at least"; rental prices sort
   by amount whatever their period (day/week/month); price bounds keep the currency they were
   entered in (in the URL); the sitemap lists private sellers only when they have a public
@@ -448,8 +535,8 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   Serbia.
 - Phase 6 choices to confirm: Admins and Super Admins can both read the audit log; listing
   emails for approval/rejection go to the creator only (not an assigned agent); a deactivated
-  _assigned agent_ does not hide the listing (only the creator's status does) — inquiry
-  routing for that case is a Phase 9 question. Removing an image from a published listing
+  _assigned agent_ does not hide the listing (only the creator's status does); its inquiries
+  go to the creator (decided in Phase 9). Removing an image from a published listing
   can't be undone except by re-uploading.
 - Super Admins are created only with `pnpm admin:create`; "delete administrators" (SPEC
   §2.1) is implemented as deactivation (soft, reversible).
@@ -467,22 +554,17 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use); set
   `NEXT_PUBLIC_MAP_TILE_URL`. "Find address on map" uses Nominatim on button press only.
 
-## Phase 9 starting notes
+## Phase 10 starting notes
 
-- Scope (plan): inquiry form on the listing page (name, email, optional phone, message;
-  anonymous, rate-limited), routing per SPEC §20 (assigned agent only, else creator; resolved
-  server-side at creation), stored in `inquiries`, email via the outbox, dashboard inquiry
-  lists (agents/sellers: theirs; creator read-only when an agent is assigned; admins: all)
-  with status NEW/CONTACTED/CLOSED; listing views per day (`listing_views_daily`), listing
-  and platform analytics (SPEC §23).
-- Ask the user first: anti-spam for the anonymous form (rate limit only, or a captcha?);
-  whether a deactivated assigned agent's inquiries go to the creator; whether the visitor
-  gets a copy/confirmation email; how views are counted (every page load, or once per
-  visitor per day; bots excluded?); who sees analytics (admins only, or agents/sellers for
-  their own listings).
-- Reuse: `AdvertiserCard` (the inquiry form belongs next to it), `canManageInquiry` in
-  `@walls/shared` (`inquiry/permissions.ts`), the outbox templates, review-queue counts
-  pattern for "new inquiries" badges, `toPage`/`pageBounds`.
+- Scope (plan): finish the SPEC §38 E2E list (gaps: approved agent creates/submits a listing
+  and gets reviewed; admin assigns a listing; agent cannot open another agent's listing in the
+  browser), responsive pass on all pages, security review (headers/CSP on the web app, rate
+  limits, upload limits, dependency audit), deployment configs (Netlify for web, Render for
+  API with pre-deploy migrations, Supabase Postgres; check pnpm 12 on the build images),
+  `TRUST_PROXY_HOPS` for the real proxy chain, production map tile host, Resend domain.
+- Ask the user first: hosting accounts/plans and domains (walls.rs DNS, `api.` subdomain or
+  only the Netlify proxy), Resend sender domain, Supabase project/region, whether rate limits
+  need a shared store (one API instance is assumed), and the `/about` and `/contact` content.
 
 ## Remaining plan (from the approved plan)
 

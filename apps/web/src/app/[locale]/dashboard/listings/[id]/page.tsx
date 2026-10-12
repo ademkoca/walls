@@ -2,9 +2,15 @@ import { isReviewer } from '@walls/shared';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { ListingAnalyticsCard } from '@/components/analytics/listing-analytics-card';
 import { ListingEditor } from '@/components/listings/editor/listing-editor';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
-import { NotAccessibleError, getCurrentUser, getListing } from '@/lib/api/server';
+import {
+  NotAccessibleError,
+  getCurrentUser,
+  getListing,
+  getListingAnalytics,
+} from '@/lib/api/server';
 
 export async function generateMetadata({
   params,
@@ -31,12 +37,15 @@ export default async function ListingEditorPage({
   const [listing, user] = await Promise.all([loadListing(id), getCurrentUser()]);
   // The dashboard layout already redirects signed-out visitors.
   if (!listing || !user) return null;
+  // Views and inquiries exist once the listing has been public (SPEC §23).
+  const analytics = listing.publishedAt ? await getListingAnalytics(id) : null;
 
   return (
     <ListingEditor
       key={`${listing.id}-${listing.updatedAt}`}
       initialListing={listing}
       viewerIsReviewer={isReviewer(user)}
+      insights={analytics && <ListingAnalyticsCard analytics={analytics} />}
     />
   );
 }

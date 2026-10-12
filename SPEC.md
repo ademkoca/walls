@@ -762,6 +762,14 @@ Inquiry routing:
 
 The recipient is always determined server-side from the listing at the time the inquiry is created.
 
+Inquiry decisions:
+
+-   If the assigned agent's account is deactivated, the inquiry goes to the listing creator/advertiser instead, as if no agent were assigned. The assignment itself stays on the listing.
+-   The recipient's email contains the message and the visitor's contact details; replying to it writes to the visitor directly. The visitor gets no confirmation email.
+-   Spam protection: a hidden trap field that people never see (inquiries with it filled in are dropped silently, with the normal answer), at most 5 inquiries per IP address per hour, and at most 3 per email address per listing per 24 hours. No captcha.
+-   The recipient and Admins/Super Admins can move an inquiry between `NEW`, `CONTACTED` and `CLOSED` in any direction; every change is audited.
+-   Anyone can send an inquiry without an account. A signed-in private seller or agent sends it under their account's name and email, and sees it afterwards under "Sent" in the dashboard: the listing, the recipient's name, the message and the time, but not the recipient's status. Replies still arrive by email. Nobody can send an inquiry about a listing they created or are assigned to. Signed-in Admins send inquiries like visitors without an account. A two-way inbox (replies inside Walls) is deferred until after the MVP (§44: no messaging between users).
+
 ------------------------------------------------------------------------
 
 # 21. Email Notifications
@@ -828,6 +836,12 @@ Track:
 
 The architecture should allow richer analytics later without requiring
 analytics logic inside UI components.
+
+Analytics decisions:
+
+-   A view counts **once per visitor per day**. Visitors are told apart by a fingerprint of IP address and browser, keyed with a secret that changes daily, so nothing identifying is stored and visitors cannot be followed across days. Views are reported by the browser (server renders and link prefetches never count), and crawlers, link previews, the listing's own creator and assigned agent, and Admins are not counted. Days follow Serbian time.
+-   "Views over time" shows views per day for the last 30 days.
+-   Admins/Super Admins see the platform totals and every listing's numbers. Private sellers and agents see the numbers of the listings they may open in the dashboard (created by them or assigned to them).
 
 ------------------------------------------------------------------------
 

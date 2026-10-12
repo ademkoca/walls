@@ -144,7 +144,6 @@
     "title": "Kontrolna tabla",
     "welcome": "Dobro došli, {name}",
     "signedInAs": "Prijavljeni ste kao {role}.",
-    "comingSoon": "Upiti, podešavanja naloga i administracija stižu uskoro.",
     "nav": {
       "label": "Navigacija kontrolne table",
       "overview": "Pregled",
@@ -156,8 +155,12 @@
       "profile": "Moj profil",
       "agentApplications": "Prijave agenata",
       "profileChanges": "Izmene profila",
-      "waiting": "Na čekanju: {count}"
-    }
+      "waiting": "Na čekanju: {count}",
+      "inquiries": "Upiti"
+    },
+    "newInquiries": "{count, plural, =0 {Nema novih upita} one {# nov upit} few {# nova upita} other {# novih upita}}",
+    "openInquiries": "Otvori upite",
+    "platformTitle": "Platforma"
   },
   "listings": {
     "title": "Moji oglasi",
@@ -522,9 +525,11 @@
       "PROFILE_CHANGE_REJECTED": "Izmene profila odbijene",
       "AGENT_APPLICATION_SUBMITTED": "Primljena prijava agenta",
       "AGENT_APPLICATION_APPROVED": "Prijava agenta odobrena",
-      "AGENT_APPLICATION_REJECTED": "Prijava agenta odbijena"
+      "AGENT_APPLICATION_REJECTED": "Prijava agenta odbijena",
+      "INQUIRY_STATUS_CHANGED": "Promenjen status upita"
     },
-    "agentApplication": "Prijava"
+    "agentApplication": "Prijava",
+    "inquiry": "Upit"
   },
   "roles": {
     "SUPER_ADMIN": "super administrator",
@@ -622,6 +627,11 @@
     "locale": {
       "sr": "srpski",
       "en": "engleski"
+    },
+    "inquiryStatus": {
+      "NEW": "Nov",
+      "CONTACTED": "Kontaktiran",
+      "CLOSED": "Zatvoren"
     }
   },
   "validation": {
@@ -965,5 +975,90 @@
       "groundFloor": "Prizemlje",
       "floorOf": "{floor} od {total}"
     }
+  },
+  "inquiry": {
+    "title": "Kontaktirajte oglašivača",
+    "to": "Vaša poruka stiže do: {name}.",
+    "contact": "Pošaljite upit",
+    "fields": {
+      "name": "Vaše ime",
+      "email": "Email adresa",
+      "phone": "Telefon (opciono)",
+      "message": "Poruka",
+      "website": "Veb-sajt"
+    },
+    "messagePlaceholder": "Zdravo, zainteresovan/a sam za ovu nekretninu…",
+    "privacy": "Vaše podatke dobija samo oglašivač, da bi vam odgovorio.",
+    "submit": "Pošalji poruku",
+    "sentTitle": "Poruka je poslata",
+    "sentDescription": "{name} će vam odgovoriti na {email}.",
+    "sendAnother": "Pošalji još jednu poruku",
+    "sendingAs": "Šaljete kao {name} ({email}). Odgovori stižu na ovu adresu.",
+    "ownListing": "Ovo je vaš oglas. Upiti o njemu su na vašoj kontrolnoj tabli.",
+    "openInquiries": "Otvori upite",
+    "sentHistory": "Naći ćete ga pod „Poslati” u upitima na kontrolnoj tabli.",
+    "viewSent": "Pogledaj poslate upite"
+  },
+  "inquiries": {
+    "title": "Upiti",
+    "description": "Poruke posetilaca o vašim oglasima.",
+    "descriptionAdmin": "Poruke posetilaca o svim oglasima.",
+    "empty": {
+      "NEW": "Nema novih upita.",
+      "CONTACTED": "Nema upita označenih kao kontaktirani.",
+      "CLOSED": "Nema zatvorenih upita."
+    },
+    "columns": {
+      "visitor": "Od",
+      "listing": "Oglas",
+      "message": "Poruka",
+      "received": "Primljeno"
+    },
+    "readOnly": "Samo čitanje",
+    "readOnlyHint": "Ovaj upit vodi agent dodeljen oglasu. Možete ga čitati, ali ne i menjati njegov status.",
+    "untitled": "Oglas bez naslova",
+    "backToList": "Svi upiti",
+    "from": "Od",
+    "email": "Email",
+    "phone": "Telefon",
+    "noPhone": "Nije naveden",
+    "message": "Poruka",
+    "listing": "Oglas",
+    "received": "Primljeno",
+    "recipient": "Vodi ga",
+    "assignedAgent": "Dodeljeni agent",
+    "status": "Status",
+    "reply": "Odgovori emailom",
+    "viewListing": "Javna stranica",
+    "openListing": "Otvori oglas",
+    "markContacted": "Označi kao kontaktiran",
+    "close": "Zatvori",
+    "reopen": "Označi kao nov",
+    "statusChanged": "Status je promenjen.",
+    "sentTab": "Poslati",
+    "sentTitle": "Poslati upiti",
+    "sentDescription": "Upiti koje ste poslali o drugim oglasima dok ste bili prijavljeni. Odgovori stižu emailom.",
+    "sentEmpty": "Niste poslali nijedan upit dok ste bili prijavljeni.",
+    "sentTo": "Za: {name}",
+    "registeredUser": "Walls nalog",
+    "registeredUserHint": "Poslato dok je pošiljalac bio prijavljen: ime i email su sa njegovog Walls naloga."
+  },
+  "analytics": {
+    "listingTitle": "Pregledi i upiti",
+    "totalViews": "Pregledi",
+    "inquiries": "Upiti",
+    "chartTitle": "Pregledi u poslednjih {days} dana",
+    "chartLabel": "{total, plural, one {# pregled} few {# pregleda} other {# pregleda}} u poslednjih {days} dana",
+    "dayViews": "{date}: {count, plural, one {# pregled} few {# pregleda} other {# pregleda}}",
+    "hint": "Svaki posetilac se broji jednom dnevno. Vaše posete i posete Walls tima se ne broje.",
+    "listings": "Oglasi",
+    "published": "Objavljeni",
+    "pendingReview": "Na pregledu",
+    "sold": "Prodati",
+    "rented": "Izdati",
+    "inquiriesTotal": "Upiti",
+    "inquiriesNew": "Novi upiti",
+    "viewsTotal": "Pregledi nekretnina",
+    "views30": "Pregledi, poslednjih 30 dana"
   }
 }

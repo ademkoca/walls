@@ -56,9 +56,12 @@ type Busy = 'save' | 'submit' | 'revise' | 'delete' | null;
 export function ListingEditor({
   initialListing,
   viewerIsReviewer,
+  insights,
 }: {
   initialListing: ListingDetail;
   viewerIsReviewer: boolean;
+  /** Shown under the status notice, e.g. the listing's views and inquiries. */
+  insights?: ReactNode;
 }) {
   const t = useTranslations('listings');
   const tPublished = useTranslations('listings.editor.published');
@@ -229,6 +232,7 @@ export function ListingEditor({
         </div>
 
         <StatusNotice listing={listing} viewerIsReviewer={viewerIsReviewer} />
+        {insights}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <form

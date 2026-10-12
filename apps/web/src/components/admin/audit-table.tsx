@@ -20,12 +20,7 @@ export async function AuditTable({
 }) {
   const t = await getTranslations('auditLog');
   const format = await getFormatter();
-  const entityLabel = (entityType: string) =>
-    entityType === 'LISTING'
-      ? t('listing')
-      : entityType === 'AGENT_APPLICATION'
-        ? t('agentApplication')
-        : t('user');
+  const entityLabel = (entityType: string) => t(ENTITIES[entityType]?.labelKey ?? 'user');
   // Codes without a translation (added later) are shown as they are.
   const actionLabel = (action: string) => {
     const key = `actions.${action}` as Parameters<typeof t>[0];
@@ -89,15 +84,19 @@ export async function AuditTable({
   );
 }
 
+/** Audited entity types: their label and dashboard page. */
+const ENTITIES: Partial<
+  Record<string, { labelKey: 'listing' | 'user' | 'agentApplication' | 'inquiry'; path: string }>
+> = {
+  LISTING: { labelKey: 'listing', path: '/dashboard/listings' },
+  USER: { labelKey: 'user', path: '/dashboard/users' },
+  AGENT_APPLICATION: { labelKey: 'agentApplication', path: '/dashboard/agent-applications' },
+  INQUIRY: { labelKey: 'inquiry', path: '/dashboard/inquiries' },
+};
+
 function EntityLink({ entry, label }: { entry: AuditLogEntry; label: string }) {
-  const href =
-    entry.entityType === 'LISTING'
-      ? `/dashboard/listings/${entry.entityId}`
-      : entry.entityType === 'USER'
-        ? `/dashboard/users/${entry.entityId}`
-        : entry.entityType === 'AGENT_APPLICATION'
-          ? `/dashboard/agent-applications/${entry.entityId}`
-          : null;
+  const entity = ENTITIES[entry.entityType];
+  const href = entity ? `${entity.path}/${entry.entityId}` : null;
   const text = `${label} ${entry.entityId.slice(0, 8)}`;
   return href ? (
     <Link href={href} className="hover:underline">

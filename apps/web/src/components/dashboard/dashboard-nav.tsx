@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  type InquiryCounts,
   type ReviewQueueCounts,
   type Role,
   hasPublicProfile,
@@ -13,6 +14,7 @@ import {
   Building2Icon,
   ExternalLinkIcon,
   HistoryIcon,
+  InboxIcon,
   LayoutDashboardIcon,
   UserPenIcon,
   UserRoundIcon,
@@ -23,10 +25,16 @@ import { Link, usePathname } from '@/i18n/navigation';
 
 const reviewer = (role: Role) => isReviewer({ role });
 
+/** Items needing attention, shown as badges: review queues (Admins) and new inquiries. */
+export interface NavCounts {
+  review: ReviewQueueCounts | null;
+  inquiries: InquiryCounts | null;
+}
+
 /**
  * Dashboard sections. `show` mirrors the API's permissions so users only see sections they
- * can use; the API still authorizes every request. `waiting` picks the reviewer's count of
- * items that need attention.
+ * can use; the API still authorizes every request. `waiting` picks the count of items that
+ * need attention.
  */
 const DASHBOARD_NAV: readonly {
   href: string;
@@ -38,10 +46,11 @@ const DASHBOARD_NAV: readonly {
     | 'profileChanges'
     | 'users'
     | 'auditLog'
-    | 'profile';
+    | 'profile'
+    | 'inquiries';
   icon: typeof UsersIcon;
   show: (role: Role) => boolean;
-  waiting?: (counts: ReviewQueueCounts) => number;
+  waiting?: (counts: NavCounts) => number;
 }[] = [
   { href: '/dashboard', labelKey: 'overview', icon: LayoutDashboardIcon, show: () => true },
   {
@@ -56,21 +65,29 @@ const DASHBOARD_NAV: readonly {
     labelKey: 'reviewListings',
     icon: Building2Icon,
     show: reviewer,
-    waiting: (counts) => counts.listings + counts.listingRevisions,
+    waiting: ({ review }) => (review ? review.listings + review.listingRevisions : 0),
+  },
+  {
+    href: '/dashboard/inquiries',
+    labelKey: 'inquiries',
+    icon: InboxIcon,
+    // Advertisers and agents receive inquiries; Admins manage all of them (SPEC §20).
+    show: () => true,
+    waiting: ({ inquiries }) => inquiries?.new ?? 0,
   },
   {
     href: '/dashboard/agent-applications',
     labelKey: 'agentApplications',
     icon: BriefcaseBusinessIcon,
     show: reviewer,
-    waiting: (counts) => counts.agentApplications,
+    waiting: ({ review }) => review?.agentApplications ?? 0,
   },
   {
     href: '/dashboard/profile-changes',
     labelKey: 'profileChanges',
     icon: UserPenIcon,
     show: reviewer,
-    waiting: (counts) => counts.profileChanges,
+    waiting: ({ review }) => review?.profileChanges ?? 0,
   },
   { href: '/dashboard/users', labelKey: 'users', icon: UsersIcon, show: reviewer },
   { href: '/dashboard/audit-log', labelKey: 'auditLog', icon: HistoryIcon, show: reviewer },
@@ -82,13 +99,7 @@ const DASHBOARD_NAV: readonly {
   },
 ];
 
-export function DashboardNav({
-  role,
-  counts = null,
-}: {
-  role: Role;
-  counts?: ReviewQueueCounts | null;
-}) {
+export function DashboardNav({ role, counts }: { role: Role; counts: NavCounts }) {
   const t = useTranslations('dashboard.nav');
   const pathname = usePathname();
   const itemClass =
@@ -102,7 +113,7 @@ export function DashboardNav({
             href === '/dashboard'
               ? pathname === href
               : pathname === href || pathname.startsWith(`${href}/`);
-          const count = counts && waiting ? waiting(counts) : 0;
+          const count = waiting ? waiting(counts) : 0;
           return (
             <Link
               key={href}

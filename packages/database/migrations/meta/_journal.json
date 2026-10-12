@@ -85,6 +85,20 @@
       "when": 1791839055708,
       "tag": "0011_listing_text_search",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791844439432,
+      "tag": "0012_listing_view_visitors",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791846321555,
+      "tag": "0013_inquiry_sender",
+      "breakpoints": true
     }
   ]
 }

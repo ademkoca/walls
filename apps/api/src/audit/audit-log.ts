@@ -42,6 +42,7 @@ export const AuditAction = {
   LISTING_REVISION_APPROVED: 'LISTING_REVISION_APPROVED',
   LISTING_REVISION_REJECTED: 'LISTING_REVISION_REJECTED',
   LISTING_REVISION_DISCARDED: 'LISTING_REVISION_DISCARDED',
+  INQUIRY_STATUS_CHANGED: 'INQUIRY_STATUS_CHANGED',
 } as const;
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction];
 
@@ -49,6 +50,7 @@ export const AuditEntity = {
   USER: 'USER',
   LISTING: 'LISTING',
   AGENT_APPLICATION: 'AGENT_APPLICATION',
+  INQUIRY: 'INQUIRY',
 } as const;
 export type AuditEntity = (typeof AuditEntity)[keyof typeof AuditEntity];
 

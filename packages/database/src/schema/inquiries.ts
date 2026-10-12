@@ -17,6 +17,11 @@ export const inquiries = pgTable(
       .references(() => users.id, { onDelete: 'restrict' }),
     /** The listing's assigned agent when the inquiry was created, if any. */
     assignedAgentId: uuid().references(() => users.id, { onDelete: 'restrict' }),
+    /**
+     * The signed-in private seller or agent who sent it, for their "Sent" history; null for
+     * visitors without an account. Set by the API from the session, never from input.
+     */
+    senderUserId: uuid().references(() => users.id, { onDelete: 'restrict' }),
     visitorName: text().notNull(),
     visitorEmail: citext().notNull(),
     visitorPhone: text(),
@@ -27,5 +32,6 @@ export const inquiries = pgTable(
   (table) => [
     index().on(table.recipientUserId, table.status, table.createdAt),
     index().on(table.listingId, table.createdAt),
+    index().on(table.senderUserId, table.createdAt),
   ],
 );

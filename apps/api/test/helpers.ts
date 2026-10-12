@@ -54,7 +54,14 @@ export function uniqueEmail(): string {
 /** An app wired to the test database, with emails and media captured in memory. */
 export function createTestContext(
   overrides: Partial<
-    Pick<AppDependencies, 'rateLimits' | 'uploadRateLimit' | 'applicationRateLimit'>
+    Pick<
+      AppDependencies,
+      | 'rateLimits'
+      | 'uploadRateLimit'
+      | 'applicationRateLimit'
+      | 'inquiryRateLimit'
+      | 'viewRateLimit'
+    >
   > = {},
 ) {
   const logger = pino({ level: 'silent' });
@@ -76,6 +83,8 @@ export function createTestContext(
     rateLimits: GENEROUS_LIMITS,
     uploadRateLimit: GENEROUS_LIMITS.perIp,
     applicationRateLimit: GENEROUS_LIMITS.perIp,
+    inquiryRateLimit: GENEROUS_LIMITS.perIp,
+    viewRateLimit: GENEROUS_LIMITS.perIp,
     ...overrides,
   });
   const emails = new RecordingEmailService();

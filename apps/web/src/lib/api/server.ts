@@ -4,6 +4,13 @@ import type {
   AgentApplicationSummary,
   AuditLogEntry,
   CurrentUser,
+  InquiryCounts,
+  InquiryDetail,
+  InquiryStatus,
+  InquirySummary,
+  ListingAnalytics,
+  PlatformAnalytics,
+  SentInquiry,
   MyProfile,
   ProfileChangeRequestDetail,
   ProfileChangeRequestSummary,
@@ -148,4 +155,47 @@ export async function getProfileChange(id: string): Promise<ProfileChangeRequest
       )
     )?.request ?? null
   );
+}
+
+export async function getInquiries(query: {
+  status: InquiryStatus;
+  page: number;
+}): Promise<Page<InquirySummary> | null> {
+  return serverGet<Page<InquirySummary>>(withQuery('/inquiries', query));
+}
+
+/** Throws NotAccessibleError for 403/404. */
+export async function getInquiry(id: string): Promise<InquiryDetail | null> {
+  return (
+    (await serverGet<{ inquiry: InquiryDetail }>(`/inquiries/${encodeURIComponent(id)}`))
+      ?.inquiry ?? null
+  );
+}
+
+/** New inquiries for the navigation badge. */
+export async function getInquiryCounts(): Promise<InquiryCounts | null> {
+  return (await serverGet<{ counts: InquiryCounts }>('/inquiries/counts'))?.counts ?? null;
+}
+
+/** Admins only; throws NotAccessibleError for others. */
+export async function getPlatformAnalytics(): Promise<PlatformAnalytics | null> {
+  return (
+    (await serverGet<{ analytics: PlatformAnalytics }>('/analytics/platform'))?.analytics ?? null
+  );
+}
+
+/** Throws NotAccessibleError for 403/404. */
+export async function getListingAnalytics(id: string): Promise<ListingAnalytics | null> {
+  return (
+    (
+      await serverGet<{ analytics: ListingAnalytics }>(
+        `/analytics/listings/${encodeURIComponent(id)}`,
+      )
+    )?.analytics ?? null
+  );
+}
+
+/** Inquiries the signed-in private seller or agent sent. */
+export async function getSentInquiries(page: number): Promise<Page<SentInquiry> | null> {
+  return serverGet<Page<SentInquiry>>(withQuery('/inquiries/sent', { page }));
 }
