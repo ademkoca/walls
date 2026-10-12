@@ -13,5 +13,9 @@
   "devDependencies": {
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "dependencies": {
+    "@walls/shared": "workspace:*",
+    "zod": "^4.6.6"
   }
 }
