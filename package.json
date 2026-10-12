@@ -11,12 +11,16 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "brand:generate": "node scripts/generate-brand-assets.ts",
     "db:up": "docker compose up -d postgres",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter @walls/database db:generate",
+    "db:migrate": "pnpm --filter @walls/database db:migrate",
+    "db:studio": "pnpm --filter @walls/database db:studio"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

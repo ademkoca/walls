@@ -203,10 +203,27 @@ Do not use `npm` or `yarn` in this repository.
 pnpm install
 cp .env.example .env      # then fill in the values you need
 pnpm db:up                # start PostgreSQL in Docker
+pnpm db:migrate           # apply database migrations
 pnpm dev                  # API on :4000, web on :3000
 ```
 
 Both apps read the single root `.env` file in development.
+
+#### Without Docker
+
+Any local PostgreSQL 14 or newer works (production and CI use 17). Create
+the same role and databases that Docker would, so `.env.example` values
+work unchanged:
+
+``` text
+psql -d postgres -c "CREATE ROLE walls LOGIN PASSWORD 'walls'"
+psql -d postgres -c "CREATE DATABASE walls OWNER walls"
+psql -d postgres -c "CREATE DATABASE walls_test OWNER walls"
+psql -d walls -c "ALTER SCHEMA public OWNER TO walls"
+psql -d walls_test -c "ALTER SCHEMA public OWNER TO walls"
+```
+
+Then skip `pnpm db:up` and run `pnpm db:migrate`.
 
 ### Scripts
 
@@ -217,11 +234,25 @@ Both apps read the single root `.env` file in development.
 | `pnpm typecheck`     | TypeScript checks in every package              |
 | `pnpm lint`          | ESLint across the repository                    |
 | `pnpm test`          | Unit tests in every package                     |
+| `pnpm test:integration` | Database integration tests (needs `pnpm db:up`) |
 | `pnpm format`        | Format with Prettier (`format:check` in CI)     |
 | `pnpm db:up` / `db:down` | Start / stop the local PostgreSQL container |
+| `pnpm db:migrate`    | Apply pending migrations to `DATABASE_URL`      |
+| `pnpm db:generate`   | Create a migration after changing the Drizzle schema |
+| `pnpm db:studio`     | Browse the database with Drizzle Studio         |
 | `pnpm brand:generate` | Regenerate favicons and app icons from the brand SVGs |
 
-Database migrations are added in Phase 2.
+### Database
+
+The schema lives in `packages/database/src/schema`, migrations in
+`packages/database/migrations`. After changing the schema, run
+`pnpm db:generate` and commit the generated SQL. Hand-written SQL (extensions,
+triggers, reference data) goes in a custom migration:
+`pnpm --filter @walls/database db:generate --custom --name <name>`.
+
+Integration tests run against a separate `walls_test` database
+(`TEST_DATABASE_URL`), which is wiped and re-migrated on every run. Docker
+creates it the first time the Postgres volume is initialised.
 
 ### Repository layout
 

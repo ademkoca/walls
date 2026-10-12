@@ -97,6 +97,14 @@ export const MediaType = {
 } as const;
 export type MediaType = ValueOf<typeof MediaType>;
 
+/** Review outcome of an agent application or other request needing Admin approval. */
+export const ReviewStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const;
+export type ReviewStatus = ValueOf<typeof ReviewStatus>;
+
 export const Locale = {
   SR: 'sr',
   EN: 'en',
