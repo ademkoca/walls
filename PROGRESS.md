@@ -4,26 +4,33 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-12, Phase 7 built and waiting for the user's review._
+_Last updated: 2026-10-12. Phase 7 committed and pushed (`bd75757`); the user is checking CI
+and reviewing. Phase 8 has not started._
 
 ## Current status
 
-| Phase | Scope                                                                                 | State                                                                 |
-| ----- | ------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                                          |
-| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                                          |
-| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                                                |
-| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                                                |
-| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                              |
-| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)                       |
-| 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                                    |
-| 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                                    |
-| **7** | Agents: applications, profiles and change requests, public agent/seller pages         | **Built and verified, NOT committed.** Waiting for the user's review. |
-| 8–10  | Public site, inquiries/analytics, hardening                                           | Not started                                                           |
+| Phase | Scope                                                                                 | State                                                      |
+| ----- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                               |
+| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                               |
+| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                                     |
+| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                                     |
+| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                   |
+| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)            |
+| 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                         |
+| 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                         |
+| **7** | Agents: applications, profiles and change requests, public agent/seller pages         | **Pushed (`bd75757`).** User is checking CI and reviewing. |
+| 8–10  | Public site, inquiries/analytics, hardening                                           | Not started                                                |
 
-**Immediate next step:** the user reviews Phase 7 (apply at `/en/for-agents`, approve as a
-Super Admin, set up the agent from the emailed link, edit profiles, look at `/agents`). Then
-commit and push, check CI, and wait for the go-ahead for Phase 8.
+**Immediate next step:** wait. The user checks GitHub CI for `bd75757`, reviews Phase 7 and
+says when to start Phase 8. Do not start Phase 8 before that. Fix anything the review finds
+first (commit only when asked, push only when asked).
+
+**How the user reviews:** restart `pnpm dev` (dev DB is migrated to `0009`), apply at
+`/en/for-agents` (setup link printed in the API console), approve as Super Admin, set up the
+agent, edit profiles, approve the profile change, look at `/en/agents`. The user's local `.env`
+has real Cloudinary credentials, so dev uploads (listing images, avatars, proof files) go to
+their Cloudinary account. One approved test application ("Adem Agent") exists in the dev DB.
 
 Phase 7 contents:
 
@@ -53,6 +60,16 @@ Phase 7 contents:
 - **Web:** `/for-agents` application form, `/confirm-email`, dashboard `My profile`,
   `Agent applications`, `Profile changes` (nav shows waiting counts from
   `GET /review-queue/counts`), audit entries for applications.
+- **Proof retention (user's review request):** an approved agent's account page
+  (`/dashboard/users/[id]`) shows an "Agent application" card with the proof files
+  (`UserDetail.agentApplication`, `ProofFileList` component) linking to the application.
+- **Supporting changes:** `http/paging.ts` (`toPage`, `pageBounds`), `http/uploads.ts`
+  (`singleImageUpload(maxBytes)`), `http/database-errors.ts` (`isUniqueViolation`),
+  `media/cloudinary-client.ts` (shared signing), `rejectionInputSchema`, `slugParamSchema`,
+  `publicProfilePath(role, slug)`, `lib/initials.ts`, `lib/intl-locale.ts`, `lib/api/public.ts`
+  (server-only public reads), `AUTH_RATE_LIMIT_PER_IP` (default 30), `LOCAL_PRIVATE_FILES_DIR`,
+  migration `0009_agent_profiles` (`profile_change_requests`, `users.avatar_url`,
+  `agent_applications.locale`, `agent_application_files.position`).
 
 Verified at the end of Phase 7: format, lint, typecheck, build; unit tests (shared 175,
 validation 45, web 43); integration tests 22 database + 124 api; 11 Playwright E2E tests.
@@ -95,11 +112,20 @@ Super Admin with the real `admin:create` script).
   for now (user may go private later). Never commit secrets or sensitive business data.
 - Commit history (oldest first): `39d6a92` docs, `2ae0fde` Phase 0, `47d23eb` spec decisions,
   `62a4a8f` Phase 1, `f2d7985` zod pin, `1195ba4` Phase 2, `048f058` Phase 3,
-  `2dd3577` CI env fix, `7324d35` brand.
-- Working agreement: **ask before committing/pushing**, commit in small logical commits with
-  conventional-commit messages, run all checks first, report failures honestly. After each
-  push the user checks GitHub Actions and reports the result (`gh` is not installed).
-  Add the co-author trailer given by the harness reminder at the time of the commit.
+  `2dd3577` CI env fix, `7324d35` brand, `d8be2d8` Phase 4, `e442d6e` CI lint fix,
+  `56a6446` Phase 5, `083a6f7` Phase 6, `bd75757` Phase 7.
+- Working agreement: **commit and push only when the user asks** ("commit" alone means do
+  not push). Work phase by phase; the user reviews each phase, then asks to commit/push,
+  checks GitHub Actions and reports the result (`gh` is not installed), then says when to
+  start the next phase. Ask before inventing product rules (AGENTS.md); offer recommended
+  options with AskUserQuestion. Conventional-commit messages with the co-author trailer from
+  the harness reminder.
+- **Before every push, reproduce CI in a clean worktree**: commit, `git worktree add <scratch>
+HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL`,
+  `API_INTERNAL_URL`) run in order: `pnpm install --frozen-lockfile`, `format:check`, `lint`,
+  `typecheck`, `test`, `test:integration`, `build`, `test:e2e`. Remove the worktree after.
+  To check uncommitted work the same way, rsync `git ls-files -m -o --exclude-standard` into
+  the worktree.
 
 ## Stack and tooling
 
@@ -137,19 +163,24 @@ Super Admin with the real `admin:create` script).
   planner, submission requirements, price/money conversion, image rules, public-location
   projection, inquiry routing, user-management rules, phone label, slugify, API contract types.
 - `packages/validation`: strict Zod schemas (listing, price, auth, reasons).
-- `packages/database`: schema (`src/schema`), migrations `0000`–`0003`, client, test helpers
-  (`@walls/database/testing`).
+- `packages/database`: schema (`src/schema`), migrations `0000`–`0009`, client, test helpers
+  (`@walls/database/testing`), `db:reset-test` (wipes a `*_test` database; used by E2E).
 - `packages/ui`: shadcn components, `brand/` SVGs, `src/brand/brand.ts` (single source of brand
   values), generated `src/styles/brand-tokens.css`, theme `src/styles/globals.css`.
-- `apps/api`: `config`, `logger`, `http/` (errors, security, validation), `auth/`, `email/`
-  (templates, outbox, EmailService), `audit/`, `scripts/create-super-admin.ts`, `test/`.
+- `apps/api`: `config`, `logger`, `http/` (errors, security, validation, paging, uploads),
+  `auth/`, `email/` (templates, outbox, EmailService), `audit/`, `media/` (MediaStorage,
+  PrivateFileStorage, Cloudinary/local/in-memory), `listings/`, `users/`, `agents/`,
+  `profiles/`, `public/` (unauthenticated reads under `/api/v1/public`), `review-queue/`,
+  `scripts/create-super-admin.ts`, `test/` (one integration file per module).
 - `e2e`: Playwright tests (`@walls/e2e`; `pnpm test:e2e`). `playwright.config.ts` builds and
   starts the API (port 4100, `NODE_ENV=test`, database `TEST_DATABASE_URL`) and the web app
   (port 3100, production build) itself, never reusing dev servers. Emailed links are read
   from the API log file (`support/api-log.ts`); `support/fixtures.ts` fails any test on an
   uncaught browser exception. First run needs `pnpm --filter @walls/e2e browsers`.
-- `apps/web`: `src/app/[locale]/…` (public, auth, dashboard groups), `src/components`,
-  `src/i18n`, `src/lib` (API client, session, helpers), `messages/{sr,en}.json`, `src/proxy.ts`.
+- `apps/web`: `src/app/[locale]/…` (public, auth, dashboard groups), `src/components`
+  (`admin/`, `agents/`, `profiles/`, `public/` incl. `ListingCard`, `listings/`, `dashboard/`),
+  `src/i18n`, `src/lib` (`api/` browser clients, `api/server.ts` cookie-forwarding reads,
+  `api/public.ts` public reads), `messages/{sr,en}.json`, `src/proxy.ts`.
 
 ## Product decisions made with the user (beyond the original spec; also recorded in SPEC.md)
 
@@ -206,8 +237,8 @@ Super Admin with the real `admin:create` script).
 - **Drafts:** creator may soft-delete a draft; a PENDING_REVIEW listing cannot be withdrawn.
   REJECTED → DRAFT via "revise". SOLD only for sale, RENTED only for rent.
 - **Deactivation:** Admins deactivate sellers and agents; Super Admins also deactivate Admins
-  (my addition, user hasn't objected). Reason required, audit-logged, user emailed (service
-  work still to do). Nobody deactivates themselves or Super Admins.
+  (my addition, user hasn't objected). Reason required, audit-logged, user emailed. Nobody
+  deactivates themselves or Super Admins.
 - **Branding:** logo colors are authoritative: orange `#FF6A00`, charcoal `#171B1E`
   (spec's `#FF7A00`/`#111827` replaced). **White text on orange fails contrast (2.87:1):
   always charcoal on orange;** no orange text on light surfaces. Typeface: **Montserrat** for
@@ -223,8 +254,9 @@ Super Admin with the real `admin:create` script).
   (key `SESSION_SECRET`); 30-day sliding sessions; emailed tokens single-use (verify 24 h,
   reset 1 h, account setup 7 days). Password ≥10 chars. Passwords reset signs out everywhere.
   No account enumeration; re-registering a pending email cannot change its password.
-  Login throttling per IP+email (5/15 min); 30 auth requests/15 min per IP (in-memory store,
-  fine for one instance).
+  Login throttling per IP+email (5/15 min); `AUTH_RATE_LIMIT_PER_IP` auth requests/15 min per
+  IP (default 30; in-memory store, fine for one instance). Changing the login email needs the
+  current password and a link to the new address.
 - **CSRF:** Origin check on state-changing requests + SameSite (no extra token, since all
   requests go through the web proxy).
 - **Cookies are first-party:** the web app rewrites `/api/*` to the API (`API_INTERNAL_URL`).
@@ -241,6 +273,15 @@ Super Admin with the real `admin:create` script).
   Email verification requires a button click (protects against link-scanning bots).
   Show/hide password toggle instead of a confirm field. No dark mode.
 - **Bundling:** the API bundles `@walls/*` and `postgres` (`onlyBundle` enforces this).
+- **Private files:** `PrivateFileStorage` (Cloudinary `authenticated` raw uploads read back via
+  a 60 s signed download URL; local `.private-files` in dev). The API streams files to
+  authorized users with `Cache-Control: private, no-store` and a sandbox CSP; they never get a
+  public URL. Verified against the user's Cloudinary (upload + download) on 2026-10-12.
+- **Public pages** (`/agents`, `/agents/[slug]`, `/sellers/[slug]`) render per request and
+  read the API with `cache: 'no-store'` (`lib/api/public.ts`); 400/404 become a 404 page.
+  Visibility rule mirrors `isListingPubliclyVisible` in SQL (`public.repository.ts`).
+- **Review queues** (applications, profile changes): `?status=PENDING|APPROVED|REJECTED` tabs,
+  pending items oldest first, 50 per page.
 
 ## Gotchas learned the hard way
 
@@ -303,9 +344,8 @@ Super Admin with the real `admin:create` script).
 - Which provider for EUR/RSD exchange rates, and API key? (Phase 8.)
 - When the exact address is hidden, no coordinates are public so no map is shown; should an
   approximate area map be allowed? (Phase 8.)
-- Cloudinary and Resend credentials are needed from the user for production. The Cloudinary
-  adapter (signed REST uploads, `f_auto,q_auto` delivery) is written but untested against the
-  real service until credentials exist.
+- Resend credentials are needed from the user for production. Cloudinary works with the
+  user's credentials in dev (listing images, private proof files verified).
 - Phase 5 choices the user has not objected to: the "listing submitted" email goes to the
   submitter as a confirmation; admins cannot create listings; the form fixes the country to
   Serbia.
@@ -322,12 +362,29 @@ Super Admin with the real `admin:create` script).
 - Phase 7 choices to confirm: profile pictures are
   JPEG/PNG/WebP/HEIC, ≥ 200 × 200 px, ≤ 10 MB; profile slugs never change when the name
   changes; changing the login email needs the current password; an approved agent's public
-  page appears only once they have set their password. The Cloudinary private-file adapter
-  (`authenticated` raw uploads + signed download) is untested against the real service.
+  page appears only once they have set their password.
 - Parallel invitations with the same name can collide on the profile slug (unique
   violation → 500); rare, not fixed.
 - Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use); set
   `NEXT_PUBLIC_MAP_TILE_URL`. "Find address on map" uses Nominatim on button press only.
+
+## Phase 8 starting notes
+
+- Scope (plan): home (search, featured, latest), `/properties` search with URL state
+  (keyword, location, transaction/property type, price, area, bedrooms, bathrooms,
+  amenities; sorts newest, price ↑↓ with price-on-request last, area ↑↓),
+  `/properties/[slug]` detail with the exact-address/map rule (SPEC §13–14), exchange-rate
+  provider + EUR/RSD toggle (SPEC §12), SEO (metadata, OG, canonical/hreflang, sitemap,
+  robots, JSON-LD).
+- Ask the user first: exchange-rate provider (e.g. NBS middle rate) and its key; whether a
+  hidden-address listing may show an approximate-area map; how the EUR/RSD choice is
+  remembered (SPEC says no locale cookie, but says nothing about a currency cookie).
+- Reuse: `ListingCard` + `PublicListingCard` (already linked to `/properties/[slug]`),
+  `public.repository.ts` visibility condition, `lib/api/public.ts`, `intlLocale()` for month
+  names, `toPublicPhoneContact`, `publicProfilePath`, `toPublicLocation` (shared location
+  projection), money conversion helpers in `@walls/shared` (`pricing/money.ts`).
+- Search will need indexes / full-text (`unaccent` + `pg_trgm` were planned) and a new
+  migration; keep `listings_published_at_idx` in mind.
 
 ## Remaining plan (from the approved plan)
 
