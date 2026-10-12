@@ -14,3 +14,4 @@ export * from './pricing/money';
 export * from './pricing/price';
 export * from './text/slug';
 export * from './web-routes';
+export * from './api/contracts';

@@ -13,6 +13,7 @@ export default defineConfig(
     '**/.next/',
     '**/.turbo/',
     '**/coverage/',
+    'e2e/.output/',
     '**/next-env.d.ts',
   ]),
 
@@ -40,7 +41,13 @@ export default defineConfig(
   },
 
   {
-    files: ['apps/api/**/*.ts', 'packages/database/**/*.ts', 'scripts/**/*.ts', '*.js'],
+    files: [
+      'apps/api/**/*.ts',
+      'packages/database/**/*.ts',
+      'scripts/**/*.ts',
+      'e2e/**/*.ts',
+      '*.js',
+    ],
     languageOptions: { globals: globals.node },
   },
 

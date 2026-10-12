@@ -4,6 +4,7 @@ dist/
 .next/
 .turbo/
 coverage/
+e2e/.output/
 *.svg
 # Product docs are hand-formatted
 SPEC.md

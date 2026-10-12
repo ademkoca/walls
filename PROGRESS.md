@@ -8,26 +8,25 @@ _Last updated: 2026-10-12, in the middle of Phase 4 review._
 
 ## Current status
 
-| Phase | Scope                                                                       | State                                                                        |
-| ----- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| 0     | Monorepo scaffold, tooling, CI, brand config                                | Done, pushed                                                                 |
-| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)    | Done, pushed                                                                 |
-| 2     | Drizzle schema, migrations, DB integration tests                            | Done, pushed, CI green                                                       |
-| 3     | API foundation, auth, sessions, email outbox, `admin:create`                | Done, pushed, CI green                                                       |
-| Brand | Outlined logo variants, Open Graph image, Montserrat                        | Done, pushed (`7324d35`)                                                     |
-| **4** | Design system, i18n shell, public layout, auth pages, dashboard shell       | **Built and verified, NOT committed.** Waiting for the user's visual review. |
-| 5–10  | Listings, review/admin, agents, public site, inquiries/analytics, hardening | Not started                                                                  |
+| Phase | Scope                                                                                 | State                                                                |
+| ----- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                                         |
+| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                                         |
+| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                                               |
+| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                                               |
+| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                             |
+| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, reviewed by the user, pushed (check CI incl. the new E2E step) |
+| **5** | Listings (creator side)                                                               | **In progress**                                                      |
+| 6–10  | Review/admin, agents, public site, inquiries/analytics, hardening                     | Not started                                                          |
 
-**Immediate next step:** the user reviews Phase 4 in a browser (`pnpm dev`, then
-http://localhost:3000). Then commit and push it, check that CI is green, and start Phase 5.
-The Phase 4 working tree is large (~30 changed paths); commit as one `feat(web)` commit
-(plus a docs commit if sensible). Optional offer made to the user: install Playwright to
-screenshot pages at phone/tablet/desktop widths (needed anyway for Phase 10 E2E).
+**Immediate next step:** Phase 5 (see Remaining plan). Ask the user for the open Phase 5
+questions (heating/furnished values, Cloudinary credentials) when they become blocking.
 
 Verified at the end of Phase 4: format, lint, typecheck, build all pass; unit tests
-133 shared + 29 validation + 20 web + 8 api; integration tests 22 database + 27 api.
-A smoke test through the web `/api` proxy passed (register → verify → login → dashboard
-in sr and en → logout). Nothing has been checked in a real browser yet.
+133 shared + 29 validation + 20 web + 8 api; integration tests 22 database + 27 api;
+4 Playwright E2E tests (register → verify → login → account menu → logout in en and sr,
+wrong password, dark-mode theme check). Fixed during the user's review: the account menu
+crash and the OS dark mode restyling components (see Gotchas).
 
 ## Repository
 
@@ -83,6 +82,11 @@ in sr and en → logout). Nothing has been checked in a real browser yet.
   values), generated `src/styles/brand-tokens.css`, theme `src/styles/globals.css`.
 - `apps/api`: `config`, `logger`, `http/` (errors, security, validation), `auth/`, `email/`
   (templates, outbox, EmailService), `audit/`, `scripts/create-super-admin.ts`, `test/`.
+- `e2e`: Playwright tests (`@walls/e2e`; `pnpm test:e2e`). `playwright.config.ts` builds and
+  starts the API (port 4100, `NODE_ENV=test`, database `TEST_DATABASE_URL`) and the web app
+  (port 3100, production build) itself, never reusing dev servers. Emailed links are read
+  from the API log file (`support/api-log.ts`); `support/fixtures.ts` fails any test on an
+  uncaught browser exception. First run needs `pnpm --filter @walls/e2e browsers`.
 - `apps/web`: `src/app/[locale]/…` (public, auth, dashboard groups), `src/components`,
   `src/i18n`, `src/lib` (API client, session, helpers), `messages/{sr,en}.json`, `src/proxy.ts`.
 
@@ -162,6 +166,18 @@ in sr and en → logout). Nothing has been checked in a real browser yet.
 - **next-intl:** use `Link/redirect/useRouter` from `@/i18n/navigation`; call
   `resolveLocale(params)` at the top of each page/layout; the file convention in Next 16 is
   `proxy.ts` (not `middleware.ts`).
+- **Base UI group labels need a group:** `DropdownMenuLabel` (and similar `*Label` parts)
+  throws "MenuGroupContext is missing" when opened outside `DropdownMenuGroup`. The error
+  only appears when the menu opens, so it slips past typecheck, lint and build. This crashed
+  the account menu in Phase 4 review; fixed in `user-menu.tsx`.
+- **Tailwind's default `dark:` variant follows the OS setting.** Walls is light-only, so
+  `globals.css` ties `dark:` to a `.dark` class that nothing sets; otherwise shadcn
+  components get gray fills and slate borders for users in dark mode.
+- **`buttonVariants` merges classes** (tailwind-merge via `cn`). Plain `cva` output on a
+  `Link` kept both `border-transparent` and `border-border`, and CSS order hid the border.
+- **Playwright sets `NODE_ENV=test` for child processes**, which breaks `next build`
+  ("Cannot read properties of null (reading 'useContext')"); the web server entry in
+  `e2e/playwright.config.ts` forces `NODE_ENV=production`.
 - Prettier reformats files; re-read a file before string-replacing it in scripts.
 - Tools generate `AGENTS.md` blocks (root: Turborepo; `apps/web/AGENTS.md`: Next.js) that are
   committed on purpose.
@@ -182,6 +198,7 @@ in sr and en → logout). Nothing has been checked in a real browser yet.
 - When the exact address is hidden, no coordinates are public so no map is shown; should an
   approximate area map be allowed? (Phase 8.)
 - Cloudinary and Resend credentials are needed from the user for Phase 5 / production.
+- Cosmetic, deferred by the user until all phases are done: make the home-page CTAs larger.
 - Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use).
 - Still not done for Phase 3 email/deactivation: the deactivation service (reason, audit,
   email template) is specified but not implemented.
@@ -199,7 +216,7 @@ in sr and en → logout). Nothing has been checked in a real browser yet.
 8. **Public site:** home search/featured, search/filters/sort in the URL, detail page and map
    rules, exchange-rate provider and EUR/RSD toggle, SEO (sitemap, robots, hreflang, JSON-LD).
 9. **Inquiries, notifications, analytics.**
-10. **Hardening:** Playwright E2E for SPEC §38 flows, responsive pass, security review,
+10. **Hardening:** extend the Playwright E2E suite (started in Phase 4) to SPEC §38 flows, responsive pass, security review,
     deployment configs (Netlify/Render/Supabase; check pnpm 12 on build images).
 
 Also: update this file, README, SPEC and `.env.example` as each phase lands.

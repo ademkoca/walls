@@ -1,0 +1,23 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-nova",
+  "rsc": true,
+  "tsx": true,
+  "iconLibrary": "lucide",
+  "rtl": false,
+  "menuColor": "default",
+  "menuAccent": "subtle",
+  "tailwind": {
+    "config": "",
+    "css": "src/styles/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true
+  },
+  "aliases": {
+    "components": "@walls/ui/components",
+    "utils": "@walls/ui/lib/utils",
+    "hooks": "@walls/ui/hooks",
+    "lib": "@walls/ui/lib",
+    "ui": "@walls/ui/components"
+  }
+}

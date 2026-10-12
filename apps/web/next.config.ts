@@ -2,24 +2,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadEnvConfig } from '@next/env';
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+import { apiInternalUrl } from './src/lib/api-internal-url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
 // All apps share the single root .env file documented in .env.example.
 // forceReload: Next has already loaded (and cached) env files from apps/web by now.
 loadEnvConfig(repoRoot, process.env.NODE_ENV !== 'production', undefined, true);
-
-const DEV_API_URL = 'http://localhost:4000';
-
-/** Where /api/* is proxied. Required in production; defaults to the local API in development. */
-function apiInternalUrl(): string {
-  const url = process.env.API_INTERNAL_URL;
-  if (url) return url.replace(/\/+$/, '');
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('API_INTERNAL_URL must be set for production builds');
-  }
-  return DEV_API_URL;
-}
 
 const nextConfig: NextConfig = {
   // Internal workspace packages ship TypeScript source and are compiled by Next.
@@ -33,4 +23,4 @@ const nextConfig: NextConfig = {
     Promise.resolve([{ source: '/api/:path*', destination: `${apiInternalUrl()}/api/:path*` }]),
 };
 
-export default nextConfig;
+export default createNextIntlPlugin('./src/i18n/request.ts')(nextConfig);

@@ -1,0 +1,161 @@
+{
+  "metadata": {
+    "title": "{brand} – nekretnine u Srbiji",
+    "titleTemplate": "%s | {brand}",
+    "description": "Pronađite stanove, kuće, poslovne prostore i placeve za prodaju i izdavanje širom Srbije."
+  },
+  "common": {
+    "skipToContent": "Preskoči na sadržaj",
+    "loading": "Učitavanje…",
+    "backToHome": "Nazad na početnu"
+  },
+  "nav": {
+    "mainLabel": "Glavna navigacija",
+    "properties": "Nekretnine",
+    "agents": "Agenti",
+    "about": "O nama",
+    "contact": "Kontakt",
+    "forAgents": "Za agente",
+    "login": "Prijava",
+    "register": "Registracija",
+    "dashboard": "Kontrolna tabla",
+    "logout": "Odjava",
+    "openMenu": "Otvori meni",
+    "accountMenu": "Meni naloga"
+  },
+  "language": {
+    "label": "Jezik",
+    "sr": "Srpski",
+    "en": "English"
+  },
+  "footer": {
+    "explore": "Istražite",
+    "company": "Kompanija",
+    "rights": "© {year} {brand}. Sva prava zadržana."
+  },
+  "home": {
+    "title": "Pronađite svoj novi dom",
+    "subtitle": "Stanovi, kuće i poslovni prostori za prodaju i izdavanje širom Srbije — od privatnih prodavaca i proverenih agenata.",
+    "browse": "Pogledajte nekretnine",
+    "advertise": "Oglasite nekretninu"
+  },
+  "placeholder": {
+    "title": "Stranica je u izradi",
+    "description": "Ovaj deo sajta još pripremamo. Uskoro će biti dostupan."
+  },
+  "notFound": {
+    "title": "Stranica nije pronađena",
+    "description": "Stranica koju tražite ne postoji ili je premeštena."
+  },
+  "auth": {
+    "fields": {
+      "displayName": "Ime i prezime",
+      "email": "Email adresa",
+      "password": "Lozinka",
+      "newPassword": "Nova lozinka",
+      "passwordHint": "Najmanje {min} znakova. Duža fraza je sigurnija od složene kratke lozinke.",
+      "showPassword": "Prikaži lozinku",
+      "hidePassword": "Sakrij lozinku"
+    },
+    "login": {
+      "title": "Prijava",
+      "description": "Prijavite se da biste upravljali svojim oglasima.",
+      "submit": "Prijavi se",
+      "forgotPassword": "Zaboravili ste lozinku?",
+      "noAccount": "Nemate nalog?",
+      "register": "Registrujte se",
+      "notVerified": "Vaša email adresa još nije potvrđena. Otvorite link koji smo vam poslali ili zatražite novi.",
+      "resend": "Pošalji novi link",
+      "resent": "Ako nalog čeka potvrdu, poslali smo novi link na vašu email adresu."
+    },
+    "register": {
+      "title": "Registracija",
+      "description": "Napravite nalog privatnog prodavca i oglasite svoju nekretninu.",
+      "submit": "Napravi nalog",
+      "haveAccount": "Već imate nalog?",
+      "login": "Prijavite se",
+      "agentPrompt": "Agent ste za nekretnine?",
+      "agentLink": "Prijavite se kao agent",
+      "checkEmailTitle": "Proverite email",
+      "checkEmailDescription": "Poslali smo link za potvrdu na {email}. Otvorite ga da biste aktivirali nalog. Link važi 24 sata.",
+      "resend": "Pošalji link ponovo",
+      "resent": "Poslali smo novi link."
+    },
+    "verifyEmail": {
+      "title": "Potvrda email adrese",
+      "description": "Kliknite na dugme da biste potvrdili email adresu i aktivirali nalog.",
+      "submit": "Potvrdi email adresu",
+      "success": "Email adresa je potvrđena. Vaš nalog je aktivan.",
+      "goToLogin": "Prijavite se",
+      "missingToken": "Link za potvrdu nije potpun. Otvorite ga direktno iz poruke koju smo vam poslali.",
+      "requestNew": "Zatražite novi link sa stranice za prijavu."
+    },
+    "forgotPassword": {
+      "title": "Zaboravljena lozinka",
+      "description": "Unesite email adresu naloga i poslaćemo vam link za postavljanje nove lozinke.",
+      "submit": "Pošalji link",
+      "sent": "Ako postoji nalog sa ovom adresom, poslali smo link za resetovanje lozinke. Link važi 1 sat.",
+      "backToLogin": "Nazad na prijavu"
+    },
+    "resetPassword": {
+      "title": "Nova lozinka",
+      "description": "Izaberite novu lozinku za svoj nalog. Bićete odjavljeni sa svih uređaja.",
+      "submit": "Sačuvaj lozinku",
+      "success": "Lozinka je promenjena. Prijavite se novom lozinkom.",
+      "goToLogin": "Prijavite se",
+      "missingToken": "Link za resetovanje nije potpun. Zatražite novi."
+    },
+    "setupAccount": {
+      "title": "Podešavanje naloga",
+      "description": "Izaberite lozinku da biste aktivirali svoj nalog.",
+      "submit": "Aktiviraj nalog",
+      "success": "Nalog je aktivan. Prijavite se izabranom lozinkom.",
+      "goToLogin": "Prijavite se",
+      "missingToken": "Link za podešavanje naloga nije potpun. Otvorite ga direktno iz poruke koju ste dobili."
+    }
+  },
+  "dashboard": {
+    "title": "Kontrolna tabla",
+    "welcome": "Dobro došli, {name}",
+    "signedInAs": "Prijavljeni ste kao {role}.",
+    "comingSoon": "Upravljanje oglasima, upitima i nalogom stiže uskoro.",
+    "nav": {
+      "label": "Navigacija kontrolne table",
+      "overview": "Pregled",
+      "viewSite": "Pogledaj sajt"
+    }
+  },
+  "roles": {
+    "SUPER_ADMIN": "super administrator",
+    "ADMIN": "administrator",
+    "REAL_ESTATE_AGENT": "agent za nekretnine",
+    "PRIVATE_SELLER": "privatni prodavac"
+  },
+  "validation": {
+    "required": "Ovo polje je obavezno.",
+    "email": "Unesite ispravnu email adresu.",
+    "tooShort": "Unesite najmanje {min, plural, one {# znak} few {# znaka} other {# znakova}}.",
+    "tooLong": "Unesite najviše {max, plural, one {# znak} few {# znaka} other {# znakova}}.",
+    "invalid": "Uneta vrednost nije ispravna."
+  },
+  "errors": {
+    "network": "Nije moguće povezati se sa serverom. Proverite internet vezu i pokušajte ponovo.",
+    "VALIDATION_FAILED": "Proverite unete podatke.",
+    "INVALID_JSON": "Zahtev nije ispravan. Osvežite stranicu i pokušajte ponovo.",
+    "PAYLOAD_TOO_LARGE": "Poslati podaci su preveliki.",
+    "UNAUTHENTICATED": "Prijavite se da biste nastavili.",
+    "INVALID_CREDENTIALS": "Email adresa ili lozinka nisu ispravni.",
+    "EMAIL_NOT_VERIFIED": "Potvrdite email adresu pre prijave.",
+    "ACCOUNT_DEACTIVATED": "Ovaj nalog je deaktiviran.",
+    "ACCOUNT_INACTIVE": "Ovaj nalog nije aktivan.",
+    "INVALID_TOKEN": "Link je nevažeći ili je istekao.",
+    "FORBIDDEN": "Nemate dozvolu za ovu radnju.",
+    "ORIGIN_NOT_ALLOWED": "Zahtev je odbijen iz bezbednosnih razloga. Osvežite stranicu i pokušajte ponovo.",
+    "NOT_FOUND": "Traženi sadržaj nije pronađen.",
+    "INVALID_STATE": "Ova radnja trenutno nije moguća.",
+    "CONFLICT": "Došlo je do konflikta sa postojećim podacima.",
+    "RATE_LIMITED": "Previše pokušaja. Sačekajte malo i pokušajte ponovo.",
+    "EXTERNAL_SERVICE_FAILED": "Spoljni servis trenutno nije dostupan. Pokušajte ponovo kasnije.",
+    "INTERNAL_ERROR": "Došlo je do greške. Pokušajte ponovo."
+  }
+}

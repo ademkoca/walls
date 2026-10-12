@@ -300,6 +300,25 @@ The public website should feel modern and premium.
 The dashboard should prioritize information clarity and efficient
 workflows.
 
+
+### Web app conventions
+
+-   Put user-facing text in `apps/web/messages/sr.json` (reference) and
+    `en.json`. A unit test fails if the two differ in keys or
+    placeholders.
+-   Use `Link`, `redirect` and `useRouter` from `@/i18n/navigation`,
+    never from `next/link` or `next/navigation`, so URLs keep the locale.
+-   Call `resolveLocale(params)` at the top of every page and layout
+    under `[locale]` so pages can render statically.
+-   Validate forms with the shared `@walls/validation` schemas through
+    `useSchemaForm`; show API errors with `useErrorMessage`.
+-   Do not export values (constants, functions) from `'use client'`
+    modules for use in Server Components: they arrive as client
+    references, not values. Put shared values in plain modules.
+-   Add shadcn/ui components with
+    `pnpm dlx shadcn@<version> add <component> -c apps/web`; they are
+    written to `packages/ui/src/components` and use Base UI primitives.
+
 ------------------------------------------------------------------------
 
 ## Responsive Design
@@ -341,6 +360,12 @@ Prioritize:
 Add API integration tests for protected endpoints.
 
 Add E2E coverage for critical user journeys.
+
+E2E tests are Playwright tests in `e2e/` (`pnpm test:e2e`). Prefer
+asserting what a user sees; the shared fixture already fails a test on any
+uncaught browser error. Unit and API tests cannot catch a component that
+crashes when it renders in a real browser, so add or extend an E2E test for
+every new interactive flow.
 
 Do not write tests merely to satisfy coverage metrics; test meaningful
 behavior.

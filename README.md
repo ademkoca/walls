@@ -87,6 +87,17 @@ packages/
 -   TypeScript
 -   Express
 
+### Web app
+
+- Serbian pages are served at unprefixed URLs (`/login`), English under `/en`
+  (`/en/login`). Translations live in `apps/web/messages/{sr,en}.json`.
+- Browsers call the API through the web app's `/api/*` proxy, so the session
+  cookie stays first-party. Run the API (`pnpm dev` starts both) and open
+  http://localhost:3000.
+- Components come from shadcn/ui (Base UI primitives) in `packages/ui`; the theme
+  in `packages/ui/src/styles/globals.css` derives every color from the brand
+  palette.
+
 ### Emails in development
 
 Without `RESEND_API_KEY`, the API prints every email, including its
@@ -253,6 +264,7 @@ Then skip `pnpm db:up` and run `pnpm db:migrate`.
 | `pnpm lint`          | ESLint across the repository                    |
 | `pnpm test`          | Unit tests in every package                     |
 | `pnpm test:integration` | Database and API integration tests (needs PostgreSQL) |
+| `pnpm test:e2e`      | Playwright browser tests (needs PostgreSQL and a built web app; see below) |
 | `pnpm format`        | Format with Prettier (`format:check` in CI)     |
 | `pnpm db:up` / `db:down` | Start / stop the local PostgreSQL container |
 | `pnpm db:migrate`    | Apply pending migrations to `DATABASE_URL`      |
@@ -260,6 +272,15 @@ Then skip `pnpm db:up` and run `pnpm db:migrate`.
 | `pnpm db:studio`     | Browse the database with Drizzle Studio         |
 | `pnpm admin:create --email <email> --name "<name>"` | Invite a Super Admin (see below) |
 | `pnpm brand:generate` | Regenerate favicons and app icons from the brand SVGs |
+
+### End-to-end tests
+
+Playwright tests live in `e2e/`. Install the browser once with
+`pnpm --filter @walls/e2e browsers`, then run `pnpm test:e2e`. The run builds
+and starts its own API (port 4100) and web app (port 3100), so it does not
+touch a running `pnpm dev`; it uses the `walls_test` database and only creates
+uniquely named users. Emails are read back from the API log, so no email
+provider is needed. Reports and traces are written to `e2e/.output/`.
 
 ### Database
 

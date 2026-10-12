@@ -12,6 +12,7 @@ const repoRoot = path.resolve(import.meta.dirname, '..');
 const brandDir = path.join(repoRoot, 'packages/ui/brand');
 const webAppDir = path.join(repoRoot, 'apps/web/src/app');
 const webIconsDir = path.join(repoRoot, 'apps/web/public/icons');
+const brandTokensFile = path.join(repoRoot, 'packages/ui/src/styles/brand-tokens.css');
 
 const FAVICON_SIZES = [16, 32, 48];
 const APPLE_ICON_SIZE = 180;
@@ -92,6 +93,21 @@ function encodeIco(images: { size: number; png: Buffer }[]): Buffer {
   return Buffer.concat([header, ...entries, ...images.map(({ png }) => png)]);
 }
 
+/** CSS custom properties for the brand palette, consumed by the theme in globals.css. */
+function brandTokensCss(): string {
+  const toKebab = (name: string) => name.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+  const declarations = Object.entries(brand.colors).map(
+    ([name, value]) => `  --brand-${toKebab(name)}: ${value};`,
+  );
+  return [
+    '/* Generated from packages/ui/src/brand/brand.ts by `pnpm brand:generate`. Do not edit. */',
+    ':root {',
+    ...declarations,
+    '}',
+    '',
+  ].join('\n');
+}
+
 async function main(): Promise<void> {
   const markSvg = await readFile(path.join(brandDir, brand.assets.mark));
   const stackedLogoSvg = await readFile(path.join(brandDir, brand.assets.logoStacked));
@@ -109,6 +125,7 @@ async function main(): Promise<void> {
     [path.join(webAppDir, 'opengraph-image.alt.txt')]: Buffer.from(
       `${brand.name} ${brand.descriptor} logo`,
     ),
+    [brandTokensFile]: Buffer.from(brandTokensCss()),
   };
   for (const size of PWA_ICON_SIZES) {
     outputs[path.join(webIconsDir, `icon-${size}.png`)] = await renderPaddedIcon(markSvg, size);

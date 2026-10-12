@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - e2e
 
 # Versions shared by several workspace packages. Reference them with "catalog:".
 catalog:
@@ -16,3 +17,7 @@ catalog:
 allowBuilds:
   # The platform binary comes from esbuild's optional dependencies; its postinstall check is not needed.
   esbuild: false
+  # Pulled in by next-intl. Both ship prebuilt binaries as optional dependencies; their
+  # scripts only compile from source when no prebuilt binary matches the platform.
+  '@parcel/watcher': false
+  '@swc/core': false

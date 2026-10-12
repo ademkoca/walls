@@ -49,3 +49,13 @@ jobs:
       - run: pnpm test
       - run: pnpm test:integration
       - run: pnpm build
+
+      # Real-browser journeys. Builds and starts the API and web app itself (see e2e/playwright.config.ts).
+      - run: pnpm --filter @walls/e2e exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-output
+          path: e2e/.output/
+          retention-days: 7

@@ -1,5 +1,13 @@
 import type { Database, DbExecutor } from '@walls/database';
-import { AUTH_PAGE_PATHS, type Actor, type Locale, Role, UserStatus, slugify } from '@walls/shared';
+import {
+  AUTH_PAGE_PATHS,
+  type Actor,
+  type CurrentUser,
+  type Locale,
+  Role,
+  UserStatus,
+  slugify,
+} from '@walls/shared';
 import type { LoginInput, RegisterInput, SetPasswordInput } from '@walls/validation';
 import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
 import type { Config } from '../config';
@@ -32,17 +40,6 @@ const STATUS_FORBIDDEN = 403;
 const STATUS_CONFLICT = 409;
 const FALLBACK_SLUG = 'user';
 const USER_AGENT_MAX_LENGTH = 500;
-
-/** The signed-in user as returned to clients. Never includes the password hash. */
-export interface CurrentUser {
-  id: string;
-  email: string;
-  role: Role;
-  displayName: string;
-  slug: string;
-  preferredLocale: Locale;
-  emailVerified: boolean;
-}
 
 export function toCurrentUser(user: UserRow): CurrentUser {
   return {

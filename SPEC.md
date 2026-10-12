@@ -1050,6 +1050,7 @@ Locale decisions:
 -   Serbian uses the **Latin** script. Cyrillic is not part of the MVP.
 -   Serbian is the default locale and is served at unprefixed URLs (for example `/properties`). English is served under the `/en` prefix (for example `/en/properties`).
 -   Listing text content (title, description) is stored per locale. Serbian text is required for submission; English text is optional. When English text is missing, English pages fall back to the Serbian text.
+-   The URL alone determines the language. Visitors are not redirected based on browser language, and no locale cookie is stored; a language switcher on every page links to the same page in the other language.
 
 ------------------------------------------------------------------------
 

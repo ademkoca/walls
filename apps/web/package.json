@@ -11,11 +11,20 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.9.1",
     "@next/env": "^16.4.0",
+    "@walls/shared": "workspace:*",
     "@walls/ui": "workspace:*",
+    "@walls/validation": "workspace:*",
+    "lucide-react": "^1.55.0",
     "next": "^16.4.0",
+    "next-intl": "^4.14.9",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "react-hook-form": "^7.89.0",
+    "server-only": "^0.0.1",
+    "sonner": "^2.0.8",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
