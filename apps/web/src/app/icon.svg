@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="127 40 116 116">
+  <path fill="#FF6A00" d="M137 94 155 76 155 146 137 146Z"/>
+  <path fill="#FF6A00" d="M163 68 181 50 181 102 163 120Z"/>
+  <path fill="#FF6A00" d="M189 50 207 68 207 120 189 102Z"/>
+  <path fill="#171B1E" d="M215 76 233 94 233 146 215 146Z"/>
+  <g fill="#FF6A00">
+    <rect x="177" y="124" width="6" height="6"/>
+    <rect x="187" y="124" width="6" height="6"/>
+    <rect x="177" y="134" width="6" height="6"/>
+    <rect x="187" y="134" width="6" height="6"/>
+  </g>
+</svg>

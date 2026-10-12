@@ -1,0 +1,12 @@
+pnpm-lock.yaml
+node_modules/
+dist/
+.next/
+.turbo/
+coverage/
+*.svg
+# Product docs are hand-formatted
+SPEC.md
+AGENTS.md
+README.md
+CLAUDE.md

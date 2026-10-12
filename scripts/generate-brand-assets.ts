@@ -1,0 +1,102 @@
+/**
+ * Generates raster brand assets for the web app from the SVG sources in packages/ui/brand/.
+ * Run with `pnpm brand:generate` after changing a brand SVG or brand colors, and commit the output.
+ */
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import sharp from 'sharp';
+import { brand } from '../packages/ui/src/brand/brand.ts';
+
+const repoRoot = path.resolve(import.meta.dirname, '..');
+const brandDir = path.join(repoRoot, 'packages/ui/brand');
+const webAppDir = path.join(repoRoot, 'apps/web/src/app');
+const webIconsDir = path.join(repoRoot, 'apps/web/public/icons');
+
+const FAVICON_SIZES = [16, 32, 48];
+const APPLE_ICON_SIZE = 180;
+const PWA_ICON_SIZES = [192, 512];
+/** Share of a padded icon's width taken by the mark; stays inside the 80% maskable safe zone. */
+const PADDED_MARK_SCALE = 0.6;
+/** Render SVGs larger than the target and downscale, for crisp edges at small sizes. */
+const SUPERSAMPLE = 4;
+const CSS_DPI = 72;
+
+const TRANSPARENT = { r: 0, g: 0, b: 0, alpha: 0 };
+
+async function renderSvg(svg: Buffer, size: number): Promise<Buffer> {
+  const { width = size } = await sharp(svg).metadata();
+  const density = Math.ceil((CSS_DPI * size * SUPERSAMPLE) / width);
+  return sharp(svg, { density })
+    .resize(size, size, { fit: 'contain', background: TRANSPARENT })
+    .png()
+    .toBuffer();
+}
+
+/** The mark centered on an opaque cream square, as required by iOS and Android launchers. */
+async function renderPaddedIcon(svg: Buffer, size: number): Promise<Buffer> {
+  const markSize = Math.round(size * PADDED_MARK_SCALE);
+  const mark = await renderSvg(svg, markSize);
+  return sharp({
+    create: { width: size, height: size, channels: 4, background: brand.colors.cream },
+  })
+    .composite([{ input: mark, gravity: 'center' }])
+    .png()
+    .toBuffer();
+}
+
+/** Packs PNG images into an ICO container (PNG-in-ICO, supported by all current browsers). */
+function encodeIco(images: { size: number; png: Buffer }[]): Buffer {
+  const HEADER_BYTES = 6;
+  const ENTRY_BYTES = 16;
+  const header = Buffer.alloc(HEADER_BYTES);
+  header.writeUInt16LE(0, 0); // reserved
+  header.writeUInt16LE(1, 2); // type: icon
+  header.writeUInt16LE(images.length, 4);
+
+  let offset = HEADER_BYTES + ENTRY_BYTES * images.length;
+  const entries = images.map(({ size, png }) => {
+    const entry = Buffer.alloc(ENTRY_BYTES);
+    entry.writeUInt8(size >= 256 ? 0 : size, 0); // width (0 means 256)
+    entry.writeUInt8(size >= 256 ? 0 : size, 1); // height
+    entry.writeUInt8(0, 2); // palette size
+    entry.writeUInt8(0, 3); // reserved
+    entry.writeUInt16LE(1, 4); // color planes
+    entry.writeUInt16LE(32, 6); // bits per pixel
+    entry.writeUInt32LE(png.length, 8);
+    entry.writeUInt32LE(offset, 12);
+    offset += png.length;
+    return entry;
+  });
+
+  return Buffer.concat([header, ...entries, ...images.map(({ png }) => png)]);
+}
+
+async function main(): Promise<void> {
+  const markSvg = await readFile(path.join(brandDir, brand.assets.mark));
+  await mkdir(webIconsDir, { recursive: true });
+
+  const outputs: Record<string, Buffer> = {
+    [path.join(webAppDir, 'favicon.ico')]: encodeIco(
+      await Promise.all(
+        FAVICON_SIZES.map(async (size) => ({ size, png: await renderSvg(markSvg, size) })),
+      ),
+    ),
+    [path.join(webAppDir, 'apple-icon.png')]: await renderPaddedIcon(markSvg, APPLE_ICON_SIZE),
+  };
+  for (const size of PWA_ICON_SIZES) {
+    outputs[path.join(webIconsDir, `icon-${size}.png`)] = await renderPaddedIcon(markSvg, size);
+  }
+
+  for (const [file, data] of Object.entries(outputs)) {
+    await writeFile(file, data);
+  }
+  // Next.js serves app/icon.svg as the scalable favicon.
+  const iconSvg = path.join(webAppDir, 'icon.svg');
+  await copyFile(path.join(brandDir, brand.assets.mark), iconSvg);
+
+  for (const file of [...Object.keys(outputs), iconSvg]) {
+    console.info(`wrote ${path.relative(repoRoot, file)}`);
+  }
+}
+
+await main();
