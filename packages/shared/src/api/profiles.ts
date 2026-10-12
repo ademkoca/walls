@@ -108,7 +108,7 @@ export interface ReviewQueueCounts {
   profileChanges: number;
 }
 
-/** A published listing as shown in public lists (profile pages, later search). */
+/** A published listing as shown in public lists (search, home page, profile pages). */
 export interface PublicListingCard {
   id: string;
   slug: string;

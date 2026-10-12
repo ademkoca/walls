@@ -27,6 +27,9 @@ export interface ExchangeRate {
   fetchedAt: Date;
 }
 
+/** The part of an exchange rate that conversion needs. */
+export type ExchangeRateQuote = Pick<ExchangeRate, 'base' | 'quote' | 'rate'>;
+
 const DECIMAL_PATTERN = /^(\d+)(?:\.(\d+))?$/;
 
 /** Parses a positive decimal string into an exact fraction numerator / 10^scale. */
@@ -55,7 +58,7 @@ export function convertMinorUnits(
   amountMinor: number,
   from: Currency,
   to: Currency,
-  exchangeRate: ExchangeRate,
+  exchangeRate: ExchangeRateQuote,
 ): number {
   if (!Number.isSafeInteger(amountMinor)) throw new RangeError('Amount must be a safe integer');
   if (from === to) return amountMinor;

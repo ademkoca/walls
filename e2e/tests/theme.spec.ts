@@ -5,10 +5,13 @@ test('the home page looks the same with the OS in dark mode', async ({ browser }
   async function ctaStyle(colorScheme: 'light' | 'dark') {
     const page = await browser.newPage({ colorScheme });
     await page.goto('/en');
-    const style = await page.getByRole('link', { name: 'List a property' }).evaluate((element) => {
-      const computed = getComputedStyle(element);
-      return { border: computed.borderColor, background: computed.backgroundColor };
-    });
+    const style = await page
+      .getByRole('main')
+      .getByRole('link', { name: 'For agents' })
+      .evaluate((element) => {
+        const computed = getComputedStyle(element);
+        return { border: computed.borderColor, background: computed.backgroundColor };
+      });
     await page.close();
     return style;
   }

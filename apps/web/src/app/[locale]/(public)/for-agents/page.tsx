@@ -4,13 +4,18 @@ import { getTranslations } from 'next-intl/server';
 import { AgentApplicationForm } from '@/components/agents/agent-application-form';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
+import { localizedAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   params,
 }: PageProps<'/[locale]/for-agents'>): Promise<Metadata> {
   const locale = await metadataLocale(params);
   const t = await getTranslations({ locale, namespace: 'agentApplication' });
-  return { title: t('title'), description: t('intro') };
+  return {
+    title: t('title'),
+    description: t('intro'),
+    alternates: localizedAlternates(locale, '/for-agents'),
+  };
 }
 
 const STEPS = ['apply', 'review', 'setup'] as const;

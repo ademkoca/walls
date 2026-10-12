@@ -1,40 +1,8 @@
-import {
-  type DbExecutor,
-  listingMedia,
-  listingTexts,
-  listings,
-  properties,
-  propertyLocations,
-  users,
-} from '@walls/database';
-import { ListingStatus, Role, UserStatus } from '@walls/shared';
-import {
-  type SQL,
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  inArray,
-  isNotNull,
-  isNull,
-  ne,
-  or,
-} from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
+import { type DbExecutor, listings, properties, propertyLocations, users } from '@walls/database';
+import { Role, UserStatus } from '@walls/shared';
+import { type SQL, and, asc, count, desc, eq, or } from 'drizzle-orm';
 import { pageBounds } from '../http/paging';
-
-const creator = alias(users, 'creator');
-
-/**
- * Listings visitors may see (SPEC §46): published, not deleted, and not created by a
- * deactivated account (decision, Phase 6). Mirrors `isListingPubliclyVisible`.
- */
-const publiclyVisible = and(
-  eq(listings.status, ListingStatus.PUBLISHED),
-  isNull(listings.deletedAt),
-  ne(creator.status, UserStatus.DEACTIVATED),
-);
+import { type CardRow, cardColumns, creator, publiclyVisible } from './listing-cards';
 
 /** An active agent or private seller with a public profile page. */
 export async function findPublicUser(db: DbExecutor, slug: string, role: Role) {
@@ -47,9 +15,9 @@ export async function findPublicUser(db: DbExecutor, slug: string, role: Role) {
 }
 
 /** Public listings advertised by a user, or assigned to them as the agent; newest first. */
-export async function findPublicListingsOf(db: DbExecutor, userId: string) {
-  const rows = await db
-    .select({ listing: listings, property: properties, location: propertyLocations })
+export async function findPublicListingsOf(db: DbExecutor, userId: string): Promise<CardRow[]> {
+  return db
+    .select(cardColumns)
     .from(listings)
     .innerJoin(creator, eq(creator.id, listings.createdById))
     .innerJoin(properties, eq(properties.id, listings.propertyId))
@@ -61,27 +29,6 @@ export async function findPublicListingsOf(db: DbExecutor, userId: string) {
       ),
     )
     .orderBy(desc(listings.publishedAt), asc(listings.id));
-  if (rows.length === 0) return [];
-
-  const ids = rows.map((row) => row.listing.id);
-  const [texts, covers] = await Promise.all([
-    db.select().from(listingTexts).where(inArray(listingTexts.listingId, ids)),
-    db
-      .select({ listingId: listingMedia.listingId, url: listingMedia.url })
-      .from(listingMedia)
-      .where(
-        and(
-          inArray(listingMedia.listingId, ids),
-          eq(listingMedia.isPrimary, true),
-          isNotNull(listingMedia.approvedAt),
-        ),
-      ),
-  ]);
-  return rows.map((row) => ({
-    ...row,
-    texts: texts.filter((text) => text.listingId === row.listing.id),
-    coverUrl: covers.find((cover) => cover.listingId === row.listing.id)?.url ?? null,
-  }));
 }
 
 /** One page of active agents by name, with their number of public listings. */

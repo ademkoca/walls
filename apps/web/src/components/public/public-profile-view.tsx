@@ -6,10 +6,17 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { intlLocale } from '@/lib/intl-locale';
 import { PhoneContact } from '../profiles/phone-contact';
 import { ProfileAvatar } from '../profiles/profile-avatar';
-import { ListingCard } from './listing-card';
+import type { Pricing } from '@/lib/currency';
+import { ListingGrid } from './listing-card';
 
 /** A public agent or private-seller page (SPEC §19): profile, contact and listings. */
-export async function PublicProfileView({ page }: { page: PublicProfilePage }) {
+export async function PublicProfileView({
+  page,
+  pricing,
+}: {
+  page: PublicProfilePage;
+  pricing: Pricing;
+}) {
   const t = await getTranslations('publicProfile');
   const monthYear = new Intl.DateTimeFormat(intlLocale(await getLocale()), {
     month: 'long',
@@ -86,13 +93,7 @@ export async function PublicProfileView({ page }: { page: PublicProfilePage }) {
             {t('noListings')}
           </p>
         ) : (
-          <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((listing) => (
-              <li key={listing.id}>
-                <ListingCard listing={listing} />
-              </li>
-            ))}
-          </ul>
+          <ListingGrid listings={listings} pricing={pricing} />
         )}
       </section>
     </div>

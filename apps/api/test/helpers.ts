@@ -15,9 +15,13 @@ import { InMemoryPrivateFileStorage } from '../src/media/private-file-storage';
 import { Role, UserStatus } from '@walls/shared';
 import sharp from 'sharp';
 import { processOutbox } from '../src/email/outbox';
+import { FixedExchangeRateProvider } from '../src/exchange-rates/exchange-rate-provider';
+import { ExchangeRatesService } from '../src/exchange-rates/exchange-rates.service';
 
 export const WEB_ORIGIN = 'http://localhost:3000';
 export const PASSWORD = 'correct horse battery staple';
+/** The EUR → RSD rate every test uses (they share one database). */
+export const TEST_EUR_RSD = '117.5';
 
 const HOUR_MS = 3_600_000;
 const GENEROUS_LIMITS: AuthRateLimits = {
@@ -40,6 +44,7 @@ export const testConfig: Config = {
     localDirectory: '/nonexistent',
     localPrivateDirectory: '/nonexistent',
   },
+  exchangeRates: { provider: 'fixed', eurRsd: TEST_EUR_RSD },
 };
 
 export function uniqueEmail(): string {
@@ -56,12 +61,18 @@ export function createTestContext(
   const { db, close } = createDatabase({ url: testConfig.databaseUrl, maxConnections: 5 });
   const media = new InMemoryMediaStorage();
   const privateFiles = new InMemoryPrivateFileStorage();
+  const exchangeRates = new ExchangeRatesService(
+    db,
+    new FixedExchangeRateProvider(TEST_EUR_RSD),
+    logger,
+  );
   const app = createApp({
     db,
     config: testConfig,
     logger,
     mediaStorage: media,
     privateFiles,
+    exchangeRates,
     rateLimits: GENEROUS_LIMITS,
     uploadRateLimit: GENEROUS_LIMITS.perIp,
     applicationRateLimit: GENEROUS_LIMITS.perIp,
@@ -128,7 +139,18 @@ export function createTestContext(
     return { user, client: signedIn };
   }
 
-  return { app, db, close, emails, media, privateFiles, lastEmailTo, client, signedInUser };
+  return {
+    app,
+    db,
+    close,
+    emails,
+    media,
+    privateFiles,
+    exchangeRates,
+    lastEmailTo,
+    client,
+    signedInUser,
+  };
 }
 
 /** Extracts the single-use token from an emailed link. */

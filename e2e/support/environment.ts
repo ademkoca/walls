@@ -35,6 +35,9 @@ export const API_ENV = {
   LOCAL_MEDIA_DIR: path.resolve(import.meta.dirname, '../.output/media'),
   LOCAL_PRIVATE_FILES_DIR: path.resolve(import.meta.dirname, '../.output/private-files'),
   LOG_LEVEL: 'info',
+  // A set EUR → RSD rate: no calls to the real rate provider, and stable converted prices.
+  EXCHANGE_RATE_PROVIDER: 'fixed',
+  EXCHANGE_RATE_FIXED_EUR_RSD: '117.2',
   // Every test browser shares one IP; the production default (30) would throttle the suite.
   AUTH_RATE_LIMIT_PER_IP: '10000',
 };

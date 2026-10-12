@@ -8,13 +8,18 @@ import { ProfileAvatar } from '@/components/profiles/profile-avatar';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
 import { getPublicAgents } from '@/lib/api/public';
+import { localizedAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   params,
 }: PageProps<'/[locale]/agents'>): Promise<Metadata> {
   const locale = await metadataLocale(params);
   const t = await getTranslations({ locale, namespace: 'publicProfile' });
-  return { title: t('agentsTitle'), description: t('agentsDescription') };
+  return {
+    title: t('agentsTitle'),
+    description: t('agentsDescription'),
+    alternates: localizedAlternates(locale, '/agents'),
+  };
 }
 
 /** Directory of approved agents (SPEC §16, §46: visitors can browse agent profiles). */

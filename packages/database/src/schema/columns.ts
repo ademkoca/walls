@@ -45,6 +45,11 @@ export const citext = customType<{ data: string }>({
   dataType: () => 'citext',
 });
 
+/** Postgres full-text search vector. */
+export const tsvector = customType<{ data: string }>({
+  dataType: () => 'tsvector',
+});
+
 export const id = () => uuid().primaryKey().defaultRandom();
 
 export const timestamptz = () => timestamp({ withTimezone: true, mode: 'date' });

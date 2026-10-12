@@ -4,33 +4,89 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-12. Phase 7 committed and pushed (`bd75757`); the user is checking CI
-and reviewing. Phase 8 has not started._
+_Last updated: 2026-10-12. Phase 8 (public site) is built and verified locally, not yet
+committed; the user is reviewing it._
 
 ## Current status
 
-| Phase | Scope                                                                                 | State                                                      |
-| ----- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                               |
-| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                               |
-| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                                     |
-| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                                     |
-| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                   |
-| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)            |
-| 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                         |
-| 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                         |
-| **7** | Agents: applications, profiles and change requests, public agent/seller pages         | **Pushed (`bd75757`).** User is checking CI and reviewing. |
-| 8–10  | Public site, inquiries/analytics, hardening                                           | Not started                                                |
+| Phase | Scope                                                                                 | State                                                     |
+| ----- | ------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                              |
+| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                              |
+| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                                    |
+| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                                    |
+| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                                  |
+| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)           |
+| 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                        |
+| 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                        |
+| 7     | Agents: applications, profiles and change requests, public agent/seller pages         | Done, pushed (`bd75757`); PROGRESS update `a6f0838`       |
+| **8** | Public site: home, search, listing page, EUR/RSD, SEO                                 | **Built, verified locally, not committed.** User reviews. |
+| 9–10  | Inquiries/analytics, hardening                                                        | Not started                                               |
 
-**Immediate next step:** wait. The user checks GitHub CI for `bd75757`, reviews Phase 7 and
-says when to start Phase 8. Do not start Phase 8 before that. Fix anything the review finds
-first (commit only when asked, push only when asked).
+**Immediate next step:** wait for the user's Phase 8 review. Fix what it finds; commit only
+when asked, push only when asked (reproduce CI in a clean worktree first). Then wait for CI
+and the go-ahead for Phase 9.
 
-**How the user reviews:** restart `pnpm dev` (dev DB is migrated to `0009`), apply at
-`/en/for-agents` (setup link printed in the API console), approve as Super Admin, set up the
-agent, edit profiles, approve the profile change, look at `/en/agents`. The user's local `.env`
-has real Cloudinary credentials, so dev uploads (listing images, avatars, proof files) go to
-their Cloudinary account. One approved test application ("Adem Agent") exists in the dev DB.
+**How the user reviews Phase 8:** the dev DB is migrated to `0011` (the running `pnpm dev`
+API reloaded and fetched the NBS rate, 117.3693 on 2026-10-12). Open `/` and `/en`, search
+from the home page, use the filters and sort on `/properties`, open a listing (one published
+listing in the dev DB: "Kuća na Dedinju", address hidden → circle), switch EUR/RSD in the
+header, switch language, look at `/sitemap.xml` and `/robots.txt`. Making the exact address
+public (listing editor) shows a pin instead.
+
+Phase 8 contents:
+
+- **Exchange rates** (`apps/api/src/exchange-rates/*`): `ExchangeRateProvider` interface,
+  `NbsExchangeRateProvider` (kurs.resenje.org `.../currencies/eur/rates/today`,
+  `exchange_middle`, 10 s timeout, zod-checked), `FixedExchangeRateProvider` (dev offline,
+  tests, E2E). `ExchangeRatesService.current()` reads the newest `exchange_rates` row;
+  `refreshIfStale()` inserts a new row when the latest is older than 12 h;
+  `startExchangeRateRefresher` runs at startup and hourly in `server.ts` (failures logged,
+  stored rate kept). Config `EXCHANGE_RATE_PROVIDER` (`nbs` default, required in production)
+  and `EXCHANGE_RATE_FIXED_EUR_RSD`; empty values count as unset (`config.test.ts`).
+- **Public listing API** (`apps/api/src/public/*`, all under `/api/v1/public`):
+  `GET /listings` (search, `listingSearchQuerySchema`, 24 per page, `total`), `GET
+/listings/:slug` (detail), `GET /home` (≤ 8 unexpired featured + 8 latest), `GET
+/exchange-rate` (or `null`), `GET /sitemap`. `listing-cards.ts` holds the shared visibility
+  condition (`creator` alias + `publiclyVisible`) and `toCards`; `public-profile-view.ts`
+  holds `toPublicProfile` (profiles and listing advertiser/agent cards use both).
+- **Search SQL** (`public-listings.repository.ts`): keyword = prefix `to_tsquery` over
+  `listing_texts.search_vector` (generated `to_tsvector('simple', walls_unaccent(title || ' '
+|| description))`, GIN index); location = `walls_unaccent(...) ILIKE` on city/municipality/
+  neighbourhood per comma-separated part (LIKE wildcards escaped); prices compared via
+  `priceIn(currency, rate)` (CASE on the listing currency, rate passed as a parameter, null
+  without a rate); area = `coalesce(floor_area, plot_area)`; amenities = one EXISTS per code;
+  sort with `NULLS LAST`, then newest. Count is a separate query.
+- **Shared:** `approximateArea()` + `PublicListingLocation.approximate` (grid snapping, 350 m
+  cells, 250 m radius), `toDisplayPrice()` + `DEFAULT_DISPLAY_CURRENCY` (`pricing/display.ts`),
+  `ListingSort`, `LISTING_SEARCH_PAGE_SIZE`, `ROOM_FILTER_OPTIONS`, `HOME_LISTINGS_LIMIT`,
+  `api/public-listings.ts` types, `publicListingPath()`. Validation: `listing-search.ts`
+  (`listingSearchQuerySchema` strict for the API, `parseListingSearch` lenient for page URLs,
+  `listingSearchToQuery`, `hasListingFilters`).
+- **Database:** `0010_search_unaccent` (custom: IMMUTABLE `walls_unaccent(text)` with
+  `search_path = public, extensions, pg_catalog` for Supabase), `0011_listing_text_search`
+  (generated column + GIN index).
+- **Web:** home page (hero with `HomeSearch`: buy/rent, location, type → `/properties?...`;
+  featured and latest sections; advertise/for-agents block), `/properties` (sidebar
+  `SearchFilters`, `MobileFilters` sheet, `SortSelect`, count, pager "Page x of y", empty
+  state, rate note), `/properties/[slug]` (gallery, key facts, description with "Serbian only"
+  note on English pages, features, `ListingMap` with pin or circle, `AdvertiserCard` for the
+  advertiser and an assigned agent, JSON-LD `RealEstateListing`), `CurrencySwitcher` in the
+  header and mobile menu (cookie `walls_currency`, `router.refresh()`), `PriceTag` ("≈" +
+  "Listed at …"), `ListingGrid`, `app/sitemap.ts` (force-dynamic, both locales with
+  alternates), `app/robots.ts`, `lib/seo.ts` (`localizedAlternates`, `jsonLd`, `absoluteUrl`),
+  `lib/currency.ts`, `lib/pricing.ts` (`getPricing()` reads the cookie + rate), canonical and
+  hreflang on every public page, filtered searches `noindex, follow`.
+- **Tests:** `public-listings.integration.test.ts` (search filters/sorts/currencies,
+  visibility, detail hiding the address, revisions not leaking, sold → 404, home featured
+  expiry, rate refresh, sitemap); unit tests for approximate area, display price, search
+  schema, NBS provider, config; E2E `public-site.spec.ts` (home search → filters → listing →
+  RSD → Serbian page keeps RSD → sitemap). E2E API uses the fixed rate 117.2.
+
+Verified at the end of Phase 8 (local, not yet in a clean worktree): format, lint,
+typecheck, build; unit tests (shared 181, validation 50, web 43, api 12); integration 22
+database + 138 api; 12 Playwright E2E tests. Pages checked at 1280 px and 390 px: no
+horizontal overflow, no browser errors.
 
 Phase 7 contents:
 
@@ -163,14 +219,15 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   planner, submission requirements, price/money conversion, image rules, public-location
   projection, inquiry routing, user-management rules, phone label, slugify, API contract types.
 - `packages/validation`: strict Zod schemas (listing, price, auth, reasons).
-- `packages/database`: schema (`src/schema`), migrations `0000`–`0009`, client, test helpers
+- `packages/database`: schema (`src/schema`), migrations `0000`–`0011`, client, test helpers
   (`@walls/database/testing`), `db:reset-test` (wipes a `*_test` database; used by E2E).
 - `packages/ui`: shadcn components, `brand/` SVGs, `src/brand/brand.ts` (single source of brand
   values), generated `src/styles/brand-tokens.css`, theme `src/styles/globals.css`.
 - `apps/api`: `config`, `logger`, `http/` (errors, security, validation, paging, uploads),
   `auth/`, `email/` (templates, outbox, EmailService), `audit/`, `media/` (MediaStorage,
   PrivateFileStorage, Cloudinary/local/in-memory), `listings/`, `users/`, `agents/`,
-  `profiles/`, `public/` (unauthenticated reads under `/api/v1/public`), `review-queue/`,
+  `profiles/`, `public/` (unauthenticated reads under `/api/v1/public`: profiles, search,
+  listing pages, home, sitemap), `exchange-rates/`, `review-queue/`,
   `scripts/create-super-admin.ts`, `test/` (one integration file per module).
 - `e2e`: Playwright tests (`@walls/e2e`; `pnpm test:e2e`). `playwright.config.ts` builds and
   starts the API (port 4100, `NODE_ENV=test`, database `TEST_DATABASE_URL`) and the web app
@@ -178,7 +235,8 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   from the API log file (`support/api-log.ts`); `support/fixtures.ts` fails any test on an
   uncaught browser exception. First run needs `pnpm --filter @walls/e2e browsers`.
 - `apps/web`: `src/app/[locale]/…` (public, auth, dashboard groups), `src/components`
-  (`admin/`, `agents/`, `profiles/`, `public/` incl. `ListingCard`, `listings/`, `dashboard/`),
+  (`admin/`, `agents/`, `profiles/`, `public/` incl. `ListingCard`/`PriceTag`, `search/`,
+  `listing/` (public listing page), `home/`, `listings/` (dashboard), `dashboard/`),
   `src/i18n`, `src/lib` (`api/` browser clients, `api/server.ts` cookie-forwarding reads,
   `api/public.ts` public reads), `messages/{sr,en}.json`, `src/proxy.ts`.
 
@@ -191,6 +249,11 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Listing text:** per-locale; Serbian required, English optional with fallback to Serbian.
 - **Locale:** Serbian **Latin** at unprefixed URLs, English under `/en`. URL alone decides the
   language: no browser-language redirect, no locale cookie. No Cyrillic.
+- **Currency (Phase 8):** NBS official middle rate via kurs.resenje.org (free, no key);
+  prices shown in EUR by default, converted prices marked "≈" with the listed price beside
+  them; the EUR/RSD choice is a preference cookie (language still only from the URL).
+- **Hidden address map (Phase 8):** an approximate-area circle (~500 m across, no pin,
+  never centred on the property).
 - **Inquiries:** if an agent is assigned, only that agent receives/manages the inquiry; the
   listing creator keeps read-only access. Otherwise the creator handles it.
 - **Agent application:** name, email, phone, optional agency name, ≥1 proof file (PDF/JPG/PNG).
@@ -268,7 +331,9 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   Audit log table is generic (before/after JSON + reason).
 - **API errors:** one shape `{ error: { code, message, details? } }`, codes shared in
   `@walls/shared` (`ApiErrorCode`); every code has a Serbian and English message.
-- **Web:** public pages are statically pre-rendered per locale; the header loads the session
+- **Web:** pages that show prices (home, search, listing, profiles) render per request
+  because they read the currency cookie; other public pages are statically pre-rendered per
+  locale; the header loads the session
   in the browser; dashboard/auth pages are dynamic and check the session on the server.
   Email verification requires a button click (protects against link-scanning bots).
   Show/hide password toggle instead of a confirm field. No dark mode.
@@ -280,6 +345,15 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Public pages** (`/agents`, `/agents/[slug]`, `/sellers/[slug]`) render per request and
   read the API with `cache: 'no-store'` (`lib/api/public.ts`); 400/404 become a 404 page.
   Visibility rule mirrors `isListingPubliclyVisible` in SQL (`public.repository.ts`).
+- **Exchange rates** are refreshed in the API process (no separate cron job): at startup
+  and hourly when older than 12 h, so a sleeping free-tier instance refreshes on wake. One
+  row per refresh in `exchange_rates`; pages never call the provider. Search converts with the
+  rate as a SQL parameter.
+- **Approximate area** is grid snapping, not a random offset: the repo is public, so any
+  offset derived from public data could be reversed, and random offsets can be averaged.
+- **Search** uses Postgres full text with the "simple" configuration plus prefix matching
+  (no Serbian stemmer exists) and an immutable unaccent wrapper. No trigram index yet; add
+  one if location search gets slow.
 - **Review queues** (applications, profile changes): `?status=PENDING|APPROVED|REJECTED` tabs,
   pending items oldest first, 50 per page.
 
@@ -331,6 +405,25 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **multer decodes file names as Latin-1** unless `defParamCharset: 'utf8'` is set.
 - **Public data must not be cached by `fetch`:** a prefetched `<Link>` cached an agent's old
   profile, so the approved version did not show. Public reads use `cache: 'no-store'` for now.
+- **Testing on a phone over Wi-Fi:** Next.js dev refuses its live-reload connection from
+  unknown hosts, so the page renders but nothing is interactive (menu, gallery, map).
+  `allowedDevOrigins` in `next.config.ts` allows `192.168.*.*`, `10.*.*.*` and `*.local`
+  (add `172.16.*`-style ranges if needed). The API also only accepts `WEB_ORIGIN`
+  (`http://localhost:3000`) on state-changing requests: for login from a phone set
+  `WEB_ORIGIN=http://<lan-ip>:3000` in `.env`.
+- **Base UI `SheetClose render={<Link/>}` logs a "native button" error**, and `nativeButton={false}`
+  adds `role="button"` to the link; the mobile menu uses plain `Link`s that close a
+  controlled sheet instead.
+- **Safari/iPhone bugs only show in WebKit:** `pnpm exec playwright install webkit` and test
+  with `devices['iPhone 15']`; a hostname mapped with Chromium's `--host-resolver-rules`
+  reproduces the "unknown dev origin" failure.
+- **New pages need `next typegen`** before `tsc` knows their `PageProps<'/…'>` route
+  (the `typecheck` script runs it; a bare `tsc` does not).
+- **Leaflet SVG colors:** `color: 'var(--primary)'` is not reliable in SVG attributes; style
+  paths with a `className` (`fill-primary stroke-primary`) instead.
+- **Postgres `numeric` comes back padded** ("117.3693000000"); the rate view trims it.
+- **`unaccent()` is not IMMUTABLE**, so generated columns/indexes use `walls_unaccent`;
+  Supabase keeps extensions in the `extensions` schema, hence its `search_path`.
 - Prettier reformats files; re-read a file before string-replacing it in scripts.
 - Tools generate `AGENTS.md` blocks (root: Turborepo; `apps/web/AGENTS.md`: Next.js) that are
   committed on purpose.
@@ -341,9 +434,13 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 
 ## Open questions and deferred decisions
 
-- Which provider for EUR/RSD exchange rates, and API key? (Phase 8.)
-- When the exact address is hidden, no coordinates are public so no map is shown; should an
-  approximate area map be allowed? (Phase 8.)
+- Phase 8 choices to confirm: bedroom/bathroom filters mean "at least"; rental prices sort
+  by amount whatever their period (day/week/month); price bounds keep the currency they were
+  entered in (in the URL); the sitemap lists private sellers only when they have a public
+  listing; filtered search pages are `noindex`; on phones the advertiser card comes after
+  the map (the inquiry form in Phase 9 may change this layout).
+- `/about` and `/contact` are still "coming soon" placeholders: their content is the user's
+  to provide (they are in the sitemap already).
 - Resend credentials are needed from the user for production. Cloudinary works with the
   user's credentials in dev (listing images, private proof files verified).
 - Phase 5 choices the user has not objected to: the "listing submitted" email goes to the
@@ -356,8 +453,10 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   can't be undone except by re-uploading.
 - Super Admins are created only with `pnpm admin:create`; "delete administrators" (SPEC
   §2.1) is implemented as deactivation (soft, reversible).
-- OSM standard tiles label Serbian places in Cyrillic; the production tile host should offer
-  Latin labels (site is Latin-only).
+- OSM standard tiles label Serbian places in Cyrillic (visible on every public listing map).
+  The user decided to keep Cyrillic map labels for now; providers considered if that changes:
+  MapTiler or Stadia Maps (~$20–25/month for commercial use; free tiers are non-commercial),
+  OpenFreeMap (free, MapLibre). Google Maps was ruled out (billing, not OSM-based, SPEC §14).
 - Cosmetic, deferred by the user until all phases are done: make the home-page CTAs larger.
 - Phase 7 choices to confirm: profile pictures are
   JPEG/PNG/WebP/HEIC, ≥ 200 × 200 px, ≤ 10 MB; profile slugs never change when the name
@@ -368,23 +467,22 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use); set
   `NEXT_PUBLIC_MAP_TILE_URL`. "Find address on map" uses Nominatim on button press only.
 
-## Phase 8 starting notes
+## Phase 9 starting notes
 
-- Scope (plan): home (search, featured, latest), `/properties` search with URL state
-  (keyword, location, transaction/property type, price, area, bedrooms, bathrooms,
-  amenities; sorts newest, price ↑↓ with price-on-request last, area ↑↓),
-  `/properties/[slug]` detail with the exact-address/map rule (SPEC §13–14), exchange-rate
-  provider + EUR/RSD toggle (SPEC §12), SEO (metadata, OG, canonical/hreflang, sitemap,
-  robots, JSON-LD).
-- Ask the user first: exchange-rate provider (e.g. NBS middle rate) and its key; whether a
-  hidden-address listing may show an approximate-area map; how the EUR/RSD choice is
-  remembered (SPEC says no locale cookie, but says nothing about a currency cookie).
-- Reuse: `ListingCard` + `PublicListingCard` (already linked to `/properties/[slug]`),
-  `public.repository.ts` visibility condition, `lib/api/public.ts`, `intlLocale()` for month
-  names, `toPublicPhoneContact`, `publicProfilePath`, `toPublicLocation` (shared location
-  projection), money conversion helpers in `@walls/shared` (`pricing/money.ts`).
-- Search will need indexes / full-text (`unaccent` + `pg_trgm` were planned) and a new
-  migration; keep `listings_published_at_idx` in mind.
+- Scope (plan): inquiry form on the listing page (name, email, optional phone, message;
+  anonymous, rate-limited), routing per SPEC §20 (assigned agent only, else creator; resolved
+  server-side at creation), stored in `inquiries`, email via the outbox, dashboard inquiry
+  lists (agents/sellers: theirs; creator read-only when an agent is assigned; admins: all)
+  with status NEW/CONTACTED/CLOSED; listing views per day (`listing_views_daily`), listing
+  and platform analytics (SPEC §23).
+- Ask the user first: anti-spam for the anonymous form (rate limit only, or a captcha?);
+  whether a deactivated assigned agent's inquiries go to the creator; whether the visitor
+  gets a copy/confirmation email; how views are counted (every page load, or once per
+  visitor per day; bots excluded?); who sees analytics (admins only, or agents/sellers for
+  their own listings).
+- Reuse: `AdvertiserCard` (the inquiry form belongs next to it), `canManageInquiry` in
+  `@walls/shared` (`inquiry/permissions.ts`), the outbox templates, review-queue counts
+  pattern for "new inquiries" badges, `toPage`/`pageBounds`.
 
 ## Remaining plan (from the approved plan)
 

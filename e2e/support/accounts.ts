@@ -98,3 +98,11 @@ export async function submitListingViaApi(page: Page, title = LISTING_TITLE): Pr
   expect((await client.post(`/listings/${id}/submit`)).status()).toBe(200);
   return id;
 }
+
+/** An Admin approves a listing in review through the API; returns its public slug. */
+export async function approveListingViaApi(admin: Page, id: string): Promise<string> {
+  const response = await api(admin).post(`/listings/${id}/approve`);
+  expect(response.status()).toBe(200);
+  const { listing } = (await response.json()) as { listing: { slug: string } };
+  return listing.slug;
+}

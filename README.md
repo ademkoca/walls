@@ -108,6 +108,13 @@ administrators only. With Cloudinary they are stored as `authenticated` raw file
 requires Cloudinary. Maps use OpenStreetMap tiles by default (`NEXT_PUBLIC_MAP_TILE_URL` to
 change).
 
+### Exchange rates in development
+
+The API fetches the National Bank of Serbia EUR middle rate at startup and whenever the
+stored rate is older than 12 hours, from kurs.resenje.org (free, no key). To work offline,
+set `EXCHANGE_RATE_PROVIDER=fixed` and `EXCHANGE_RATE_FIXED_EUR_RSD=117.2`; tests and the
+E2E suite always use a fixed rate. Production must use `nbs`.
+
 ### Emails in development
 
 Without `RESEND_API_KEY`, the API prints every email, including its
@@ -325,7 +332,7 @@ DATABASE_URL
 SESSION_SECRET
 CLOUDINARY_*
 RESEND_API_KEY
-EXCHANGE_RATE_API_KEY
+EXCHANGE_RATE_PROVIDER
 ```
 
 The exact variables should be documented in `.env.example`.

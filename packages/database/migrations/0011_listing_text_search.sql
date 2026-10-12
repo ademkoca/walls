@@ -1,0 +1,2 @@
+ALTER TABLE "listing_texts" ADD COLUMN "search_vector" "tsvector" GENERATED ALWAYS AS (to_tsvector('simple', walls_unaccent(title || ' ' || description))) STORED NOT NULL;--> statement-breakpoint
+CREATE INDEX "listing_texts_search_idx" ON "listing_texts" USING gin ("search_vector");

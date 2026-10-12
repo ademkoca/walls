@@ -9,6 +9,7 @@ import { type AuthRateLimits, authRoutes } from './auth/auth.routes';
 import { AuthService } from './auth/auth.service';
 import { loadSession } from './auth/session.middleware';
 import type { Config } from './config';
+import type { ExchangeRatesService } from './exchange-rates/exchange-rates.service';
 import { createErrorHandler, notFoundHandler } from './http/error-handler';
 import { type RateLimitRule, requireAllowedOrigin } from './http/security';
 import { ListingMediaService } from './listings/listing-media.service';
@@ -23,6 +24,7 @@ import {
 } from './profiles/profiles.routes';
 import { ProfileChangesService } from './profiles/profile-changes.service';
 import { ProfilesService } from './profiles/profiles.service';
+import { PublicListingsService } from './public/public-listings.service';
 import { publicRoutes } from './public/public.routes';
 import { PublicService } from './public/public.service';
 import { reviewQueueRoutes } from './review-queue/review-queue';
@@ -60,6 +62,7 @@ export interface AppDependencies {
   logger: Logger;
   mediaStorage: MediaStorage;
   privateFiles: PrivateFileStorage;
+  exchangeRates: ExchangeRatesService;
   rateLimits?: AuthRateLimits;
   uploadRateLimit?: RateLimitRule;
   applicationRateLimit?: RateLimitRule;
@@ -71,6 +74,7 @@ export function createApp({
   logger,
   mediaStorage,
   privateFiles,
+  exchangeRates,
   rateLimits = authRateLimits(config),
   uploadRateLimit = DEFAULT_UPLOAD_RATE_LIMIT,
   applicationRateLimit = DEFAULT_APPLICATION_RATE_LIMIT,
@@ -91,6 +95,7 @@ export function createApp({
   const profilesService = new ProfilesService(db, authService, mediaStorage, logger);
   const profileChangesService = new ProfileChangesService(db, config, mediaStorage, logger);
   const publicService = new PublicService(db);
+  const publicListingsService = new PublicListingsService(db, exchangeRates);
 
   app.disable('x-powered-by');
   app.set('trust proxy', config.trustProxyHops);
@@ -117,7 +122,14 @@ export function createApp({
     confirmEmailChangeRoutes({ profiles: profilesService, sensitiveRateLimit: rateLimits.perIp }),
   );
   api.use('/auth', authRoutes({ db, authService, env: config.env, rateLimits }));
-  api.use('/public', publicRoutes(publicService));
+  api.use(
+    '/public',
+    publicRoutes({
+      profiles: publicService,
+      listings: publicListingsService,
+      rates: exchangeRates,
+    }),
+  );
   api.use(
     '/agent-applications',
     agentApplicationsRoutes({

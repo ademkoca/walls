@@ -506,6 +506,12 @@ conversion.
 The conversion service MUST be abstracted so the provider can be
 replaced.
 
+Currency decisions:
+
+-   The rate is the **National Bank of Serbia (NBS) official middle rate** for EUR, read from kurs.resenje.org, a free service (no key) that republishes the NBS exchange rate list. The API refreshes it when the stored rate is older than 12 hours (checked hourly and at startup); if a refresh fails, the last stored rate stays in use.
+-   Prices are shown in **EUR** until the visitor chooses otherwise. A converted price is marked as approximate (≈) and the price as listed is shown next to it. Pages that show converted prices say which rate was used and when it was retrieved.
+-   The visitor's EUR/RSD choice is remembered in a preference cookie. It affects only how prices are shown; the language is still decided by the URL alone.
+
 ------------------------------------------------------------------------
 
 # 13. Location
@@ -551,6 +557,8 @@ MVP does NOT require map-based property search.
 
 The map on a listing page should only expose exact location when the
 listing explicitly permits public exact-address visibility.
+
+When the exact address is hidden, the map shows an **approximate area**: a circle about 500 m across, with no pin, that contains the property. Its centre is never the property's location: hidden locations are snapped to a fixed grid of about 350 m cells, and the circle covers the whole cell, so every property in a cell gets the same circle and the exact point cannot be worked out. Structured data for search engines likewise omits the street and coordinates.
 
 ------------------------------------------------------------------------
 
@@ -671,6 +679,16 @@ Sorting should support at minimum:
 
 Search state should be URL-addressable so results can be
 shared/bookmarked.
+
+How the filters behave:
+
+-   **Keyword** matches words of the title and description (Serbian and English) by prefix, ignoring case and accents ("vracar" finds "Vračaru").
+-   **Location** matches the city, municipality or neighbourhood, ignoring case and accents; comma-separated parts ("Vračar, Beograd") must all match.
+-   **Bedrooms and bathrooms** mean "at least" (1+ … 5+).
+-   **Price bounds** are entered in a currency (the visitor's, kept in the URL with the bounds) and compared with every listing's price converted at the current rate. "Price on request" listings never match a price bound.
+-   **Area** is the floor area, or the plot area for land.
+-   **Features** offered are those of the chosen property type (all without one); a listing must have every chosen feature.
+-   Sorting by price compares prices in EUR at the current rate; rental prices are compared as stated, whatever their period. Listings without a price or area sort last.
 
 ------------------------------------------------------------------------
 
@@ -1124,6 +1142,8 @@ rather than:
 /property?id=123
 ```
 
+The sitemap lists the public pages, every public listing, every active agent, and the private sellers who have at least one public listing, each with its Serbian and English URL. Search result pages with filters are not indexed (`noindex, follow`); every public page names its canonical URL and its language alternates.
+
 ------------------------------------------------------------------------
 
 # 33. Branding
@@ -1391,7 +1411,7 @@ DATABASE_URL
 SESSION_SECRET
 CLOUDINARY_*
 RESEND_API_KEY
-EXCHANGE_RATE_API_KEY
+EXCHANGE_RATE_PROVIDER
 ```
 
 Provide:

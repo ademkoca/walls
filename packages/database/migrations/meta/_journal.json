@@ -71,6 +71,20 @@
       "when": 1791821336103,
       "tag": "0009_agent_profiles",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791839047066,
+      "tag": "0010_search_unaccent",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791839055708,
+      "tag": "0011_listing_text_search",
+      "breakpoints": true
     }
   ]
 }

@@ -1,32 +1,23 @@
-import { PriceMode, type PriceView, type PublicListingCard } from '@walls/shared';
+import type { PublicListingCard } from '@walls/shared';
 import { Badge } from '@walls/ui/components/badge';
 import { ImageIcon, MapPinIcon } from 'lucide-react';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-
-function usePriceLabel() {
-  const t = useTranslations('listingCard');
-  const format = useFormatter();
-  return (price: PriceView) => {
-    if (price.mode === PriceMode.ON_REQUEST) return t('priceOnRequest');
-    const amount = format.number(price.amount, {
-      style: 'currency',
-      currency: price.currency,
-      maximumFractionDigits: 0,
-    });
-    return price.period
-      ? t('perPeriod', { price: amount, period: t(`period.${price.period}`) })
-      : amount;
-  };
-}
+import type { Pricing } from '@/lib/currency';
+import { PriceTag } from './price-tag';
 
 /** A published listing in public lists. English pages fall back to the Serbian title. */
-export function ListingCard({ listing }: { listing: PublicListingCard }) {
+export function ListingCard({
+  listing,
+  pricing,
+}: {
+  listing: PublicListingCard;
+  pricing: Pricing;
+}) {
   const t = useTranslations('listingCard');
   const tEnums = useTranslations('enums');
   const locale = useLocale();
   const format = useFormatter();
-  const priceLabel = usePriceLabel();
   const title = (locale === 'en' && listing.title.en) || listing.title.sr;
   const place = [listing.neighborhood, listing.municipality, listing.city]
     .filter(Boolean)
@@ -34,8 +25,11 @@ export function ListingCard({ listing }: { listing: PublicListingCard }) {
   const area = listing.floorArea ?? listing.plotArea;
 
   return (
-    <article className="group overflow-hidden rounded-lg border bg-card">
-      <Link href={`/properties/${listing.slug}`} className="block focus-visible:outline-none">
+    <article className="group h-full overflow-hidden rounded-lg border bg-card">
+      <Link
+        href={`/properties/${listing.slug}`}
+        className="flex h-full flex-col focus-visible:outline-none"
+      >
         <div className="relative aspect-[4/3] bg-muted">
           {listing.coverImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -55,8 +49,7 @@ export function ListingCard({ listing }: { listing: PublicListingCard }) {
             {tEnums(`transactionType.${listing.transactionType}`)}
           </Badge>
         </div>
-        <div className="space-y-2 p-4">
-          <p className="text-lg font-semibold">{priceLabel(listing.price)}</p>
+        <div className="flex flex-1 flex-col gap-2 p-4">
           <h3 className="line-clamp-2 font-medium group-hover:underline group-focus-visible:underline">
             {title}
           </h3>
@@ -75,8 +68,30 @@ export function ListingCard({ listing }: { listing: PublicListingCard }) {
               .filter(Boolean)
               .join(' · ')}
           </p>
+          <div className="mt-auto pt-1">
+            <PriceTag price={listing.price} pricing={pricing} className="text-lg font-semibold" />
+          </div>
         </div>
       </Link>
     </article>
+  );
+}
+
+/** A responsive grid of listing cards. */
+export function ListingGrid({
+  listings,
+  pricing,
+}: {
+  listings: PublicListingCard[];
+  pricing: Pricing;
+}) {
+  return (
+    <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {listings.map((listing) => (
+        <li key={listing.id}>
+          <ListingCard listing={listing} pricing={pricing} />
+        </li>
+      ))}
+    </ul>
   );
 }

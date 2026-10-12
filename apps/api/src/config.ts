@@ -6,6 +6,10 @@ const MIN_SECRET_LENGTH = 32;
 const DEFAULT_PORT = 4000;
 const CLOUDINARY_VARIABLE_COUNT = 3;
 
+/** An empty variable (as copied from .env.example) counts as unset. */
+const unsetIfEmpty = <T extends z.ZodType>(schema: T) =>
+  z.preprocess((value) => (value === '' ? undefined : value), schema);
+
 const envSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -31,10 +35,27 @@ const envSchema = z
     LOCAL_MEDIA_DIR: z.string().min(1).default('.media'),
     /** Development only: private documents (agent proof files) without Cloudinary. */
     LOCAL_PRIVATE_FILES_DIR: z.string().min(1).default('.private-files'),
+    /** "nbs": the National Bank of Serbia middle rate; "fixed": a set rate (development, tests). */
+    EXCHANGE_RATE_PROVIDER: unsetIfEmpty(z.enum(['nbs', 'fixed']).default('nbs')),
+    /** The EUR → RSD rate used by the "fixed" provider, e.g. 117.2. */
+    EXCHANGE_RATE_FIXED_EUR_RSD: unsetIfEmpty(
+      z
+        .string()
+        .regex(/^\d+(\.\d+)?$/, 'Must be a decimal number such as 117.2')
+        .optional(),
+    ),
   })
   .refine((env) => env.NODE_ENV !== 'production' || Boolean(env.RESEND_API_KEY), {
     message: 'RESEND_API_KEY is required in production',
     path: ['RESEND_API_KEY'],
+  })
+  .refine((env) => env.EXCHANGE_RATE_PROVIDER !== 'fixed' || env.EXCHANGE_RATE_FIXED_EUR_RSD, {
+    message: 'Required when EXCHANGE_RATE_PROVIDER is "fixed"',
+    path: ['EXCHANGE_RATE_FIXED_EUR_RSD'],
+  })
+  .refine((env) => env.NODE_ENV !== 'production' || env.EXCHANGE_RATE_PROVIDER === 'nbs', {
+    message: 'Production uses the "nbs" provider',
+    path: ['EXCHANGE_RATE_PROVIDER'],
   })
   .refine(
     (env) => {
@@ -68,6 +89,7 @@ export interface Config {
     /** Never served directly; see LocalDiskPrivateFileStorage. */
     localPrivateDirectory: string;
   };
+  exchangeRates: { provider: 'nbs' } | { provider: 'fixed'; eurRsd: string };
 }
 
 /** Parses and validates environment variables. Throws with every problem listed. */
@@ -102,5 +124,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       localDirectory: path.resolve(parsed.LOCAL_MEDIA_DIR),
       localPrivateDirectory: path.resolve(parsed.LOCAL_PRIVATE_FILES_DIR),
     },
+    exchangeRates:
+      parsed.EXCHANGE_RATE_PROVIDER === 'fixed' && parsed.EXCHANGE_RATE_FIXED_EUR_RSD
+        ? { provider: 'fixed', eurRsd: parsed.EXCHANGE_RATE_FIXED_EUR_RSD }
+        : { provider: 'nbs' },
   };
 }

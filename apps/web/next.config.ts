@@ -12,6 +12,10 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../
 loadEnvConfig(repoRoot, process.env.NODE_ENV !== 'production', undefined, true);
 
 const nextConfig: NextConfig = {
+  // Development only: lets a phone on the same Wi-Fi open the dev server by its network
+  // address (e.g. http://192.168.1.75:3000). Without this, Next.js refuses to serve the
+  // dev scripts to that address, so the page shows but nothing is interactive.
+  allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '*.local'],
   // Internal workspace packages ship TypeScript source and are compiled by Next.
   transpilePackages: ['@walls/ui', '@walls/shared', '@walls/validation'],
   turbopack: {

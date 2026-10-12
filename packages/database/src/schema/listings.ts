@@ -27,6 +27,7 @@ import {
   timestamps,
   timestamptz,
   transactionTypeEnum,
+  tsvector,
 } from './columns';
 import { properties } from './properties';
 import { users } from './users';
@@ -126,12 +127,22 @@ export const listingTexts = pgTable(
     locale: localeEnum().notNull(),
     title: text().notNull(),
     description: text().notNull(),
+    /**
+     * Keyword search (SPEC §17): words of the title and description without accents. The
+     * "simple" configuration has no stemming, so search uses prefix matching instead.
+     */
+    searchVector: tsvector()
+      .notNull()
+      .generatedAlwaysAs(sql`to_tsvector('simple', walls_unaccent(title || ' ' || description))`),
     updatedAt: timestamptz()
       .notNull()
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => [primaryKey({ columns: [table.listingId, table.locale] })],
+  (table) => [
+    primaryKey({ columns: [table.listingId, table.locale] }),
+    index('listing_texts_search_idx').using('gin', table.searchVector),
+  ],
 );
 
 /** Listing media as first-class records (SPEC §15). Provider details stay behind `storageKey`. */

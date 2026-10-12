@@ -4,7 +4,6 @@ import { Button, buttonVariants } from '@walls/ui/components/button';
 import { Separator } from '@walls/ui/components/separator';
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
@@ -12,9 +11,10 @@ import {
 } from '@walls/ui/components/sheet';
 import { MenuIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { Link } from '@/i18n/navigation';
 import { useSession } from '../session/session-provider';
+import { CurrencySwitcher } from './currency-switcher';
 import { LanguageSwitcher } from './language-switcher';
 import { MAIN_NAV } from './nav-items';
 
@@ -22,10 +22,12 @@ import { MAIN_NAV } from './nav-items';
 export function MobileNav() {
   const t = useTranslations('nav');
   const { session } = useSession();
+  const [open, setOpen] = useState(false);
+  const close = () => setOpen(false);
   const linkClass = 'block rounded-md px-3 py-2.5 text-base font-medium hover:bg-muted';
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger render={<Button variant="ghost" size="icon" className="md:hidden" />}>
         <MenuIcon />
         <span className="sr-only">{t('openMenu')}</span>
@@ -36,34 +38,37 @@ export function MobileNav() {
         </SheetHeader>
         <nav aria-label={t('mainLabel')} className="flex flex-col gap-1 px-4">
           {[...MAIN_NAV, { href: '/for-agents', labelKey: 'forAgents' } as const].map((item) => (
-            <SheetClose key={item.href} render={<Link href={item.href} className={linkClass} />}>
+            <Link key={item.href} href={item.href} className={linkClass} onClick={close}>
               {t(item.labelKey)}
-            </SheetClose>
+            </Link>
           ))}
         </nav>
         <Separator className="my-2" />
         <div className="flex flex-col gap-2 px-4">
           {session.status === 'authenticated' ? (
-            <SheetClose render={<Link href="/dashboard" className={buttonVariants()} />}>
+            <Link href="/dashboard" className={buttonVariants()} onClick={close}>
               {t('dashboard')}
-            </SheetClose>
+            </Link>
           ) : (
             <>
-              <SheetClose render={<Link href="/register" className={buttonVariants()} />}>
+              <Link href="/register" className={buttonVariants()} onClick={close}>
                 {t('register')}
-              </SheetClose>
-              <SheetClose
-                render={<Link href="/login" className={buttonVariants({ variant: 'outline' })} />}
+              </Link>
+              <Link
+                href="/login"
+                className={buttonVariants({ variant: 'outline' })}
+                onClick={close}
               >
                 {t('login')}
-              </SheetClose>
+              </Link>
             </>
           )}
         </div>
-        <div className="mt-auto px-4 pb-6">
+        <div className="mt-auto flex items-center justify-between gap-4 px-4 pb-6">
           <Suspense>
             <LanguageSwitcher />
           </Suspense>
+          <CurrencySwitcher />
         </div>
       </SheetContent>
     </Sheet>

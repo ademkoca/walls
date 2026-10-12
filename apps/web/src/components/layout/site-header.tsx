@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 import { Link } from '@/i18n/navigation';
 import { Logo } from '../brand/logo';
+import { CurrencySwitcher } from './currency-switcher';
 import { HeaderAuth } from './header-auth';
 import { LanguageSwitcher } from './language-switcher';
 import { MainNav } from './main-nav';
@@ -26,6 +27,7 @@ export async function SiteHeader() {
           >
             {t('forAgents')}
           </Link>
+          <CurrencySwitcher className="hidden sm:flex" />
           <Suspense>
             <LanguageSwitcher className="hidden sm:flex" />
           </Suspense>

@@ -14,6 +14,8 @@ export const mapProvider = {
   defaultCenter: { latitude: 44.8125, longitude: 20.4612 },
   defaultZoom: 12,
   pinnedZoom: 17,
+  /** Shows a listing's approximate area with its surroundings. */
+  areaZoom: 15,
 } as const;
 
 export interface Coordinates {

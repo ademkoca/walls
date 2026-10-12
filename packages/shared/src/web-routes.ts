@@ -19,3 +19,8 @@ export function publicProfilePath(role: Role, slug: string): string | null {
   if (role === Role.PRIVATE_SELLER) return `/sellers/${slug}`;
   return null;
 }
+
+/** Public page of a published listing (SPEC §16, §32). */
+export function publicListingPath(slug: string): string {
+  return `/properties/${slug}`;
+}
