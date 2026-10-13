@@ -353,6 +353,11 @@ Settings that live outside the repository:
   production API and database.
 - **Domain:** walls.rs and www.walls.rs point to Netlify; set walls.rs as the primary domain.
   Render's `WEB_ORIGIN` and Netlify's `NEXT_PUBLIC_SITE_URL` must be that exact origin.
+- **Preview before launch:** to test on a subdomain first (preview.walls.rs, a `CNAME` to the
+  Netlify site), use that origin for `WEB_ORIGIN` and `NEXT_PUBLIC_SITE_URL` and set
+  `SITE_INDEXING=off` on Netlify, so search engines do not index the preview. At launch, switch
+  both variables to `https://walls.rs`, remove `SITE_INDEXING` and redeploy the web app (these
+  values are read at build time); keep preview.walls.rs as a domain alias that redirects.
 
 On the free plan the API sleeps after 15 minutes without requests, and the first request after
 that waits for it to start (about a minute).

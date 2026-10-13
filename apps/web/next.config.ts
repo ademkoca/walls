@@ -4,6 +4,7 @@ import { loadEnvConfig } from '@next/env';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { apiInternalUrl } from './src/lib/api-internal-url';
+import { NOINDEX_HEADER, isSiteIndexable } from './src/lib/site-indexing';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -25,6 +26,9 @@ const nextConfig: NextConfig = {
   // even though the API is hosted elsewhere (Render).
   rewrites: () =>
     Promise.resolve([{ source: '/api/:path*', destination: `${apiInternalUrl()}/api/:path*` }]),
+  // A preview deployment (SITE_INDEXING=off) tells search engines not to index any response.
+  headers: () =>
+    Promise.resolve(isSiteIndexable() ? [] : [{ source: '/:path*', headers: [NOINDEX_HEADER] }]),
 };
 
 export default createNextIntlPlugin('./src/i18n/request.ts')(nextConfig);

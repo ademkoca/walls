@@ -5,7 +5,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "env": ["NEXT_PUBLIC_*", "API_INTERNAL_URL"],
+      "env": ["NEXT_PUBLIC_*", "API_INTERNAL_URL", "SITE_INDEXING"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
     "typecheck": {

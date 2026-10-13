@@ -37,7 +37,9 @@ Frankfurt); Resend domain walls.rs verified; Render **free** plan in **Frankfurt
 after 15 min; no pre-deploy step on free, so `pnpm db:migrate` runs at the end of the
 build); walls.rs on Netlify only, no `api.` subdomain (the web proxy calls the Render URL). The
 site first goes live at **preview.walls.rs** (walls.rs keeps its "coming soon" page until the
-user has tested): `WEB_ORIGIN` and `NEXT_PUBLIC_SITE_URL` point there until the switch.
+user has tested): `WEB_ORIGIN` and `NEXT_PUBLIC_SITE_URL` point there until the switch. `SITE_INDEXING=off` on Netlify
+(`lib/site-indexing.ts`) sends `X-Robots-Tag: noindex, nofollow` on every response and drops
+the sitemap from robots.txt; any value other than on/off fails the build. Remove it at launch.
 Deployment facts checked: Render `rootDir` would hide `packages/` from the build, so the
 service uses the repo root plus `buildFilter`; Node 22's bundled Corepack 0.34 cannot run pnpm
 12, so the Render build installs the pinned pnpm with npm; `NODE_ENV=production` would make
