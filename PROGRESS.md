@@ -110,6 +110,17 @@ US East (Ohio) on the free plan; region choice needs Netlify Pro.
   audit is easy to recreate (collect `a, button, [role=…]`, `mouse.move`, diff computed
   colour/background/border/decoration/opacity/shadow/transform) when new UI lands.
 
+**Cloudinary folders (2026-10-13, uncommitted):** both of the user's accounts use _dynamic
+folder mode_, where a slash in the public ID does not create a Media Library folder (all
+files appeared at the root). Uploads now also send `asset_folder` = the key without its file
+name (`assetFolder()` in `cloudinary-client.ts`: `listings/<id>`, `agent-applications/<id>`,
+`avatars/<id>`); public IDs and delivery URLs are unchanged, so existing assets keep working
+(they stay at the root). Verified against the dev account: image and private PDF landed in the
+right folder, delivery and signed download fine; unit test checks the signature includes the
+folder. Only dynamic mode was tested (an old fixed-mode account would not need it). Dynamic
+folders stay behind when emptied (a deleted listing leaves an empty `listings/<id>` folder);
+the verification left an empty `zz-folder-check` folder in the dev account (delete by hand).
+
 **Cloudinary (2026-10-13):** the user created a second Cloudinary account: the **new one is for
 development** (root `.env`, cloud `dhetmw7g`; checked: image upload + public delivery and a
 private PDF upload + signed download + deletes all work), the **previous one is production**
