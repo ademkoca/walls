@@ -4,8 +4,9 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-13. Phase 9 pushed (`e53b0d8`). Phase 10 started with deployment:
-configs written (not committed), the user is connecting Render and Netlify._
+_Last updated: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+(waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
+user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
 ## Current status
 
@@ -22,32 +23,102 @@ configs written (not committed), the user is connecting Render and Netlify._
 | 7      | Agents: applications, profiles and change requests, public agent/seller pages         | Done, pushed (`bd75757`); PROGRESS update `a6f0838` |
 | 8      | Public site: home, search, listing page, EUR/RSD, SEO                                 | Done, pushed (`6732a82`), CI green                  |
 | 9      | Inquiries, notifications, analytics                                                   | Done, pushed (`e53b0d8`)                            |
-| **10** | Hardening and deployment                                                              | **In progress:** deployment first                   |
+| **10** | Hardening and deployment                                                              | **In progress:** deployed to preview.walls.rs       |
 
-**Immediate next step:** the user commits `render.yaml`, `apps/web/netlify.toml` and the
-README "Deployment" section, then connects Render (Blueprint) and Netlify following README
-"Deployment". After the first deploy: set `TRUST_PROXY_HOPS` from the `x-forwarded-for`
-header in the Render request logs, create the production Super Admin (`admin:create` run
-locally with the production `DATABASE_URL`, `SESSION_SECRET`, `WEB_ORIGIN` and
-`RESEND_API_KEY`: the setup link is signed with `SESSION_SECRET`), then the rest of Phase 10
-(see "Phase 10 starting notes"). `/about` and `/contact` content comes last (user's choice).
+**Immediate next step:** wait for the user to confirm `https://preview.walls.rs` loads with a
+valid certificate (Netlify was still serving its generic `*.netlify.app` certificate; if it
+takes over ~1 h: Netlify → Domain management → HTTPS → Verify DNS configuration / Provision
+certificate). Do not test sign-in over plain HTTP (`__Host-` cookie is Secure; the API only
+accepts the `https://preview.walls.rs` origin). Then, in order:
+
+1. **`TRUST_PROXY_HOPS`** (Render, currently the initial guess `2`): ask the user for one
+   request log line from Render (pino-http logs `req.headers["x-forwarded-for"]` and
+   `remoteAddress`) after loading a page from their browser, and pick the hop count at which
+   Express's `req.ip` is the visitor's address (chain: browser → Netlify edge → Netlify
+   function running the Next `/api` rewrite → Render proxy → Express). Too high lets callers
+   spoof their IP via `X-Forwarded-For`; too low makes every visitor share one IP (rate limits,
+   view counting).
+2. **Production Super Admin:** run `pnpm admin:create --email … --name "…"` locally with the
+   production `DATABASE_URL`, `SESSION_SECRET` (copied from Render: the emailed setup link is
+   signed with it), `WEB_ORIGIN=https://preview.walls.rs` and `RESEND_API_KEY`, passed as
+   environment variables (they override the root `.env`; Node's `--env-file` never overrides
+   existing variables). Keep secrets out of shell history (`read -s`).
+3. The rest of Phase 10 (see "Phase 10 starting notes"). `/about` and `/contact` content comes
+   last (user's choice).
+
+**Deployment state (2026-10-13):**
+
+- Web: Netlify site `superb-pithivier-4c81f6.netlify.app`, package directory `apps/web`,
+  custom domain `preview.walls.rs` (CNAME + Netlify's `subdomain-owner-verification` TXT at
+  the walls.rs DNS host unlimited.rs; keep the TXT). Env: `API_INTERNAL_URL` (Render URL),
+  `NEXT_PUBLIC_SITE_URL=https://preview.walls.rs`, `SITE_INDEXING=off`. Verified: pages
+  render, `x-robots-tag: noindex, nofollow` is sent, `/api/v1/public/exchange-rate` through
+  the proxy returns the NBS rate from Supabase (so migrations ran). It was first deployed for a
+  short time before `SITE_INDEXING` existed (low risk, nothing linked to it).
+- API: Render Blueprint `walls-api`, free plan, Frankfurt, `WEB_ORIGIN=https://preview.walls.rs`.
+  The first build failed in `drizzle-kit migrate` with no message (fixed by
+  `apply-migrations.ts`, `3b2726f`); a later deploy succeeded.
+- walls.rs itself still serves the user's "coming soon" page from **GitHub Pages**; don't touch
+  its DNS records until launch.
+- walls.rs's SOA negative-cache time is 24 h: a resolver that looked a name up before it
+  existed can keep answering "no such name" for hours (happened to the user's network with
+  preview.walls.rs; public resolvers were fine).
+- Launch (later): switch `WEB_ORIGIN` and `NEXT_PUBLIC_SITE_URL` to `https://walls.rs`, remove
+  `SITE_INDEXING`, redeploy Netlify (build-time values), point walls.rs/www at Netlify, keep
+  preview.walls.rs as a redirecting alias (README "Deployment").
+
+Phase 10 commits so far: `146a3e3` deployment configs (render.yaml, apps/web/netlify.toml,
+README "Deployment"), `827d7a0` integration test fix (agent directory paging), `076b572`
+`SITE_INDEXING`, `3b2726f` migration script. Each was pushed after a clean-worktree CI run.
 
 Phase 10 deployment decisions (user, 2026-10-13): Supabase project created (EU region, not
 Frankfurt); Resend domain walls.rs verified; Render **free** plan in **Frankfurt** (sleeps
 after 15 min; no pre-deploy step on free, so `pnpm db:migrate` runs at the end of the
 build); walls.rs on Netlify only, no `api.` subdomain (the web proxy calls the Render URL). The
 site first goes live at **preview.walls.rs** (walls.rs keeps its "coming soon" page until the
-user has tested): `WEB_ORIGIN` and `NEXT_PUBLIC_SITE_URL` point there until the switch. `SITE_INDEXING=off` on Netlify
-(`lib/site-indexing.ts`) sends `X-Robots-Tag: noindex, nofollow` on every response and drops
-the sitemap from robots.txt; any value other than on/off fails the build. Remove it at launch.
+user has tested): `WEB_ORIGIN` and `NEXT_PUBLIC_SITE_URL` point there until the switch.
+`SITE_INDEXING=off` on Netlify (`lib/site-indexing.ts`) sends `X-Robots-Tag: noindex,
+nofollow` on every response and drops the sitemap from robots.txt; any value other than on/off
+fails the build. Remove it at launch.
 Deployment facts checked: Render `rootDir` would hide `packages/` from the build, so the
 service uses the repo root plus `buildFilter`; Node 22's bundled Corepack 0.34 cannot run pnpm
-12, so the Render build installs the pinned pnpm with npm; `NODE_ENV=production` would make
-pnpm skip devDependencies, hence `--prod=false`; Netlify's Next.js runtime needs
-`PNPM_FLAGS=--shamefully-hoist`; builds use `pnpm --filter … build` rather than turbo (strict
-env mode would strip platform variables). Both build sequences were run locally in a clean
-worktree (API started with production config and answered `/health`). Netlify functions run in
+12, so the Render build installs the pinned pnpm with npm (worked on Render); `NODE_ENV=production`
+would make pnpm skip devDependencies, hence `--prod=false`; Netlify's Next.js runtime needs
+`PNPM_FLAGS=--shamefully-hoist`; Netlify installed pnpm 12 itself without problems; builds use
+`pnpm --filter … build` rather than turbo (strict env mode would strip platform variables).
+Render's build filter includes `apps/api/**`, so test-only API changes also redeploy (harmless;
+could add ignored paths for tests after checking the Blueprint key). Netlify functions run in
 US East (Ohio) on the free plan; region choice needs Netlify Pro.
+
+**UI polish (user's requests, 2026-10-13, uncommitted):**
+
+- Home-page calls to action are larger: new `Button` size `xl` (48 px) for "Oglasite
+  nekretninu", "Za agente" and the search button; the hero search inputs match (`h-12`).
+- **Cream text on every orange button/badge/avatar**: `--primary-foreground` and
+  `--sidebar-primary-foreground` are cream (`packages/ui/src/styles/globals.css`); documented in
+  `brand.ts`, `packages/ui/brand/README.md`, README and SPEC §33 as a knowing exception to WCAG AA.
+- **Pointer cursor everywhere clickable:** Tailwind 4 gives `<button>` the default arrow, so a
+  base-layer rule in `globals.css` sets `cursor: pointer` on buttons, `summary`, and the
+  tab/combobox/menuitem/option/checkbox/radio/switch roles (and labels around them); menu and
+  select items use `cursor-pointer` instead of `cursor-default`.
+- **Hover audit:** a temporary Playwright script (not committed) hovered every link/button on 26
+  pages (visitor, phone menu, seller and admin dashboards) and compared computed styles. It found
+  88 buttons without a pointer and 150 elements without hover feedback; now 0 outside logo links
+  (also fixed). Added: hover colour on always-underlined text links, logo/avatar opacity,
+  underline on dashboard listing titles and audit "Details", `hover:bg-muted/60` on select
+  triggers, hover border on unchecked checkboxes/radios, `hover:opacity-90` on switches. The
+  audit is easy to recreate (collect `a, button, [role=…]`, `mouse.move`, diff computed
+  colour/background/border/decoration/opacity/shadow/transform) when new UI lands.
+
+**Cloudinary (2026-10-13):** the user created a second Cloudinary account: the **new one is for
+development** (root `.env`, cloud `dhetmw7g`; checked: image upload + public delivery and a
+private PDF upload + signed download + deletes all work), the **previous one is production**
+(Render env vars, unchanged). E2E still blanks `CLOUDINARY_*`. The local dev database still
+references files in the production account (stored URLs contain the cloud name): 9 listing
+images (folders `listings/37fd8823-…` and `listings/6ea11229-…`), 1 agent proof file
+(`agent-applications/8e9a4cfb-…`, authenticated, no longer downloadable from dev) and 1 avatar
+(`avatars/b83a5da8-…`). They still display, dev can no longer delete them, and they are dev test
+data the user may delete from the production account's Media Library (or re-upload in dev).
 
 **How the user reviews Phase 9:** the dev DB is migrated to `0013`. Send an inquiry from a
 listing page (form in the sidebar; "Send an inquiry" button on phones), read it in the API
@@ -253,7 +324,8 @@ Super Admin with the real `admin:create` script).
 - Commit history (oldest first): `39d6a92` docs, `2ae0fde` Phase 0, `47d23eb` spec decisions,
   `62a4a8f` Phase 1, `f2d7985` zod pin, `1195ba4` Phase 2, `048f058` Phase 3,
   `2dd3577` CI env fix, `7324d35` brand, `d8be2d8` Phase 4, `e442d6e` CI lint fix,
-  `56a6446` Phase 5, `083a6f7` Phase 6, `bd75757` Phase 7.
+  `56a6446` Phase 5, `083a6f7` Phase 6, `bd75757` Phase 7, `a6f0838` progress, `6732a82` Phase 8,
+  `58824fe` progress, `e53b0d8` Phase 9, then the Phase 10 commits listed above.
 - Working agreement: **commit and push only when the user asks** ("commit" alone means do
   not push). Work phase by phase; the user reviews each phase, then asks to commit/push,
   checks GitHub Actions and reports the result (`gh` is not installed), then says when to
@@ -397,8 +469,10 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   (my addition, user hasn't objected). Reason required, audit-logged, user emailed. Nobody
   deactivates themselves or Super Admins.
 - **Branding:** logo colors are authoritative: orange `#FF6A00`, charcoal `#171B1E`
-  (spec's `#FF7A00`/`#111827` replaced). **White text on orange fails contrast (2.87:1):
-  always charcoal on orange;** no orange text on light surfaces. Typeface: **Montserrat** for
+  (spec's `#FF7A00`/`#111827` replaced). **Text on orange is cream by the
+  user's explicit choice (2026-10-13; 2.68:1, below WCAG AA, charcoal would be 6.03:1;
+  `--primary-foreground` in `globals.css` is the one token to flip back);** white on orange
+  (2.87:1) is not used; no orange text on light surfaces. Typeface: **Montserrat** for
   all UI text. Logo variants (stacked/horizontal × default/inverse) are generated outlined
   SVGs; `REAL ESTATE` is centered under `WALLS` in the horizontal lockup. The original
   `walls-logo.svg` has live text and must not be used directly. OG image is generated.
@@ -556,8 +630,9 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   the map (the inquiry form in Phase 9 may change this layout).
 - `/about` and `/contact` are still "coming soon" placeholders: their content is the user's
   to provide (they are in the sitemap already).
-- Resend credentials are needed from the user for production. Cloudinary works with the
-  user's credentials in dev (listing images, private proof files verified).
+- Resend: the walls.rs sending domain is verified and the production key is set on Render.
+  Cloudinary: separate accounts since 2026-10-13 (see above): dev = new account, prod = the
+  original one.
 - Phase 5 choices the user has not objected to: the "listing submitted" email goes to the
   submitter as a confirmation; admins cannot create listings; the form fixes the country to
   Serbia.
@@ -572,7 +647,6 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   The user decided to keep Cyrillic map labels for now; providers considered if that changes:
   MapTiler or Stadia Maps (~$20–25/month for commercial use; free tiers are non-commercial),
   OpenFreeMap (free, MapLibre). Google Maps was ruled out (billing, not OSM-based, SPEC §14).
-- Cosmetic, deferred by the user until all phases are done: make the home-page CTAs larger.
 - Phase 7 choices to confirm: profile pictures are
   JPEG/PNG/WebP/HEIC, ≥ 200 × 200 px, ≤ 10 MB; profile slugs never change when the name
   changes; changing the login email needs the current password; an approved agent's public
@@ -584,15 +658,19 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 
 ## Phase 10 starting notes
 
-- Scope (plan): finish the SPEC §38 E2E list (gaps: approved agent creates/submits a listing
-  and gets reviewed; admin assigns a listing; agent cannot open another agent's listing in the
-  browser), responsive pass on all pages, security review (headers/CSP on the web app, rate
-  limits, upload limits, dependency audit), deployment configs (Netlify for web, Render for
-  API with pre-deploy migrations, Supabase Postgres; check pnpm 12 on the build images),
-  `TRUST_PROXY_HOPS` for the real proxy chain, production map tile host, Resend domain.
-- Ask the user first: hosting accounts/plans and domains (walls.rs DNS, `api.` subdomain or
-  only the Netlify proxy), Resend sender domain, Supabase project/region, whether rate limits
-  need a shared store (one API instance is assumed), and the `/about` and `/contact` content.
+- Scope still to do: finish the SPEC §38 E2E list (gaps: approved agent creates/submits a
+  listing and gets reviewed; admin assigns a listing; agent cannot open another agent's listing
+  in the browser), responsive pass on all pages, security review (headers/CSP on the web app,
+  rate limits, upload limits, dependency audit), `TRUST_PROXY_HOPS` for the real proxy chain,
+  production map tile host (`NEXT_PUBLIC_MAP_TILE_URL`; the public OSM tile server forbids
+  heavy use), and a final check of the deployed site (emails from the walls.rs domain,
+  uploads to Cloudinary, sign-in over HTTPS).
+- Answered by the user: hosting plans and domains (Render free/Frankfurt, Netlify, walls.rs
+  only through Netlify, preview.walls.rs first), Resend sender domain (verified), Supabase
+  project (created, EU), rate limits (decided 2026-10-13: keep the in-memory counters; they
+  reset on every deploy or restart and would multiply with several API instances, so revisit a
+  shared store, e.g. Postgres or Redis, when scaling beyond one instance). Still open: the
+  `/about` and `/contact` content (last).
 
 ## Remaining plan (from the approved plan)
 
