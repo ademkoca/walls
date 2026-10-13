@@ -1,4 +1,4 @@
-import { CloudinaryClient, type CloudinaryCredentials } from './cloudinary-client';
+import { CloudinaryClient, type CloudinaryCredentials, assetFolder } from './cloudinary-client';
 import type { MediaStorage, StoredMedia } from './media-storage';
 
 const DELIVERY_BASE = 'https://res.cloudinary.com';
@@ -24,7 +24,7 @@ export class CloudinaryMediaStorage implements MediaStorage {
     const response = await this.client.post(
       'image',
       'upload',
-      { public_id: file.key, overwrite: 'false' },
+      { public_id: file.key, asset_folder: assetFolder(file.key), overwrite: 'false' },
       new Blob([new Uint8Array(file.data)], { type: file.contentType }),
     );
     const { public_id: publicId } = (await response.json()) as UploadResponse;

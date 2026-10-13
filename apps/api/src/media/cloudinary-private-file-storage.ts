@@ -1,4 +1,4 @@
-import { CloudinaryClient, type CloudinaryCredentials } from './cloudinary-client';
+import { CloudinaryClient, type CloudinaryCredentials, assetFolder } from './cloudinary-client';
 import type { PrivateFileStorage } from './private-file-storage';
 
 /** Signed download links are used immediately by the API, so they can expire quickly. */
@@ -19,7 +19,12 @@ export class CloudinaryPrivateFileStorage implements PrivateFileStorage {
     await this.client.post(
       'raw',
       'upload',
-      { public_id: file.key, type: 'authenticated', overwrite: 'false' },
+      {
+        public_id: file.key,
+        asset_folder: assetFolder(file.key),
+        type: 'authenticated',
+        overwrite: 'false',
+      },
       new Blob([new Uint8Array(file.data)], { type: file.contentType }),
     );
   }

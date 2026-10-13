@@ -12,6 +12,15 @@ export interface CloudinaryCredentials {
 /** `image` for pictures (transformations available), `raw` for documents kept as uploaded. */
 export type CloudinaryResourceType = 'image' | 'raw';
 
+/**
+ * The Media Library folder for a file key such as `listings/<id>/<file>`. With dynamic
+ * folders (the default for new accounts) a path in the public ID does not place the file in
+ * a folder, so it is passed separately as `asset_folder`; the public ID is unchanged.
+ */
+export function assetFolder(key: string): string {
+  return key.slice(0, Math.max(key.lastIndexOf('/'), 0));
+}
+
 const unixSeconds = () => String(Math.floor(Date.now() / MS_PER_SECOND));
 
 /** Signed calls to Cloudinary's REST API, shared by the public and private storages. */
