@@ -14,6 +14,16 @@ async function setProfile(userId: string, values: Partial<typeof users.$inferIns
   await ctx.db.update(users).set(values).where(eq(users.id, userId));
 }
 
+/** An agent's entry in the public directory, searching every page (other tests add agents). */
+async function directoryEntry(slug: string): Promise<PublicAgentSummary | undefined> {
+  for (let page = 1; ; page += 1) {
+    const directory = (await ctx.client().get(`/api/v1/public/agents?page=${page}`))
+      .body as Page<PublicAgentSummary>;
+    const entry = directory.items.find((item) => item.slug === slug);
+    if (entry || !directory.hasMore) return entry;
+  }
+}
+
 async function publishedListing(owner: Awaited<ReturnType<typeof ctx.signedInUser>>) {
   const id = await submittedListing(owner.client);
   const admin = await ctx.signedInUser(Role.ADMIN);
@@ -95,9 +105,7 @@ describe('public agent profiles (SPEC §19)', () => {
     const page = pageOf(await ctx.client().get(`/api/v1/public/agents/${agent.user.slug}`));
     expect(page.listings.map((listing) => listing.id).sort()).toEqual([own.id, assigned.id].sort());
 
-    const directory = (await ctx.client().get('/api/v1/public/agents'))
-      .body as Page<PublicAgentSummary>;
-    expect(directory.items.find((item) => item.slug === agent.user.slug)?.listingCount).toBe(2);
+    expect((await directoryEntry(agent.user.slug))?.listingCount).toBe(2);
   });
 
   it('hides listings of a deactivated creator even when assigned to the agent', async () => {

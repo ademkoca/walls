@@ -525,6 +525,10 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **E2E fixtures must not share file names:** tests run in parallel, so photos written to
   one fixed path were sometimes read half-written by another test (upload → 422, passing on
   retry). `listingPhotos()` writes new, uniquely named files on every call.
+- **Paged lists in integration tests:** all test users of a role share one display name, so
+  lists sorted by name fall back to random IDs, and other test files add rows to the same
+  database. Never assume a row is on page 1 (the agent directory test failed in CI only); search
+  every page, or sort so the new row comes first.
 - Prettier reformats files; re-read a file before string-replacing it in scripts.
 - Tools generate `AGENTS.md` blocks (root: Turborepo; `apps/web/AGENTS.md`: Next.js) that are
   committed on purpose.
