@@ -7,6 +7,8 @@ const DEFAULT_MAX_CONNECTIONS = 10;
 export interface DatabaseOptions {
   url: string;
   maxConnections?: number;
+  /** Receives Postgres notices; by default they are printed to the console. */
+  onNotice?: (notice: postgres.Notice) => void;
 }
 
 /**
@@ -14,8 +16,16 @@ export interface DatabaseOptions {
  * Prepared statements are disabled for compatibility with Supabase's transaction-mode
  * connection pooler.
  */
-export function createDatabase({ url, maxConnections = DEFAULT_MAX_CONNECTIONS }: DatabaseOptions) {
-  const client = postgres(url, { max: maxConnections, prepare: false });
+export function createDatabase({
+  url,
+  maxConnections = DEFAULT_MAX_CONNECTIONS,
+  onNotice,
+}: DatabaseOptions) {
+  const client = postgres(url, {
+    max: maxConnections,
+    prepare: false,
+    ...(onNotice ? { onnotice: onNotice } : {}),
+  });
   const db = drizzle({ client, schema, casing: 'snake_case' });
   return { db, close: () => client.end() };
 }

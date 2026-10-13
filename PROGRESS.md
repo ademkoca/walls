@@ -531,6 +531,10 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   lists sorted by name fall back to random IDs, and other test files add rows to the same
   database. Never assume a row is on page 1 (the agent directory test failed in CI only); search
   every page, or sort so the new row comes first.
+- **`drizzle-kit migrate` hides why it failed** (only "pnpm recursive run failed"; the first
+  Render build failed this way). `pnpm db:migrate` runs `packages/database/src/apply-migrations.ts`
+  (Drizzle's migrator) instead, which prints the Postgres error and its code but never the
+  connection string. drizzle-kit is still used for `db:generate` and `db:studio`.
 - Prettier reformats files; re-read a file before string-replacing it in scripts.
 - Tools generate `AGENTS.md` blocks (root: Turborepo; `apps/web/AGENTS.md`: Next.js) that are
   committed on purpose.
