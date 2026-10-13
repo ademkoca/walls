@@ -4,30 +4,48 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-13. Phase 9 (inquiries, sent history, analytics) committed and pushed
-(the "feat(inquiries)" commit after `58824fe`); the user checks CI and says when Phase 10
-starts._
+_Last updated: 2026-10-13. Phase 9 pushed (`e53b0d8`). Phase 10 started with deployment:
+configs written (not committed), the user is connecting Render and Netlify._
 
 ## Current status
 
-| Phase | Scope                                                                                 | State                                               |
-| ----- | ------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| 0     | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                        |
-| 1     | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                        |
-| 2     | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                              |
-| 3     | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                              |
-| Brand | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                            |
-| 4     | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)     |
-| 5     | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                  |
-| 6     | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                  |
-| 7     | Agents: applications, profiles and change requests, public agent/seller pages         | Done, pushed (`bd75757`); PROGRESS update `a6f0838` |
-| 8     | Public site: home, search, listing page, EUR/RSD, SEO                                 | Done, pushed (`6732a82`), CI green                  |
-| **9** | Inquiries, notifications, analytics                                                   | **Pushed.** Waiting for CI + go-ahead.              |
-| 10    | Hardening and deployment                                                              | Not started                                         |
+| Phase  | Scope                                                                                 | State                                               |
+| ------ | ------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 0      | Monorepo scaffold, tooling, CI, brand config                                          | Done, pushed                                        |
+| 1      | Domain rules (`packages/shared`) and Zod schemas (`packages/validation`)              | Done, pushed                                        |
+| 2      | Drizzle schema, migrations, DB integration tests                                      | Done, pushed, CI green                              |
+| 3      | API foundation, auth, sessions, email outbox, `admin:create`                          | Done, pushed, CI green                              |
+| Brand  | Outlined logo variants, Open Graph image, Montserrat                                  | Done, pushed (`7324d35`)                            |
+| 4      | Design system, i18n shell, public layout, auth pages, dashboard shell, Playwright E2E | Done, pushed (`d8be2d8`, CI lint fix `e442d6e`)     |
+| 5      | Listings (creator side)                                                               | Done, pushed (`56a6446`), CI green                  |
+| 6      | Review and admin: review queue, revisions, assignment, featuring, users, audit log    | Done, pushed (`083a6f7`), CI green                  |
+| 7      | Agents: applications, profiles and change requests, public agent/seller pages         | Done, pushed (`bd75757`); PROGRESS update `a6f0838` |
+| 8      | Public site: home, search, listing page, EUR/RSD, SEO                                 | Done, pushed (`6732a82`), CI green                  |
+| 9      | Inquiries, notifications, analytics                                                   | Done, pushed (`e53b0d8`)                            |
+| **10** | Hardening and deployment                                                              | **In progress:** deployment first                   |
 
-**Immediate next step:** wait. The user checks GitHub CI for the Phase 9 commit and says
-when to start Phase 10 (ask the Phase 10 questions first, see "Phase 10 starting notes"). Do
-not start Phase 10 before that.
+**Immediate next step:** the user commits `render.yaml`, `apps/web/netlify.toml` and the
+README "Deployment" section, then connects Render (Blueprint) and Netlify following README
+"Deployment". After the first deploy: set `TRUST_PROXY_HOPS` from the `x-forwarded-for`
+header in the Render request logs, create the production Super Admin (`admin:create` run
+locally with the production `DATABASE_URL`, `SESSION_SECRET`, `WEB_ORIGIN` and
+`RESEND_API_KEY`: the setup link is signed with `SESSION_SECRET`), then the rest of Phase 10
+(see "Phase 10 starting notes"). `/about` and `/contact` content comes last (user's choice).
+
+Phase 10 deployment decisions (user, 2026-10-13): Supabase project created (EU region, not
+Frankfurt); Resend domain walls.rs verified; Render **free** plan in **Frankfurt** (sleeps
+after 15 min; no pre-deploy step on free, so `pnpm db:migrate` runs at the end of the
+build); walls.rs on Netlify only, no `api.` subdomain (the web proxy calls the Render URL). The
+site first goes live at **preview.walls.rs** (walls.rs keeps its "coming soon" page until the
+user has tested): `WEB_ORIGIN` and `NEXT_PUBLIC_SITE_URL` point there until the switch.
+Deployment facts checked: Render `rootDir` would hide `packages/` from the build, so the
+service uses the repo root plus `buildFilter`; Node 22's bundled Corepack 0.34 cannot run pnpm
+12, so the Render build installs the pinned pnpm with npm; `NODE_ENV=production` would make
+pnpm skip devDependencies, hence `--prod=false`; Netlify's Next.js runtime needs
+`PNPM_FLAGS=--shamefully-hoist`; builds use `pnpm --filter … build` rather than turbo (strict
+env mode would strip platform variables). Both build sequences were run locally in a clean
+worktree (API started with production config and answered `/health`). Netlify functions run in
+US East (Ohio) on the free plan; region choice needs Netlify Pro.
 
 **How the user reviews Phase 9:** the dev DB is migrated to `0013`. Send an inquiry from a
 listing page (form in the sidebar; "Send an inquiry" button on phones), read it in the API

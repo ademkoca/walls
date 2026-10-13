@@ -1,0 +1,14 @@
+# Netlify configuration for the Walls web app (apps/web). In the Netlify UI, set the
+# package directory to apps/web and leave the base directory empty, so dependencies install from
+# the repository root (pnpm workspace). Paths and commands below run from the repository root.
+# The API is deployed by Render (render.yaml); see README "Deployment".
+
+[build]
+  command = "pnpm --filter @walls/web build"
+  publish = "apps/web/.next"
+  # Skip the build (exit 0) unless something the web app is built from changed.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- apps/web packages/shared packages/validation packages/ui package.json pnpm-lock.yaml pnpm-workspace.yaml .nvmrc"
+
+[build.environment]
+  # Netlify's Next.js runtime needs a flat node_modules with pnpm.
+  PNPM_FLAGS = "--shamefully-hoist"

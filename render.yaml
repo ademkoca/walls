@@ -1,0 +1,63 @@
+# Render Blueprint for the Walls API (apps/api). The web app is deployed by Netlify
+# (apps/web/netlify.toml); see README "Deployment".
+services:
+  - type: web
+    name: walls-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: main
+    # Deploy a commit only after GitHub CI has passed on it.
+    autoDeployTrigger: checksPass
+    # The service builds from the whole repository (the API bundles the workspace packages), so
+    # it uses the repository root rather than a rootDir; this filter limits rebuilds to changes
+    # that affect the API.
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/**
+        - package.json
+        - pnpm-lock.yaml
+        - pnpm-workspace.yaml
+        - .nvmrc
+    # Installs the pnpm version pinned in package.json (the Corepack bundled with Node 22 cannot
+    # run pnpm 12), then only the API and the packages it uses. `--prod=false` keeps the build
+    # tools, which NODE_ENV=production would skip. The free plan has no pre-deploy step, so
+    # migrations run at the end of the build.
+    buildCommand: >-
+      npm install --global "$(node -p "require('./package.json').packageManager")" &&
+      pnpm --version &&
+      pnpm install --frozen-lockfile --prod=false --filter "@walls/api..." &&
+      pnpm --filter @walls/api build &&
+      pnpm db:migrate
+    startCommand: node apps/api/dist/server.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render sends traffic to this port.
+      - key: API_PORT
+        value: '10000'
+      # Supabase session pooler connection string (see README "Deployment").
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      # The site's public origin, e.g. https://walls.rs.
+      - key: WEB_ORIGIN
+        sync: false
+      # Proxies between visitors and the API (Netlify, Render); set after checking the logs.
+      - key: TRUST_PROXY_HOPS
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        value: Walls <no-reply@walls.rs>
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: EXCHANGE_RATE_PROVIDER
+        value: nbs
