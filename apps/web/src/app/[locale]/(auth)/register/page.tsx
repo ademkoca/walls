@@ -15,7 +15,8 @@ export default async function RegisterPage({ params }: PageProps<'/[locale]/regi
   const locale = await resolveLocale(params);
   if (await getCurrentUser()) redirect({ href: DEFAULT_AFTER_LOGIN, locale });
   const t = await getTranslations('auth.register');
-  const linkClass = 'font-medium text-foreground underline underline-offset-4';
+  const linkClass =
+    'font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground';
 
   return (
     <AuthCard

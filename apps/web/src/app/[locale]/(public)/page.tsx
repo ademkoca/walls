@@ -98,10 +98,10 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
             <p className="text-muted-foreground">{t('agentsText')}</p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-3">
-            <Link href="/register" className={buttonVariants({ size: 'lg' })}>
+            <Link href="/register" className={buttonVariants({ size: 'xl' })}>
               {t('advertise')}
             </Link>
-            <Link href="/for-agents" className={buttonVariants({ size: 'lg', variant: 'outline' })}>
+            <Link href="/for-agents" className={buttonVariants({ size: 'xl', variant: 'outline' })}>
               {tNav('forAgents')}
             </Link>
           </div>

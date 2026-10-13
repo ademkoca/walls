@@ -71,7 +71,7 @@ export function HomeSearch() {
             value={location}
             placeholder={t('locationPlaceholder')}
             onChange={(event) => setLocation(event.target.value)}
-            className="h-10"
+            className="h-12 text-base md:text-base"
           />
         </div>
         <div className="space-y-1">
@@ -83,13 +83,14 @@ export function HomeSearch() {
             value={propertyType}
             onChange={setPropertyType}
             anyLabel={t('anyType')}
+            triggerClassName="data-[size=default]:h-12 text-base"
             options={enumValues(PropertyTypes).map((value) => ({
               value,
               label: tEnums(`propertyType.${value}`),
             }))}
           />
         </div>
-        <Button type="submit" size="lg" className="h-10">
+        <Button type="submit" size="xl">
           <SearchIcon data-icon="inline-start" />
           {t('search')}
         </Button>

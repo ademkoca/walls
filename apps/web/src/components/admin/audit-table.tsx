@@ -54,7 +54,7 @@ export async function AuditTable({
                 <span className="font-medium">{actionLabel(entry.action)}</span>
                 {(entry.before ?? entry.after) && (
                   <details className="mt-1 text-xs text-muted-foreground">
-                    <summary className="cursor-pointer">{t('details')}</summary>
+                    <summary className="cursor-pointer hover:underline">{t('details')}</summary>
                     <pre className="mt-1 max-w-md overflow-x-auto whitespace-pre-wrap break-all">
                       {JSON.stringify(
                         { [t('before')]: entry.before, [t('after')]: entry.after },

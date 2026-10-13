@@ -3,8 +3,9 @@
  *
  * Brand colors come from brand-tokens.css (generated from src/brand/brand.ts). Every UI
  * color below is derived from those five values, so rebranding only touches brand.ts.
- * Contrast rules (see packages/ui/brand/README.md): text on orange is charcoal; orange is
- * never used for text on light surfaces.
+ * Contrast rules (see packages/ui/brand/README.md): text on orange is cream (the owner's
+ * choice; 2.68:1, below WCAG AA, charcoal would be 6.03:1); orange is never used for text on
+ * light surfaces.
  */
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -76,9 +77,10 @@
   --popover: var(--brand-white);
   --popover-foreground: var(--brand-charcoal);
 
-  /* Orange for primary actions; charcoal text on orange (6.03:1). */
+  /* Orange for primary actions; cream text on orange (2.68:1, see above). Switching this
+     token to --brand-charcoal restores the accessible 6.03:1 everywhere. */
   --primary: var(--brand-orange);
-  --primary-foreground: var(--brand-charcoal);
+  --primary-foreground: var(--brand-cream);
   --secondary: color-mix(in oklab, var(--brand-slate) 12%, var(--brand-white));
   --secondary-foreground: var(--brand-charcoal);
   --muted: color-mix(in oklab, var(--brand-slate) 8%, var(--brand-cream));
@@ -106,7 +108,7 @@
   --sidebar: var(--brand-charcoal);
   --sidebar-foreground: var(--brand-cream);
   --sidebar-primary: var(--brand-orange);
-  --sidebar-primary-foreground: var(--brand-charcoal);
+  --sidebar-primary-foreground: var(--brand-cream);
   --sidebar-accent: color-mix(in oklab, var(--brand-cream) 10%, var(--brand-charcoal));
   --sidebar-accent-foreground: var(--brand-cream);
   --sidebar-border: color-mix(in oklab, var(--brand-cream) 14%, var(--brand-charcoal));
@@ -119,5 +121,19 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+  /* Tailwind 4 gives buttons the default arrow cursor; clickable things show a pointer. */
+  button:not(:disabled),
+  summary,
+  [role='button']:not([aria-disabled='true']),
+  [role='tab'],
+  [role='combobox']:not([aria-disabled='true']),
+  [role='menuitem']:not([aria-disabled='true']),
+  [role='option']:not([aria-disabled='true']),
+  [role='checkbox']:not([aria-disabled='true']),
+  [role='radio']:not([aria-disabled='true']),
+  [role='switch']:not([aria-disabled='true']),
+  label:has([role='checkbox'], [role='radio'], [role='switch']) {
+    cursor: pointer;
   }
 }

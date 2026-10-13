@@ -52,7 +52,7 @@ export default async function ForAgentsPage({ params }: PageProps<'/[locale]/for
           {t('sellerNote')}{' '}
           <Link
             href="/register"
-            className="font-medium text-foreground underline underline-offset-4"
+            className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
           >
             {t('sellerLink')}
           </Link>

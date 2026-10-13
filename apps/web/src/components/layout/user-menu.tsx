@@ -40,7 +40,7 @@ export function UserMenu({ user, onLoggedOut }: { user: CurrentUser; onLoggedOut
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={t('accountMenu')}
-        className="rounded-full focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        className="rounded-full transition-opacity hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
       >
         <Avatar>
           <AvatarFallback className="bg-primary text-primary-foreground font-semibold">

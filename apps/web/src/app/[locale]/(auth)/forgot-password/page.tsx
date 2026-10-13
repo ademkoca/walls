@@ -19,7 +19,10 @@ export default async function ForgotPasswordPage({
       title={t('title')}
       description={t('description')}
       footer={
-        <Link href="/login" className="font-medium text-foreground underline underline-offset-4">
+        <Link
+          href="/login"
+          className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
+        >
           {t('backToLogin')}
         </Link>
       }

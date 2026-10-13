@@ -29,7 +29,7 @@ export default async function LoginPage({ params, searchParams }: PageProps<'/[l
           {t('noAccount')}{' '}
           <Link
             href="/register"
-            className="font-medium text-foreground underline underline-offset-4"
+            className="font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground"
           >
             {t('register')}
           </Link>

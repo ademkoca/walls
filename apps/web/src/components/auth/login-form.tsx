@@ -80,7 +80,10 @@ export function LoginForm({ next }: { next?: string }) {
           {isSubmitting && <Spinner />}
           {t('login.submit')}
         </Button>
-        <Link href="/forgot-password" className="text-sm font-medium underline underline-offset-4">
+        <Link
+          href="/forgot-password"
+          className="text-sm font-medium underline underline-offset-4 transition-colors hover:text-muted-foreground"
+        >
           {t('login.forgotPassword')}
         </Link>
       </div>

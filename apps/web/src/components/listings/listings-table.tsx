@@ -52,7 +52,7 @@ export async function ListingsTable({
                 <TableCell>
                   <Link
                     href={`/dashboard/listings/${listing.id}`}
-                    className="flex items-center gap-3 rounded focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+                    className="group flex items-center gap-3 rounded focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
                   >
                     <span className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-muted">
                       {listing.coverImageUrl ? (
@@ -67,7 +67,7 @@ export async function ListingsTable({
                       )}
                     </span>
                     <span className="min-w-0">
-                      <span className="block truncate font-medium">
+                      <span className="block truncate font-medium group-hover:underline">
                         {listing.title ?? t('untitled')}
                       </span>
                       {details.length > 0 && (

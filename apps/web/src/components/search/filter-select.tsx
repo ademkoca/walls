@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@walls/ui/components/select';
+import { cn } from '@walls/ui/lib/utils';
 
 const ANY = '__any';
 
@@ -17,12 +18,14 @@ export function FilterSelect<T extends string>({
   onChange,
   options,
   anyLabel,
+  triggerClassName,
 }: {
   id: string;
   value: T | '';
   onChange: (value: T | '') => void;
   options: readonly { value: T; label: string }[];
   anyLabel: string;
+  triggerClassName?: string;
 }) {
   const items = [{ value: ANY, label: anyLabel }, ...options];
   return (
@@ -31,7 +34,7 @@ export function FilterSelect<T extends string>({
       value={value === '' ? ANY : value}
       onValueChange={(next) => onChange(!next || next === ANY ? '' : (next as T))}
     >
-      <SelectTrigger id={id} className="w-full">
+      <SelectTrigger id={id} className={cn('w-full', triggerClassName)}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

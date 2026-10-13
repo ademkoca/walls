@@ -57,7 +57,8 @@ text, 3:1 large text):
 
 | Pair                    | Ratio | Rule                                              |
 | ----------------------- | ----- | ------------------------------------------------- |
-| charcoal on orange      | 6.03  | Use for text on orange buttons and badges         |
+| cream on orange         | 2.68  | Used on orange buttons and badges (owner's choice); fails AA |
+| charcoal on orange      | 6.03  | The accessible alternative: set `--primary-foreground` to charcoal |
 | white on orange         | 2.87  | Fails; never use                                  |
 | orange on white / cream | 2.87 / 2.68 | Fails; no orange text on light surfaces     |
 | orange on charcoal      | 6.03  | Orange text and accents are fine on dark surfaces |

@@ -1182,7 +1182,7 @@ The approved artwork sets the wordmark as live text; production logo files are g
 
 Use orange for primary actions and selected accents, charcoal for strong text and dark surfaces, slate gray for secondary text/borders, and cream for warm page backgrounds. Maintain accessible text contrast; do not use orange for small text on cream/white unless contrast is verified.
 
-The orange and charcoal values match the approved logo artwork, which is authoritative for brand color. Verified contrast: white text on orange is 2.87:1 and fails WCAG AA even for large text, so text on orange surfaces must be charcoal (6.03:1). Orange text on white/cream (2.87:1 / 2.68:1) also fails; use orange text only on dark surfaces. See `packages/ui/brand/README.md`.
+The orange and charcoal values match the approved logo artwork, which is authoritative for brand color. Verified contrast: white text on orange is 2.87:1 and fails WCAG AA even for large text, so text on orange surfaces is **cream** (2.68:1) by the owner's decision, knowingly below WCAG AA; charcoal (6.03:1) is the accessible alternative and can be restored by changing one design token. Orange text on white/cream (2.87:1 / 2.68:1) also fails; use orange text only on dark surfaces. See `packages/ui/brand/README.md`.
 
 The branding must remain easy to replace. Do NOT scatter branding values through components. Centralize the brand name, domain, logo asset, favicon, colors, typography, and theme tokens in one clearly documented branding/theme configuration.
 

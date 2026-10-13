@@ -48,7 +48,7 @@ export default async function DashboardLayout({
         <div className="flex flex-col gap-4 px-4 py-4 lg:gap-8 lg:py-6">
           <Link
             href="/dashboard"
-            className="rounded focus-visible:ring-3 focus-visible:ring-sidebar-ring/60 focus-visible:outline-none"
+            className="rounded transition-opacity hover:opacity-80 focus-visible:ring-3 focus-visible:ring-sidebar-ring/60 focus-visible:outline-none"
           >
             <Logo tone="inverse" className="w-32" />
           </Link>

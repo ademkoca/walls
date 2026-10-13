@@ -23,7 +23,7 @@ The authoritative product and technical requirements are defined in:
 - **White:** `#FFFFFF`
 - **Typeface:** Montserrat (headings and body)
 
-Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Text on orange must be charcoal: white on orange fails WCAG contrast.
+Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Text on orange is cream by the owner's choice (2.68:1, below WCAG AA); charcoal (6.03:1) is the accessible alternative and one token away (`--primary-foreground` in `packages/ui/src/styles/globals.css`). White on orange (2.87:1) is not used.
 
 ## Architecture
 

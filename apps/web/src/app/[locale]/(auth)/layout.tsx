@@ -16,7 +16,7 @@ export default async function AuthLayout({ children, params }: LayoutProps<'/[lo
       <header className="mx-auto flex w-full max-w-md items-center justify-between px-4 pt-8">
         <Link
           href="/"
-          className="rounded focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          className="rounded transition-opacity hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         >
           <Logo className="w-32" priority />
         </Link>
