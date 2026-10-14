@@ -25,26 +25,48 @@ user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (
 | 9      | Inquiries, notifications, analytics                                                   | Done, pushed (`e53b0d8`)                            |
 | **10** | Hardening and deployment                                                              | **In progress:** deployed to preview.walls.rs       |
 
-**Immediate next step:** wait for the user to confirm `https://preview.walls.rs` loads with a
-valid certificate (Netlify was still serving its generic `*.netlify.app` certificate; if it
-takes over ~1 h: Netlify → Domain management → HTTPS → Verify DNS configuration / Provision
-certificate). Do not test sign-in over plain HTTP (`__Host-` cookie is Secure; the API only
-accepts the `https://preview.walls.rs` origin). Then, in order:
+**Immediate next step (2026-10-14):** the user is signed in to `https://preview.walls.rs` as the
+production Super Admin (created with `pnpm admin:create` using their personal email; HTTPS works,
+Resend delivers from walls.rs). The user sets `TRUST_PROXY_HOPS=3` on Render (decided below).
+Then: smoke-test the live site (see "Phase 10 starting notes"), and continue the rest of
+Phase 10. `/about` and `/contact` content comes last (user's choice).
 
-1. **`TRUST_PROXY_HOPS`** (Render, currently the initial guess `2`): ask the user for one
-   request log line from Render (pino-http logs `req.headers["x-forwarded-for"]` and
-   `remoteAddress`) after loading a page from their browser, and pick the hop count at which
-   Express's `req.ip` is the visitor's address (chain: browser → Netlify edge → Netlify
-   function running the Next `/api` rewrite → Render proxy → Express). Too high lets callers
-   spoof their IP via `X-Forwarded-For`; too low makes every visitor share one IP (rate limits,
-   view counting).
-2. **Production Super Admin:** run `pnpm admin:create --email … --name "…"` locally with the
-   production `DATABASE_URL`, `SESSION_SECRET` (copied from Render: the emailed setup link is
-   signed with it), `WEB_ORIGIN=https://preview.walls.rs` and `RESEND_API_KEY`, passed as
-   environment variables (they override the root `.env`; Node's `--env-file` never overrides
-   existing variables). Keep secrets out of shell history (`read -s`).
-3. The rest of Phase 10 (see "Phase 10 starting notes"). `/about` and `/contact` content comes
-   last (user's choice).
+**`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
+reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
+Ohio>, <Cloudflare edge>, <Render internal>` and socket address `::1` (Render's proxy); server-side
+calls from the Next app (user agent `node`, e.g. `GET /auth/me` while rendering a page) carry
+no visitor address at all: `<Netlify function>, <Cloudflare>, <Render internal>`. Netlify also sends
+`x-nf-client-connection-ip` (the visitor). Value `5` would give the visitor's address, but
+`walls-api.onrender.com` can be called directly, and a caller can then prepend their own
+`X-Forwarded-For` entries, which `5` would trust: that would bypass the login brute-force limit
+and the inquiry/auth limits. `3` (chosen for now) uses the address Cloudflare saw: not
+spoofable, but every visitor coming through Netlify shares Netlify's proxy address, so per-IP
+limits (auth 30/15 min, inquiries 5/h, views 600/h) are shared by all visitors: acceptable for the
+preview, **not for launch**.
+
+**LAUNCH BLOCKER (user agreed to revisit before launch): per-visitor client IP behind
+Netlify.** Planned fix: the web app's `/api` proxy sends the visitor's address (from
+`x-nf-client-connection-ip`) together with a shared secret header (`API_PROXY_SECRET`, an
+environment variable on both Netlify and Render; the repo is public, so it can never be in
+`netlify.toml`); the API trusts the forwarded visitor address only when the secret matches
+(timing-safe compare), otherwise it uses the Cloudflare-seen address (`TRUST_PROXY_HOPS=3`).
+Open points to check first: whether Netlify's `/api` rewrite (Next `rewrites`, or a Netlify edge
+proxy?) can add a request header, e.g. in `proxy.ts` with `NextResponse.rewrite(url, { request:
+{ headers } })` or an `app/api/[...path]` route handler (a Netlify function has a ~6 MB request
+body limit, but listing images may be 15 MB: **test a 10+ MB image upload on the preview**, which
+may need another route for uploads anyway); `req.ip` is read by `limitByIp`,
+`limitLoginAttempts` and `ListingViewsService`, so override it in one middleware. Add tests
+(secret present/absent/wrong, spoofed `X-Forwarded-For`) and verify on the live site with a
+spoofed header.
+
+**Admin email addresses cannot be changed in the app** (`canEditOwnProfile` allows only roles
+with a public profile: sellers and agents), which corrects what I first told the user. The user
+chose to keep the personal-email Super Admin and, once a walls.rs mailbox exists, run `admin:create`
+again for `admin@walls.rs` as a second Super Admin (Super Admin accounts cannot be deactivated in
+the app). Letting admins change their email would be a product decision (not decided). walls.rs
+has no mail (MX/SPF/DMARC) records yet: receiving mail needs a mailbox or forwarding service (options
+discussed: ImprovMX/Forward Email, the DNS host unlimited.rs, Google Workspace/Zoho); Resend's
+records are on the `send.` subdomain, so there is no conflict.
 
 **Deployment state (2026-10-13):**
 
@@ -672,10 +694,12 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - Scope still to do: finish the SPEC §38 E2E list (gaps: approved agent creates/submits a
   listing and gets reviewed; admin assigns a listing; agent cannot open another agent's listing
   in the browser), responsive pass on all pages, security review (headers/CSP on the web app,
-  rate limits, upload limits, dependency audit), `TRUST_PROXY_HOPS` for the real proxy chain,
+  rate limits, upload limits, dependency audit), the per-visitor client IP fix (launch
+  blocker, see above; `TRUST_PROXY_HOPS=3` until then),
   production map tile host (`NEXT_PUBLIC_MAP_TILE_URL`; the public OSM tile server forbids
   heavy use), and a final check of the deployed site (emails from the walls.rs domain,
-  uploads to Cloudinary, sign-in over HTTPS).
+  uploads to Cloudinary incl. a 10+ MB image through the Netlify proxy, sign-in over HTTPS,
+  a listing through review and publication).
 - Answered by the user: hosting plans and domains (Render free/Frankfurt, Netlify, walls.rs
   only through Netlify, preview.walls.rs first), Resend sender domain (verified), Supabase
   project (created, EU), rate limits (decided 2026-10-13: keep the in-memory counters; they
