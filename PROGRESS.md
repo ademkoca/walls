@@ -59,6 +59,32 @@ may need another route for uploads anyway); `req.ip` is read by `limitByIp`,
 (secret present/absent/wrong, spoofed `X-Forwarded-For`) and verify on the live site with a
 spoofed header.
 
+**First smoke test on preview.walls.rs (2026-10-14, user):** register/verify/login and filling a
+listing worked. Findings (all fixed locally, uncommitted until the user says so):
+
+- **Uploads over ~4.5 MB failed with "Content too large".** Probed with throwaway POSTs to a
+  nonexistent `/api` path: ≤ 4 MB reaches the API (404 from Express); ≥ 4.5 MB gets a plain-text
+  `413` from Netlify itself (the `/api` rewrite runs in a Netlify function with a ~4.5 MB body
+  limit), so the API's own 15 MB rule never applies. User chose (options: browser-side
+  shrinking / Netlify proxy rule with signed requests / direct-to-API uploads): **shrink in the
+  browser**. `apps/web/src/lib/shrink-image.ts`: files ≤ `MAX_UPLOAD_BYTES` (3.5 MB) are sent
+  untouched; bigger ones are scaled to ≤ 3000 px (never below the API minimums; `fitWithin`) and
+  saved as JPEG at 0.88 → 0.64 quality (then smaller sizes) until they fit; on a decode failure
+  (e.g. HEIC outside Safari) the original is sent. Used for listing photos, profile pictures
+  (1600 px) and image proof files (2400 px). Agent applications: the whole request must fit, so
+  images get what is left after PDFs, a PDF over 3.5 MB is refused immediately, and a total over
+  3.5 MB is refused with `filesTooLargeTogether` (hint text updated; scanned PDFs over 3.5 MB
+  cannot be sent until uploads bypass the proxy). `apiFetch` maps a plain `413` to
+  `PAYLOAD_TOO_LARGE`. Re-encoding as JPEG also strips EXIF/GPS from reduced photos. Tests:
+  unit (`fitWithin`), E2E `listings.spec.ts` (12 MB photo: request < 4 MB, image added) and
+  `agents.spec.ts` (large photo accepted, large PDF refused). The server limits (15 MB, 10 MB)
+  are unchanged. If the planned signed Netlify proxy (launch blocker above) turns out to lift the
+  limit, the shrinking can stay as a bandwidth saver or be relaxed.
+- **Agent search button** (reviewer's agent picker) is disabled until the box has a letter or
+  digit (`hasSearchableText`); an empty search used to list all agents.
+- **Language tabs in the read-only listing form** (reviewer view) work now: only the fields are
+  disabled (the tabs were inside the disabled `fieldset`). E2E in `review.spec.ts` covers both.
+
 **Admin email addresses cannot be changed in the app** (`canEditOwnProfile` allows only roles
 with a public profile: sellers and agents), which corrects what I first told the user. The user
 chose to keep the personal-email Super Admin and, once a walls.rs mailbox exists, run `admin:create`
