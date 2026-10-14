@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { BrowserSetup } from '@/components/layout/browser-setup';
 import { routing } from '@/i18n/routing';
 import { uiFont } from '../fonts';
 
@@ -39,6 +40,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
     <html lang={locale} className={uiFont.variable}>
       <body className="min-h-dvh">
         <NextIntlClientProvider>
+          <BrowserSetup />
           {children}
           <Toaster position="top-center" />
         </NextIntlClientProvider>

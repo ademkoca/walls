@@ -2,6 +2,7 @@ import { execFile } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 import { type Page, expect } from '@playwright/test';
+import { emailedLink } from './api-log';
 import { API_ENV, REPO_ROOT, WEB_ORIGIN } from './environment';
 import { type TestUser, logIn, newTestUser } from './fixtures';
 import { listingPhotos } from './images';
@@ -105,4 +106,52 @@ export async function approveListingViaApi(admin: Page, id: string): Promise<str
   expect(response.status()).toBe(200);
   const { listing } = (await response.json()) as { listing: { slug: string } };
   return listing.slug;
+}
+
+const PROOF_PDF = Buffer.from('%PDF-1.7\n1 0 obj << /Type /Catalog >> endobj\ntrailer\n%%EOF\n');
+
+/**
+ * Creates an approved, activated agent the way the product does: a public application with
+ * proof, approval by the signed-in `admin`, and account setup from the emailed link. The
+ * application and approval go through the API (their UI is covered in agents.spec.ts); the
+ * agent is left signed in on `page`.
+ */
+export async function createActiveAgent(page: Page, admin: Page): Promise<TestUser> {
+  const user = newTestUser();
+  // A unique name: parallel runs would otherwise race for the same profile slug.
+  const agent = { ...user, name: `Agent Test ${user.email.slice(0, 6)}` };
+  const headers = { Origin: WEB_ORIGIN };
+
+  const applied = await page.request.post('/api/v1/agent-applications', {
+    headers,
+    multipart: {
+      fullName: agent.name,
+      email: agent.email,
+      phone: '+381 64 123 4567',
+      agencyName: '',
+      locale: 'en',
+      files: { name: 'licenca.pdf', mimeType: 'application/pdf', buffer: PROOF_PDF },
+    },
+  });
+  expect(applied.status(), await applied.text()).toBe(202);
+
+  const queue = await admin.request.get('/api/v1/agent-applications?status=PENDING');
+  const { items } = (await queue.json()) as { items: { id: string; email: string }[] };
+  const application = items.find((item) => item.email === agent.email);
+  expect(application, 'the application is waiting for review').toBeDefined();
+  const approved = await admin.request.post(
+    `/api/v1/agent-applications/${application!.id}/approve`,
+    {
+      headers,
+    },
+  );
+  expect(approved.status()).toBe(200);
+
+  await page.goto(await emailedLink(agent.email));
+  await page.getByLabel('New password', { exact: true }).fill(agent.password);
+  await page.getByRole('button', { name: 'Activate account' }).click();
+  await expect(page.getByText('Your account is active.')).toBeVisible();
+  await logIn(page, agent);
+  await expect(page).toHaveURL(/\/en\/dashboard$/);
+  return agent;
 }

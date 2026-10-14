@@ -23,9 +23,15 @@ export const test = base.extend<{ failOnPageErrors: void }>({
   failOnPageErrors: [
     async ({ page }, use) => {
       const errors: Error[] = [];
+      const policyViolations: string[] = [];
       page.on('pageerror', (error) => errors.push(error));
+      // A page that breaks its own Content Security Policy (blocked script, image, request).
+      page.on('console', (message) => {
+        if (/Content Security Policy/.test(message.text())) policyViolations.push(message.text());
+      });
       await use();
       expect(errors, 'uncaught browser errors').toEqual([]);
+      expect(policyViolations, 'Content Security Policy violations').toEqual([]);
     },
     { auto: true },
   ],

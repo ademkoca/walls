@@ -4,8 +4,10 @@
  * is fine for development but forbids heavy use: set NEXT_PUBLIC_MAP_TILE_URL to an
  * OSM-based tile host for production.
  */
+export const DEFAULT_TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
 export const mapProvider = {
-  tileUrl: process.env.NEXT_PUBLIC_MAP_TILE_URL || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  tileUrl: process.env.NEXT_PUBLIC_MAP_TILE_URL || DEFAULT_TILE_URL,
   attribution:
     process.env.NEXT_PUBLIC_MAP_ATTRIBUTION ||
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -24,6 +26,9 @@ export interface Coordinates {
 }
 
 const GEOCODER_URL = 'https://nominatim.openstreetmap.org/search';
+
+/** The origin the browser calls to find an address (needed by the Content Security Policy). */
+export const GEOCODER_ORIGIN = new URL(GEOCODER_URL).origin;
 
 /**
  * Finds coordinates for an address typed by the user, using OpenStreetMap's Nominatim.

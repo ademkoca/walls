@@ -4,6 +4,8 @@ import { loadEnvConfig } from '@next/env';
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 import { apiInternalUrl } from './src/lib/api-internal-url';
+import { DEFAULT_TILE_URL } from './src/lib/map/map-provider';
+import { securityHeaders } from './src/lib/security-headers';
 import { NOINDEX_HEADER, isSiteIndexable } from './src/lib/site-indexing';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
@@ -26,9 +28,21 @@ const nextConfig: NextConfig = {
   // even though the API is hosted elsewhere (Render).
   rewrites: () =>
     Promise.resolve([{ source: '/api/:path*', destination: `${apiInternalUrl()}/api/:path*` }]),
-  // A preview deployment (SITE_INDEXING=off) tells search engines not to index any response.
+  // Security headers on every response. A preview deployment (SITE_INDEXING=off) also tells
+  // search engines not to index any response.
   headers: () =>
-    Promise.resolve(isSiteIndexable() ? [] : [{ source: '/:path*', headers: [NOINDEX_HEADER] }]),
+    Promise.resolve([
+      {
+        source: '/:path*',
+        headers: [
+          ...securityHeaders({
+            development: process.env.NODE_ENV !== 'production',
+            tileUrl: process.env.NEXT_PUBLIC_MAP_TILE_URL || DEFAULT_TILE_URL,
+          }),
+          ...(isSiteIndexable() ? [] : [NOINDEX_HEADER]),
+        ],
+      },
+    ]),
 };
 
 export default createNextIntlPlugin('./src/i18n/request.ts')(nextConfig);
