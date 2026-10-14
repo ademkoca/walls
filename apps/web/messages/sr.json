@@ -687,12 +687,13 @@
       "agencyName": "Agencija (opciono)",
       "files": "Dokaz"
     },
-    "filesHint": "PDF, JPG ili PNG, do {maxMb} MB po datoteci, najviše {max} datoteka. Vidi ih samo naš tim.",
+    "filesHint": "PDF, JPG ili PNG, najviše {max} datoteka i 3,5 MB ukupno. Fotografije se automatski smanjuju, PDF datoteke ne. Vidi ih samo naš tim.",
     "chooseFiles": "Izaberi datoteke",
     "removeFile": "Ukloni {name}",
     "noFiles": "Dodajte bar jednu datoteku.",
     "tooManyFiles": "Možete poslati najviše {max} datoteka.",
     "fileTooLarge": "{name} je veća od {maxMb} MB.",
+    "filesTooLargeTogether": "Datoteke su prevelike za slanje (zajedno preko {maxMb} MB). Uklonite datoteku ili koristite manje skenove; fotografije se automatski smanjuju, PDF datoteke ne.",
     "fileWrongType": "{name} nije PDF, JPG ili PNG datoteka.",
     "fileIssues": {
       "UNSUPPORTED_TYPE": "nije PDF, JPG ili PNG datoteka",

@@ -32,3 +32,24 @@ export async function listingPhotos(count: number): Promise<string[]> {
     }),
   );
 }
+
+/**
+ * A photo straight from a modern phone or camera: about 12 MB, far above what the hosting
+ * platform lets through in one request (see MAX_UPLOAD_BYTES in the web app).
+ */
+export async function largePhoto(): Promise<{ path: string; bytes: number }> {
+  mkdirSync(FIXTURE_DIR, { recursive: true });
+  const file = path.join(FIXTURE_DIR, `large-${randomUUID().slice(0, 8)}.jpg`);
+  const info = await sharp({
+    create: {
+      width: 4000,
+      height: 3000,
+      channels: 3,
+      background: '#4f9a5a',
+      noise: { type: 'gaussian', mean: 128, sigma: 60 },
+    },
+  })
+    .jpeg({ quality: 95 })
+    .toFile(file);
+  return { path: file, bytes: info.size };
+}

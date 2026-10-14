@@ -5,6 +5,7 @@ import { ApiError, NetworkError, isApiErrorBody } from './errors';
 const API_BASE_PATH = '/api/v1';
 const STATUS_NO_CONTENT = 204;
 const STATUS_ACCEPTED = 202;
+const STATUS_PAYLOAD_TOO_LARGE = 413;
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -41,6 +42,10 @@ export async function apiFetch<T = undefined>(
   }
   const data: unknown = await response.json().catch(() => null);
   if (!response.ok) {
+    // The hosting platform answers an oversized request itself, with plain text.
+    if (response.status === STATUS_PAYLOAD_TOO_LARGE && !isApiErrorBody(data)) {
+      throw new ApiError(response.status, ApiErrorCode.PAYLOAD_TOO_LARGE, 'Payload too large');
+    }
     if (isApiErrorBody(data)) {
       throw new ApiError(response.status, data.error.code, data.error.message, data.error.details);
     }

@@ -8,6 +8,7 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ApiError } from '@/lib/api/errors';
 import { profileApi } from '@/lib/api/profile';
+import { AVATAR_SHRINK, prepareImageForUpload } from '@/lib/shrink-image';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { ProfileAvatar } from './profile-avatar';
 
@@ -90,7 +91,8 @@ export function AvatarField({
             event.target.value = '';
             if (file) {
               void run(
-                () => profileApi.uploadAvatar(file),
+                async () =>
+                  profileApi.uploadAvatar(await prepareImageForUpload(file, AVATAR_SHRINK)),
                 awaitsApproval ? t('uploadedForReview') : t('uploaded'),
               );
             }

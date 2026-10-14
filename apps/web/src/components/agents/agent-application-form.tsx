@@ -17,15 +17,29 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useId, useRef, useState } from 'react';
 import { agentApplicationsApi } from '@/lib/api/agent-applications';
 import { ApiError } from '@/lib/api/errors';
+import { MAX_UPLOAD_BYTES, PROOF_IMAGE_SHRINK, prepareImageForUpload } from '@/lib/shrink-image';
 import { useErrorMessage } from '@/lib/use-error-message';
 import { FormAlert } from '../forms/form-alert';
 import { FormField, fieldAria } from '../forms/form-field';
 import { useSchemaForm } from '../forms/use-schema-form';
 
 const BYTES_PER_MB = 1024 * 1024;
-const MAX_MB = AGENT_PROOF_RULES.maxBytes / BYTES_PER_MB;
 const ACCEPT = '.pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png';
 const ALLOWED_EXTENSIONS = /\.(pdf|jpe?g|png)$/i;
+
+const isImage = (file: File) => /\.(jpe?g|png)$/i.test(file.name);
+
+/** Reduces the images so that, with the other files, the request fits the upload limit. */
+async function prepareProofFiles(files: File[]): Promise<File[]> {
+  const images = files.filter(isImage);
+  const otherBytes = files.filter((file) => !isImage(file)).reduce((sum, f) => sum + f.size, 0);
+  const perImage = Math.max(0, MAX_UPLOAD_BYTES - otherBytes) / Math.max(images.length, 1);
+  return Promise.all(
+    files.map(async (file) =>
+      isImage(file) ? await prepareImageForUpload(file, PROOF_IMAGE_SHRINK, perImage) : file,
+    ),
+  );
+}
 
 /** The API's per-file problems, from an INVALID_FILE error. */
 function fileProblems(error: unknown): { name: string; issues: FileIssue[] }[] {
@@ -63,8 +77,11 @@ export function AgentApplicationForm() {
         problems.push(t('fileWrongType', { name: file.name }));
         return false;
       }
-      if (file.size > AGENT_PROOF_RULES.maxBytes) {
-        problems.push(t('fileTooLarge', { name: file.name, maxMb: MAX_MB }));
+      // Photos and scans are reduced on sending; a PDF cannot be, so it must fit as it is.
+      if (!isImage(file) && file.size > MAX_UPLOAD_BYTES) {
+        problems.push(
+          t('fileTooLarge', { name: file.name, maxMb: MAX_UPLOAD_BYTES / BYTES_PER_MB }),
+        );
         return false;
       }
       return true;
@@ -83,9 +100,16 @@ export function AgentApplicationForm() {
       setFileError(t('noFiles'));
       return;
     }
+    // The whole request must stay small (see MAX_UPLOAD_BYTES): scans and photos are reduced
+    // to what is left after the documents; PDFs cannot be reduced.
+    const sendable = await prepareProofFiles(files);
+    if (sendable.reduce((total, file) => total + file.size, 0) > MAX_UPLOAD_BYTES) {
+      setFileError(t('filesTooLargeTogether', { maxMb: MAX_UPLOAD_BYTES / BYTES_PER_MB }));
+      return;
+    }
     const body = new FormData();
     for (const [name, value] of Object.entries(values)) body.append(name, value);
-    for (const file of files) body.append('files', file, file.name);
+    for (const file of sendable) body.append('files', file, file.name);
     try {
       await agentApplicationsApi.submit(body);
       setSentTo(values.email);
@@ -166,9 +190,7 @@ export function AgentApplicationForm() {
 
         <Field data-invalid={fileError ? true : undefined}>
           <FieldLabel htmlFor={filesId}>{t('fields.files')}</FieldLabel>
-          <FieldDescription>
-            {t('filesHint', { max: AGENT_PROOF_RULES.maxFiles, maxMb: MAX_MB })}
-          </FieldDescription>
+          <FieldDescription>{t('filesHint', { max: AGENT_PROOF_RULES.maxFiles })}</FieldDescription>
           {files.length > 0 && (
             <ul className="space-y-2">
               {files.map((file, index) => (

@@ -33,6 +33,7 @@ import { useId, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { ApiError } from '@/lib/api/errors';
 import { listingsApi } from '@/lib/api/listings';
+import { prepareImageForUpload } from '@/lib/shrink-image';
 import { useErrorMessage } from '@/lib/use-error-message';
 
 const ACCEPTED_TYPES = [...LISTING_IMAGE_RULES.allowedMimeTypes, '.heic', '.heif'].join(',');
@@ -89,7 +90,7 @@ export function ListingImages({
     for (const file of files) {
       setUploading(file.name);
       try {
-        onImagesChange(await listingsApi.uploadImage(listingId, file));
+        onImagesChange(await listingsApi.uploadImage(listingId, await prepareImageForUpload(file)));
         added += 1;
       } catch (error) {
         failed.push(t('failed', { name: file.name, reason: failureReason(error) }));

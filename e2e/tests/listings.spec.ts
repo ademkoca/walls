@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { listingPhotos } from '../support/images';
+import { largePhoto, listingPhotos } from '../support/images';
 import { expect, logIn, newTestUser, registerAndVerify, test } from '../support/fixtures';
 
 /** Near the Temple of Saint Sava, Vračar. */
@@ -127,4 +127,22 @@ test('offers only the features that apply to the property type', async ({ page }
   await propertyType.click();
   await page.getByRole('option', { name: 'Apartment' }).click();
   await expect(page.getByRole('checkbox', { name: 'Elevator' })).not.toBeChecked();
+});
+
+// Netlify refuses request bodies above about 4.5 MB, so large photos are reduced in the browser.
+test('a large photo is reduced in the browser before it is uploaded', async ({ page }) => {
+  test.slow();
+  await openNewDraft(page);
+  const photo = await largePhoto();
+  expect(photo.bytes, 'the fixture is a large photo').toBeGreaterThan(8 * 1024 * 1024);
+
+  const upload = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/images'),
+  );
+  await page.getByLabel('Add images').setInputFiles(photo.path);
+  const sentBytes = Number((await (await upload).allHeaders())['content-length']);
+  expect(sentBytes, 'bytes sent to the API').toBeLessThan(4 * 1024 * 1024);
+
+  await expect(page.getByText('1 image added.')).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText('1 / 30')).toBeVisible();
 });

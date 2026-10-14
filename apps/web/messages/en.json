@@ -687,12 +687,13 @@
       "agencyName": "Agency (optional)",
       "files": "Proof"
     },
-    "filesHint": "PDF, JPG or PNG, up to {maxMb} MB each, at most {max} files. Only our team can see them.",
+    "filesHint": "PDF, JPG or PNG, at most {max} files and 3.5 MB in total. Photos are reduced automatically, PDF files are not. Only our team can see them.",
     "chooseFiles": "Choose files",
     "removeFile": "Remove {name}",
     "noFiles": "Add at least one file.",
     "tooManyFiles": "You can send at most {max} files.",
     "fileTooLarge": "{name} is larger than {maxMb} MB.",
+    "filesTooLargeTogether": "Your files are too large to send together (over {maxMb} MB in total). Remove a file or use smaller scans; photos are reduced automatically, PDF files are not.",
     "fileWrongType": "{name} isn't a PDF, JPG or PNG file.",
     "fileIssues": {
       "UNSUPPORTED_TYPE": "not a PDF, JPG or PNG file",

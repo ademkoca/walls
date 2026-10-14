@@ -2,6 +2,7 @@ import type { Browser, Page } from '@playwright/test';
 import { emailedLink } from '../support/api-log';
 import { signInAsSuperAdmin } from '../support/accounts';
 import { expect, logIn, newTestUser, registerAndVerify, test } from '../support/fixtures';
+import { largePhoto } from '../support/images';
 
 const PROOF_PDF = Buffer.from('%PDF-1.7\n1 0 obj << /Type /Catalog >> endobj\ntrailer\n%%EOF\n');
 const PHONE = '+381 64 123 4567';
@@ -136,4 +137,35 @@ test('a private seller edits their profile, which is public immediately', async 
   await expect(visitor.getByText('Not verified')).toBeVisible();
   await expect(visitor.getByText('No published listings at the moment.')).toBeVisible();
   expect(errors, 'uncaught browser errors (visitor)').toEqual([]);
+});
+
+// Netlify refuses request bodies above about 4.5 MB, so the browser keeps proof files small.
+test('an application with a large photo as proof is reduced and accepted, a large PDF is refused', async ({
+  page,
+}) => {
+  test.slow();
+  await page.goto('/en/for-agents');
+  const user = newTestUser();
+  await page.getByLabel('Full name').fill(user.name);
+  await page.getByLabel('Email address').fill(user.email);
+  await page.getByLabel('Phone number', { exact: true }).fill(PHONE);
+
+  // A PDF cannot be reduced: over the limit, it is refused right away.
+  const bigPdf = Buffer.concat([PROOF_PDF, Buffer.alloc(5 * 1024 * 1024)]);
+  await page
+    .getByLabel('Proof')
+    .setInputFiles({ name: 'veliki-sken.pdf', mimeType: 'application/pdf', buffer: bigPdf });
+  await expect(page.getByText('veliki-sken.pdf is larger than 3.5 MB.')).toBeVisible();
+
+  // A large photo is reduced on sending.
+  const photo = await largePhoto();
+  await page.getByLabel('Proof').setInputFiles(photo.path);
+  await expect(page.getByText(/large-[0-9a-f]{8}\.jpg/)).toBeVisible();
+  const upload = page.waitForRequest(
+    (request) => request.method() === 'POST' && request.url().endsWith('/agent-applications'),
+  );
+  await page.getByRole('button', { name: 'Send application' }).click();
+  const sentBytes = Number((await (await upload).allHeaders())['content-length']);
+  expect(sentBytes, 'bytes sent to the API').toBeLessThan(4 * 1024 * 1024);
+  await expect(page.getByRole('heading', { name: 'Thank you for applying' })).toBeVisible();
 });
