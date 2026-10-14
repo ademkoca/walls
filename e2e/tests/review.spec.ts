@@ -43,6 +43,25 @@ test('an admin rejects a listing, the seller resubmits, and the admin publishes 
   // Reject with a reason.
   await openFromQueue(admin, 'In review', LISTING_TITLE);
   await expect(admin.getByText('This listing is waiting for review.')).toBeVisible();
+
+  // The form is read-only for a reviewer, but its language tabs still work.
+  await admin.getByRole('tab', { name: 'English (optional)' }).click();
+  await expect(admin.getByRole('tab', { name: 'English (optional)' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(admin.locator('#texts-en-title')).toBeVisible();
+  await expect(admin.locator('#texts-en-title')).toBeDisabled();
+
+  // The agent search needs something to search for: not empty, not only spaces or symbols.
+  const agentSearch = admin.getByRole('textbox', { name: 'Search agents by name or email' });
+  const searchButton = admin.getByRole('button', { name: 'Search agents by name or email' });
+  await expect(searchButton).toBeDisabled();
+  await agentSearch.fill('  -_. ');
+  await expect(searchButton).toBeDisabled();
+  await agentSearch.fill('Ana');
+  await expect(searchButton).toBeEnabled();
+  await agentSearch.fill('');
   await admin.getByRole('button', { name: 'Reject', exact: true }).click();
   const rejectDialog = admin.getByRole('alertdialog');
   await rejectDialog.getByRole('button', { name: 'Reject' }).click();

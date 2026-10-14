@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 import { toast } from 'sonner';
 import { usersApi } from '@/lib/api/users';
+import { hasSearchableText } from '@/lib/search-text';
 import { useErrorMessage } from '@/lib/use-error-message';
 
 /** Shows the assigned agent and lets a reviewer assign another active agent or remove it. */
@@ -28,7 +29,10 @@ export function AgentPicker({
   const [results, setResults] = useState<UserSummary[] | null>(null);
   const [searching, setSearching] = useState(false);
 
+  const canSearch = hasSearchableText(query);
+
   async function search() {
+    if (!canSearch) return;
     setSearching(true);
     try {
       setResults((await usersApi.activeAgents(query.trim())).items);
@@ -75,7 +79,13 @@ export function AgentPicker({
           placeholder={t('searchAgents')}
           onChange={(event) => setQuery(event.target.value)}
         />
-        <Button type="submit" variant="outline" size="icon" aria-label={t('searchAgents')}>
+        <Button
+          type="submit"
+          variant="outline"
+          size="icon"
+          aria-label={t('searchAgents')}
+          disabled={!canSearch || searching}
+        >
           {searching ? <Spinner /> : <SearchIcon />}
         </Button>
       </form>

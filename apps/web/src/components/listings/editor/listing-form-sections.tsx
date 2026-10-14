@@ -118,7 +118,11 @@ export function BasicsSection({ editable }: { editable: boolean }) {
   );
 }
 
-export function TextsSection() {
+/**
+ * Title and description in both languages. When the form is read-only, the language tabs stay
+ * usable (a reviewer must be able to read the English text); only the fields are disabled.
+ */
+export function TextsSection({ editable }: { editable: boolean }) {
   const t = useTranslations('listings.editor');
   const label = useRequiredLabel();
   const { register } = useFormContext<ListingFormValues>();
@@ -141,39 +145,41 @@ export function TextsSection() {
           <TabsTrigger value={Locale.SR}>{t('fields.languageSr')}</TabsTrigger>
           <TabsTrigger value={Locale.EN}>{t('fields.languageEn')}</TabsTrigger>
         </TabsList>
-        {([Locale.SR, Locale.EN] as const).map((locale) => {
-          const required = locale === Locale.SR;
-          const titleId = `texts-${locale}-title`;
-          const descriptionId = `texts-${locale}-description`;
-          // Kept mounted so both languages are validated and submitted.
-          return (
-            <TabsContent key={locale} value={locale} keepMounted className="space-y-4 pt-4">
-              <FormField
-                id={titleId}
-                label={label(t('fields.title'), required)}
-                error={errors[locale].title}
-              >
-                <Input
-                  {...fieldAria(titleId, errors[locale].title)}
-                  maxLength={LISTING_INPUT_LIMITS.titleMaxLength}
-                  {...register(`texts.${locale}.title`)}
-                />
-              </FormField>
-              <FormField
-                id={descriptionId}
-                label={label(t('fields.description'), required)}
-                error={errors[locale].description}
-              >
-                <Textarea
-                  {...fieldAria(descriptionId, errors[locale].description)}
-                  rows={8}
-                  maxLength={LISTING_INPUT_LIMITS.descriptionMaxLength}
-                  {...register(`texts.${locale}.description`)}
-                />
-              </FormField>
-            </TabsContent>
-          );
-        })}
+        <fieldset disabled={!editable} className="contents">
+          {([Locale.SR, Locale.EN] as const).map((locale) => {
+            const required = locale === Locale.SR;
+            const titleId = `texts-${locale}-title`;
+            const descriptionId = `texts-${locale}-description`;
+            // Kept mounted so both languages are validated and submitted.
+            return (
+              <TabsContent key={locale} value={locale} keepMounted className="space-y-4 pt-4">
+                <FormField
+                  id={titleId}
+                  label={label(t('fields.title'), required)}
+                  error={errors[locale].title}
+                >
+                  <Input
+                    {...fieldAria(titleId, errors[locale].title)}
+                    maxLength={LISTING_INPUT_LIMITS.titleMaxLength}
+                    {...register(`texts.${locale}.title`)}
+                  />
+                </FormField>
+                <FormField
+                  id={descriptionId}
+                  label={label(t('fields.description'), required)}
+                  error={errors[locale].description}
+                >
+                  <Textarea
+                    {...fieldAria(descriptionId, errors[locale].description)}
+                    rows={8}
+                    maxLength={LISTING_INPUT_LIMITS.descriptionMaxLength}
+                    {...register(`texts.${locale}.description`)}
+                  />
+                </FormField>
+              </TabsContent>
+            );
+          })}
+        </fieldset>
       </Tabs>
     </div>
   );

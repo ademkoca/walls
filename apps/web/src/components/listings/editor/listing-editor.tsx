@@ -250,9 +250,11 @@ export function ListingEditor({
               <Section title={t('editor.sections.basics')}>
                 <BasicsSection editable={editable} />
               </Section>
-              <Section title={t('editor.sections.description')}>
-                <TextsSection />
-              </Section>
+            </fieldset>
+            <Section title={t('editor.sections.description')}>
+              <TextsSection editable={editable} />
+            </Section>
+            <fieldset disabled={!editable} className="contents">
               <Section title={t('editor.sections.location')}>
                 <LocationSection editable={editable} />
               </Section>
