@@ -88,6 +88,21 @@ listing worked. Findings (all fixed locally, uncommitted until the user says so)
   phone as plain text plus a hint (`inquiries.replyHint`), and admins can still change the status.
   Chosen over hiding the visitor's email/phone from admins (that stays an option if the user wants
   admins unable to contact visitors at all). SPEC §20 updated; unit, API and E2E tests added.
+- **Photo viewer (user's feedback, 2026-10-14, uncommitted):** thumbnails in the listing editor
+  (seller) and in the read-only review view (admin) open the photo at full size in a dark dialog
+  (`components/media/image-viewer.tsx`, built on the new shadcn `dialog.tsx`): previous/next
+  buttons, arrow keys, Escape/close, "Photo n of m". Texts under `imageViewer` (sr/en). The
+  grip handle still does the dragging, so clicking the photo is free. Not done: the public listing
+  gallery has no full-screen view (easy follow-up with the same component), and tiles still load
+  the full-size URL as their thumbnail (a smaller Cloudinary transformation would load faster).
+  E2E in `listings.spec.ts` and `review.spec.ts`.
+- **Inquiry emails and replies (answer given 2026-10-14):** the notification goes out from
+  `no-reply@walls.rs` but carries `Reply-To: <visitor's email>` (`EmailMessage.replyTo` → Resend
+  `reply_to`), so "Reply" in the recipient's mail program addresses the visitor directly and works
+  with a send-only Resend account; nothing is delivered to walls.rs. Edge cases: a mistyped
+  visitor address bounces to the recipient's mailbox. For the other emails (verification, password
+  reset, …) there is no Reply-To: replying to `no-reply@walls.rs` goes nowhere because walls.rs has
+  no MX records (add a real support mailbox/Reply-To when the contact page is done).
 - **Agent search button** (reviewer's agent picker) is disabled until the box has a letter or
   digit (`hasSearchableText`); an empty search used to list all agents.
 - **Language tabs in the read-only listing form** (reviewer view) work now: only the fields are
