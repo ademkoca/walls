@@ -80,6 +80,14 @@ listing worked. Findings (all fixed locally, uncommitted until the user says so)
   `agents.spec.ts` (large photo accepted, large PDF refused). The server limits (15 MB, 10 MB)
   are unchanged. If the planned signed Netlify proxy (launch blocker above) turns out to lift the
   limit, the shrinking can stay as a bandwidth saver or be relaxed.
+- **Admins do not reply to inquiries (user's decision, 2026-10-14, privacy; uncommitted):**
+  replying is only a `mailto:` link (no in-app messaging). `canReplyToInquiry` (shared) is true
+  only for the recipient; `InquiryDetail.canReply` is computed by the API. On the inquiry page
+  the "Reply by email" button and the mail/phone links show only when `canReply`; everyone else
+  (Admins, and the creator with read-only access when an agent handles it) sees the email and
+  phone as plain text plus a hint (`inquiries.replyHint`), and admins can still change the status.
+  Chosen over hiding the visitor's email/phone from admins (that stays an option if the user wants
+  admins unable to contact visitors at all). SPEC §20 updated; unit, API and E2E tests added.
 - **Agent search button** (reviewer's agent picker) is disabled until the box has a letter or
   digit (`hasSearchableText`); an empty search used to list all agents.
 - **Language tabs in the read-only listing form** (reviewer view) work now: only the fields are
