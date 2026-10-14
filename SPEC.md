@@ -753,7 +753,7 @@ notification.
 
 Agents can manage inquiries belonging to their listings.
 
-Admins/Super Admins can manage all inquiries.
+Admins/Super Admins can manage all inquiries (read them and set their status); they do not reply to visitors: only the inquiry's recipient is offered the "reply by email" action and the visitor's contact links (decision, 2026-10-14).
 
 Inquiry routing:
 

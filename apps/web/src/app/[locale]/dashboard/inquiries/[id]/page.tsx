@@ -44,20 +44,33 @@ export default async function InquiryPage({
   const title = inquiry.listing.title ?? t('untitled');
 
   const details: [string, React.ReactNode][] = [
+    // Contact links (mail, phone) are for the recipient, who replies; others only read.
     [
       t('email'),
-      <a key="email" href={`mailto:${inquiry.visitorEmail}`} className="break-all hover:underline">
-        {inquiry.visitorEmail}
-      </a>,
+      inquiry.canReply ? (
+        <a
+          key="email"
+          href={`mailto:${inquiry.visitorEmail}`}
+          className="break-all hover:underline"
+        >
+          {inquiry.visitorEmail}
+        </a>
+      ) : (
+        <span key="email" className="break-all">
+          {inquiry.visitorEmail}
+        </span>
+      ),
     ],
     [
       t('phone'),
-      inquiry.visitorPhone ? (
+      !inquiry.visitorPhone ? (
+        <span className="text-muted-foreground">{t('noPhone')}</span>
+      ) : inquiry.canReply ? (
         <a key="phone" href={`tel:${inquiry.visitorPhone.replace(/[^\d+]/g, '')}`}>
           {inquiry.visitorPhone}
         </a>
       ) : (
-        <span className="text-muted-foreground">{t('noPhone')}</span>
+        <span key="phone">{inquiry.visitorPhone}</span>
       ),
     ],
     [
@@ -115,14 +128,17 @@ export default async function InquiryPage({
               </div>
             ))}
           </dl>
+          {!inquiry.canReply && <p className="text-sm text-muted-foreground">{t('replyHint')}</p>}
           <div className="flex flex-wrap gap-2">
-            <a
-              href={`mailto:${inquiry.visitorEmail}?subject=${encodeURIComponent(`Re: ${title}`)}`}
-              className={buttonVariants({ variant: 'outline' })}
-            >
-              <MailIcon data-icon="inline-start" />
-              {t('reply')}
-            </a>
+            {inquiry.canReply && (
+              <a
+                href={`mailto:${inquiry.visitorEmail}?subject=${encodeURIComponent(`Re: ${title}`)}`}
+                className={buttonVariants({ variant: 'outline' })}
+              >
+                <MailIcon data-icon="inline-start" />
+                {t('reply')}
+              </a>
+            )}
             <Link
               href={`/dashboard/listings/${inquiry.listing.id}`}
               className={buttonVariants({ variant: 'outline' })}

@@ -1030,6 +1030,7 @@
     "assignedAgent": "Assigned agent",
     "status": "Status",
     "reply": "Reply by email",
+    "replyHint": "Only the advertiser who receives this inquiry replies to the visitor.",
     "viewListing": "View public page",
     "openListing": "Open listing",
     "markContacted": "Mark as contacted",

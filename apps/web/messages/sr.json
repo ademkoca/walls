@@ -1030,6 +1030,7 @@
     "assignedAgent": "Dodeljeni agent",
     "status": "Status",
     "reply": "Odgovori emailom",
+    "replyHint": "Samo oglašivač koji prima ovaj upit odgovara posetiocu.",
     "viewListing": "Javna stranica",
     "openListing": "Otvori oglas",
     "markContacted": "Označi kao kontaktiran",

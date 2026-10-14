@@ -89,6 +89,18 @@ test('a visitor sends an inquiry, the seller handles it and sees the listing sta
   await expect(buyer.getByText('Prodajem i ja stan u blizini')).toBeVisible();
   expect(buyerErrors, 'uncaught browser errors (buyer)').toEqual([]);
 
+  // Admins read every inquiry and can set its status, but only the recipient replies.
+  await admin.goto('/en/dashboard/inquiries?status=CONTACTED');
+  await admin.getByRole('link', { name: 'Marija Petrović' }).first().click();
+  await expect(admin.getByText('Mogu da dođem u subotu.')).toBeVisible();
+  await expect(admin.getByText('marija@example.com')).toBeVisible();
+  await expect(
+    admin.getByText('Only the advertiser who receives this inquiry replies'),
+  ).toBeVisible();
+  await expect(admin.getByRole('link', { name: 'Reply by email' })).toHaveCount(0);
+  await expect(admin.getByRole('link', { name: 'marija@example.com' })).toHaveCount(0);
+  await expect(admin.getByRole('button', { name: 'Mark as new' })).toBeVisible();
+
   // Admins see platform totals on their overview.
   await admin.goto('/en/dashboard');
   await expect(admin.getByRole('heading', { name: 'Platform' })).toBeVisible();

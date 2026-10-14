@@ -29,6 +29,8 @@ export interface InquiryDetail extends InquirySummary {
   fromRegisteredUser: boolean;
   visitorEmail: string;
   visitorPhone: string | null;
+  /** Only the recipient may write back to the visitor; admins read and set the status. */
+  canReply: boolean;
   message: string;
   /** Who received and manages the inquiry. */
   recipient: UserReference;

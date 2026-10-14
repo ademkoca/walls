@@ -4,6 +4,7 @@ import { Role, UserStatus } from '../enums';
 import { admin, agent, otherAgent, otherSeller, seller } from '../testing/fixtures';
 import {
   canManageInquiry,
+  canReplyToInquiry,
   canViewInquiry,
   isOwnListing,
   keepsSentInquiries,
@@ -42,6 +43,18 @@ describe('inquiry access', () => {
   it('lets the recipient and admins manage the inquiry', () => {
     expect(canManageInquiry(agent, assigned).allowed).toBe(true);
     expect(canManageInquiry(admin, assigned).allowed).toBe(true);
+  });
+
+  it('lets only the recipient reply: not admins, not the creator with read-only access', () => {
+    expect(canReplyToInquiry(agent, assigned).allowed).toBe(true);
+    expect(canReplyToInquiry(admin, assigned)).toEqual({
+      allowed: false,
+      reason: DenialReason.NOT_RESOURCE_PARTICIPANT,
+    });
+    expect(canReplyToInquiry(seller, assigned).allowed).toBe(false);
+    expect(canReplyToInquiry({ ...agent, status: UserStatus.DEACTIVATED }, assigned).allowed).toBe(
+      false,
+    );
   });
 
   it('gives the listing creator read-only access when an agent handles the inquiry', () => {

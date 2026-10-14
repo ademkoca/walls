@@ -41,6 +41,19 @@ export function canManageInquiry(actor: Actor, inquiry: InquiryAccessContext): D
   );
 }
 
+/**
+ * Writing back to the visitor (the "Reply by email" button and the visitor's contact links):
+ * only the recipient does. Admins manage inquiries (status) and can read them, but do not
+ * reply (decision, 2026-10-14: privacy); a creator with read-only access does not either.
+ */
+export function canReplyToInquiry(actor: Actor, inquiry: InquiryAccessContext): Decision {
+  return firstDenial(
+    () => requireActive(actor),
+    () =>
+      inquiry.recipientUserId === actor.id ? allow() : deny(DenialReason.NOT_RESOURCE_PARTICIPANT),
+  );
+}
+
 /** Reading an inquiry: anyone who can manage it, plus the listing creator (read-only). */
 export function canViewInquiry(actor: Actor, inquiry: InquiryAccessContext): Decision {
   const manage = canManageInquiry(actor, inquiry);

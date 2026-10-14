@@ -76,7 +76,15 @@ describe('sending an inquiry (SPEC §20)', () => {
       message: body.message,
       recipient: { id: seller.user.id },
       assignedAgent: null,
+      canReply: true,
     });
+
+    // Admins read and manage it (status), but only the recipient replies (decision, 2026-10-14).
+    const asAdmin = (await admin.client.get(`/api/v1/inquiries/${item!.id}`)).body as {
+      inquiry: InquiryDetail;
+    };
+    expect(asAdmin.inquiry).toMatchObject({ canManage: true, canReply: false });
+    expect(asAdmin.inquiry.visitorEmail).toBe(body.email);
   });
 
   it('routes to the assigned agent only; the creator can read it but not change it', async () => {
@@ -104,7 +112,10 @@ describe('sending an inquiry (SPEC §20)', () => {
       recipient: { id: agent.user.id },
       assignedAgent: { id: agent.user.id },
       canManage: false,
+      canReply: false,
     });
+    const asAgent = (await agent.client.get(path)).body as { inquiry: InquiryDetail };
+    expect(asAgent.inquiry.canReply).toBe(true);
     const stranger = await ctx.signedInUser();
     expect((await stranger.client.get(path)).status).toBe(403);
     expect((await listOf(stranger)).items).toEqual([]);
