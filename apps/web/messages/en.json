@@ -1062,5 +1062,12 @@
     "inquiriesNew": "New inquiries",
     "viewsTotal": "Property views",
     "views30": "Views, last 30 days"
+  },
+  "imageViewer": {
+    "title": "Photo {position} of {count}",
+    "previous": "Previous photo",
+    "next": "Next photo",
+    "close": "Close",
+    "open": "View photo {position} larger"
   }
 }

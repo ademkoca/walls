@@ -1062,5 +1062,12 @@
     "inquiriesNew": "Novi upiti",
     "viewsTotal": "Pregledi nekretnina",
     "views30": "Pregledi, poslednjih 30 dana"
+  },
+  "imageViewer": {
+    "title": "Fotografija {position} od {count}",
+    "previous": "Prethodna fotografija",
+    "next": "Sledeća fotografija",
+    "close": "Zatvori",
+    "open": "Prikaži fotografiju {position} veću"
   }
 }

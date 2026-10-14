@@ -53,6 +53,12 @@ test('an admin rejects a listing, the seller resubmits, and the admin publishes 
   await expect(admin.locator('#texts-en-title')).toBeVisible();
   await expect(admin.locator('#texts-en-title')).toBeDisabled();
 
+  // Reviewers can open the photos at full size.
+  await admin.getByRole('button', { name: 'View photo 1 larger' }).click();
+  await expect(admin.getByRole('dialog').getByText('Photo 1 of 3')).toBeVisible();
+  await admin.getByRole('dialog').getByRole('button', { name: 'Close' }).click();
+  await expect(admin.getByRole('dialog')).toBeHidden();
+
   // The agent search needs something to search for: not empty, not only spaces or symbols.
   const agentSearch = admin.getByRole('textbox', { name: 'Search agents by name or email' });
   const searchButton = admin.getByRole('button', { name: 'Search agents by name or email' });

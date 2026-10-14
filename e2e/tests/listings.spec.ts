@@ -84,6 +84,18 @@ test.describe('with location access granted', () => {
     await page.getByLabel('Add images').setInputFiles(await listingPhotos(3));
     await expect(page.getByText('3 / 30')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText('Cover', { exact: true })).toHaveCount(1);
+
+    // A photo opens large; the arrow keys move through the photos and Escape closes it.
+    await page.getByRole('button', { name: 'View photo 1 larger' }).click();
+    const viewer = page.getByRole('dialog');
+    await expect(viewer.getByText('Photo 1 of 3')).toBeVisible();
+    await expect(viewer.getByRole('img', { name: 'Image 1' })).toBeVisible();
+    await page.keyboard.press('ArrowRight');
+    await expect(viewer.getByText('Photo 2 of 3')).toBeVisible();
+    await viewer.getByRole('button', { name: 'Previous photo' }).click();
+    await expect(viewer.getByText('Photo 1 of 3')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(viewer).toBeHidden();
     await expect(page.getByText('This listing has everything needed for review.')).toBeVisible();
 
     await page.getByRole('button', { name: 'Submit for review' }).click();

@@ -31,6 +31,7 @@ import { GripVerticalIcon, ImageIcon, StarIcon, Trash2Icon, UploadIcon } from 'l
 import { useTranslations } from 'next-intl';
 import { useId, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { ImageViewer } from '@/components/media/image-viewer';
 import { ApiError } from '@/lib/api/errors';
 import { listingsApi } from '@/lib/api/listings';
 import { prepareImageForUpload } from '@/lib/shrink-image';
@@ -67,6 +68,7 @@ export function ListingImages({
   const [uploading, setUploading] = useState<string | null>(null);
   const [failures, setFailures] = useState<string[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [viewing, setViewing] = useState<number | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: DRAG_ACTIVATION_DISTANCE_PX } }),
@@ -242,12 +244,22 @@ export function ListingImages({
                   toBeRemoved={removedImageIds.includes(image.id)}
                   onMakeCover={() => void save(images, image.id)}
                   onRemove={() => void remove(image)}
+                  onOpen={() => setViewing(index)}
                 />
               ))}
             </ul>
           </SortableContext>
         </DndContext>
       )}
+      <ImageViewer
+        images={images.map((image, index) => ({
+          url: image.url,
+          alt: t('imageAlt', { position: index + 1 }),
+        }))}
+        index={viewing}
+        onIndexChange={setViewing}
+        onClose={() => setViewing(null)}
+      />
     </div>
   );
 }
@@ -260,6 +272,7 @@ function SortableImage({
   toBeRemoved,
   onMakeCover,
   onRemove,
+  onOpen,
 }: {
   image: ListingImage;
   position: number;
@@ -268,8 +281,10 @@ function SortableImage({
   toBeRemoved: boolean;
   onMakeCover: () => void;
   onRemove: () => void;
+  onOpen: () => void;
 }) {
   const t = useTranslations('listings.editor.images');
+  const tViewer = useTranslations('imageViewer');
   const tPublished = useTranslations('listings.editor.published');
   const [broken, setBroken] = useState(false);
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -293,15 +308,23 @@ function SortableImage({
             <ImageIcon aria-hidden />
           </div>
         ) : (
-          // Provider URLs (Cloudinary transformations or local files) are already optimized.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={image.url}
-            alt={t('imageAlt', { position })}
-            className="size-full object-cover"
-            loading="lazy"
-            onError={() => setBroken(true)}
-          />
+          <button
+            type="button"
+            onClick={onOpen}
+            aria-label={tViewer('open', { position })}
+            title={tViewer('open', { position })}
+            className="block size-full transition-opacity hover:opacity-90 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none focus-visible:ring-inset"
+          >
+            {/* Provider URLs (Cloudinary transformations or local files) are already optimized. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image.url}
+              alt=""
+              className="size-full object-cover"
+              loading="lazy"
+              onError={() => setBroken(true)}
+            />
+          </button>
         )}
       </div>
       <div className="absolute top-2 left-2 flex flex-wrap gap-1">
