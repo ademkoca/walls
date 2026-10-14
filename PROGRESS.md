@@ -103,6 +103,47 @@ listing worked. Findings (all fixed locally, uncommitted until the user says so)
   visitor address bounces to the recipient's mailbox. For the other emails (verification, password
   reset, …) there is no Reply-To: replying to `no-reply@walls.rs` goes nowhere because walls.rs has
   no MX records (add a real support mailbox/Reply-To when the contact page is done).
+- **§38 E2E gaps closed (2026-10-14, uncommitted):** `agent-listings.spec.ts`: an approved agent
+  submits a listing and cannot approve it (API 403), an admin reviews and publishes it, a second
+  agent cannot see or open it (list, browser 404 page, API 403/404), then the admin assigns it in
+  the UI (agent picker) and the second agent can open it while the creator keeps access. New
+  helper `createActiveAgent(page, admin)` in `e2e/support/accounts.ts` (application and approval
+  through the API, account setup through the emailed link).
+- **Security review (2026-10-14, uncommitted):**
+  - _Secrets:_ git history and tracked files scanned: no real secrets (only test fixtures); `.env`
+    is untracked.
+  - _Dependencies_ (`pnpm audit`): 2 advisories, both in development tools that never run in
+    production: `braces` (stack exhaustion, no patched version yet; via the ESLint Next plugin and the
+    shadcn CLI) and an old `esbuild` dev-server issue (via drizzle-kit). Accepted; re-run the audit
+    before launch.
+  - _Authorization inventory:_ every non-public API route sits behind `authenticated` / `requireAuth`;
+    public routes are the read endpoints, inquiry + view reporting (IP-limited), the agent
+    application (IP-limited) and the auth endpoints (IP-limited, login also per IP+email).
+  - _Cookies:_ HttpOnly, SameSite=Lax, Secure and the `__Host-` prefix in production.
+  - _CSRF/Origin, JSON limit (100 kb), paging caps, error bodies without internals, HTML-escaped
+    email content:_ reviewed, fine.
+  - _New: web security headers_ (`lib/security-headers.ts`, wired in `next.config.ts`): Content
+    Security Policy (scripts/styles from this site plus inline ones that Next and the map/drag
+    libraries need; images from this site, `res.cloudinary.com` and the map tile host derived from
+    `NEXT_PUBLIC_MAP_TILE_URL`; connections only to this site and Nominatim; no frames, plugins or
+    foreign form targets; `unsafe-eval` and websockets only in development),
+    `Referrer-Policy: strict-origin-when-cross-origin` (the OSM tile policy needs the Referer),
+    `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Permissions-Policy` (geolocation for this site
+    only), `Cross-Origin-Opener-Policy`. HSTS is added by Netlify. Zod's eval probe is switched off in the
+    browser (`lib/browser-zod-config.ts`, `BrowserSetup`; it was reported as a CSP violation). Every
+    E2E test now fails on a CSP violation and `security-headers.spec.ts` visits the public,
+    seller and admin pages (map, tiles, photo viewer). **After deploying, check a listing with
+    Cloudinary photos, the editor and the map in the browser console for "Content Security Policy"
+    messages** (Cloudinary photos are not covered by E2E).
+  - _Logging:_ Netlify's `x-nf-geo` header (visitor city and coordinates) is now redacted
+    (`logger.ts`, tested); client IP addresses stay in the request logs (needed for the proxy/IP
+    work; mention in the privacy policy).
+  - _Residual risks / later:_ `script-src` keeps `'unsafe-inline'` (a strict CSP needs per-request
+    nonces, which make every page dynamic, or Next's experimental SRI); the public search
+    endpoints have no per-IP limit (a limit would hit all visitors until the visitor-IP launch
+    blocker is fixed); upload limit 150/15 min and the other per-IP limits are shared by everyone
+    behind Netlify until then; the inquiry form lets anonymous visitors put free text (links) in a
+    Walls-branded email to an advertiser (limited to 5/h per IP and 3 per email per listing).
 - **Agent search button** (reviewer's agent picker) is disabled until the box has a letter or
   digit (`hasSearchableText`); an empty search used to list all agents.
 - **Language tabs in the read-only listing form** (reviewer view) work now: only the fields are
@@ -735,20 +776,31 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   page appears only once they have set their password.
 - Parallel invitations with the same name can collide on the profile slug (unique
   violation → 500); rare, not fixed.
-- Production tile source for OpenStreetMap maps (public OSM tiles forbid heavy use); set
-  `NEXT_PUBLIC_MAP_TILE_URL`. "Find address on map" uses Nominatim on button press only.
+- **Map tiles (decision 2026-10-14): keep the free `tile.openstreetmap.org` tiles for now and
+  revisit when the site gets real traffic (pre-launch/post-launch checklist item).** Why it
+  matters: the OSM tile policy gives best-effort availability with no SLA, says commercial services
+  may have access withdrawn at any point, may block without notice, and forbids heavy use; the
+  data licence (ODbL) is fine and the required attribution is shown (`lib/map/map-provider.ts`).
+  Switching is one environment variable (`NEXT_PUBLIC_MAP_TILE_URL` plus
+  `NEXT_PUBLIC_MAP_ATTRIBUTION`, rebuild of the web app) for raster providers (MapTiler/Stadia,
+  ~$20–25/month commercial); vector providers (OpenFreeMap: free, commercial use allowed, no key, no
+  SLA) need MapLibre instead of Leaflet in `ListingMap`/`LocationMap`, which would also allow
+  choosing the label language (the current raster tiles label Serbian places in Cyrillic and cannot
+  be changed; the user keeps Cyrillic for now; how each provider renders Serbian Latin names is
+  untested). The site must not send a `Referrer-Policy` that strips the Referer (the policy
+  requires it; today none is set). "Find address on map" uses Nominatim (same OSM policy) on
+  button press only.
 
 ## Phase 10 starting notes
 
-- Scope still to do: finish the SPEC §38 E2E list (gaps: approved agent creates/submits a
-  listing and gets reviewed; admin assigns a listing; agent cannot open another agent's listing
-  in the browser), responsive pass on all pages, security review (headers/CSP on the web app,
-  rate limits, upload limits, dependency audit), the per-visitor client IP fix (launch
+- Scope still to do: responsive pass on all pages (dashboard, auth and agent pages at phone and
+  tablet width), the per-visitor client IP fix (launch
   blocker, see above; `TRUST_PROXY_HOPS=3` until then),
-  production map tile host (`NEXT_PUBLIC_MAP_TILE_URL`; the public OSM tile server forbids
-  heavy use), and a final check of the deployed site (emails from the walls.rs domain,
+  and a final check of the deployed site (emails from the walls.rs domain,
   uploads to Cloudinary incl. a 10+ MB image through the Netlify proxy, sign-in over HTTPS,
   a listing through review and publication).
+- Revisit when real traffic arrives (not a launch blocker): the production map tile host, see
+  "Map tiles" under open questions.
 - Answered by the user: hosting plans and domains (Render free/Frankfurt, Netlify, walls.rs
   only through Netlify, preview.walls.rs first), Resend sender domain (verified), Supabase
   project (created, EU), rate limits (decided 2026-10-13: keep the in-memory counters; they
