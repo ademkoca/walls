@@ -3,6 +3,7 @@ import { buttonVariants } from '@walls/ui/components/button';
 import { ArrowRightIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { HeroBackdrop } from '@/components/home/hero-backdrop';
 import { HomeSearch } from '@/components/home/home-search';
 import { ListingGrid } from '@/components/public/listing-card';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
@@ -47,7 +48,10 @@ async function ListingSection({
   );
 }
 
-/** Home page (SPEC §16): search, featured and latest listings, and calls to action. */
+/**
+ * Home page (SPEC §16): a hero with rotating photos and the two main calls to action, the
+ * search, featured and latest listings, and the call to advertise.
+ */
 export default async function HomePage({ params }: PageProps<'/[locale]'>) {
   await resolveLocale(params);
   const [t, tNav, home, pricing] = await Promise.all([
@@ -59,15 +63,50 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
 
   return (
     <>
-      <section className="border-b bg-muted/40">
-        <div className="mx-auto flex max-w-7xl flex-col items-start gap-6 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+      <section
+        aria-labelledby="home-title"
+        className="relative isolate overflow-hidden bg-sidebar text-sidebar-foreground"
+      >
+        <HeroBackdrop />
+        {/* Darkens the photos so the text stays readable: evenly on phones, where the text spans
+            the width, and from the left on wider screens. */}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-sidebar/60 md:bg-transparent md:bg-linear-to-r md:from-sidebar/85 md:via-sidebar/60 md:to-sidebar/10"
+        />
+        <div className="relative mx-auto flex min-h-[30rem] max-w-7xl flex-col items-start justify-center gap-6 px-4 py-20 sm:min-h-[34rem] sm:px-6 lg:min-h-[40rem] lg:px-8">
+          <h1
+            id="home-title"
+            className="max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl"
+          >
             {t('title')}
           </h1>
-          <p className="max-w-2xl text-lg text-muted-foreground">{t('subtitle')}</p>
-          <HomeSearch />
+          <p className="max-w-2xl text-lg text-sidebar-foreground/85">{t('subtitle')}</p>
+          <div className="flex w-full flex-col gap-3 pt-2 sm:w-auto sm:flex-row">
+            <Link href="/properties" className={buttonVariants({ size: 'xl' })}>
+              {t('browse')}
+              <ArrowRightIcon data-icon="inline-end" aria-hidden />
+            </Link>
+            {/* The hero's light text would otherwise carry over onto the light button. */}
+            <Link
+              href="/register"
+              className={buttonVariants({
+                size: 'xl',
+                variant: 'outline',
+                className: 'text-foreground',
+              })}
+            >
+              {t('advertise')}
+            </Link>
+          </div>
         </div>
       </section>
+
+      <div className="border-b bg-muted/40">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          <HomeSearch />
+        </div>
+      </div>
 
       <div className="mx-auto max-w-7xl space-y-16 px-4 py-16 sm:px-6 lg:px-8">
         {home.featured.length > 0 && (

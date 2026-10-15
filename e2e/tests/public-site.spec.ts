@@ -27,8 +27,19 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await signInAsSuperAdmin(admin);
   const slug = await approveListingViaApi(admin, id);
 
-  // The home page search opens the results with the choices in the URL.
+  // The home page hero leads to the listings and to registration.
   await visitor.goto('/en');
+  const hero = visitor.getByRole('region', { name: 'Find your next home' });
+  await expect(hero.getByRole('link', { name: 'Browse properties' })).toHaveAttribute(
+    'href',
+    '/en/properties',
+  );
+  await expect(hero.getByRole('link', { name: 'List a property' })).toHaveAttribute(
+    'href',
+    '/en/register',
+  );
+
+  // The home page search opens the results with the choices in the URL.
   const homeSearch = visitor.getByRole('search', { name: 'Property search' });
   await homeSearch.getByRole('button', { name: 'Buy' }).click();
   await homeSearch.getByPlaceholder('City, municipality or neighbourhood').fill('Stari grad');
