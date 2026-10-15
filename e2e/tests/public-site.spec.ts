@@ -39,6 +39,25 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
     '/en/register',
   );
 
+  // Property-type tiles and the popular searches are shortcuts into the search.
+  const byType = visitor.getByRole('region', { name: 'Browse by property type' });
+  await expect(byType.getByRole('link', { name: 'Apartment', exact: true })).toHaveAttribute(
+    'href',
+    '/en/properties?propertyType=APARTMENT',
+  );
+  const popular = visitor.getByRole('region', { name: 'Popular searches' });
+  await expect(popular.getByRole('link', { name: 'Houses for rent', exact: true })).toHaveAttribute(
+    'href',
+    '/en/properties?propertyType=HOUSE&transactionType=RENT',
+  );
+  // City links search by the city as listings store it, in Serbian, on English pages too.
+  await expect(
+    popular.getByRole('link', { name: 'Apartments for sale in Belgrade' }),
+  ).toHaveAttribute(
+    'href',
+    '/en/properties?propertyType=APARTMENT&transactionType=SALE&location=Beograd',
+  );
+
   // The home page search opens the results with the choices in the URL.
   const homeSearch = visitor.getByRole('search', { name: 'Property search' });
   await homeSearch.getByRole('button', { name: 'Buy' }).click();

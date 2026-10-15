@@ -54,7 +54,44 @@
     "advertiseTitle": "Prodajete ili izdajete nekretninu?",
     "advertiseText": "Napravite besplatan nalog privatnog prodavca i objavite oglas. Naš tim pregleda svaki oglas pre objave.",
     "agentsText": "Agenti za nekretnine se prijavljuju posebno i dobijaju profil proverenog agenta.",
-    "transactionTypeLabel": "Kupovina ili iznajmljivanje"
+    "transactionTypeLabel": "Kupovina ili iznajmljivanje",
+    "browseByTypeTitle": "Pretražite po vrsti nekretnine",
+    "seoLinksTitle": "Popularne pretrage",
+    "seoLinks": {
+      "apartmentSale": "Stanovi na prodaju",
+      "apartmentRent": "Izdavanje stanova",
+      "houseSale": "Kuće na prodaju",
+      "houseRent": "Izdavanje kuća",
+      "villaSale": "Vile na prodaju",
+      "villaRent": "Izdavanje vila",
+      "officeSale": "Poslovni prostori na prodaju",
+      "officeRent": "Izdavanje poslovnih prostora",
+      "retailSale": "Lokali na prodaju",
+      "retailRent": "Izdavanje lokala",
+      "warehouseSale": "Magacini na prodaju",
+      "warehouseRent": "Izdavanje magacina",
+      "landSale": "Placevi na prodaju",
+      "landRent": "Izdavanje placeva",
+      "garageSale": "Garaže na prodaju",
+      "garageRent": "Izdavanje garaža",
+      "apartmentSaleIn": "Prodaja stanova {city}",
+      "apartmentRentIn": "Izdavanje stanova {city}",
+      "houseSaleIn": "Kuće na prodaju {city}",
+      "houseRentIn": "Izdavanje kuća {city}"
+    },
+    "seoColumns": {
+      "sale": "Prodaja",
+      "rent": "Izdavanje",
+      "apartments": "Stanovi",
+      "houses": "Kuće"
+    },
+    "cities": {
+      "beograd": "Beograd",
+      "noviSad": "Novi Sad",
+      "nis": "Niš",
+      "kragujevac": "Kragujevac",
+      "noviPazar": "Novi Pazar"
+    }
   },
   "placeholder": {
     "title": "Stranica je u izradi",

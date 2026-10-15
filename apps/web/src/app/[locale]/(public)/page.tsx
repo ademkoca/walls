@@ -5,6 +5,8 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { HeroBackdrop } from '@/components/home/hero-backdrop';
 import { HomeSearch } from '@/components/home/home-search';
+import { PropertyTypeLinks } from '@/components/home/property-type-links';
+import { SeoLinks } from '@/components/home/seo-links';
 import { ListingGrid } from '@/components/public/listing-card';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
@@ -109,6 +111,7 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
       </div>
 
       <div className="mx-auto max-w-7xl space-y-16 px-4 py-16 sm:px-6 lg:px-8">
+        <PropertyTypeLinks />
         {home.featured.length > 0 && (
           <ListingSection
             id="featured-listings"
@@ -145,6 +148,8 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
             </Link>
           </div>
         </section>
+
+        <SeoLinks />
       </div>
     </>
   );

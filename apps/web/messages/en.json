@@ -54,7 +54,44 @@
     "advertiseTitle": "Selling or renting out a property?",
     "advertiseText": "Create a free private-seller account and publish your listing. Our team reviews every listing before it goes live.",
     "agentsText": "Real-estate agents apply separately and get a verified agent profile.",
-    "transactionTypeLabel": "Buy or rent"
+    "transactionTypeLabel": "Buy or rent",
+    "browseByTypeTitle": "Browse by property type",
+    "seoLinksTitle": "Popular searches",
+    "seoLinks": {
+      "apartmentSale": "Apartments for sale",
+      "apartmentRent": "Apartments for rent",
+      "houseSale": "Houses for sale",
+      "houseRent": "Houses for rent",
+      "villaSale": "Villas for sale",
+      "villaRent": "Villas for rent",
+      "officeSale": "Offices for sale",
+      "officeRent": "Offices for rent",
+      "retailSale": "Retail spaces for sale",
+      "retailRent": "Retail spaces for rent",
+      "warehouseSale": "Warehouses for sale",
+      "warehouseRent": "Warehouses for rent",
+      "landSale": "Land for sale",
+      "landRent": "Land for rent",
+      "garageSale": "Garages for sale",
+      "garageRent": "Garages for rent",
+      "apartmentSaleIn": "Apartments for sale in {city}",
+      "apartmentRentIn": "Apartments for rent in {city}",
+      "houseSaleIn": "Houses for sale in {city}",
+      "houseRentIn": "Houses for rent in {city}"
+    },
+    "seoColumns": {
+      "sale": "For sale",
+      "rent": "For rent",
+      "apartments": "Apartments",
+      "houses": "Houses"
+    },
+    "cities": {
+      "beograd": "Belgrade",
+      "noviSad": "Novi Sad",
+      "nis": "Niš",
+      "kragujevac": "Kragujevac",
+      "noviPazar": "Novi Pazar"
+    }
   },
   "placeholder": {
     "title": "Coming soon",
