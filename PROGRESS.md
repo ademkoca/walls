@@ -591,11 +591,14 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Deactivation:** Admins deactivate sellers and agents; Super Admins also deactivate Admins
   (my addition, user hasn't objected). Reason required, audit-logged, user emailed. Nobody
   deactivates themselves or Super Admins.
-- **Branding:** logo colors are authoritative: orange `#FF6A00`, charcoal `#171B1E`
-  (spec's `#FF7A00`/`#111827` replaced). **Text on orange is cream by the
-  user's explicit choice (2026-10-13; 2.68:1, below WCAG AA, charcoal would be 6.03:1;
-  `--primary-foreground` in `globals.css` is the one token to flip back);** white on orange
-  (2.87:1) is not used; no orange text on light surfaces. Typeface: **Montserrat** for
+- **Branding:** logo colors are authoritative: orange `#C2410C`, charcoal `#171B1E`.
+  **2026-10-15: the user changed the orange from `#FF6A00` to `#C2410C`** (after comparing it
+  with a green `#236500` and a two-tone variant in screenshots), so text on orange passes AA:
+  cream on orange 4.83:1 (the earlier knowingly-below-AA cream-on-`#FF6A00` exception is gone).
+  `#FF6A00` stays as `orangeOnDark` for the inverse logos and dark-surface accents
+  (`--sidebar-primary`, `--sidebar-ring`; 6.03:1 on charcoal); buttons keep `#C2410C`
+  everywhere because cream on `#FF6A00` is 2.68:1. Email buttons now use cream text (charcoal
+  on `#C2410C` is 3.35:1). Typeface: **Montserrat** for
   all UI text. Logo variants (stacked/horizontal × default/inverse) are generated outlined
   SVGs; `REAL ESTATE` is centered under `WALLS` in the horizontal lockup. The original
   `walls-logo.svg` has live text and must not be used directly. OG image is generated.
