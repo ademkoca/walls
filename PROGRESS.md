@@ -622,8 +622,17 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   the locative. The `location` in city links is always the Serbian name as listings store it, so
   English pages say "Belgrade" but search for `Beograd`. Considered and deferred: the "Stanje"
   condition filter (uknjiženo, legalizovano, novogradnja…: a new listing field with legal weight,
-  needs its own spec decision), featured agencies (no real agencies yet) and a blog. Still open
-  from the same review: a furnished-status filter, a stats bar and a mid-page agent CTA.
+  needs its own spec decision), featured agencies (no real agencies yet) and a blog.
+- **Furnished filter, home stats, agent banner (2026-10-15):** search has a "Nameštenost" filter
+  (`furnishedStatus`, exact match, one value; listings without a status never match), shown when
+  no type or a type with the field is chosen (apartment, house, villa, office; from
+  `VISIBLE_ATTRIBUTES`); recorded in SPEC §17. `GET /public/home` returns `stats`: public
+  listings, distinct cities of public listings (case- and accent-insensitive, trimmed) and active
+  agents; the home page shows them under the search, leaving out any zero count and the whole
+  row when all are zero. Small numbers are shown as they are; whether to hide them until launch
+  traffic is the user's call. A dark "Agent ste za nekretnine?" banner after the featured
+  listings links to `/for-agents`; the bottom block now addresses sellers only. The translation
+  test no longer mistakes single-word plural branches (`one {grad}`) for arguments.
 
 ## Technical decisions
 
