@@ -34,17 +34,22 @@ export const brand = {
   /**
    * Brand palette. The logo artwork's colors are authoritative (SPEC §33).
    *
-   * WCAG contrast (normal text needs 4.5:1, large text 3:1):
-   *  - cream on orange    2.68  → used on orange buttons and badges by the owner's choice;
-   *                               fails AA even for large text (see --primary-foreground)
-   *  - charcoal on orange 6.03  → the accessible choice for text on orange
-   *  - white on orange    2.87  → fails even for large text; never use
-   *  - orange on white    2.87 / on cream 2.68 → never use orange for text on light surfaces
-   *  - orange on charcoal 6.03  → orange accents/text are fine on dark surfaces
+   * WCAG contrast (normal text needs 4.5:1, large text 3:1; graphics 3:1):
+   *  - cream on orange          4.83 → text on orange buttons and badges (passes AA)
+   *  - white on orange          5.18 → also passes
+   *  - charcoal on orange       3.35 → large text only; not used
+   *  - orange on white / cream  5.18 / 4.83 → orange text on light surfaces passes AA
+   *  - orangeOnDark on charcoal 6.03 → logo mark, accents and focus rings on dark surfaces
+   *  - orange on charcoal       3.35 → orange buttons on dark surfaces stay visible (graphics)
    *  - slate on white     4.83 / on cream 4.51 → secondary text passes AA (cream is borderline)
    */
   colors: {
-    orange: '#FF6A00',
+    orange: '#C2410C',
+    /**
+     * Lighter orange for dark surfaces: the inverse logos, accents and focus rings. Never
+     * behind text: cream on it is 2.68:1.
+     */
+    orangeOnDark: '#FF6A00',
     charcoal: '#171B1E',
     slate: '#6B7280',
     cream: '#F8F7F4',

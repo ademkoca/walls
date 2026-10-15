@@ -13,6 +13,9 @@ These files are the source of truth. Do not edit them by hand; replace them with
 | `walls-logo.svg` | Approved stacked artwork: mark, `WALLS`, `REAL ESTATE` |
 | `favicon.svg`    | Mark only                                             |
 
+The orange in both files was changed from `#FF6A00` to `#C2410C` by the owner's decision
+(2026-10-15); keep it equal to `brand.colors.orange`, which the generator relies on.
+
 `walls-logo.svg` sets the wordmark as live text in Montserrat, which renders in a fallback
 font wherever Montserrat is not installed. Never use it directly; use the generated variants.
 
@@ -29,7 +32,8 @@ baselines, and writes these files (commit the output):
 | `walls-logo-horizontal.svg`         | Mark beside the wordmark, e.g. the header |
 | `walls-logo-horizontal-inverse.svg` | Horizontal lockup on dark surfaces        |
 
-Inverse variants replace charcoal with cream; orange is unchanged. All variants are cropped to
+Inverse variants replace charcoal with cream and the orange with the lighter
+`brand.colors.orangeOnDark` (`#FF6A00`), which stays bright on charcoal. All variants are cropped to
 the artwork's edges, so layouts add their own clear space. In the horizontal lockup the text block is
 vertically centred on the mark and separated from it by a quarter of the mark’s height;
 `REAL ESTATE` is centred under `WALLS`.
@@ -52,17 +56,19 @@ Montserrat is the typeface for all UI text, headings and body (`brand.typography
 
 ## Color usage
 
-The logo's colors are the official palette (SPEC §33). Contrast checks (WCAG AA: 4.5:1 normal
-text, 3:1 large text):
+The logo's colors are the official palette (SPEC §33). "Orange" is `#C2410C`; "orange on
+dark" is `#FF6A00`. Contrast checks (WCAG AA: 4.5:1 normal text, 3:1 large text and graphics):
 
-| Pair                    | Ratio | Rule                                              |
-| ----------------------- | ----- | ------------------------------------------------- |
-| cream on orange         | 2.68  | Used on orange buttons and badges (owner's choice); fails AA |
-| charcoal on orange      | 6.03  | The accessible alternative: set `--primary-foreground` to charcoal |
-| white on orange         | 2.87  | Fails; never use                                  |
-| orange on white / cream | 2.87 / 2.68 | Fails; no orange text on light surfaces     |
-| orange on charcoal      | 6.03  | Orange text and accents are fine on dark surfaces |
-| slate on white / cream  | 4.83 / 4.51 | Passes for secondary text (cream is borderline) |
-| charcoal on cream       | 16.17 | Primary text                                      |
+| Pair                            | Ratio       | Rule                                                 |
+| ------------------------------- | ----------- | ---------------------------------------------------- |
+| cream on orange                 | 4.83        | Text on orange buttons and badges; passes AA         |
+| white on orange                 | 5.18        | Also passes                                          |
+| charcoal on orange              | 3.35        | Large text only; not used                            |
+| orange on white / cream         | 5.18 / 4.83 | Orange text on light surfaces passes AA              |
+| orange on charcoal              | 3.35        | Orange buttons on dark surfaces (graphics, 3:1)      |
+| orange on dark, on charcoal     | 6.03        | Inverse logo, accents and focus rings on dark surfaces |
+| cream on orange on dark         | 2.68        | Fails; never put text on the lighter orange          |
+| slate on white / cream          | 4.83 / 4.51 | Passes for secondary text (cream is borderline)      |
+| charcoal on cream               | 16.17       | Primary text                                         |
 
 `favicon.svg` uses a charcoal shape, which has low contrast on dark browser tabs.

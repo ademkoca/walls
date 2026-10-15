@@ -16,14 +16,15 @@ The authoritative product and technical requirements are defined in:
 - **Brand:** Walls
 - **Domain:** [walls.rs](https://walls.rs)
 - **Logo:** approved geometric architectural mark with the WALLS wordmark; SVG sources in [`packages/ui/brand/`](./packages/ui/brand/README.md).
-- **Primary orange:** `#FF6A00`
+- **Primary orange:** `#C2410C`
+- **Orange on dark surfaces:** `#FF6A00` (logo and accents on charcoal)
 - **Charcoal:** `#171B1E`
 - **Slate gray:** `#6B7280`
 - **Cream:** `#F8F7F4`
 - **White:** `#FFFFFF`
 - **Typeface:** Montserrat (headings and body)
 
-Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Text on orange is cream by the owner's choice (2.68:1, below WCAG AA); charcoal (6.03:1) is the accessible alternative and one token away (`--primary-foreground` in `packages/ui/src/styles/globals.css`). White on orange (2.87:1) is not used.
+Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Text on orange is cream (4.83:1, passes WCAG AA). On charcoal the logo and accents use the lighter `#FF6A00` (6.03:1); buttons keep `#C2410C`, since cream text on the lighter orange would fail. Contrast table: [`packages/ui/brand/README.md`](./packages/ui/brand/README.md).
 
 ## Architecture
 

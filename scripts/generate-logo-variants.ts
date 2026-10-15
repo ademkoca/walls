@@ -92,10 +92,20 @@ async function readMark(): Promise<string> {
 
 type Tone = 'default' | 'inverse';
 
-/** Inverse variants swap charcoal for cream so the logo works on dark surfaces. */
+/**
+ * Inverse variants, for dark surfaces, swap charcoal for cream and the orange for the
+ * lighter `orangeOnDark`, which keeps the mark bright on charcoal.
+ */
 function colors(tone: Tone) {
-  const ink = tone === 'inverse' ? brand.colors.cream : brand.colors.charcoal;
-  return { ink, recolorMark: (mark: string) => mark.replaceAll(brand.colors.charcoal, ink) };
+  if (tone === 'default') {
+    return { ink: brand.colors.charcoal, recolorMark: (mark: string) => mark };
+  }
+  const ink = brand.colors.cream;
+  const recolorMark = (mark: string) =>
+    mark
+      .replaceAll(brand.colors.charcoal, ink)
+      .replaceAll(brand.colors.orange, brand.colors.orangeOnDark);
+  return { ink, recolorMark };
 }
 
 function svgDocument(width: number, height: number, title: string, body: string): string {

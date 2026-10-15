@@ -505,7 +505,7 @@ export function renderEmail<T extends EmailTemplate>(
       (paragraph) => `<p style="white-space:pre-line">${escapeHtml(paragraph)}</p>`,
     ),
     content.action
-      ? `<p><a href="${escapeHtml(content.action.url)}" style="background:${brand.colors.orange};color:${brand.colors.charcoal};padding:12px 20px;text-decoration:none;font-weight:bold;display:inline-block">${escapeHtml(content.action.label)}</a></p>`
+      ? `<p><a href="${escapeHtml(content.action.url)}" style="background:${brand.colors.orange};color:${brand.colors.cream};padding:12px 20px;text-decoration:none;font-weight:bold;display:inline-block">${escapeHtml(content.action.label)}</a></p>`
       : '',
     `<p style="color:${brand.colors.slate}">${escapeHtml(brand.name)} · ${escapeHtml(brand.domain)}</p>`,
     '</div>',

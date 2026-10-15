@@ -2,10 +2,9 @@
  * Walls design tokens and base styles, shared by the public site and the dashboard.
  *
  * Brand colors come from brand-tokens.css (generated from src/brand/brand.ts). Every UI
- * color below is derived from those five values, so rebranding only touches brand.ts.
- * Contrast rules (see packages/ui/brand/README.md): text on orange is cream (the owner's
- * choice; 2.68:1, below WCAG AA, charcoal would be 6.03:1); orange is never used for text on
- * light surfaces.
+ * color below is derived from those values, so rebranding only touches brand.ts.
+ * Contrast rules (see packages/ui/brand/README.md): text on orange is cream (4.83:1, AA);
+ * dark surfaces use the lighter --brand-orange-on-dark for accents, never behind text.
  */
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -77,8 +76,8 @@
   --popover: var(--brand-white);
   --popover-foreground: var(--brand-charcoal);
 
-  /* Orange for primary actions; cream text on orange (2.68:1, see above). Switching this
-     token to --brand-charcoal restores the accessible 6.03:1 everywhere. */
+  /* Orange for primary actions, also on dark surfaces, since buttons carry cream text
+     (4.83:1); the lighter orange would drop that to 2.68:1. */
   --primary: var(--brand-orange);
   --primary-foreground: var(--brand-cream);
   --secondary: color-mix(in oklab, var(--brand-slate) 12%, var(--brand-white));
@@ -104,15 +103,16 @@
   /* Flat, modern shapes (SPEC §33). */
   --radius: 0.5rem;
 
-  /* Dashboard sidebar: charcoal surface; orange text is fine on charcoal (6.03:1). */
+  /* Charcoal surfaces (dashboard sidebar, hero, footer): accents use the lighter orange
+     (6.03:1 on charcoal); text on it must be charcoal (cream would be 2.68:1). */
   --sidebar: var(--brand-charcoal);
   --sidebar-foreground: var(--brand-cream);
-  --sidebar-primary: var(--brand-orange);
-  --sidebar-primary-foreground: var(--brand-cream);
+  --sidebar-primary: var(--brand-orange-on-dark);
+  --sidebar-primary-foreground: var(--brand-charcoal);
   --sidebar-accent: color-mix(in oklab, var(--brand-cream) 10%, var(--brand-charcoal));
   --sidebar-accent-foreground: var(--brand-cream);
   --sidebar-border: color-mix(in oklab, var(--brand-cream) 14%, var(--brand-charcoal));
-  --sidebar-ring: var(--brand-orange);
+  --sidebar-ring: var(--brand-orange-on-dark);
 }
 
 @layer base {
