@@ -3,7 +3,10 @@ import { brand } from '@walls/ui/brand';
 import { getFormatter, getTranslations } from 'next-intl/server';
 
 /** Platform totals under the home page search; a zero count is left out rather than shown. */
-export async function HomeStats({ stats }: { stats: PublicHome['stats'] }) {
+export async function HomeStats({ stats }: { stats: PublicHome['stats'] | undefined }) {
+  // Netlify deploys the web app before Render deploys the API, so for a while after a release
+  // the API may not send stats yet.
+  if (!stats) return null;
   const [t, format] = await Promise.all([getTranslations('home.stats'), getFormatter()]);
   const items = [
     { key: 'listings', count: stats.listings },
