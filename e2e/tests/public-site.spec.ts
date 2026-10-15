@@ -86,6 +86,8 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await expect(visitor.getByText('No properties match your search')).toBeVisible();
   await filters.getByLabel('Minimum price').fill('');
   await filters.getByRole('button', { name: 'Show results' }).click();
+  // Wait for the new results, or the re-render can close the dropdown opened below.
+  await expect(visitor.getByRole('heading', { name: '1 property' })).toBeVisible();
 
   // Furnishing matches exactly, and this listing doesn't state it.
   const furnishing = filters.getByRole('combobox', { name: 'Furnishing' });
