@@ -813,6 +813,26 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   a listing through review and publication).
 - Revisit when real traffic arrives (not a launch blocker): the production map tile host, see
   "Map tiles" under open questions.
+- **Demo data on the preview site (decision 2026-10-15):** the user wanted many listings to test
+  search, filters and sorting on preview.walls.rs, which runs on the production database and
+  production Cloudinary. `pnpm demo:seed` (`apps/api/src/scripts/seed-demo.ts`, data in
+  `demo-data.ts`, descriptions generated in `demo-text.ts`) adds 8 demo accounts (4 sellers, 4
+  approved agents with approved applications but no proof files) and 50 published listings
+  (every type, sale/rent, EUR/RSD, day/week/month rents, price on request, negotiable, 6
+  featured, 3 seller listings assigned to agents, a month of daily views), checked with the
+  shared schemas and `checkSubmissionRequirements`, written straight to the database so no
+  emails are queued (approving through the services would queue ~100 emails, Resend's whole
+  free daily quota). Demo emails are `delivered+walls-demo-<name>@resend.dev` (Resend's
+  test mailbox: accepted, never bounces, counts against the quota); photos are Unsplash
+  Licence photos fetched from `images.unsplash.com` (the unsplash.com download links now sit
+  behind an anti-bot check that rejects scripts), stored under `demo/listings/…` keys.
+  `--remove` deletes demo users and everything referring to them. The user runs it against
+  preview with production credentials entered at prompts (README "Demo data"); I tested seed,
+  duplicate-run refusal and remove on the local database (local photo storage, not
+  Cloudinary).
+- **Before launch (user's choice): start the live site on a fresh database** (new or reset
+  Supabase database, migrations, re-create the Super Admin with `admin:create`) rather than
+  relying on `--remove`, and delete the `demo` folder in the production Cloudinary account.
 - Answered by the user: hosting plans and domains (Render free/Frankfurt, Netlify, walls.rs
   only through Netlify, preview.walls.rs first), Resend sender domain (verified), Supabase
   project (created, EU), rate limits (decided 2026-10-13: keep the in-memory counters; they
