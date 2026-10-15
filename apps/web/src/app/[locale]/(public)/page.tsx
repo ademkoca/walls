@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { HeroBackdrop } from '@/components/home/hero-backdrop';
 import { HomeSearch } from '@/components/home/home-search';
+import { HomeStats } from '@/components/home/home-stats';
 import { PropertyTypeLinks } from '@/components/home/property-type-links';
 import { SeoLinks } from '@/components/home/seo-links';
 import { ListingGrid } from '@/components/public/listing-card';
@@ -52,13 +53,13 @@ async function ListingSection({
 
 /**
  * Home page (SPEC §16): a hero with rotating photos and the two main calls to action, the
- * search, featured and latest listings, and the call to advertise.
+ * search with platform totals, property-type shortcuts, featured listings, the call to agents,
+ * latest listings, the call to sellers, and popular searches.
  */
 export default async function HomePage({ params }: PageProps<'/[locale]'>) {
   await resolveLocale(params);
-  const [t, tNav, home, pricing] = await Promise.all([
+  const [t, home, pricing] = await Promise.all([
     getTranslations('home'),
-    getTranslations('nav'),
     getPublicHome(),
     getPricing(),
   ]);
@@ -105,8 +106,9 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
       </section>
 
       <div className="border-b bg-muted/40">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
           <HomeSearch />
+          <HomeStats stats={home.stats} />
         </div>
       </div>
 
@@ -120,6 +122,26 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
             pricing={pricing}
           />
         )}
+
+        <section
+          aria-labelledby="agent-banner"
+          className="flex flex-col gap-6 rounded-xl bg-sidebar p-6 text-sidebar-foreground sm:p-10 md:flex-row md:items-center md:justify-between"
+        >
+          <div className="max-w-2xl space-y-2">
+            <h2 id="agent-banner" className="text-2xl font-semibold tracking-tight">
+              {t('agentBanner.title')}
+            </h2>
+            <p className="text-sidebar-foreground/85">{t('agentBanner.text')}</p>
+          </div>
+          <Link
+            href="/for-agents"
+            className={buttonVariants({ size: 'xl', className: 'shrink-0' })}
+          >
+            {t('agentBanner.action')}
+            <ArrowRightIcon data-icon="inline-end" aria-hidden />
+          </Link>
+        </section>
+
         {home.latest.length > 0 ? (
           <ListingSection
             id="latest-listings"
@@ -137,16 +159,10 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
           <div className="max-w-2xl space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight">{t('advertiseTitle')}</h2>
             <p className="text-muted-foreground">{t('advertiseText')}</p>
-            <p className="text-muted-foreground">{t('agentsText')}</p>
           </div>
-          <div className="flex shrink-0 flex-wrap gap-3">
-            <Link href="/register" className={buttonVariants({ size: 'xl' })}>
-              {t('advertise')}
-            </Link>
-            <Link href="/for-agents" className={buttonVariants({ size: 'xl', variant: 'outline' })}>
-              {tNav('forAgents')}
-            </Link>
-          </div>
+          <Link href="/register" className={buttonVariants({ size: 'xl', className: 'shrink-0' })}>
+            {t('advertise')}
+          </Link>
         </section>
 
         <SeoLinks />

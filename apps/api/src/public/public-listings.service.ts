@@ -16,6 +16,7 @@ import { notFound } from '../http/errors';
 import { priceView, storedPrice } from '../listings/listing-content';
 import { toCards } from './listing-cards';
 import {
+  countHomeStats,
   findFeaturedListings,
   findPublicListing,
   findSitemapEntries,
@@ -50,7 +51,7 @@ export class PublicListingsService {
   }
 
   async home(): Promise<PublicHome> {
-    const [featured, latest] = await Promise.all([
+    const [featured, latest, counts] = await Promise.all([
       findFeaturedListings(this.db, HOME_LISTINGS_LIMIT),
       searchPublicListings(
         this.db,
@@ -58,10 +59,12 @@ export class PublicListingsService {
         null,
         HOME_LISTINGS_LIMIT,
       ),
+      countHomeStats(this.db),
     ]);
     return {
       featured: await toCards(this.db, featured),
       latest: await toCards(this.db, latest.rows),
+      stats: { listings: latest.total, ...counts },
     };
   }
 

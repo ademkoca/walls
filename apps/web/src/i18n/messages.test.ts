@@ -28,9 +28,13 @@ function flatten(tree: Tree, prefix = ''): Record<string, string> {
   }, {});
 }
 
-/** ICU argument names used in a message, e.g. {email} or {min, plural, …}. */
+/**
+ * ICU argument names used in a message, e.g. {email} or {min, plural, …}. A plural branch
+ * such as `one {grad}` is text, not an argument.
+ */
 function argumentsOf(message: string): string[] {
-  return [...message.matchAll(/\{\s*([a-zA-Z]+)\s*[,}]/g)].map((match) => match[1] ?? '').sort();
+  const argument = /(?<!\b(?:zero|one|two|few|many|other|=\d+)\s*)\{\s*([a-zA-Z]+)\s*[,}]/g;
+  return [...message.matchAll(argument)].map((match) => match[1] ?? '').sort();
 }
 
 const catalogues = { sr: flatten(sr), en: flatten(en) };

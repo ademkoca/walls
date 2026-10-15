@@ -61,6 +61,7 @@ describe('listing search query (SPEC §17)', () => {
         sort: 'PRICE_ASC',
         page: '-4',
         utm_source: 'newsletter',
+        furnishedStatus: 'YES',
         location: '   ',
       }),
     ).toEqual({ q: 'kuća', sort: 'PRICE_ASC', page: 1 });
@@ -72,6 +73,7 @@ describe('listing search query (SPEC §17)', () => {
       maxPrice: '800',
       currency: 'EUR',
       amenities: 'PETS_ALLOWED',
+      furnishedStatus: 'FURNISHED',
       sort: 'NEWEST',
       page: '2',
     });
@@ -81,6 +83,7 @@ describe('listing search query (SPEC §17)', () => {
       maxPrice: '800',
       currency: 'EUR',
       amenities: 'PETS_ALLOWED',
+      furnishedStatus: 'FURNISHED',
       page: '2',
     });
     expect(parseListingSearch(query)).toEqual(search);

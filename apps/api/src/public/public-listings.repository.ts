@@ -120,6 +120,7 @@ function searchConditions(search: ListingSearch, rate: string | null): SQL {
     search.maxArea === undefined ? undefined : sql`${listingArea} <= ${search.maxArea}`,
     search.bedrooms === undefined ? undefined : gte(properties.bedrooms, search.bedrooms),
     search.bathrooms === undefined ? undefined : gte(properties.bathrooms, search.bathrooms),
+    search.furnishedStatus ? eq(properties.furnishedStatus, search.furnishedStatus) : undefined,
     ...(search.amenities ?? []).map(hasAmenity),
   ];
   return and(...conditions)!;
@@ -197,6 +198,28 @@ export async function findFeaturedListings(
     )
     .orderBy(desc(listings.publishedAt), asc(listings.id))
     .limit(limit);
+}
+
+/**
+ * Cities with public listings, and active agents, for the home page. Cities are typed in by
+ * advertisers, so they are told apart ignoring case and accents.
+ */
+export async function countHomeStats(db: DbExecutor): Promise<{ cities: number; agents: number }> {
+  const [[cityRow], [agentRow]] = await Promise.all([
+    db
+      .select({
+        cities: sql<number>`count(distinct lower(walls_unaccent(trim(${propertyLocations.city}))))::int`,
+      })
+      .from(listings)
+      .innerJoin(creator, eq(creator.id, listings.createdById))
+      .innerJoin(propertyLocations, eq(propertyLocations.propertyId, listings.propertyId))
+      .where(publiclyVisible),
+    db
+      .select({ agents: count() })
+      .from(users)
+      .where(and(eq(users.role, Role.REAL_ESTATE_AGENT), eq(users.status, UserStatus.ACTIVE))),
+  ]);
+  return { cities: cityRow?.cities ?? 0, agents: agentRow?.agents ?? 0 };
 }
 
 /** A published listing by its slug, with its creator; undefined when not public. */

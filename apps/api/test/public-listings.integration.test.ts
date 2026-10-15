@@ -94,7 +94,14 @@ describe('public property search (SPEC §17)', () => {
         ...inCity(city),
         transactionType: 'RENT',
         texts: [{ locale: 'sr', title: 'Garsonjera za izdavanje', description: 'Namešten stan.' }],
-        attributes: { floorArea: 40, bedrooms: 1, bathrooms: 1, floor: 1, totalFloors: 3 },
+        attributes: {
+          floorArea: 40,
+          bedrooms: 1,
+          bathrooms: 1,
+          floor: 1,
+          totalFloors: 3,
+          furnishedStatus: 'FURNISHED',
+        },
         amenityCodes: [],
         price: { mode: 'FIXED', amount: 600, currency: 'EUR', period: 'MONTH', negotiable: false },
       })
@@ -156,6 +163,13 @@ describe('public property search (SPEC §17)', () => {
     expect(await ordered({ amenities: 'GARDEN,ELEVATOR' })).toEqual([]);
   });
 
+  it('filters by furnished status exactly; listings without one never match', async () => {
+    expect(await ordered({ furnishedStatus: 'FURNISHED' })).toEqual([ids.rental]);
+    // The fixture apartment is semi-furnished; the house and penthouse have no status.
+    expect(await ordered({ furnishedStatus: 'SEMI_FURNISHED' })).toEqual([ids.apartment]);
+    expect(await ordered({ furnishedStatus: 'UNFURNISHED' })).toEqual([]);
+  });
+
   it('compares prices across currencies at the current rate; "on request" never matches', async () => {
     expect(await ordered({ minPrice: '175000', currency: 'EUR' })).toEqual([ids.apartment]);
     expect(await ordered({ maxPrice: '180000' })).toEqual([ids.rental, ids.house]);
@@ -195,7 +209,13 @@ describe('public property search (SPEC §17)', () => {
   it('pages results and rejects invalid queries', async () => {
     const second = await search({ location: city, page: '2' });
     expect(second).toMatchObject({ items: [], total: 4, page: 2, hasMore: false });
-    for (const query of ['bedrooms=0', 'sort=RANDOM', 'amenities=JACUZZI', 'role=ADMIN']) {
+    for (const query of [
+      'bedrooms=0',
+      'sort=RANDOM',
+      'amenities=JACUZZI',
+      'furnishedStatus=YES',
+      'role=ADMIN',
+    ]) {
       expect((await ctx.client().get(`${PUBLIC}/listings?${query}`)).status).toBe(400);
     }
   });
@@ -289,6 +309,27 @@ describe('home page listings (SPEC §16, §22)', () => {
     expect(featuredIds).not.toContain(expired.id);
     expect(home.latest[0]?.id).toBe(latest.id);
     expect(home.latest.length).toBeLessThanOrEqual(8);
+  });
+
+  it('counts public listings, their cities ignoring case and accents, and active agents', async () => {
+    const stats = async () => ((await ctx.client().get(`${PUBLIC}/home`)).body as PublicHome).stats;
+    const before = await stats();
+
+    const code = randomUUID().slice(0, 8);
+    const seller = await ctx.signedInUser();
+    await published(seller.client, inCity(`Šabac ${code}`));
+    await published(seller.client, inCity(` sabac ${code.toUpperCase()} `));
+    await submittedListing(seller.client, inCity(`Pending ${code}`));
+    const banned = await ctx.signedInUser();
+    await published(banned.client, inCity(`Banned ${code}`));
+    await admin.client.post(`/api/v1/users/${banned.user.id}/deactivate`, { reason: 'Prevara.' });
+    await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
+
+    expect(await stats()).toEqual({
+      listings: before.listings + 2,
+      cities: before.cities + 1,
+      agents: before.agents + 1,
+    });
   });
 });
 

@@ -667,6 +667,7 @@ Filters should include:
 -   maximum area
 -   bedrooms
 -   bathrooms
+-   furnished status
 -   relevant amenities/features
 
 Sorting should support at minimum:
@@ -687,6 +688,7 @@ How the filters behave:
 -   **Bedrooms and bathrooms** mean "at least" (1+ … 5+).
 -   **Price bounds** are entered in a currency (the visitor's, kept in the URL with the bounds) and compared with every listing's price converted at the current rate. "Price on request" listings never match a price bound.
 -   **Area** is the floor area, or the plot area for land.
+-   **Furnished status** is one of furnished, semi-furnished or unfurnished and matches exactly; listings that don't state it never match. It is offered when no property type is chosen or the chosen type has the field (apartment, house, villa, office).
 -   **Features** offered are those of the chosen property type (all without one); a listing must have every chosen feature.
 -   Sorting by price compares prices in EUR at the current rate; rental prices are compared as stated, whatever their period. Listings without a price or area sort last.
 

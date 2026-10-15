@@ -4,11 +4,13 @@ import {
   AMENITIES,
   type Amenity,
   type Currency,
+  type FurnishedStatus,
   type PropertyType,
   ROOM_FILTER_OPTIONS,
   type TransactionType,
   amenitiesFor,
   enumValues,
+  FurnishedStatus as FurnishedStatuses,
   PropertyType as PropertyTypes,
   TransactionType as TransactionTypes,
 } from '@walls/shared';
@@ -22,6 +24,7 @@ import { SearchIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useId, useState } from 'react';
 import { Link, useRouter } from '@/i18n/navigation';
+import { VISIBLE_ATTRIBUTES } from '../listings/editor/listing-form-model';
 import { FilterSelect } from './filter-select';
 
 const text = (value: number | string | undefined) => (value === undefined ? '' : String(value));
@@ -38,6 +41,7 @@ interface FilterValues {
   maxArea: string;
   bedrooms: string;
   bathrooms: string;
+  furnishedStatus: FurnishedStatus | '';
   amenities: Amenity[];
 }
 
@@ -53,6 +57,7 @@ function initialValues(search: ListingSearch): FilterValues {
     maxArea: text(search.maxArea),
     bedrooms: text(search.bedrooms),
     bathrooms: text(search.bathrooms),
+    furnishedStatus: search.furnishedStatus ?? '',
     amenities: search.amenities ?? [],
   };
 }
@@ -81,6 +86,9 @@ export function SearchFilters({
 
   // Only the features that apply to the chosen property type (all without one).
   const amenityOptions = values.propertyType ? amenitiesFor(values.propertyType) : AMENITIES;
+  // Furnished status only exists for the types whose listing form asks for it.
+  const showFurnished =
+    !values.propertyType || VISIBLE_ATTRIBUTES[values.propertyType].includes('furnishedStatus');
   const roomOptions = ROOM_FILTER_OPTIONS.map((count) => ({
     value: String(count),
     label: t('atLeast', { count }),
@@ -91,6 +99,7 @@ export function SearchFilters({
     const amenities = values.amenities.filter((code) => amenityOptions.includes(code));
     const next = parseListingSearch({
       ...values,
+      furnishedStatus: showFurnished ? values.furnishedStatus : '',
       amenities: amenities.join(','),
       currency: priceCurrency,
       sort: search.sort,
@@ -184,6 +193,21 @@ export function SearchFilters({
           />
         </Field>
       </div>
+      {showFurnished && (
+        <Field>
+          <FieldLabel htmlFor={field('furnishedStatus')}>{t('furnishedStatus')}</FieldLabel>
+          <FilterSelect
+            id={field('furnishedStatus')}
+            value={values.furnishedStatus}
+            onChange={(value) => set('furnishedStatus', value)}
+            anyLabel={t('any')}
+            options={enumValues(FurnishedStatuses).map((value) => ({
+              value,
+              label: tEnums(`furnishedStatus.${value}`),
+            }))}
+          />
+        </Field>
+      )}
       <FieldSet>
         <FieldLegend variant="label">{t('amenities')}</FieldLegend>
         <ul className="grid grid-cols-2 gap-x-3 gap-y-2 lg:grid-cols-1">

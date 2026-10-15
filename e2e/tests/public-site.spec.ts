@@ -58,6 +58,14 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
     '/en/properties?propertyType=APARTMENT&transactionType=SALE&location=Beograd',
   );
 
+  // Platform totals under the search, and the call to agents.
+  await expect(visitor.getByText(/^published listings?$/)).toBeVisible();
+  const agentBanner = visitor.getByRole('region', { name: 'Are you a real-estate agent?' });
+  await expect(agentBanner.getByRole('link', { name: 'Apply as an agent' })).toHaveAttribute(
+    'href',
+    '/en/for-agents',
+  );
+
   // The home page search opens the results with the choices in the URL.
   const homeSearch = visitor.getByRole('search', { name: 'Property search' });
   await homeSearch.getByRole('button', { name: 'Buy' }).click();
@@ -78,6 +86,18 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await expect(visitor.getByText('No properties match your search')).toBeVisible();
   await filters.getByLabel('Minimum price').fill('');
   await filters.getByRole('button', { name: 'Show results' }).click();
+
+  // Furnishing matches exactly, and this listing doesn't state it.
+  const furnishing = filters.getByRole('combobox', { name: 'Furnishing' });
+  await furnishing.click();
+  await visitor.getByRole('option', { name: 'Furnished', exact: true }).click();
+  await filters.getByRole('button', { name: 'Show results' }).click();
+  await expect(visitor).toHaveURL(/furnishedStatus=FURNISHED/);
+  await expect(visitor.getByText('No properties match your search')).toBeVisible();
+  await furnishing.click();
+  await visitor.getByRole('option', { name: 'Any' }).click();
+  await filters.getByRole('button', { name: 'Show results' }).click();
+  await expect(visitor.getByRole('heading', { name: '1 property' })).toBeVisible();
   await visitor.getByRole('link', { name: new RegExp(title) }).click();
 
   // The listing page: price, facts, and only the approximate location.

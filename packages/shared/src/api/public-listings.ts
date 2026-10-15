@@ -55,6 +55,8 @@ export interface PublicListingDetail {
 export interface PublicHome {
   featured: PublicListingCard[];
   latest: PublicListingCard[];
+  /** Public listings, the cities they are in, and active agents. */
+  stats: { listings: number; cities: number; agents: number };
 }
 
 /** What the sitemap lists (SPEC §32). */

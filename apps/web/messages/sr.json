@@ -53,9 +53,19 @@
     "noListings": "Još nema objavljenih oglasa.",
     "advertiseTitle": "Prodajete ili izdajete nekretninu?",
     "advertiseText": "Napravite besplatan nalog privatnog prodavca i objavite oglas. Naš tim pregleda svaki oglas pre objave.",
-    "agentsText": "Agenti za nekretnine se prijavljuju posebno i dobijaju profil proverenog agenta.",
+    "agentBanner": {
+      "title": "Agent ste za nekretnine?",
+      "text": "Objavljujte oglase pod svojim profilom agenta, sa svim vašim oglasima na jednom mestu, i primajte upite posetilaca direktno. Pošaljite prijavu sa dokazom da radite kao agent; naš tim je pregleda pre otvaranja naloga.",
+      "action": "Prijavite se kao agent"
+    },
     "transactionTypeLabel": "Kupovina ili iznajmljivanje",
     "browseByTypeTitle": "Pretražite po vrsti nekretnine",
+    "stats": {
+      "label": "{brand} u brojkama",
+      "listings": "{count, plural, one {objavljen oglas} few {objavljena oglasa} other {objavljenih oglasa}}",
+      "cities": "{count, plural, one {grad} few {grada} other {gradova}}",
+      "agents": "{count, plural, one {provereni agent} few {proverena agenta} other {proverenih agenata}}"
+    },
     "seoLinksTitle": "Popularne pretrage",
     "seoLinks": {
       "apartmentSale": "Stanovi na prodaju",
@@ -955,6 +965,7 @@
     "maxArea": "Najveća površina",
     "bedrooms": "Spavaće sobe",
     "bathrooms": "Kupatila",
+    "furnishedStatus": "Nameštenost",
     "atLeast": "{count}+",
     "amenities": "Karakteristike",
     "apply": "Prikaži rezultate",

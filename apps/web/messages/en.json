@@ -53,9 +53,19 @@
     "noListings": "No published listings yet.",
     "advertiseTitle": "Selling or renting out a property?",
     "advertiseText": "Create a free private-seller account and publish your listing. Our team reviews every listing before it goes live.",
-    "agentsText": "Real-estate agents apply separately and get a verified agent profile.",
+    "agentBanner": {
+      "title": "Are you a real-estate agent?",
+      "text": "Publish listings under your own agent profile, with all your listings in one place, and receive visitors' inquiries directly. Apply with proof that you work as an agent; our team reviews every application before your account is created.",
+      "action": "Apply as an agent"
+    },
     "transactionTypeLabel": "Buy or rent",
     "browseByTypeTitle": "Browse by property type",
+    "stats": {
+      "label": "{brand} in numbers",
+      "listings": "{count, plural, one {published listing} other {published listings}}",
+      "cities": "{count, plural, one {city} other {cities}}",
+      "agents": "{count, plural, one {approved agent} other {approved agents}}"
+    },
     "seoLinksTitle": "Popular searches",
     "seoLinks": {
       "apartmentSale": "Apartments for sale",
@@ -955,6 +965,7 @@
     "maxArea": "Maximum area",
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",
+    "furnishedStatus": "Furnishing",
     "atLeast": "{count}+",
     "amenities": "Features",
     "apply": "Show results",
