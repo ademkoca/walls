@@ -600,6 +600,18 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   SVGs; `REAL ESTATE` is centered under `WALLS` in the horizontal lockup. The original
   `walls-logo.svg` has live text and must not be used directly. OG image is generated.
 - Public repo/personal GitHub; hosting plan unchanged (Netlify, Render, Supabase, Cloudinary, Resend).
+- **Home page hero (2026-10-15):** a full-width photo backdrop that cross-fades through four
+  photos every 5 seconds (not user-controlled; interval and photos in
+  `apps/web/src/components/home/hero-photos.ts`), with the title, subtitle and two CTAs over it:
+  "Browse properties" (→ `/properties`, orange) and "List a property" (→ `/register`). The
+  search form moved to a band directly below the hero; featured and latest listings follow, and
+  the "Selling or renting out a property?" block stays at the bottom. Photos are free Unsplash
+  Licence photos; the user chose all four from a shortlist (Zemun rooftops, a modern villa, a living
+  room, the Sava riverside in winter; credits in the config), stored as 2400 px JPEGs in
+  `apps/web/src/assets/hero`. The rotation stops for visitors with reduced motion and while the
+  tab is hidden. With no pause control it may not meet WCAG 2.2.2 (Pause, Stop, Hide) if
+  auditors treat a decorative backdrop as moving content; the user chose a rotation without
+  controls.
 
 ## Technical decisions
 
