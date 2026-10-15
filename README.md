@@ -132,6 +132,32 @@ pnpm admin:create --email admin@walls.rs --name "Ana Anić" --locale sr
 The new admin receives an email with a single-use link (valid 7 days) to set
 their own password; no password is chosen or shown by the command.
 
+### Demo data (preview only)
+
+`pnpm demo:seed` adds 8 made-up demo accounts (4 private sellers, 4 approved agents) and 50
+published listings: every property type, sale and rent, EUR and RSD, with Unsplash photos.
+Each listing passes the same checks as a real submission, but is written straight to the
+database, so no emails are sent. The oldest active Super Admin is recorded as the reviewer.
+Demo accounts sign in with `DEMO_PASSWORD` and use Resend's test mailbox
+(`delivered+walls-demo-…@resend.dev`), so mail the site sends them never bounces.
+`pnpm demo:seed --remove` deletes the demo accounts, their listings, photos and anything that
+refers to them. Both commands show the target database and photo storage and ask for
+confirmation. Never run it against the live site's database.
+
+To seed the preview site, enter the production values at prompts (zsh) instead of pasting
+them into a command, so they stay out of the shell history:
+
+``` text
+read -rs "DATABASE_URL?Production DATABASE_URL: "; echo; export DATABASE_URL
+read -r "CLOUDINARY_CLOUD_NAME?Production Cloudinary cloud name: "; export CLOUDINARY_CLOUD_NAME
+read -r "CLOUDINARY_API_KEY?Production Cloudinary API key: "; export CLOUDINARY_API_KEY
+read -rs "CLOUDINARY_API_SECRET?Production Cloudinary API secret: "; echo; export CLOUDINARY_API_SECRET
+read -rs "DEMO_PASSWORD?Password for every demo account: "; echo; export DEMO_PASSWORD
+pnpm demo:seed
+```
+
+Values already in the environment win over the root `.env`. Close the terminal afterwards.
+
 ### Database
 
 -   PostgreSQL
@@ -288,6 +314,7 @@ Then skip `pnpm db:up` and run `pnpm db:migrate`.
 | `pnpm db:generate`   | Create a migration after changing the Drizzle schema |
 | `pnpm db:studio`     | Browse the database with Drizzle Studio         |
 | `pnpm admin:create --email <email> --name "<name>"` | Invite a Super Admin (see below) |
+| `pnpm demo:seed` / `demo:seed --remove` | Add or remove demo listings for the preview site (see below) |
 | `pnpm brand:generate` | Regenerate favicons and app icons from the brand SVGs |
 
 ### End-to-end tests

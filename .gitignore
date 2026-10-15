@@ -16,6 +16,8 @@ coverage/
 # Local uploads in development (LOCAL_MEDIA_DIR)
 .media/
 .private-files/
+# Photos downloaded by `pnpm demo:seed`
+.demo-photos/
 
 # Playwright output
 e2e/.output/

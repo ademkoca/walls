@@ -22,7 +22,8 @@
     "db:generate": "pnpm --filter @walls/database db:generate",
     "db:migrate": "pnpm --filter @walls/database db:migrate",
     "db:studio": "pnpm --filter @walls/database db:studio",
-    "admin:create": "pnpm --filter @walls/api admin:create"
+    "admin:create": "pnpm --filter @walls/api admin:create",
+    "demo:seed": "pnpm --filter @walls/api demo:seed"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

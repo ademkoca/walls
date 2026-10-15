@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "admin:create": "tsx --env-file-if-exists=../../.env src/scripts/create-super-admin.ts",
+    "demo:seed": "tsx --env-file-if-exists=../../.env src/scripts/seed-demo.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts"
   },
   "dependencies": {

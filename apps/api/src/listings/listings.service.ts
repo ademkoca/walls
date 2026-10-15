@@ -70,7 +70,7 @@ export async function loadViewableListing(
 }
 
 /** Every content group, for writing a whole draft. */
-const ALL_CONTENT_FIELDS: ReadonlySet<ListingField> = new Set([
+export const ALL_CONTENT_FIELDS: ReadonlySet<ListingField> = new Set([
   ListingField.PROPERTY_TYPE,
   ListingField.TRANSACTION_TYPE,
   ListingField.TEXT,
