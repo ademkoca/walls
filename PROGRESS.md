@@ -612,6 +612,18 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   tab is hidden. With no pause control it may not meet WCAG 2.2.2 (Pause, Stop, Hide) if
   auditors treat a decorative backdrop as moving content; the user chose a rotation without
   controls.
+- **Home page shortcuts (2026-10-15):** below the search band, "Browse by property type" tiles
+  (one per property type, icon + label → `/properties?propertyType=…`); at the bottom, above the
+  footer, "Popular searches": 32 preset search links in four columns (two on phones). "Prodaja"
+  and "Izdavanje" list every property type except Other; "Stanovi" and "Kuće" list sale in
+  Beograd, Novi Sad, Niš, Kragujevac and Novi Pazar and rent in the first three (cities chosen by
+  the user). Type phrases are written out per language because Serbian case forms differ
+  ("Stanovi na prodaju", "Izdavanje stanova"); city links use "Prodaja stanova {city}" to avoid
+  the locative. The `location` in city links is always the Serbian name as listings store it, so
+  English pages say "Belgrade" but search for `Beograd`. Considered and deferred: the "Stanje"
+  condition filter (uknjiženo, legalizovano, novogradnja…: a new listing field with legal weight,
+  needs its own spec decision), featured agencies (no real agencies yet) and a blog. Still open
+  from the same review: a furnished-status filter, a stats bar and a mid-page agent CTA.
 
 ## Technical decisions
 
