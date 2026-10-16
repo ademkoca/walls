@@ -3,9 +3,12 @@ import { buttonVariants } from '@walls/ui/components/button';
 import { ArrowRightIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { CityLinks } from '@/components/home/city-links';
 import { HeroBackdrop } from '@/components/home/hero-backdrop';
+import { HomeFaq } from '@/components/home/home-faq';
 import { HomeSearch } from '@/components/home/home-search';
 import { HomeStats } from '@/components/home/home-stats';
+import { HowItWorks } from '@/components/home/how-it-works';
 import { PropertyTypeLinks } from '@/components/home/property-type-links';
 import { SeoLinks } from '@/components/home/seo-links';
 import { ListingGrid } from '@/components/public/listing-card';
@@ -114,6 +117,7 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
 
       <div className="mx-auto max-w-7xl space-y-16 px-4 py-16 sm:px-6 lg:px-8">
         <PropertyTypeLinks />
+        <CityLinks />
         {home.featured.length > 0 && (
           <ListingSection
             id="featured-listings"
@@ -155,6 +159,8 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
           </p>
         )}
 
+        <HowItWorks />
+
         <section className="flex flex-col gap-6 rounded-xl border bg-card p-6 sm:p-10 md:flex-row md:items-center md:justify-between">
           <div className="max-w-2xl space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight">{t('advertiseTitle')}</h2>
@@ -164,6 +170,8 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
             {t('advertise')}
           </Link>
         </section>
+
+        <HomeFaq />
 
         <SeoLinks />
       </div>

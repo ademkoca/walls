@@ -1,6 +1,7 @@
 import { PropertyType, TransactionType } from '@walls/shared';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
+import { CITIES } from './cities';
 
 type TypeKey =
   'apartment' | 'house' | 'villa' | 'office' | 'retail' | 'warehouse' | 'land' | 'garage';
@@ -16,16 +17,6 @@ const TYPES: { key: TypeKey; propertyType: PropertyType }[] = [
   { key: 'garage', propertyType: PropertyType.GARAGE },
 ];
 
-type CityKey = 'beograd' | 'noviSad' | 'nis' | 'kragujevac' | 'noviPazar';
-
-/** `location` is the city as listings store it, so English pages search by the Serbian name. */
-const CITIES: { key: CityKey; location: string }[] = [
-  { key: 'beograd', location: 'Beograd' },
-  { key: 'noviSad', location: 'Novi Sad' },
-  { key: 'nis', location: 'Niš' },
-  { key: 'kragujevac', location: 'Kragujevac' },
-  { key: 'noviPazar', location: 'Novi Pazar' },
-];
 const RENT_CITIES = CITIES.slice(0, 3);
 
 type CityLinkKey = 'apartmentSaleIn' | 'apartmentRentIn' | 'houseSaleIn' | 'houseRentIn';

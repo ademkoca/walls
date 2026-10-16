@@ -60,6 +60,53 @@
     },
     "transactionTypeLabel": "Kupovina ili iznajmljivanje",
     "browseByTypeTitle": "Pretražite po vrsti nekretnine",
+    "browseByCityTitle": "Pretražite po gradu",
+    "howItWorks": {
+      "title": "Kako funkcioniše",
+      "steps": {
+        "list": {
+          "title": "Dodajte oglas",
+          "text": "Napravite besplatan nalog i unesite podatke o nekretnini, slike i cenu."
+        },
+        "review": {
+          "title": "Mi pregledamo oglas",
+          "text": "Naš tim proverava svaki oglas pre objave. Ako nešto treba izmeniti, videćete razlog i moći ćete da ponovo pošaljete oglas."
+        },
+        "publish": {
+          "title": "Oglas se objavljuje",
+          "text": "Nakon odobrenja, oglas se objavljuje i posetioci vas mogu direktno kontaktirati."
+        }
+      }
+    },
+    "faq": {
+      "title": "Često postavljana pitanja",
+      "items": {
+        "free": {
+          "question": "Da li je oglašavanje nekretnine na {brand} besplatno?",
+          "answer": "Da. Otvaranje naloga i objava oglasa su besplatni."
+        },
+        "agentRequired": {
+          "question": "Da li moram biti agent za nekretnine da bih oglasio svoju nekretninu?",
+          "answer": "Ne. Privatni prodavci mogu oglasiti sopstvenu nekretninu nakon potvrde email adrese. Agenti za nekretnine se prijavljuju posebno i dobijaju profil proverenog agenta."
+        },
+        "review": {
+          "question": "Kako funkcioniše pregled oglasa?",
+          "answer": "Naš tim proverava svaki oglas pre nego što postane javno vidljiv. Ako su potrebne izmene, videćete razlog i moći ćete da izmenite i ponovo pošaljete oglas."
+        },
+        "editPublished": {
+          "question": "Da li mogu da izmenim oglas nakon objave?",
+          "answer": "Da. Cena i nekoliko drugih podataka se menjaju odmah. Veće izmene, poput opisa ili slika, ponovo se pregledaju pre objave, a vaš objavljeni oglas ostaje vidljiv u međuvremenu."
+        },
+        "phonePublic": {
+          "question": "Da li je moj broj telefona vidljiv svima?",
+          "answer": "Sami birate da li će vaš broj telefona biti prikazan na javnom profilu. Kada je prikazan, označavamo i da li je proveren."
+        },
+        "currency": {
+          "question": "U kojim valutama mogu videti cene?",
+          "answer": "Cene se prikazuju u EUR ili RSD, po zvaničnom kursu; možete promeniti prikaz u bilo kom trenutku, a originalna cena iz oglasa je uvek prikazana."
+        }
+      }
+    },
     "stats": {
       "label": "{brand} u brojkama",
       "listings": "{count, plural, one {objavljen oglas} few {objavljena oglasa} other {objavljenih oglasa}}",

@@ -60,6 +60,53 @@
     },
     "transactionTypeLabel": "Buy or rent",
     "browseByTypeTitle": "Browse by property type",
+    "browseByCityTitle": "Browse by city",
+    "howItWorks": {
+      "title": "How it works",
+      "steps": {
+        "list": {
+          "title": "Add your listing",
+          "text": "Create a free account and add your property's details, photos and price."
+        },
+        "review": {
+          "title": "We review it",
+          "text": "Our team checks every listing before it goes live. If something needs to change, you'll see why and can resubmit."
+        },
+        "publish": {
+          "title": "It goes live",
+          "text": "Once approved, your listing is published and visitors can contact you directly."
+        }
+      }
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "items": {
+        "free": {
+          "question": "Is it free to list a property on {brand}?",
+          "answer": "Yes. Creating an account and publishing a listing is free."
+        },
+        "agentRequired": {
+          "question": "Do I need to be a real-estate agent to list my property?",
+          "answer": "No. Private sellers can list their own properties once they verify their email address. Real-estate agents apply separately and get a verified agent profile."
+        },
+        "review": {
+          "question": "How does the review process work?",
+          "answer": "Every listing is checked by our team before it appears publicly. If changes are needed, you'll see the reason and can update and resubmit it."
+        },
+        "editPublished": {
+          "question": "Can I edit my listing after it's published?",
+          "answer": "Yes. Price and a few other details update right away. Bigger changes, like the description or photos, are reviewed again before they go live, and your published listing stays visible while that happens."
+        },
+        "phonePublic": {
+          "question": "Is my phone number shown to everyone?",
+          "answer": "You choose whether your phone number is shown on your public profile. When it is shown, we also label whether it's verified."
+        },
+        "currency": {
+          "question": "Which currencies can I see prices in?",
+          "answer": "Prices show in EUR or RSD, converted at the official exchange rate; you can switch anytime, and the original listed price is always shown too."
+        }
+      }
+    },
     "stats": {
       "label": "{brand} in numbers",
       "listings": "{count, plural, one {published listing} other {published listings}}",

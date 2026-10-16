@@ -58,6 +58,13 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
     '/en/properties?propertyType=APARTMENT&transactionType=SALE&location=Beograd',
   );
 
+  // City tiles are another shortcut into the search, by the Serbian city name.
+  const byCity = visitor.getByRole('region', { name: 'Browse by city' });
+  await expect(byCity.getByRole('link', { name: 'Belgrade' })).toHaveAttribute(
+    'href',
+    '/en/properties?location=Beograd',
+  );
+
   // Platform totals under the search, and the call to agents.
   await expect(visitor.getByText(/^published listings?$/)).toBeVisible();
   const agentBanner = visitor.getByRole('region', { name: 'Are you a real-estate agent?' });
@@ -65,6 +72,15 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
     'href',
     '/en/for-agents',
   );
+
+  // The seller journey and an FAQ answer, further down the home page.
+  const howItWorks = visitor.getByRole('region', { name: 'How it works' });
+  await expect(howItWorks.getByRole('heading', { name: 'Add your listing' })).toBeVisible();
+  const faq = visitor.getByRole('region', { name: 'Frequently asked questions' });
+  const firstQuestion = faq.getByRole('button', { name: /free to list a property/ });
+  await expect(faq.getByText('Yes. Creating an account')).toBeHidden();
+  await firstQuestion.click();
+  await expect(faq.getByText('Yes. Creating an account')).toBeVisible();
 
   // The home page search opens the results with the choices in the URL.
   const homeSearch = visitor.getByRole('search', { name: 'Property search' });
