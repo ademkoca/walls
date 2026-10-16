@@ -29,7 +29,8 @@ user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (
 production Super Admin (created with `pnpm admin:create` using their personal email; HTTPS works,
 Resend delivers from walls.rs). The user sets `TRUST_PROXY_HOPS=3` on Render (decided below).
 Then: smoke-test the live site (see "Phase 10 starting notes"), and continue the rest of
-Phase 10. `/about` and `/contact` content comes last (user's choice).
+Phase 10. `/about` and `/contact` were built on 2026-10-16 (see "About, contact and legal
+pages" below).
 
 **`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
 reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
@@ -647,6 +648,24 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   the FAQ's "Is it free on {brand}?" string crashed next-intl because the component didn't pass
   `brand`, a reminder that an intl formatting error only surfaces at render, not at compile time.
 
+- **About, contact and legal pages (2026-10-16, SPEC §16):** `/about` tells the story the user
+  asked for (one place to find, sell or rent out property, directly or with an approved agent),
+  three ways to use Walls, five trust points that restate SPEC rules, the live totals and a
+  closing call to action. `/contact` has a form (user's choice over plain email links) that
+  emails `info@walls.rs` (`brand.company.email`, also the address shown) with reply-to set to
+  the visitor; no table, no confirmation email, trap field, 5 per IP per hour
+  (`POST /api/v1/public/contact`, `CONTACT_MESSAGE` template, in Serbian with a note of which
+  site the visitor wrote from). Company details live in `brand.company`; the registered name,
+  street address, MB and PIB are `null` and read "U postupku registracije" until the company is
+  registered (user's choice over realistic fake values); the location shown is "Beograd,
+  Srbija". `/privacy` and `/terms` are drafts (user's choice), marked as such, linked from the
+  footer's bottom bar and listed in the sitemap; they describe only what Walls actually does
+  (data collected, providers, the two essential cookies, the Poverenik) and leave retention
+  periods, cross-border safeguards and liability limits for the lawyer. Before launch:
+  `info@walls.rs` must receive mail (Resend only sends), the company details and a reviewed
+  legal text must replace the placeholders, and `LAST_UPDATED` in `legal-page.tsx` must be
+  updated with every change. The unused "coming soon" component and texts were removed.
+
 ## Technical decisions
 
 - **Auth:** scrypt (OWASP params) instead of argon2; opaque session token in an HttpOnly,
@@ -871,8 +890,8 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   only through Netlify, preview.walls.rs first), Resend sender domain (verified), Supabase
   project (created, EU), rate limits (decided 2026-10-13: keep the in-memory counters; they
   reset on every deploy or restart and would multiply with several API instances, so revisit a
-  shared store, e.g. Postgres or Redis, when scaling beyond one instance). Still open: the
-  `/about` and `/contact` content (last).
+  shared store, e.g. Postgres or Redis, when scaling beyond one instance). The `/about` and
+  `/contact` content was decided on 2026-10-16.
 
 ## Remaining plan (from the approved plan)
 
