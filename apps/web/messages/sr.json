@@ -99,7 +99,7 @@
         },
         "phonePublic": {
           "question": "Da li je moj broj telefona vidljiv svima?",
-          "answer": "Sami birate da li će vaš broj telefona biti prikazan na javnom profilu. Kada je prikazan, označavamo i da li je proveren."
+          "answer": "Sami birate da li će vaš broj telefona biti prikazan na javnom profilu. Kada je prikazan, označavamo i da li je verifikovan."
         },
         "currency": {
           "question": "U kojim valutama mogu videti cene?",
@@ -953,10 +953,10 @@
   },
   "publicProfile": {
     "agentsTitle": "Agenti za nekretnine",
-    "agentsDescription": "Agenti koje je odobrio Walls i nekretnine koje oglašavaju.",
+    "agentsDescription": "Agenti koje je proverio Walls i nekretnine koje oglašavaju.",
     "agentsEmpty": "Još nema agenata.",
     "listingCount": "{count, plural, =0 {Nema oglasa} one {# oglas} few {# oglasa} other {# oglasa}}",
-    "approvedAgent": "Odobren agent",
+    "approvedAgent": "Proveren agent",
     "approvedAgentHint": "Walls je proverio profesionalne podatke ovog agenta.",
     "privateSeller": "Privatni prodavac",
     "phoneVerified": "Verifikovan",
