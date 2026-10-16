@@ -32,7 +32,10 @@
   "footer": {
     "explore": "Istražite",
     "company": "Kompanija",
-    "rights": "© {year} {brand}. Sva prava zadržana."
+    "rights": "© {year} {brand}. Sva prava zadržana.",
+    "legal": "Pravne informacije",
+    "privacy": "Politika privatnosti",
+    "terms": "Uslovi korišćenja"
   },
   "home": {
     "title": "Pronađite svoj novi dom",
@@ -149,10 +152,6 @@
       "kragujevac": "Kragujevac",
       "noviPazar": "Novi Pazar"
     }
-  },
-  "placeholder": {
-    "title": "Stranica je u izradi",
-    "description": "Ovaj deo sajta još pripremamo. Uskoro će biti dostupan."
   },
   "notFound": {
     "title": "Stranica nije pronađena",
@@ -1165,5 +1164,198 @@
     "next": "Sledeća fotografija",
     "close": "Zatvori",
     "open": "Prikaži fotografiju {position} veću"
+  },
+  "about": {
+    "metaDescription": "Zašto smo napravili Walls: jedno mesto za traženje, prodaju i izdavanje nekretnina u Srbiji, samostalno ili uz proverenog agenta.",
+    "title": "Zašto smo napravili Walls",
+    "lead": "Jedno mesto za sve koji traže, prodaju ili izdaju nekretninu u Srbiji.",
+    "story": {
+      "problem": "Traženje stana ili kuće u Srbiji obično znači skakanje sa sajta na sajt i pitanje da li je oglas još aktuelan i ko zapravo stoji iza njega. Ni prodaja ili izdavanje sopstvene nekretnine nije lakše: ili je prepustite agenciji, ili okušate sreću na sajtu za male oglase.",
+      "solution": "Napravili smo {brand} da bi se sve to dešavalo na jednom mestu. Možete pronaći nekretninu za kupovinu ili zakup, sami oglasiti svoju nekretninu ili sarađivati sa proverenim agentom za nekretnine ako više volite da to prepustite profesionalcu. Izbor je vaš.",
+      "trust": "Pošto je poverenje najvažnije kada je ulog ovako velik, naš tim pregleda svaki oglas pre objave, a agenta odobrava tek kada vidi dokaz da se bavi tim poslom."
+    },
+    "waysTitle": "Tri načina da koristite {brand}",
+    "ways": {
+      "find": {
+        "title": "Pronađite nekretninu",
+        "text": "Pretražujte stanove, kuće, placeve i poslovne prostore za prodaju i izdavanje širom Srbije.",
+        "action": "Pregledajte nekretnine"
+      },
+      "sell": {
+        "title": "Oglasite sami",
+        "text": "Napravite besplatan nalog privatnog prodavca i objavite svoj oglas, bez agencije.",
+        "action": "Oglasite nekretninu"
+      },
+      "agent": {
+        "title": "Sarađujte sa agentom",
+        "text": "Više volite profesionalca? Pregledajte proverene agente za nekretnine i njihove oglase.",
+        "action": "Pronađite agenta"
+      }
+    },
+    "trustTitle": "Kako čuvamo poverenje na {brand}",
+    "trustPoints": {
+      "reviewed": {
+        "title": "Svaki oglas se pregleda",
+        "text": "Naš tim proverava svaki oglas pre objave, i ponovo kada se promene važni podaci."
+      },
+      "agents": {
+        "title": "Agenti se odobravaju uz dokaz",
+        "text": "Profil agenta otvaramo tek kada proverimo dokaz da se osoba bavi poslom agenta."
+      },
+      "address": {
+        "title": "Tačna adresa ostaje privatna",
+        "text": "Tačna adresa je podrazumevano skrivena; posetioci vide približnu oblast dok prodavac ne odluči da je prikaže."
+      },
+      "phone": {
+        "title": "Iskreni kontakt podaci",
+        "text": "Brojeve telefona označavamo kao verifikovane ili neverifikovane i nikada ne prikazujemo neverifikovan broj kao verifikovan."
+      },
+      "free": {
+        "title": "Oglašavanje je besplatno",
+        "text": "Otvaranje naloga i objava oglasa ne koštaju ništa."
+      }
+    },
+    "numbersTitle": "{brand} danas",
+    "ctaTitle": "Spremni da počnete?",
+    "ctaText": "Pregledajte oglase, oglasite svoju nekretninu ili se prijavite kao agent."
+  },
+  "contact": {
+    "metaDescription": "Kontaktirajte Walls tim.",
+    "title": "Kontaktirajte nas",
+    "intro": "Imate pitanje, predlog ili problem sa sajtom? Pišite nam i odgovorićemo vam emailom.",
+    "shortcuts": {
+      "property": {
+        "title": "Pitanje o nekretnini?",
+        "text": "Pišite oglašivaču preko forme na stranici oglasa. {brand} ne učestvuje u prodaji ili zakupu, pa vam samo oglašivač može odgovoriti.",
+        "action": "Pregledajte nekretnine"
+      },
+      "agent": {
+        "title": "Agent ste za nekretnine?",
+        "text": "Prijavite se za nalog agenta i profil proverenog agenta.",
+        "action": "Prijavite se kao agent"
+      },
+      "faq": {
+        "title": "Imate kratko pitanje?",
+        "text": "Mnogi odgovori su u često postavljanim pitanjima.",
+        "action": "Pročitajte pitanja"
+      }
+    },
+    "channelsTitle": "Kontakt",
+    "emailLabel": "Email",
+    "locationLabel": "Lokacija",
+    "location": "Beograd, Srbija",
+    "company": {
+      "title": "Podaci o firmi",
+      "name": "Naziv",
+      "legalName": "Poslovno ime",
+      "address": "Adresa",
+      "registrationNumber": "Matični broj",
+      "taxId": "PIB",
+      "pending": "U postupku registracije"
+    },
+    "form": {
+      "title": "Pošaljite nam poruku",
+      "fields": {
+        "name": "Ime i prezime",
+        "email": "Email adresa",
+        "subject": "Tema",
+        "message": "Poruka",
+        "website": "Veb-sajt"
+      },
+      "messagePlaceholder": "Kako možemo da pomognemo?",
+      "submit": "Pošalji poruku",
+      "privacy": "Vaše podatke koristimo samo da bismo vam odgovorili.",
+      "privacyLink": "Politika privatnosti",
+      "sentTitle": "Poruka je poslata",
+      "sentDescription": "Hvala, {name}. Odgovorićemo na {email}.",
+      "sendAnother": "Pošalji novu poruku"
+    }
+  },
+  "legal": {
+    "draftTitle": "Nacrt",
+    "draftNotice": "Ovaj tekst je nacrt. Konačna verzija biće objavljena nakon pravne provere, pre pokretanja sajta {brand}.",
+    "lastUpdated": "Poslednja izmena: {date}",
+    "privacy": {
+      "title": "Politika privatnosti",
+      "metaDescription": "Koje lične podatke Walls prikuplja, zašto i koja su vaša prava.",
+      "intro": "Ova politika objašnjava koje lične podatke {brand} prikuplja, zašto ih prikupljamo, ko ih vidi i koja su vaša prava.",
+      "sections": {
+        "controller": {
+          "title": "Ko je odgovoran",
+          "body": "{brand} ({domain}) vodi firma koja je u postupku registracije u Srbiji. Njeni podaci biće navedeni na stranici za kontakt kada registracija bude završena. Možete nam pisati na {email}."
+        },
+        "collect": {
+          "title": "Šta prikupljamo",
+          "body": "Podaci o nalogu: ime, email adresa i lozinka (čuvamo je samo u obliku bezbednog heša), kao i broj telefona, profilna slika i kratka biografija ako ih dodate.\n\nPrijave agenata: ime i prezime, email adresa, broj telefona, naziv agencije i dokumenti koje priložite. Dokumente vide samo naši administratori.\n\nOglasi: podaci o nekretnini, slike, cena i lokacija.\n\nUpiti: ime, email adresa, broj telefona (neobavezno) i poruka koju posetilac pošalje o oglasu.\n\nPoruke sa kontakt forme: ime, email adresa, tema i poruka.\n\nPregledi oglasa: da bismo pregled brojali jednom po posetiocu dnevno, koristimo otisak IP adrese i pregledača napravljen ključem koji se menja svakog dana. Samu IP adresu ne čuvamo."
+        },
+        "use": {
+          "title": "Zašto ih koristimo",
+          "body": "Da bismo vodili vaš nalog i omogućili prijavu; da bismo pregledali i objavljivali oglase; da bismo upite dostavili oglašivačima, a poruke sa kontakt forme nama; da bismo slali potrebne emailove, poput potvrde email adrese, promene lozinke i ishoda pregleda; da bismo čuvali bezbednost platforme, na primer ograničavanjem ponovljenih zahteva i blokiranjem neželjenih poruka; i da bismo oglašivačima pokazali koliko je ljudi pogledalo njihove oglase."
+        },
+        "share": {
+          "title": "Ko ih vidi",
+          "body": "Javni profili i objavljeni oglasi vidljivi su svima. Broj telefona agenta uvek je prikazan na profilu; privatni prodavci biraju da li će prikazati svoj. Email adresa prikazuje se samo ako to vlasnik izabere, a tačna adresa nekretnine samo ako to izabere oglašivač.\n\nUpiti stižu samo oglašivaču ili agentu dodeljenom oglasu, a poruke sa kontakt forme samo nama. Lične podatke ne prodajemo."
+        },
+        "providers": {
+          "title": "Pružaoci usluga",
+          "body": "Za rad sajta {brand} koristimo pouzdane pružaoce usluga: Supabase (baza podataka), Render (aplikacioni server), Netlify (hosting sajta), Cloudinary (slike i dokumenti) i Resend (email). Mape se prikazuju preko servisa OpenStreetMap, koji prima zahteve vašeg pregledača za slike mape. Neki pružaoci mogu obrađivati podatke van Srbije; mere zaštite za to biće opisane ovde nakon pravne provere."
+        },
+        "cookies": {
+          "title": "Kolačići",
+          "body": "Koristimo samo kolačiće neophodne za rad sajta {brand}: kolačić sesije, koji vas drži prijavljenim, i kolačić koji pamti da li cene gledate u EUR ili RSD. Ne koristimo reklamne ni analitičke kolačiće."
+        },
+        "retention": {
+          "title": "Koliko dugo ih čuvamo",
+          "body": "Podatke o nalogu čuvamo dok nalog postoji. Poruke sa kontakt forme brišu se iz naših sistema kada stignu u naše sanduče. Rokovi čuvanja ostalih podataka biće navedeni ovde nakon pravne provere."
+        },
+        "rights": {
+          "title": "Vaša prava",
+          "body": "Možete zatražiti uvid u lične podatke koje o vama čuvamo, njihovu ispravku ili brisanje, ograničenje obrade ili prigovor na obradu, kao i prenos podataka. Mnoge podatke možete sami izmeniti na kontrolnoj tabli; za sve ostalo pišite na {email}.\n\nTakođe možete podneti pritužbu Povereniku za informacije od javnog značaja i zaštitu podataka o ličnosti."
+        },
+        "changes": {
+          "title": "Izmene ove politike",
+          "body": "Ako izmenimo ovu politiku, novu verziju objavićemo na ovoj stranici i ažurirati datum na vrhu."
+        }
+      }
+    },
+    "terms": {
+      "title": "Uslovi korišćenja",
+      "metaDescription": "Pravila korišćenja sajta Walls.",
+      "intro": "Ovi uslovi važe za sve koji koriste {brand} ({domain}). Otvaranjem naloga ili objavom oglasa prihvatate ih.",
+      "sections": {
+        "service": {
+          "title": "Šta je {brand}",
+          "body": "{brand} je platforma za oglašavanje i pronalaženje nekretnina za prodaju i izdavanje u Srbiji. Nismo strana ni u jednoj prodaji ili zakupu, ne posredujemo u prometu nekretnina i ne obrađujemo plaćanja. Dogovori se sklapaju direktno između oglašivača i onih koji ih kontaktiraju."
+        },
+        "accounts": {
+          "title": "Nalozi",
+          "body": "Dužni ste da unesete tačne podatke i čuvate svoju lozinku. Nalog privatnog prodavca postaje aktivan kada potvrdite email adresu. Nalog agenta otvara se tek kada odobrimo prijavu uz dokaz da se bavite poslom agenta. Ulogu ne možete sami izabrati ni promeniti."
+        },
+        "listings": {
+          "title": "Oglasi",
+          "body": "Možete oglašavati samo nekretnine koje posedujete ili koje ste ovlašćeni da oglašavate. Oglasi moraju biti tačni i ne smeju dovoditi u zabludu u pogledu nekretnine, cene ili lokacije.\n\nSvaki oglas se pregleda pre objave, a važne izmene ponovo. Možemo odbiti oglas ili zatražiti izmene, i uvek vam navodimo razlog.\n\nPrava na slike i tekstove ostaju vaša; dozvoljavate nam da ih prikazujemo na sajtu {brand} dok je oglas objavljen."
+        },
+        "conduct": {
+          "title": "Šta nije dozvoljeno",
+          "body": "Lažni ili duplirani oglasi, oglasi za nekretnine koje ne smete da oglašavate, obmanjujuće cene, neželjene poruke i reklame poslate kroz upite ili kontakt formu, prikupljanje podataka drugih korisnika i sve što krši zakon."
+        },
+        "deactivation": {
+          "title": "Deaktivacija naloga",
+          "body": "Ako nalog krši ove uslove, na primer zloupotrebom, naši administratori ga mogu deaktivirati. Uvek navodimo razlog i obaveštavamo vas emailom. Dok je nalog deaktiviran, ne možete se prijaviti, a njegovi oglasi nisu vidljivi na sajtu."
+        },
+        "responsibility": {
+          "title": "Odgovornost",
+          "body": "Oglašivači su odgovorni za svoje oglase i za ono što dogovore sa kupcima i zakupcima. Oglase pregledamo pre objave, ali ne možemo garantovati da je svaki podatak tačan: pre bilo kakvog dogovora sami proverite nekretninu i dokumentaciju. Granice naše odgovornosti biće navedene ovde nakon pravne provere."
+        },
+        "law": {
+          "title": "Merodavno pravo",
+          "body": "Na ove uslove primenjuje se pravo Republike Srbije."
+        },
+        "changes": {
+          "title": "Izmene i pitanja",
+          "body": "Ako izmenimo ove uslove, novu verziju objavićemo na ovoj stranici i ažurirati datum na vrhu. Imate pitanje? Pišite na {email}."
+        }
+      }
+    }
   }
 }

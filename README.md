@@ -121,6 +121,14 @@ E2E suite always use a fixed rate. Production must use `nbs`.
 Without `RESEND_API_KEY`, the API prints every email, including its
 verification or reset link, to its console instead of sending it.
 
+### Company details and the contact inbox
+
+The contact page shows the company details from `brand.company` in
+[`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts); details set to `null`
+read "being registered". The contact form emails `brand.company.email` (`info@walls.rs`), so
+that address must be able to receive mail: Resend only sends, so set up receiving or forwarding
+at the domain's email provider.
+
 ### First Super Admin
 
 Accounts with admin rights are never created through public registration.

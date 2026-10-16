@@ -9,6 +9,7 @@ import { type AuthRateLimits, authRoutes } from './auth/auth.routes';
 import { AuthService } from './auth/auth.service';
 import { loadSession } from './auth/session.middleware';
 import type { Config } from './config';
+import { ContactService } from './contact/contact.service';
 import { analyticsRoutes } from './analytics/analytics.routes';
 import { AnalyticsService } from './analytics/analytics.service';
 import { ListingViewsService } from './analytics/listing-views';
@@ -64,6 +65,9 @@ export const DEFAULT_APPLICATION_RATE_LIMIT: RateLimitRule = {
 /** Inquiries per IP: a visitor contacting a few advertisers; more looks like spam. */
 export const DEFAULT_INQUIRY_RATE_LIMIT: RateLimitRule = { windowMs: 60 * MINUTE_MS, limit: 5 };
 
+/** Contact-page messages per IP: a person writes a few at most; more looks like spam. */
+export const DEFAULT_CONTACT_RATE_LIMIT: RateLimitRule = { windowMs: 60 * MINUTE_MS, limit: 5 };
+
 /** Listing view reports per IP: plenty for browsing, low enough to stop flooding. */
 export const DEFAULT_VIEW_RATE_LIMIT: RateLimitRule = { windowMs: 60 * MINUTE_MS, limit: 600 };
 
@@ -78,6 +82,7 @@ export interface AppDependencies {
   uploadRateLimit?: RateLimitRule;
   applicationRateLimit?: RateLimitRule;
   inquiryRateLimit?: RateLimitRule;
+  contactRateLimit?: RateLimitRule;
   viewRateLimit?: RateLimitRule;
 }
 
@@ -92,6 +97,7 @@ export function createApp({
   uploadRateLimit = DEFAULT_UPLOAD_RATE_LIMIT,
   applicationRateLimit = DEFAULT_APPLICATION_RATE_LIMIT,
   inquiryRateLimit = DEFAULT_INQUIRY_RATE_LIMIT,
+  contactRateLimit = DEFAULT_CONTACT_RATE_LIMIT,
   viewRateLimit = DEFAULT_VIEW_RATE_LIMIT,
 }: AppDependencies): Express {
   const app = express();
@@ -112,6 +118,7 @@ export function createApp({
   const publicService = new PublicService(db);
   const publicListingsService = new PublicListingsService(db, exchangeRates);
   const inquiriesService = new InquiriesService(db, config, logger);
+  const contactService = new ContactService(db, logger);
   const viewsService = new ListingViewsService(db, config.sessionSecret);
   const analyticsService = new AnalyticsService(db);
 
@@ -147,8 +154,10 @@ export function createApp({
       listings: publicListingsService,
       rates: exchangeRates,
       inquiries: inquiriesService,
+      contact: contactService,
       views: viewsService,
       inquiryRateLimit,
+      contactRateLimit,
       viewRateLimit,
     }),
   );

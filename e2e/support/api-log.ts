@@ -53,3 +53,20 @@ export async function emailedLink(to: string): Promise<string> {
     .toBeDefined();
   return link as string;
 }
+
+/** Waits for the outbox worker to deliver an email to `to` containing `text`, and returns it. */
+export async function emailedText(to: string, text: string): Promise<string> {
+  let found: string | undefined;
+  await expect
+    .poll(
+      () => {
+        found = loggedEmails().findLast(
+          (email) => email.to === to && email.msg.includes(text),
+        )?.msg;
+        return found;
+      },
+      { message: `Waiting for an email to ${to} containing "${text}"`, timeout: 30_000 },
+    )
+    .toBeDefined();
+  return found as string;
+}

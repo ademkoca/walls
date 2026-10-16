@@ -1,5 +1,6 @@
 import { Role } from '@walls/shared';
 import {
+  contactInputSchema,
   inquiryInputSchema,
   listingSearchQuerySchema,
   publicPageQuerySchema,
@@ -7,6 +8,7 @@ import {
 } from '@walls/validation';
 import { Router } from 'express';
 import type { ListingViewsService } from '../analytics/listing-views';
+import type { ContactService } from '../contact/contact.service';
 import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { getAuth } from '../http/auth-context';
 import { type RateLimitRule, limitByIp } from '../http/security';
@@ -24,16 +26,20 @@ export function publicRoutes({
   listings,
   rates,
   inquiries,
+  contact,
   views,
   inquiryRateLimit,
+  contactRateLimit,
   viewRateLimit,
 }: {
   profiles: PublicService;
   listings: PublicListingsService;
   rates: ExchangeRatesService;
   inquiries: InquiriesService;
+  contact: ContactService;
   views: ListingViewsService;
   inquiryRateLimit: RateLimitRule;
+  contactRateLimit: RateLimitRule;
   viewRateLimit: RateLimitRule;
 }): Router {
   const router = Router();
@@ -54,6 +60,12 @@ export function publicRoutes({
   router.post('/listings/:slug/inquiries', limitByIp(inquiryRateLimit), async (req, res) => {
     const slug = slugParamSchema.parse(req.params.slug);
     await inquiries.create(slug, parseBody(inquiryInputSchema, req), getAuth(req)?.actor ?? null);
+    res.status(STATUS_CREATED).json({ received: true });
+  });
+
+  /** A message to the company from the contact page. Bots get the same answer as people. */
+  router.post('/contact', limitByIp(contactRateLimit), async (req, res) => {
+    await contact.send(parseBody(contactInputSchema, req));
     res.status(STATUS_CREATED).json({ received: true });
   });
 

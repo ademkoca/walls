@@ -60,6 +60,7 @@ export function createTestContext(
       | 'uploadRateLimit'
       | 'applicationRateLimit'
       | 'inquiryRateLimit'
+      | 'contactRateLimit'
       | 'viewRateLimit'
     >
   > = {},
@@ -84,6 +85,7 @@ export function createTestContext(
     uploadRateLimit: GENEROUS_LIMITS.perIp,
     applicationRateLimit: GENEROUS_LIMITS.perIp,
     inquiryRateLimit: GENEROUS_LIMITS.perIp,
+    contactRateLimit: GENEROUS_LIMITS.perIp,
     viewRateLimit: GENEROUS_LIMITS.perIp,
     ...overrides,
   });

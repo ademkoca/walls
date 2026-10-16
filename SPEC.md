@@ -622,7 +622,15 @@ Required pages:
  /agents/:slug
  /about
  /contact
+ /privacy
+ /terms
 ```
+
+About, contact and legal pages (decision 2026-10-16):
+
+-   **About** tells why Walls exists (one place to find, sell or rent out property, directly or with an approved agent), the three ways to use it, how it stays trustworthy (only rules defined in this specification) and the live platform totals.
+-   **Contact** has a form (name, email, subject, message) whose message is emailed to the company inbox (`brand.company.email`, `info@walls.rs`), with replies going to the visitor. It is not stored once the email is sent, the visitor gets no confirmation email, and it has the inquiry spam protection: a hidden trap field (dropped silently) and at most 5 messages per IP address per hour. The page also shows the contact email, the city, shortcuts (questions about a property go to the advertiser through the listing) and the company details; details not known yet (registered name, address, registration number MB, tax ID PIB) read "being registered" until the company is registered.
+-   **Privacy policy** and **terms of use** are linked from every page footer and marked as drafts until they have been reviewed by a lawyer. They describe only what Walls actually does.
 
 The homepage should support:
 
@@ -789,6 +797,7 @@ The system should support transactional email for:
 -   email/phone change requests
 -   approval/rejection of profile changes
 -   account deactivated (including the reason)
+-   contact form message (to the company inbox)
 
 Use Resend for MVP, behind an `EmailService` abstraction.
 

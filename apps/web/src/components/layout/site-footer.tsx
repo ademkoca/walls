@@ -52,9 +52,23 @@ export async function SiteFooter() {
         </nav>
       </div>
       <div className="border-t border-sidebar-border">
-        <p className="mx-auto max-w-7xl px-4 py-6 text-xs text-sidebar-foreground/70 sm:px-6 lg:px-8">
-          {t('footer.rights', { year, brand: brand.name })}
-        </p>
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6 text-xs text-sidebar-foreground/70 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <p>{t('footer.rights', { year, brand: brand.name })}</p>
+          <nav aria-label={t('footer.legal')}>
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+              <li>
+                <Link href="/privacy" className="hover:text-sidebar-foreground">
+                  {t('footer.privacy')}
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-sidebar-foreground">
+                  {t('footer.terms')}
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </footer>
   );

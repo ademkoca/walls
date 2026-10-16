@@ -8,7 +8,16 @@ import { absoluteUrl } from '@/lib/seo';
 // Lists the current listings and profiles, so it is built per request, never at build time.
 export const dynamic = 'force-dynamic';
 
-const STATIC_PAGES = ['/', '/properties', '/agents', '/for-agents', '/about', '/contact'];
+const STATIC_PAGES = [
+  '/',
+  '/properties',
+  '/agents',
+  '/for-agents',
+  '/about',
+  '/contact',
+  '/privacy',
+  '/terms',
+];
 
 /** Every language version of a page, each listing the others as alternates (SPEC §32). */
 function localizedEntries(href: string, lastModified?: string): MetadataRoute.Sitemap {

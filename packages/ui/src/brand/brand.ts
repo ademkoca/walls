@@ -6,6 +6,26 @@
  * and the SVG sources in `packages/ui/brand/`. See `packages/ui/brand/README.md`.
  */
 
+/** Legal details of the company behind the brand. */
+export interface CompanyDetails {
+  /** Public contact address; the contact form also delivers here. */
+  email: string;
+  legalName: string | null;
+  streetAddress: string | null;
+  /** Matični broj (MB). */
+  registrationNumber: string | null;
+  /** Poreski identifikacioni broj (PIB). */
+  taxId: string | null;
+}
+
+const COMPANY: CompanyDetails = {
+  email: 'info@walls.rs',
+  legalName: null,
+  streetAddress: null,
+  registrationNumber: null,
+  taxId: null,
+};
+
 export const brand = {
   name: 'Walls',
   descriptor: 'Real Estate',
@@ -55,6 +75,12 @@ export const brand = {
     cream: '#F8F7F4',
     white: '#FFFFFF',
   },
+
+  /**
+   * The company behind the brand, shown on the contact page. `null` values are shown as
+   * "being registered" until the company exists; replace them when it does.
+   */
+  company: COMPANY,
 
   typography: {
     /** Typeface for all UI text, headings and body. */

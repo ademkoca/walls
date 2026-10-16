@@ -25,6 +25,7 @@ export const EmailTemplate = {
   PROFILE_CHANGES_APPROVED: 'PROFILE_CHANGES_APPROVED',
   PROFILE_CHANGES_REJECTED: 'PROFILE_CHANGES_REJECTED',
   INQUIRY_RECEIVED: 'INQUIRY_RECEIVED',
+  CONTACT_MESSAGE: 'CONTACT_MESSAGE',
 } as const;
 export type EmailTemplate = (typeof EmailTemplate)[keyof typeof EmailTemplate];
 
@@ -64,6 +65,14 @@ export interface EmailPayloads {
     visitorPhone: string | null;
     message: string;
     link: string;
+  };
+  CONTACT_MESSAGE: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+    /** The language of the page the visitor wrote from. */
+    pageLocale: Locale;
   };
 }
 
@@ -271,6 +280,15 @@ const COPY: Record<Locale, Copy> = {
       action: { label: 'Otvori upit', url: link },
       replyTo: visitorEmail,
     }),
+    CONTACT_MESSAGE: ({ name, email, subject, message, pageLocale }) => ({
+      subject: `Kontakt forma: ${subject}`,
+      paragraphs: [
+        `${name} (${email}) je poslao/la poruku preko kontakt stranice:`,
+        message,
+        `Poslato sa ${pageLocale === 'en' ? 'engleske' : 'srpske'} verzije sajta. Odgovorom na ovu poruku pišete direktno pošiljaocu.`,
+      ],
+      replyTo: email,
+    }),
   },
   en: {
     EMAIL_VERIFICATION: ({ displayName, link }) => ({
@@ -470,6 +488,15 @@ const COPY: Record<Locale, Copy> = {
       ],
       action: { label: 'Open inquiry', url: link },
       replyTo: visitorEmail,
+    }),
+    CONTACT_MESSAGE: ({ name, email, subject, message, pageLocale }) => ({
+      subject: `Contact form: ${subject}`,
+      paragraphs: [
+        `${name} (${email}) sent a message through the contact page:`,
+        message,
+        `Sent from the ${pageLocale === 'en' ? 'English' : 'Serbian'} site. Reply to this email to write to the sender directly.`,
+      ],
+      replyTo: email,
     }),
   },
 };

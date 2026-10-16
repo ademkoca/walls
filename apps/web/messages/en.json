@@ -32,7 +32,10 @@
   "footer": {
     "explore": "Explore",
     "company": "Company",
-    "rights": "© {year} {brand}. All rights reserved."
+    "rights": "© {year} {brand}. All rights reserved.",
+    "legal": "Legal",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use"
   },
   "home": {
     "title": "Find your next home",
@@ -149,10 +152,6 @@
       "kragujevac": "Kragujevac",
       "noviPazar": "Novi Pazar"
     }
-  },
-  "placeholder": {
-    "title": "Coming soon",
-    "description": "We're still building this part of the site. It will be available shortly."
   },
   "notFound": {
     "title": "Page not found",
@@ -1165,5 +1164,198 @@
     "next": "Next photo",
     "close": "Close",
     "open": "View photo {position} larger"
+  },
+  "about": {
+    "metaDescription": "Why we built Walls: one place to find, sell or rent out property in Serbia, directly or with an approved agent.",
+    "title": "Why we built Walls",
+    "lead": "One place for everyone looking for, selling or renting out property in Serbia.",
+    "story": {
+      "problem": "Looking for a home in Serbia usually means jumping between sites, wondering whether a listing is still available and who is really behind it. Selling or renting out your own property isn't easier: you either hand it to an agency or try your luck on a classifieds site.",
+      "solution": "We built {brand} so that all of this happens in one place. You can find a property to buy or rent, advertise your own property yourself, or work with an approved real-estate agent if you'd rather have a professional handle it. The choice is yours.",
+      "trust": "Because trust matters most when the stakes are this high, our team reviews every listing before it goes live, and approves an agent only after seeing proof that they work as one."
+    },
+    "waysTitle": "Three ways to use {brand}",
+    "ways": {
+      "find": {
+        "title": "Find a property",
+        "text": "Search apartments, houses, land and commercial spaces for sale or rent across Serbia.",
+        "action": "Browse properties"
+      },
+      "sell": {
+        "title": "Advertise it yourself",
+        "text": "Create a free private-seller account and publish your own listing, no agency needed.",
+        "action": "List a property"
+      },
+      "agent": {
+        "title": "Work with an agent",
+        "text": "Prefer a professional? Browse approved real-estate agents and their listings.",
+        "action": "Find an agent"
+      }
+    },
+    "trustTitle": "How we keep {brand} trustworthy",
+    "trustPoints": {
+      "reviewed": {
+        "title": "Every listing is reviewed",
+        "text": "Our team checks every listing before it's published, and again when important details change."
+      },
+      "agents": {
+        "title": "Agents are approved with proof",
+        "text": "An agent profile is created only after we've checked proof that the person works as an agent."
+      },
+      "address": {
+        "title": "Exact addresses stay private",
+        "text": "The exact address is hidden by default; visitors see an approximate area until the seller chooses to show it."
+      },
+      "phone": {
+        "title": "Honest contact details",
+        "text": "Phone numbers are labelled as verified or unverified, and an unverified number is never shown as verified."
+      },
+      "free": {
+        "title": "Free to list",
+        "text": "Creating an account and publishing a listing costs nothing."
+      }
+    },
+    "numbersTitle": "{brand} today",
+    "ctaTitle": "Ready to start?",
+    "ctaText": "Browse listings, advertise your property or apply as an agent."
+  },
+  "contact": {
+    "metaDescription": "Get in touch with the Walls team.",
+    "title": "Contact us",
+    "intro": "Questions, suggestions or a problem with the site? Write to us and we'll reply by email.",
+    "shortcuts": {
+      "property": {
+        "title": "Asking about a property?",
+        "text": "Write to the advertiser using the form on the listing page. {brand} isn't part of the sale or rental, so they're the ones who can answer.",
+        "action": "Browse properties"
+      },
+      "agent": {
+        "title": "Are you a real-estate agent?",
+        "text": "Apply for an agent account and a verified agent profile.",
+        "action": "Apply as an agent"
+      },
+      "faq": {
+        "title": "Have a quick question?",
+        "text": "Many answers are in our frequently asked questions.",
+        "action": "Read the FAQ"
+      }
+    },
+    "channelsTitle": "Reach us",
+    "emailLabel": "Email",
+    "locationLabel": "Location",
+    "location": "Belgrade, Serbia",
+    "company": {
+      "title": "Company details",
+      "name": "Name",
+      "legalName": "Registered name",
+      "address": "Address",
+      "registrationNumber": "Registration number (MB)",
+      "taxId": "Tax ID (PIB)",
+      "pending": "Being registered"
+    },
+    "form": {
+      "title": "Send us a message",
+      "fields": {
+        "name": "Your name",
+        "email": "Email address",
+        "subject": "Subject",
+        "message": "Message",
+        "website": "Website"
+      },
+      "messagePlaceholder": "How can we help?",
+      "submit": "Send message",
+      "privacy": "We use your details only to reply to you.",
+      "privacyLink": "Privacy policy",
+      "sentTitle": "Message sent",
+      "sentDescription": "Thank you, {name}. We'll reply to {email}.",
+      "sendAnother": "Send another message"
+    }
+  },
+  "legal": {
+    "draftTitle": "Draft",
+    "draftNotice": "This text is a draft. It will be finalised after legal review, before {brand} launches.",
+    "lastUpdated": "Last updated: {date}",
+    "privacy": {
+      "title": "Privacy policy",
+      "metaDescription": "What personal data Walls collects, why, and what rights you have.",
+      "intro": "This policy explains what personal data {brand} collects, why we collect it, who sees it and what rights you have.",
+      "sections": {
+        "controller": {
+          "title": "Who is responsible",
+          "body": "{brand} ({domain}) is run by a company that is currently being registered in Serbia. Its details will be listed on the contact page once registration is complete. You can reach us at {email}."
+        },
+        "collect": {
+          "title": "What we collect",
+          "body": "Account details: your name, email address and password (stored only as a secure hash) and, if you add them, your phone number, profile picture and short bio.\n\nAgent applications: full name, email address, phone number, agency name and the proof files you upload. Proof files are visible only to our administrators.\n\nListings: the property's details, photos, price and location.\n\nInquiries: the name, email address, optional phone number and message a visitor sends about a listing.\n\nContact form messages: your name, email address, subject and message.\n\nListing views: to count a view once per visitor per day we use a fingerprint of the IP address and browser, made with a key that changes every day. We don't store the IP address itself."
+        },
+        "use": {
+          "title": "Why we use it",
+          "body": "To run your account and sign you in; to review and publish listings; to deliver inquiries to advertisers and contact messages to us; to send the emails you need, such as email confirmation, password resets and review outcomes; to keep the platform safe, for example by limiting repeated requests and blocking spam; and to show advertisers how many people viewed their listings."
+        },
+        "share": {
+          "title": "Who sees it",
+          "body": "Public profiles and published listings are visible to everyone. Agents' phone numbers are always shown on their profiles; private sellers choose whether to show theirs. An email address is shown only if its owner chooses so, and a property's exact address only if the advertiser chooses so.\n\nInquiries go only to the advertiser or the agent assigned to the listing, and contact messages only to us. We don't sell personal data."
+        },
+        "providers": {
+          "title": "Service providers",
+          "body": "We use trusted providers to run {brand}: Supabase (database), Render (application server), Netlify (website hosting), Cloudinary (photos and documents) and Resend (email). Maps are shown with OpenStreetMap, which receives your browser's requests for map images. Some providers may process data outside Serbia; the safeguards for that will be described here after legal review."
+        },
+        "cookies": {
+          "title": "Cookies",
+          "body": "We use only the cookies {brand} needs to work: a session cookie that keeps you signed in, and a cookie that remembers whether you view prices in EUR or RSD. We don't use advertising or analytics cookies."
+        },
+        "retention": {
+          "title": "How long we keep it",
+          "body": "We keep account data while your account exists. Contact form messages are removed from our systems once they have been delivered to our inbox. Retention periods for other data will be set out here after legal review."
+        },
+        "rights": {
+          "title": "Your rights",
+          "body": "You can ask to see the personal data we hold about you, have it corrected or deleted, restrict or object to its use, and receive it in a portable form. Many details you can change yourself in your dashboard; for anything else, write to {email}.\n\nYou can also lodge a complaint with the Commissioner for Information of Public Importance and Personal Data Protection (Poverenik)."
+        },
+        "changes": {
+          "title": "Changes to this policy",
+          "body": "If we change this policy, we'll publish the new version on this page and update the date at the top."
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of use",
+      "metaDescription": "The rules for using Walls.",
+      "intro": "These terms apply to everyone who uses {brand} ({domain}). By creating an account or publishing a listing you agree to them.",
+      "sections": {
+        "service": {
+          "title": "What {brand} is",
+          "body": "{brand} is a platform for advertising and finding properties for sale or rent in Serbia. We are not a party to any sale or rental, we don't act as an agent or broker, and we don't handle payments. Agreements are made directly between advertisers and the people who contact them."
+        },
+        "accounts": {
+          "title": "Accounts",
+          "body": "You must give accurate details and keep your password safe. A private-seller account becomes active once you confirm your email address. An agent account is created only after we approve an application with proof that you work as an agent. You can't choose or change your own role."
+        },
+        "listings": {
+          "title": "Listings",
+          "body": "You may only advertise properties you own or are authorised to advertise. Listings must be accurate and must not mislead about the property, its price or its location.\n\nEvery listing is reviewed before it's published, and important changes are reviewed again. We may reject a listing or ask for changes, and we always tell you why.\n\nYou keep the rights to your photos and texts, and allow us to show them on {brand} while the listing is published."
+        },
+        "conduct": {
+          "title": "What isn't allowed",
+          "body": "Fake or duplicate listings, listings for properties you may not advertise, misleading prices, spam or advertising sent through inquiries or the contact form, collecting other users' data, and anything that breaks the law."
+        },
+        "deactivation": {
+          "title": "Account deactivation",
+          "body": "If an account breaks these terms, for example through abuse, our administrators may deactivate it. We always give a reason and tell you by email. While an account is deactivated you can't sign in and its listings are hidden from the site."
+        },
+        "responsibility": {
+          "title": "Responsibility",
+          "body": "Advertisers are responsible for their listings and for what they agree with buyers and tenants. We review listings before publishing them, but we can't guarantee that every detail is correct: check the property and its documents yourself before any agreement. The limits of our liability will be set out here after legal review."
+        },
+        "law": {
+          "title": "Applicable law",
+          "body": "These terms are governed by the law of the Republic of Serbia."
+        },
+        "changes": {
+          "title": "Changes and questions",
+          "body": "If we change these terms, we'll publish the new version on this page and update the date at the top. Questions? Write to {email}."
+        }
+      }
+    }
   }
 }
