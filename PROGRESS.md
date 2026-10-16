@@ -636,6 +636,16 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   traffic is the user's call. A dark "Agent ste za nekretnine?" banner after the featured
   listings links to `/for-agents`; the bottom block now addresses sellers only. The translation
   test no longer mistakes single-word plural branches (`one {grad}`) for arguments.
+- **Home page: city tiles, "How it works", FAQ (2026-10-16):** a "Browse by city" tile row
+  (same 5 cities as the popular searches, factored into `apps/web/src/components/home/cities.ts`
+  so both reuse one list) sits under the property-type tiles. A 3-step "How it works" (list → we
+  review → it goes live) sits before the seller call-to-action. An FAQ accordion (6 questions:
+  free to list, agent vs. private seller, review process, editing a published listing, phone
+  number visibility, EUR/RSD) sits above "Popular searches", with `FAQPage` JSON-LD for SEO
+  (SPEC §32); content only restates existing rules (§4, §6, §12, §19), nothing new. Added the
+  shadcn/Base UI `accordion` component. Caught in a real dev-server run (not just typecheck):
+  the FAQ's "Is it free on {brand}?" string crashed next-intl because the component didn't pass
+  `brand`, a reminder that an intl formatting error only surfaces at render, not at compile time.
 
 ## Technical decisions
 
