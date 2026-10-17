@@ -29,7 +29,7 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
 
   // The home page hero leads to the listings and to registration.
   await visitor.goto('/en');
-  const hero = visitor.getByRole('region', { name: 'Find your next home' });
+  const hero = visitor.getByRole('region', { name: 'Find the walls that feel like home.' });
   await expect(hero.getByRole('link', { name: 'Browse properties' })).toHaveAttribute(
     'href',
     '/en/properties',
