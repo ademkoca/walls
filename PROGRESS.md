@@ -864,6 +864,11 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   and a final check of the deployed site (emails from the walls.rs domain,
   uploads to Cloudinary incl. a 10+ MB image through the Netlify proxy, sign-in over HTTPS,
   a listing through review and publication).
+- **Before launch: delete `.github/workflows/keep-api-awake.yml`** (added 2026-10-17, user's
+  temporary measure for the preview): a scheduled GitHub Actions job that calls
+  `https://walls-api.onrender.com/health` every 10 minutes so the free Render service does not
+  sleep. GitHub may run scheduled jobs late, and it turns them off in public repositories after
+  60 days without commits.
 - Revisit when real traffic arrives (not a launch blocker): the production map tile host, see
   "Map tiles" under open questions.
 - **Demo data on the preview site (decision 2026-10-15):** the user wanted many listings to test

@@ -1,0 +1,19 @@
+# TEMPORARY (preview only): pings the API every 10 minutes so Render's free plan does not put it
+# to sleep after 15 idle minutes. Delete this file before launch (see PROGRESS.md).
+name: Keep API awake
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Calls Render directly rather than through the web app, so no Netlify function runs. A
+      # sleeping service takes about a minute to start, hence the long timeout.
+      - run: curl --fail --silent --show-error --max-time 120 --retry 2 https://walls-api.onrender.com/health

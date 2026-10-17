@@ -396,7 +396,9 @@ Settings that live outside the repository:
   values are read at build time); keep preview.walls.rs as a domain alias that redirects.
 
 On the free plan the API sleeps after 15 minutes without requests, and the first request after
-that waits for it to start (about a minute).
+that waits for it to start (about a minute). While the site is in preview, a temporary GitHub
+Actions workflow ([`keep-api-awake.yml`](./.github/workflows/keep-api-awake.yml)) calls
+`/health` every 10 minutes to keep it awake; delete that file before launch.
 
 ## Environment Variables
 
