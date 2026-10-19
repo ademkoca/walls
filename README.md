@@ -361,6 +361,11 @@ scripts/            Repository maintenance scripts
 
 ## Deployment
 
+**Moving to a VPS (trial from 2026-10-19):** the web app and the API are moving to one netcup
+VPS with Docker Compose and Caddy, deployed by GitHub Actions after CI passes. See
+[`deploy/README.md`](./deploy/README.md). Netlify and Render below stay set up until the trial
+ends.
+
 Each host builds only its own app from the same repository:
 
 | App | Host | Config | Rebuilds when these change |

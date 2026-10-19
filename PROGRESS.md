@@ -32,18 +32,43 @@ Then: smoke-test the live site (see "Phase 10 starting notes"), and continue the
 Phase 10. `/about` and `/contact` were built on 2026-10-16 (see "About, contact and legal
 pages" below).
 
-**Hosting change under consideration (user, 2026-10-19):** move the web app and API from
-Netlify + Render to one **Netcup VPS 500 G12.5** (2 shared vCores, 4 GB RAM, 64 GB SSD), first on
-the **1-month term** as a trial. Database stays on Supabase (now Frankfurt) for the trial; moving
-Postgres onto the VPS is decided later (it would need off-server backups). **Don't write the
-VPS configuration until the user has bought the server.** Planned shape: Docker Compose with
-Caddy (HTTPS, HSTS, 15 MB body limit) + Next.js standalone + API bound to localhost; images built
-in GitHub Actions after CI and pulled over SSH; hardening script; Nuremberg location (near the
-Frankfurt database). It would remove the per-visitor IP launch blocker below (one trusted proxy,
-`TRUST_PROXY_HOPS=1`), the Netlify 4.5 MB upload limit, the Ohio detour of Netlify functions and
-Render's cold starts. SPEC §27 hosting, README "Deployment", the privacy policy's provider list
-(`legal.privacy` texts name Render and Netlify), `render.yaml`, `netlify.toml`, the `x-nf-*`
-handling and `keep-api-awake.yml` would change with it.
+**VPS trial (user bought it 2026-10-19; 1-month netcup term, decide within ~2 weeks):** the web
+app and API move from Netlify + Render to one **netcup VPS 500 G12.5** (Debian 13, 2 shared
+vCores, 4 GB RAM, 64 GB SSD, `159.195.128.124`, IPv6 `2a03:4000:b:1913:b4e5:3dff:fe3c:c014`).
+Database stays on Supabase Frankfurt; moving Postgres onto the VPS is decided later (needs
+off-server backups). The user switches **preview.walls.rs directly** (no separate test host).
+Everything is in `deploy/` (README there) plus `apps/{api,web}/Dockerfile`, `.dockerignore`
+and `.github/workflows/deploy-vps.yml`:
+
+- Server done 2026-10-19 (`setup-server.sh`, `harden-ssh.sh`): admin user `koad` (passwordless
+  sudo, Docker), `deploy` user (Docker, GitHub Actions key with `restrict`), root and password
+  SSH logins off, ufw (22, 80, 443 tcp+udp), 2 GB swap, Debian + Docker unattended upgrades with
+  reboot at 03:00 UTC, Docker log cap. The user's Mac: `ssh walls-vps` (key `~/.ssh/walls_vps`,
+  passphrase in Keychain). Root password changed by the user (netcup console only).
+- Stack: Caddy on the **host network** (Docker's port publishing would replace IPv6 visitors'
+  addresses with its own, sharing one rate limit), web and API on `127.0.0.1:3000/4000`; Caddy
+  sends `/api/*` straight to the API (60 MB cap; Netlify's 4.5 MB limit is gone, so the
+  browser-side shrinking can be relaxed later) and the rest to Next. `TRUST_PROXY_HOPS=1`.
+- Verified on the server with the real Compose stack, a throwaway Postgres and dummy secrets:
+  all pages over HTTPS (Serbian and English), HTTP→HTTPS, live NBS rate, HSTS, noindex, gzip,
+  IPv6 clients; **a spoofed `X-Forwarded-For` is replaced by Caddy** (per-IP limit hit after 3
+  requests with 5 different spoofed values) — this resolves the per-visitor IP launch blocker
+  below once the switch is done. ~200 MB RAM in use.
+- Next.js gotchas checked: the standalone server listens on `HOSTNAME`, which Docker sets to
+  the container ID, so the image sets `HOSTNAME=0.0.0.0`. `output: 'standalone'` only when
+  `NEXT_OUTPUT=standalone` (the web Dockerfile), so Netlify's build is unchanged. E2E only visits
+  `/en/...` URLs; unprefixed Serbian URLs were checked by hand on the standalone build.
+- Migrations: `dist/migrate.mjs` (tsdown entry `apps/api/src/migrate.ts`, which imports
+  `@walls/database/apply-migrations`) reads `../migrations`, copied into the image.
+- Remaining (in order): user fills `/opt/walls/api.env` (values from Render, **same
+  `SESSION_SECRET`**) and `ACME_EMAIL` in `/opt/walls/.env`; GitHub environment `production`
+  secrets `VPS_HOST`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS` and variables `SITE_URL`,
+  `SITE_INDEXING=off`; commit + push (deploys); DNS: replace the `preview` CNAME with A + AAAA
+  (TTL lowered to 300 beforehand); check; suspend Render (two APIs share Supabase's small
+  session pool and would both run migrations). If the trial is kept: SPEC §27, README
+  "Deployment", privacy policy providers (Render/Netlify → netcup; sign netcup's data
+  processing agreement), delete `render.yaml`, `netlify.toml`, the `x-nf-*` redaction and
+  `keep-api-awake.yml`, uptime monitoring.
 
 **`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
 reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
