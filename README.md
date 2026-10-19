@@ -367,7 +367,7 @@ Each host builds only its own app from the same repository:
 | --- | --- | --- | --- |
 | `apps/web` | Netlify | [`apps/web/netlify.toml`](./apps/web/netlify.toml) | `apps/web`, `packages/shared`, `packages/validation`, `packages/ui`, root package files (`ignore` command) |
 | `apps/api` | Render (Frankfurt, free plan) | [`render.yaml`](./render.yaml) (Blueprint) | `apps/api`, `packages/*`, root package files (`buildFilter`); deploys only after GitHub CI passes |
-| Database | Supabase | — | migrations run at the end of every Render build |
+| Database | Supabase (Frankfurt, `eu-central-1`) | — | migrations run at the end of every Render build |
 
 Browsers only talk to the web app's domain (walls.rs). The web app forwards `/api/*` to the
 API's Render address (`API_INTERNAL_URL`), so the API needs no custom domain and the session

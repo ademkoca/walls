@@ -32,6 +32,19 @@ Then: smoke-test the live site (see "Phase 10 starting notes"), and continue the
 Phase 10. `/about` and `/contact` were built on 2026-10-16 (see "About, contact and legal
 pages" below).
 
+**Hosting change under consideration (user, 2026-10-19):** move the web app and API from
+Netlify + Render to one **Netcup VPS 500 G12.5** (2 shared vCores, 4 GB RAM, 64 GB SSD), first on
+the **1-month term** as a trial. Database stays on Supabase (now Frankfurt) for the trial; moving
+Postgres onto the VPS is decided later (it would need off-server backups). **Don't write the
+VPS configuration until the user has bought the server.** Planned shape: Docker Compose with
+Caddy (HTTPS, HSTS, 15 MB body limit) + Next.js standalone + API bound to localhost; images built
+in GitHub Actions after CI and pulled over SSH; hardening script; Nuremberg location (near the
+Frankfurt database). It would remove the per-visitor IP launch blocker below (one trusted proxy,
+`TRUST_PROXY_HOPS=1`), the Netlify 4.5 MB upload limit, the Ohio detour of Netlify functions and
+Render's cold starts. SPEC §27 hosting, README "Deployment", the privacy policy's provider list
+(`legal.privacy` texts name Render and Netlify), `render.yaml`, `netlify.toml`, the `x-nf-*`
+handling and `keep-api-awake.yml` would change with it.
+
 **`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
 reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
 Ohio>, <Cloudflare edge>, <Render internal>` and socket address `::1` (Render's proxy); server-side
@@ -168,6 +181,19 @@ records are on the `send.` subdomain, so there is no conflict.
   render, `x-robots-tag: noindex, nofollow` is sent, `/api/v1/public/exchange-rate` through
   the proxy returns the NBS rate from Supabase (so migrations ran). It was first deployed for a
   short time before `SITE_INDEXING` existed (low risk, nothing linked to it).
+- Database (moved 2026-10-19): Supabase project in **Frankfurt (`eu-central-1`)**, replacing
+  the first project in Ireland (`eu-west-1`), which added ~25–35 ms per query from Frankfurt.
+  Created with the same settings (Data API off, automatic RLS off: Walls connects as the
+  table owner, so RLS would protect nothing and only make the schema differ from CI/local).
+  Copied with a one-off script: `pnpm db:migrate` on the new project, `pg_dump --data-only
+--schema=public` (pg_dump 17 from Homebrew `postgresql@17`, called by full path; the linked
+  local tools are 14), load in one transaction with `session_replication_role = replica`
+  after truncating (the migrations insert the amenities), then per-table row count + checksum
+  and a schema diff: all 22 tables and the schema matched. Render's `DATABASE_URL` now points
+  to the Frankfurt session pooler (deploy log: `aws-1-eu-central-1.pooler.supabase.com`).
+  **Delete the Irish project around 2026-10-26** once nothing has gone wrong (the user keeps
+  its URL commented out in `.env` until then; remove that line too). Supabase's free plan has
+  no restorable backups, so there are none yet: decide on a backup job before launch.
 - API: Render Blueprint `walls-api`, free plan, Frankfurt, `WEB_ORIGIN=https://preview.walls.rs`.
   The first build failed in `drizzle-kit migrate` with no message (fixed by
   `apply-migrations.ts`, `3b2726f`); a later deploy succeeded.
@@ -185,7 +211,7 @@ README "Deployment"), `827d7a0` integration test fix (agent directory paging), `
 `SITE_INDEXING`, `3b2726f` migration script. Each was pushed after a clean-worktree CI run.
 
 Phase 10 deployment decisions (user, 2026-10-13): Supabase project created (EU region, not
-Frankfurt); Resend domain walls.rs verified; Render **free** plan in **Frankfurt** (sleeps
+Frankfurt; moved to Frankfurt on 2026-10-19, see "Deployment state"); Resend domain walls.rs verified; Render **free** plan in **Frankfurt** (sleeps
 after 15 min; no pre-deploy step on free, so `pnpm db:migrate` runs at the end of the
 build); walls.rs on Netlify only, no `api.` subdomain (the web proxy calls the Render URL). The
 site first goes live at **preview.walls.rs** (walls.rs keeps its "coming soon" page until the
