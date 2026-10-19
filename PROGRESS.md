@@ -60,15 +60,22 @@ and `.github/workflows/deploy-vps.yml`:
   `/en/...` URLs; unprefixed Serbian URLs were checked by hand on the standalone build.
 - Migrations: `dist/migrate.mjs` (tsdown entry `apps/api/src/migrate.ts`, which imports
   `@walls/database/apply-migrations`) reads `../migrations`, copied into the image.
-- Remaining (in order): user fills `/opt/walls/api.env` (values from Render, **same
-  `SESSION_SECRET`**) and `ACME_EMAIL` in `/opt/walls/.env`; GitHub environment `production`
-  secrets `VPS_HOST`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS` and variables `SITE_URL`,
-  `SITE_INDEXING=off`; commit + push (deploys); DNS: replace the `preview` CNAME with A + AAAA
-  (TTL lowered to 300 beforehand); check; suspend Render (two APIs share Supabase's small
-  session pool and would both run migrations). If the trial is kept: SPEC §27, README
-  "Deployment", privacy policy providers (Render/Netlify → netcup; sign netcup's data
-  processing agreement), delete `render.yaml`, `netlify.toml`, the `x-nf-*` redaction and
-  `keep-api-awake.yml`, uptime monitoring.
+- **Switched 2026-10-19:** first deploy `4fee4de` by the workflow (CI → Deploy (VPS), both
+  green); user filled `/opt/walls/api.env` from Render (same `SESSION_SECRET`), GitHub
+  environment `production` (secrets `VPS_HOST`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`) and repository
+  variables `SITE_URL`, `SITE_INDEXING=off`. ACME email `demektech@gmail.com`. DNS: `preview` is
+  now `A 159.195.128.124` + `AAAA 2a03:4000:b:1913:b4e5:3dff:fe3c:c014`, **DNS only (grey
+  cloud)** at Cloudflare; proxied would hide visitors' addresses again. Let's Encrypt certificate
+  obtained. Checked from the internet: all pages 200 in 0.3–0.5 s (Netlify + Render: 6.7 s and
+  a 504 on the home page), the API logs the visitor's real address.
+- **DNS is at Cloudflare, not unlimited.rs:** the user moved walls.rs's name servers to
+  Cloudflare (`lochlan`/`meilani.ns.cloudflare.com`) for Cloudflare Email Routing, which needs
+  Cloudflare as the DNS host; unlimited.rs is the registrar and its DNS records are unused.
+- Render suspended by the user (not deleted; `/health` answers 503) and `keep-api-awake.yml`
+  removed. Next: user smoke test in the browser (sign-in, a large photo upload, an inquiry email). If the trial is
+  kept: SPEC §27, README "Deployment", privacy policy providers (Render/Netlify → netcup; sign
+  netcup's data processing agreement), delete `render.yaml`, `netlify.toml`, the `x-nf-*`
+  redaction, relax the browser-side photo shrinking, add uptime monitoring.
 
 **`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
 reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
@@ -194,14 +201,14 @@ chose to keep the personal-email Super Admin and, once a walls.rs mailbox exists
 again for `admin@walls.rs` as a second Super Admin (Super Admin accounts cannot be deactivated in
 the app). Letting admins change their email would be a product decision (not decided). walls.rs
 has no mail (MX/SPF/DMARC) records yet: receiving mail needs a mailbox or forwarding service (options
-discussed: ImprovMX/Forward Email, the DNS host unlimited.rs, Google Workspace/Zoho); Resend's
+discussed: ImprovMX/Forward Email, Cloudflare Email Routing (chosen later; DNS moved to Cloudflare), Google Workspace/Zoho); Resend's
 records are on the `send.` subdomain, so there is no conflict.
 
 **Deployment state (2026-10-13):**
 
 - Web: Netlify site `superb-pithivier-4c81f6.netlify.app`, package directory `apps/web`,
   custom domain `preview.walls.rs` (CNAME + Netlify's `subdomain-owner-verification` TXT at
-  the walls.rs DNS host unlimited.rs; keep the TXT). Env: `API_INTERNAL_URL` (Render URL),
+  the walls.rs DNS host, now Cloudflare; keep the TXT). Env: `API_INTERNAL_URL` (Render URL),
   `NEXT_PUBLIC_SITE_URL=https://preview.walls.rs`, `SITE_INDEXING=off`. Verified: pages
   render, `x-robots-tag: noindex, nofollow` is sent, `/api/v1/public/exchange-rate` through
   the proxy returns the NBS rate from Supabase (so migrations ran). It was first deployed for a
@@ -915,11 +922,7 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   and a final check of the deployed site (emails from the walls.rs domain,
   uploads to Cloudinary incl. a 10+ MB image through the Netlify proxy, sign-in over HTTPS,
   a listing through review and publication).
-- **Before launch: delete `.github/workflows/keep-api-awake.yml`** (added 2026-10-17, user's
-  temporary measure for the preview): a scheduled GitHub Actions job that calls
-  `https://walls-api.onrender.com/health` every 10 minutes so the free Render service does not
-  sleep. GitHub may run scheduled jobs late, and it turns them off in public repositories after
-  60 days without commits.
+- ~~Delete `.github/workflows/keep-api-awake.yml`~~: done 2026-10-19, with the move to the VPS.
 - Revisit when real traffic arrives (not a launch blocker): the production map tile host, see
   "Map tiles" under open questions.
 - **Demo data on the preview site (decision 2026-10-15):** the user wanted many listings to test
