@@ -1,0 +1,23 @@
+# Caddy for the Walls stack (deploy/compose.yaml). SITE_HOST and ACME_EMAIL come from
+# /opt/walls/.env. Caddy obtains and renews the HTTPS certificate itself.
+{
+	email {$ACME_EMAIL}
+}
+
+{$SITE_HOST} {
+	encode zstd gzip
+	header Strict-Transport-Security "max-age=31536000"
+
+	# The API directly, not through Next.js, so uploads keep the API's own limits
+	# (listing photos up to 15 MB, agent proof files up to 5 × 10 MB).
+	handle /api/* {
+		request_body {
+			max_size 60MB
+		}
+		reverse_proxy 127.0.0.1:4000
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+}

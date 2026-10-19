@@ -1,0 +1,80 @@
+# The Walls stack on the VPS: Caddy (HTTPS) in front of the web app and the API.
+# Lives in /opt/walls next to Caddyfile, deploy.sh, .env (Compose variables) and api.env
+# (the API's secrets). See deploy/README.md.
+name: walls
+
+x-api-image: &api-image ${IMAGE_PREFIX:?}/walls-api:${WALLS_VERSION:?}
+
+services:
+  caddy:
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    # On the host's network, so Caddy sees every visitor's real IPv4 or IPv6 address (Docker's
+    # port publishing would replace IPv6 visitors' addresses with its own). It reaches the web
+    # app and the API on 127.0.0.1.
+    network_mode: host
+    environment:
+      SITE_HOST: ${SITE_HOST:?}
+      ACME_EMAIL: ${ACME_EMAIL:?}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    mem_limit: 256m
+
+  web:
+    image: ${IMAGE_PREFIX:?}/walls-web:${WALLS_VERSION:?}
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:4000
+    ports:
+      - '127.0.0.1:3000:3000'
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/robots.txt').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    mem_limit: 1g
+
+  api:
+    image: *api-image
+    restart: unless-stopped
+    env_file: api.env
+    environment:
+      NODE_ENV: production
+      API_PORT: '4000'
+      # Caddy is the only proxy in front of the API, and it replaces any X-Forwarded-For
+      # a visitor sends, so the last entry is the visitor's address.
+      TRUST_PROXY_HOPS: '1'
+    ports:
+      - '127.0.0.1:4000:4000'
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4000/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    mem_limit: 768m
+
+  # One-off: `docker compose run --rm migrate` (deploy.sh runs it before every start).
+  migrate:
+    image: *api-image
+    profiles: [tools]
+    env_file: api.env
+    environment:
+      NODE_ENV: production
+    command: ['node', 'dist/migrate.mjs']
+
+volumes:
+  # Certificates and ACME account; keep them, or Let's Encrypt rate limits may apply.
+  caddy-data:
+  caddy-config:
