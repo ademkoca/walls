@@ -69,6 +69,8 @@ systemctl restart docker
 systemctl enable --quiet docker
 usermod --append --groups docker deploy
 usermod --append --groups docker "$ADMIN_USER"
+# Lets the admin user open /opt/walls (the env files stay readable by deploy only).
+usermod --append --groups deploy "$ADMIN_USER"
 
 echo '== Automatic updates'
 cat > /etc/apt/apt.conf.d/20auto-upgrades << 'EOF'
