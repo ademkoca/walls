@@ -1,0 +1,14 @@
+# Build context for apps/api/Dockerfile and apps/web/Dockerfile (both built from the root).
+# Dependencies and build output are recreated inside the image; secrets never enter it.
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/*.tsbuildinfo
+.git
+.env
+.env.*
+!.env.example
+apps/api/.media
+apps/api/.private-files
+e2e/.output

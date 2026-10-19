@@ -1,7 +1,8 @@
 import { defineConfig } from 'tsdown';
 
 export default defineConfig({
-  entry: ['src/server.ts'],
+  // migrate.mjs finds the SQL files at ../migrations relative to dist/ (see src/migrate.ts).
+  entry: ['src/server.ts', 'src/migrate.ts'],
   format: 'esm',
   platform: 'node',
   target: 'node22',

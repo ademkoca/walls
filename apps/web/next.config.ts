@@ -19,6 +19,9 @@ const nextConfig: NextConfig = {
   // address (e.g. http://192.168.1.75:3000). Without this, Next.js refuses to serve the
   // dev scripts to that address, so the page shows but nothing is interactive.
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '*.local'],
+  // The Docker image (apps/web/Dockerfile) runs a self-contained server; Netlify's build
+  // makes its own output and must not get this.
+  ...(process.env.NEXT_OUTPUT === 'standalone' ? { output: 'standalone' as const } : {}),
   // Internal workspace packages ship TypeScript source and are compiled by Next.
   transpilePackages: ['@walls/ui', '@walls/shared', '@walls/validation'],
   turbopack: {
