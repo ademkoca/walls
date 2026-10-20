@@ -77,6 +77,23 @@ and `.github/workflows/deploy-vps.yml`:
   netcup's data processing agreement), delete `render.yaml`, `netlify.toml`, the `x-nf-*`
   redaction, relax the browser-side photo shrinking, add uptime monitoring.
 
+**Database backups (2026-10-20):** Supabase free has no restorable backups, so
+`deploy/backup.sh` runs nightly at 02:00 UTC on the VPS (`walls-backup.timer`, installed by
+`deploy/setup-backups.sh`): `pg_dump` of `public` (with the extensions installed there:
+citext, pg_trgm, unaccent; a schema-limited dump leaves them out otherwise) and `drizzle`, age
+encryption, stored **on the VPS** in `/opt/walls/backup/archive` (daily 30 days, monthly 12
+months). **User's decision: no Cloudflare R2 for the MVP** (felt like overkill; the VPS is
+already a different provider from Supabase, so a database loss is covered, not the loss of
+both). The script switches to R2 (bucket in the EU jurisdiction) when `backup.env` gets R2
+settings: revisit at launch. The stored file is read back, decrypted and restored into a
+throwaway `postgres:17-alpine` container with the same `pg_restore --clean --if-exists
+--no-owner --no-privileges` command as the documented emergency restore (the dump recreates
+`public`, which every new database already has), and per-table row counts are compared
+(missing or emptied table = failure). The restore test caught both problems above before the
+first real run. healthchecks.io pings when `HEALTHCHECK_URL` is set (user to add). First run via
+systemd 2026-10-20: 23 tables, 2116 rows, 139 KB. The age private key is on the server
+(`/opt/walls/backup/age-key.txt`) and **must also be in the user's password manager**.
+
 **`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
 reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
 Ohio>, <Cloudflare edge>, <Render internal>` and socket address `::1` (Render's proxy); server-side
