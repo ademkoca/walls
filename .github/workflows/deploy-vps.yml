@@ -85,7 +85,7 @@ jobs:
       - name: Copy the stack configuration
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
-        run: scp deploy/compose.yaml deploy/Caddyfile deploy/deploy.sh "deploy@$VPS_HOST:/opt/walls/"
+        run: scp deploy/compose.yaml deploy/Caddyfile deploy/deploy.sh deploy/backup.sh "deploy@$VPS_HOST:/opt/walls/"
       # The registry token is valid only while this job runs; deploy.sh logs out afterwards.
       - name: Deploy
         env:
