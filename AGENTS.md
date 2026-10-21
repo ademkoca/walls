@@ -99,9 +99,11 @@ Never rely on the frontend for authorization.
 
 Always verify permissions server-side.
 
-For private sellers, resource access must be based on the authenticated user and listings they created/are authorized to manage. For agents, enforce listing access using the authenticated identity plus explicit listing assignment/authorization rules. An optional `assignedAgent` is not a replacement for `createdBy` or the advertiser identity.
+For private sellers, resource access must be based on the authenticated user and listings they created/are authorized to manage. For agents, enforce listing access using the authenticated identity plus explicit listing assignment/authorization rules. An optional `assignedAgent` (an agent or agency, never an investor) is not a replacement for `createdBy` or the advertiser identity.
 
-Private seller accounts become active after email verification. Public registration must never allow users to select or self-assign the agent role. Agent applications require supporting proof and Admin/Super Admin approval before an active agent account/profile is created.
+Agents, agencies and investors all have the `REAL_ESTATE_AGENT` role; their kind is the account's `sellerType` (`REAL_ESTATE_AGENT`, `AGENCY`, `INVESTOR`; `PRIVATE_SELLER` for private sellers, none for admins). Decide permissions by role and use the seller type only where a rule names a kind (assignment, agency name, badges). The shared rules live in `packages/shared/src/user/seller-type.ts`; the database checks that role and type match.
+
+Private seller accounts become active after email verification. Public registration must never allow users to select or self-assign the agent role. Applications from agents, agencies and investors require supporting proof and Admin/Super Admin approval before an active account/profile is created.
 
 Never trust these values when sent by the client:
 
@@ -189,7 +191,7 @@ Password hashes must never be returned to clients.
 
 Private sellers register with email/password and must verify email before their account can submit listings. Do not require phone verification for MVP.
 
-Provide a separate “For real-estate agents” application flow. Collect professional details and supporting proof; do not create/activate an agent account or public agent profile until an Admin/Super Admin approves the application. Do not expose an agent role selector in ordinary public registration.
+Provide a separate “For professionals” application flow for agents, agencies and investors. Collect the advertiser type, professional details and supporting proof; do not create/activate a professional account or public profile until an Admin/Super Admin approves the application. Do not expose an agent role selector in ordinary public registration.
 
 Phone verification status must be stored and displayed accurately wherever public contact details show a phone number. Never allow a user to mark their own number verified. No phone-verification workflow is in MVP scope.
 
@@ -213,7 +215,7 @@ DRAFT
 
 Rejected listings return to Draft with a rejection reason.
 
-Both private sellers and approved agents can submit listings; neither can publish directly. Admin/Super Admin review is required before publication.
+Both private sellers and approved professionals (agents, agencies, investors) can submit listings; neither can publish directly. Admin/Super Admin review is required before publication.
 
 Keep `createdBy`, advertiser/seller type, and optional `assignedAgent` separate. Private sellers manage their own listings by default and do not need an assigned agent. Enforce all access rules server-side.
 

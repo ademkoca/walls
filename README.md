@@ -1,6 +1,6 @@
 # Walls — Real Estate Platform
 
-A modern real-estate listing platform for Serbia, with public property browsing, private-seller accounts, professionally approved real-estate agents, and an administrative dashboard for reviewing listings and managing inquiries and platform operations.
+A modern real-estate listing platform for Serbia, with public property browsing, private-seller accounts, approved real-estate agents, agencies and investors, and an administrative dashboard for reviewing listings and managing inquiries and platform operations.
 
 ## Project Status
 
@@ -143,7 +143,7 @@ their own password; no password is chosen or shown by the command.
 
 ### Demo data (preview only)
 
-`pnpm demo:seed` adds 8 made-up demo accounts (4 private sellers, 4 approved agents) and 50
+`pnpm demo:seed` adds 8 made-up demo accounts (4 private sellers, 2 agents, an agency and an investor) and 50
 published listings: every property type, sale and rent, EUR and RSD, with Unsplash photos.
 Each listing passes the same checks as a real submission, but is written straight to the
 database, so no emails are sent. The oldest active Super Admin is recorded as the reviewer.
@@ -210,11 +210,11 @@ PRIVATE_SELLER
 
 Private sellers register with email/password and can create an active seller account after verifying their email. Ordinary public registration does not allow users to choose the real-estate-agent role.
 
-Prospective real-estate agents use the separate **“For real-estate agents”** application flow and submit professional details plus supporting proof. An Admin or Super Admin must approve the application before an active agent account and public agent profile are created.
+Prospective real-estate agents, agencies and investors use the separate **“For professionals”** application flow (`/for-professionals`) and submit their advertiser type, professional details and supporting proof. An Admin or Super Admin must approve the application before an active account and public profile (`/partners/:slug`) are created. All three have the `REAL_ESTATE_AGENT` role; their kind is the account's seller type, shown as a badge ("Agent", "Agency", "Investor", or "Private seller") on listings and profiles. Listings can be assigned to agents and agencies.
 
 Private sellers can manage their own listings and have public seller profile pages. Agents can manage listings they are authorized to advertise, subject to server-side access rules and optional admin assignment. `createdBy`, seller/advertiser type, and `assignedAgent` are separate concepts.
 
-Both private sellers and approved agents submit listings for review. Admins/Super Admins must approve listings before they appear publicly.
+Both private sellers and approved professionals submit listings for review. Admins/Super Admins must approve listings before they appear publicly.
 
 Phone verification is not required for MVP. Public contact details must clearly label phone numbers as verified or unverified; users cannot self-mark a number as verified.
 
@@ -438,13 +438,13 @@ The MVP includes:
 -   property listings
 -   private-seller registration and email verification
 -   private-seller dashboard and public seller profiles
--   separate real-estate-agent application with proof and admin approval
+-   separate application for agents, agencies and investors, with proof and admin approval
 -   phone verification-status labels (without phone verification workflow)
 -   sale/rent support
 -   property search
 -   filtering and sorting
 -   property detail pages
--   agent profiles
+-   agent, agency and investor profiles
 -   listing creation/editing
 -   listing review and approval
 -   listing assignment
@@ -466,7 +466,7 @@ The MVP includes:
 
 The MVP does not include payments, buyer-only accounts, favorites, saved
 searches, Google login, MFA, phone verification, map-based search, full CRM
-functionality, or native mobile applications. Users who want to advertise a property must have a verified private-seller account or an approved agent account.
+functionality, or native mobile applications. Users who want to advertise a property must have a verified private-seller account or an approved agent, agency or investor account.
 
 ## Source of Truth
 

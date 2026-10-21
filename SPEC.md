@@ -58,7 +58,20 @@ The MVP has four application roles:
 -   `REAL_ESTATE_AGENT`
 -   `PRIVATE_SELLER`
 
-There is no Manager role. Anonymous visitors do not have accounts. A private seller account is created automatically after email verification. Real-estate agents must apply through a separate flow and are not given an agent account/profile until an Admin or Super Admin approves the application.
+There is no Manager role. Anonymous visitors do not have accounts. A private seller account is created automatically after email verification. Real-estate agents, agencies and investors must apply through a separate flow and are not given an account/profile until an Admin or Super Admin approves the application.
+
+### Advertiser types (decision 2026-10-20)
+
+Every account that advertises has an advertiser type (`sellerType`), shown as a badge on its listings, listing cards and public profile:
+
+-   `PRIVATE_SELLER`: a private seller (role `PRIVATE_SELLER`)
+-   `REAL_ESTATE_AGENT`: an individual real-estate agent
+-   `AGENCY`: a real-estate agency, as one account under the agency's own name (no member agents or team features)
+-   `INVESTOR`: an investor or developer advertising its own properties
+
+Agents, agencies and investors are approved professionals ("partners"). All three have the `REAL_ESTATE_AGENT` role and the same rights and rules; wherever this specification says "agent" about permissions, profiles, inquiries or applications, it applies to all three, except where it names a type. Only agents and agencies can be assigned to a listing (§5). An agent may name the agency they work for (free text); agencies and investors are named by their display name. The type is chosen in the application and never changes. Admins have no advertiser type.
+
+Every professional is approved before their account exists, so the public site shows no separate "approved" or "verified" label: the badge names the type only.
 
 ### Super Admin
 
@@ -98,9 +111,9 @@ Admins cannot:
 -   create/delete administrators
 -   permanently delete listings
 
-### Real Estate Agent
+### Real Estate Agent (agents, agencies and investors)
 
-Agent accounts and public agent profiles are created only after an Admin or Super Admin approves an agent application and its supporting proof. Public/private seller registration must not allow a user to select or self-assign the `REAL_ESTATE_AGENT` role.
+Professional accounts and public profiles are created only after an Admin or Super Admin approves an application and its supporting proof. Public/private seller registration must not allow a user to select or self-assign the `REAL_ESTATE_AGENT` role.
 
 Can:
 
@@ -147,21 +160,22 @@ Private sellers cannot:
 
 ### Agent Applicant
 
-An agent applicant submits a separate application through the “For real-estate agents” entry point and provides the required professional details and supporting proof. An application is not an active agent account and must not grant dashboard or listing-management access. Admin/Super Admin reviews the application; on approval, the system creates or activates the agent account/profile and sends the applicant an email to complete account setup. On rejection, no active agent account/profile is created and the applicant receives an appropriate outcome notification.
+An applicant (agent, agency or investor) submits a separate application through the “For professionals” entry point and provides the required professional details and supporting proof. An application is not an active agent account and must not grant dashboard or listing-management access. Admin/Super Admin reviews the application; on approval, the system creates or activates the agent account/profile and sends the applicant an email to complete account setup. On rejection, no active agent account/profile is created and the applicant receives an appropriate outcome notification.
 
-An agent application contains:
+An application contains:
 
--   full name
+-   the advertiser type: agent, agency or investor
+-   full name (an agency's or company's name for agencies and investors)
 -   email address
 -   phone number
--   agency name (optional)
--   at least one supporting proof file (PDF, JPG, or PNG)
+-   agency name (optional, agents only)
+-   at least one supporting proof file (PDF, JPG, or PNG), for example a licence or employment confirmation for an agent, or an extract from the Business Registers Agency (APR) for an agency or investor
 
 No licence/registry number is collected in the MVP. Proof files are private: they are visible only to Admins/Super Admins and are never exposed publicly.
 
 Application rules:
 
--   An agent account needs its own email address. An application from an email that already belongs to a Walls account (for example a private seller) is not saved; the applicant is told by email to apply with a different address. Accounts never change role. The form's response is the same either way, so it does not reveal which addresses are registered.
+-   A professional account needs its own email address. An application from an email that already belongs to a Walls account (for example a private seller) is not saved; the applicant is told by email to apply with a different address. Accounts never change role. The form's response is the same either way, so it does not reveal which addresses are registered.
 -   An email address can have only one application waiting for review at a time; after a rejection the applicant may apply again.
 -   The applicant receives a confirmation email. Admins are not emailed about new applications; the dashboard shows how many are waiting.
 -   A rejection reason is required and is included in the email to the applicant.
@@ -190,7 +204,7 @@ MVP does not include:
 
 Private sellers register through the standard public registration flow. Once they verify their email, their `PRIVATE_SELLER` account is activated automatically. Public registration must not offer a role selector or any way to request `REAL_ESTATE_AGENT` privileges.
 
-Prospective agents use a distinct “For real-estate agents” entry point and submit professional details plus supporting proof. Admin/Super Admin approval is required before an active agent account and public agent profile are created. After approval, the agent completes account setup using a secure email flow; never send or manually share passwords.
+Prospective agents, agencies and investors use a distinct “For professionals” entry point and submit their advertiser type, professional details and supporting proof. Admin/Super Admin approval is required before an active account and public profile are created. After approval, the agent completes account setup using a secure email flow; never send or manually share passwords.
 
 Phone verification is not required in the MVP. Whenever a phone number is shown in public seller/agent contact details, its verification status must be clearly labelled. Unverified phone numbers must never be presented as verified. Do not implement phone verification as part of MVP.
 
@@ -216,7 +230,7 @@ Phone verification is not required for MVP. Store phone verification status expl
 
 Approval rules by account type:
 
--   **Agents:** changes to any public profile field (display name, bio, profile picture, phone number, email address) are submitted as change requests and take effect only after Admin/Super Admin approval. An email change additionally requires verifying the new address.
+-   **Agents, agencies and investors:** changes to any public profile field (display name, bio, profile picture, phone number, email address) are submitted as change requests and take effect only after Admin/Super Admin approval. An email change additionally requires verifying the new address.
 -   **Private sellers:** permitted profile changes take effect immediately and are audited. An email change requires verifying the new address.
 
 An agent has at most one pending change request. Until it is reviewed, further changes update that same request (so the reviewer always sees the latest version), and the agent may discard it. A rejected request includes a reason, emailed to the agent; the public profile stays unchanged.
@@ -230,8 +244,8 @@ All important profile changes should be auditable.
 Keep these concepts separate:
 
 -   `createdBy`: the authenticated user who created the listing; immutable for audit/history purposes
--   `sellerType`: whether the listing is advertised by a `PRIVATE_SELLER` or a `REAL_ESTATE_AGENT`
--   `assignedAgent`: optional agent assignment managed by Admin/Super Admin; it is not a substitute for the seller or creator
+-   `sellerType`: who advertises the listing: `PRIVATE_SELLER`, `REAL_ESTATE_AGENT`, `AGENCY` or `INVESTOR`; it is the creator's advertiser type when the listing is created and does not change with an assignment
+-   `assignedAgent`: optional assignment of an agent or agency, managed by Admin/Super Admin; it is not a substitute for the seller or creator. Investors cannot be assigned.
 
 The creator/advertiser is responsible for managing their own listing, subject to role-based authorization. A private seller's listing has no assigned agent by default. An admin may assign an agent when appropriate. Agent assignment must not silently remove the creator's access to their own listing, and a listing may only be managed by users explicitly authorized by the server-side policy.
 
@@ -618,13 +632,17 @@ Required pages:
 /
  /properties
  /properties/:slug
- /agents
- /agents/:slug
+ /partners
+ /partners/:slug
+ /sellers/:slug
+ /for-professionals
  /about
  /contact
  /privacy
  /terms
 ```
+
+`/partners` lists agents, agencies and investors, with a tab for each type (`?type=`); `/partners/:slug` is a professional's profile and `/sellers/:slug` a private seller's. The former `/agents`, `/agents/:slug` and `/for-agents` URLs redirect permanently (decision 2026-10-20).
 
 About, contact and legal pages (decision 2026-10-16):
 
@@ -676,6 +694,7 @@ Filters should include:
 -   bedrooms
 -   bathrooms
 -   furnished status
+-   advertiser type
 -   relevant amenities/features
 
 Sorting should support at minimum:
@@ -697,6 +716,7 @@ How the filters behave:
 -   **Price bounds** are entered in a currency (the visitor's, kept in the URL with the bounds) and compared with every listing's price converted at the current rate. "Price on request" listings never match a price bound.
 -   **Area** is the floor area, or the plot area for land.
 -   **Furnished status** is one of furnished, semi-furnished or unfurnished and matches exactly; listings that don't state it never match. It is offered when no property type is chosen or the chosen type has the field (apartment, house, villa, office).
+-   **Advertiser type** (private seller, agent, agency or investor) matches the listing's `sellerType`, its creator's type; an assigned agency does not change it.
 -   **Features** offered are those of the chosen property type (all without one); a listing must have every chosen feature.
 -   Sorting by price compares prices in EUR at the current rate; rental prices are compared as stated, whatever their period. Listings without a price or area sort last.
 
@@ -712,16 +732,17 @@ MVP does not include buyer-only accounts, favorites, or saved searches. Do not r
 
 # 19. Seller and Agent Profiles
 
-Both approved agents and private sellers have public profile pages.
+Both approved professionals (agents, agencies and investors) and private sellers have public profile pages.
 
-Public agent pages show:
+Public professional pages show:
 
 -   profile picture
 -   display name
 -   approved public contact information
 -   biography and professional details
 -   phone verification status alongside the phone number
--   all currently public listings attributed to that agent
+-   all currently public listings attributed to that professional
+-   a badge with their advertiser type (agent, agency or investor)
 
 Public private-seller pages show:
 
@@ -730,9 +751,9 @@ Public private-seller pages show:
 -   phone verification status alongside the phone number
 -   all currently public listings attributed to that seller
 
-Contact details on public profiles: an agent's phone number is always shown; a private seller chooses whether to show theirs. An email address is shown only when its owner opts in (for agents, that choice is part of the reviewed profile change). An agent's page lists the public listings the agent created and those assigned to them.
+Contact details on public profiles: a professional's phone number is always shown; a private seller chooses whether to show theirs. An email address is shown only when its owner opts in (for agents, that choice is part of the reviewed profile change). A professional's page lists the public listings they created and those assigned to them.
 
-A public profile must not expose internal/admin-only information, email addresses unless explicitly configured for public display, agent application documents, identity evidence, or other verification evidence. The public site must not label an agent as approved/verified unless the agent application was approved by an Admin/Super Admin. Phone verification status is separate from professional agent approval.
+A public profile must not expose internal/admin-only information, email addresses unless explicitly configured for public display, agent application documents, identity evidence, or other verification evidence. Every professional account exists only after an Admin/Super Admin approved its application, so the public site names the advertiser type (private seller, agent, agency, investor) and shows no separate "approved" or "verified" label for professionals. Phone verification status is separate from professional approval.
 
 ------------------------------------------------------------------------
 
@@ -767,7 +788,7 @@ Admins/Super Admins can manage all inquiries (read them and set their status); t
 
 Inquiry routing:
 
--   If the listing has an `assignedAgent`, the inquiry is routed to the assigned agent only. The assigned agent receives the email notification and manages the inquiry status. The listing creator/advertiser can view the inquiry read-only.
+-   If the listing has an `assignedAgent` (an agent or agency), the inquiry is routed to the assigned agent only. The assigned agent receives the email notification and manages the inquiry status. The listing creator/advertiser can view the inquiry read-only.
 -   If the listing has no `assignedAgent`, the inquiry is routed to the listing creator/advertiser, who receives the notification and manages it.
 
 The recipient is always determined server-side from the listing at the time the inquiry is created.
@@ -1343,14 +1364,14 @@ Cover critical flows:
 4.  Admin reviews, rejects, and provides a reason.
 5.  Private seller updates/resubmits.
 6.  Admin approves; listing appears publicly.
-7.  Prospective agent submits an application with supporting proof.
-8.  Admin approves or rejects the agent application; an approved applicant completes account setup.
+7.  Prospective agent or agency submits an application with its advertiser type and supporting proof.
+8.  Admin approves or rejects the application; an approved applicant completes account setup.
 9.  Approved agent creates/submits a listing and receives the same manual listing review.
 11. Visitor searches/filter listings.
 12. Visitor opens listing.
 13. Visitor submits inquiry.
 14. Agent sees inquiry.
-15. Admin can assign listing.
+15. Admin can assign listing to an agent or agency, never an investor.
 16. Agent cannot access another agent's listing.
 
 ------------------------------------------------------------------------
@@ -1457,13 +1478,14 @@ The MVP includes:
 -   public property browsing
 -   private-seller registration and email verification
 -   private-seller dashboard and public profile pages
--   separate real-estate agent application with supporting proof and admin approval
+-   separate application for agents, agencies and investors, with supporting proof and admin approval
+-   advertiser-type badges and an advertiser-type search filter
 -   public phone verification-status labels (no phone verification flow)
 -   property search
 -   filtering
 -   sorting
 -   property detail pages
--   public agent pages
+-   public partner pages (agents, agencies, investors)
 -   listing creation
 -   listing editing
 -   listing approval workflow
@@ -1552,12 +1574,13 @@ Do not prematurely implement these features.
 -   Visitor can search and filter listings.
 -   Visitor can sort results.
 -   Visitor can open a property detail page.
--   Visitor can see the listing advertiser (private seller or agent) and any assigned agent, where applicable.
--   Visitor can open public profile pages for both private sellers and approved agents.
+-   Visitor can see the listing advertiser (private seller, agent, agency or investor, named by a badge) and any assigned agent or agency, where applicable.
+-   Visitor can open public profile pages for both private sellers and approved professionals.
 -   Visitor can contact the listing advertiser.
 -   Visitor can see the exact map location only when permitted.
 -   Visitor can switch EUR/RSD display.
--   Visitor can browse agent profiles.
+-   Visitor can browse agent, agency and investor profiles, by type.
+-   Visitor can filter search results by advertiser type.
 -   Website is responsive.
 
 ## Private Seller
@@ -1573,9 +1596,9 @@ Do not prematurely implement these features.
 -   Public contact details clearly show whether the phone number is verified; phone verification is not required for MVP.
 -   Private seller cannot access or manage another user's listings.
 
-## Agent
+## Agent (agents, agencies and investors)
 
--   Prospective agent applies through the separate “For real-estate agents” flow.
+-   Prospective agent, agency or investor applies through the separate “For professionals” flow and chooses its advertiser type.
 -   Application requires professional details and supporting proof.
 -   Agent account/profile is not active until Admin/Super Admin approval.
 -   Agent can authenticate after completing approved account setup.
@@ -1585,14 +1608,14 @@ Do not prematurely implement these features.
 -   Agent cannot publish directly.
 -   Agent can see rejection reasons and resubmit rejected listings.
 -   Agent can see inquiries for their listings.
--   Public agent profile clearly distinguishes professional approval from phone verification status.
+-   Public profile shows the advertiser type as a badge, with no separate "approved" label, and the phone's verification status separately.
 
 ## Admin
 
 -   Admin can authenticate.
 -   Admin can review, approve, or reject agent applications and supporting proof.
 -   Admin can manage approved agents.
--   Admin can assign listings.
+-   Admin can assign listings to agents and agencies.
 -   Admin can review listings.
 -   Admin can approve/reject listings.
 -   Admin can provide rejection reasons.

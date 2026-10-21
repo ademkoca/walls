@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-21 (advertiser types: agencies and investors, uncommitted). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -93,6 +93,38 @@ throwaway `postgres:17-alpine` container with the same `pg_restore --clean --if-
 first real run. healthchecks.io pings when `HEALTHCHECK_URL` is set (user to add). First run via
 systemd 2026-10-20: 23 tables, 2116 rows, 139 KB. The age private key is on the server
 (`/opt/walls/backup/age-key.txt`) and **must also be in the user's password manager**.
+
+**Advertiser types: agencies and investors (user's decision 2026-10-20, built 2026-10-21,
+uncommitted, awaiting the user's review):** for the Novi Pazar launch, where most professional
+advertisers are agencies and investors. SPEC §2.1, §5, §16, §17, §19 updated. Decisions:
+
+- Types: private seller, **agent, agency, investor** ("investor" covers developers/builders).
+  Badge on the listing's advertiser card, listing cards (image top-right), profile pages,
+  directory, admin pages. **The "Approved agent" badge is gone**: every professional is
+  approved before the account exists. The phone "Verified/Not verified" label stays.
+- Agencies and investors join through the **same application** (now "For professionals",
+  `/for-professionals`, with a type choice; the name label and proof hint follow the type: APR
+  extract for agencies/investors). **One account per agency**, no member agents; agents keep
+  the free-text agency name, which agencies/investors don't have (the API drops it).
+- Listings can be **assigned to agents and agencies, not investors** (API 400
+  `VALIDATION_FAILED` like other bad assignees; the admin picker searches with
+  `assignable=true`). A listing's type is its creator's (`listings.seller_type`), unchanged by
+  an assignment.
+- Public directory **`/partners`** (tabs All/Agents/Agencies/Investors via `?type=`) and
+  **`/partners/[slug]`**; `/agents`, `/agents/:slug`, `/for-agents` (and `/en/…`) redirect
+  permanently (`next.config.ts`). `/sellers/[slug]` unchanged. Search filter "Advertiser"
+  (`sellerType`). Home stat "professional advertisers" (`stats.partners`), sitemap `partners`.
+- Card title stays "Advertiser / Oglašivač" (not "owner": an agency doesn't own the property).
+- Model: **role stays `REAL_ESTATE_AGENT`** for all three professional kinds (permissions);
+  the kind is **`users.seller_type`** (new; check constraint `users_seller_type_matches_role`,
+  null for admins) and `agent_applications.seller_type`. `SellerType` gained `AGENCY`,
+  `INVESTOR`. Shared rules in `packages/shared/src/user/seller-type.ts`
+  (`canBeAssigned`, `hasAgencyName`, `isSellerTypeValidForRole`); `Actor`/`CurrentUser` carry
+  `sellerType`; `sellerTypeForRole` was replaced by `advertisesListings`. Migration `0014`
+  recreates the `seller_type` enum (see Gotchas). In the dashboard, the role "Agent" now reads
+  "Professional"; lists show the kind.
+- Demo data: Stefan → agency "Primer Nekretnine", Tamara → investor "Primer Gradnja" (keys
+  `agencija`, `investitor`); the listing assigned to Tamara is now assigned to the agency.
 
 **`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
 reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
@@ -799,7 +831,12 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Turborepo strict env:** variables must be declared in `turbo.json` (`env`/`passThroughEnv`)
   and set in the CI workflow; the local `.env` hides missing declarations. Reproduce CI by
   moving `.env` aside and running `pnpm exec turbo run <task> --force` (restore `.env`!).
-- **SQL CHECK constraints pass on NULL:** guard nullable comparisons (`IS NOT NULL`, `IS TRUE`).
+- **SQL CHECK constraints pass on NULL:** guard nullable comparisons (`IS NOT NULL`, `IS TRUE`,
+  `COALESCE(x IN (…), false)`).
+- **New enum values can't be used in the migration that adds them:** Drizzle's migrator runs
+  all pending migrations in one transaction, and Postgres refuses a value added with
+  `ALTER TYPE … ADD VALUE` until that transaction commits. Recreate the type instead (rename
+  old, create new, `ALTER COLUMN … USING col::text::new_type`, drop old), as in `0014`.
 - **drizzle-kit loads its config as CommonJS:** no `import.meta.dirname` in `drizzle.config.ts`.
   Regenerating migrations: custom SQL goes in `--custom` migrations.
 - **Values exported from `'use client'` files are client references** in Server Components;
