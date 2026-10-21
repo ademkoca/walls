@@ -4,7 +4,7 @@ import { FileWarningIcon } from 'lucide-react';
 import { getFormatter, getTranslations } from 'next-intl/server';
 
 /** When the legal texts were last changed; update it with every change to them. */
-const LAST_UPDATED = new Date('2026-10-16T12:00:00Z');
+const LAST_UPDATED = new Date('2026-10-21T12:00:00Z');
 
 export const PRIVACY_SECTIONS = [
   'controller',

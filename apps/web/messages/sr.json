@@ -1271,8 +1271,7 @@
       "legalName": "Poslovno ime",
       "address": "Adresa",
       "registrationNumber": "Matični broj",
-      "taxId": "PIB",
-      "pending": "U postupku registracije"
+      "taxId": "PIB"
     },
     "form": {
       "title": "Pošaljite nam poruku",
@@ -1303,7 +1302,7 @@
       "sections": {
         "controller": {
           "title": "Ko je odgovoran",
-          "body": "{brand} ({domain}) vodi firma koja je u postupku registracije u Srbiji. Njeni podaci biće navedeni na stranici za kontakt kada registracija bude završena. Možete nam pisati na {email}."
+          "body": "Za lične podatke opisane u ovoj politici odgovoran je {brand} ({domain}). Možete nam pisati na {email}."
         },
         "collect": {
           "title": "Šta prikupljamo",

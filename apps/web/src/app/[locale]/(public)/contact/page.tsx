@@ -27,19 +27,22 @@ const SHORTCUTS = [
   { key: 'faq', href: { pathname: '/', hash: 'home-faq' } },
 ] as const;
 
-/** Contact page: where to write, shortcuts for common questions, company details, the form. */
+/** Contact page: where to write, shortcuts for common questions, company details once known, the form. */
 export default async function ContactPage({ params }: PageProps<'/[locale]/contact'>) {
   await resolveLocale(params);
   const t = await getTranslations('contact');
   const { company } = brand;
-  const pending = t('company.pending');
-  const details = [
-    { label: t('company.name'), value: brand.name },
+  // Only the details that are known; none until the company is registered (decision 2026-10-21).
+  const legalDetails = [
     { label: t('company.legalName'), value: company.legalName },
     { label: t('company.address'), value: company.streetAddress },
     { label: t('company.registrationNumber'), value: company.registrationNumber },
     { label: t('company.taxId'), value: company.taxId },
-  ];
+  ].filter((detail): detail is { label: string; value: string } => detail.value !== null);
+  const details =
+    legalDetails.length > 0
+      ? [{ label: t('company.name'), value: brand.name }, ...legalDetails]
+      : [];
 
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_28rem] lg:px-8">
@@ -96,21 +99,21 @@ export default async function ContactPage({ params }: PageProps<'/[locale]/conta
           ))}
         </ul>
 
-        <section aria-labelledby="company-details" className="space-y-3">
-          <h2 id="company-details" className="text-lg font-semibold">
-            {t('company.title')}
-          </h2>
-          <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
-            {details.map(({ label, value }) => (
-              <div key={label} className="contents">
-                <dt className="text-muted-foreground">{label}</dt>
-                <dd className={value ? 'font-medium' : 'text-muted-foreground italic'}>
-                  {value ?? pending}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </section>
+        {details.length > 0 && (
+          <section aria-labelledby="company-details" className="space-y-3">
+            <h2 id="company-details" className="text-lg font-semibold">
+              {t('company.title')}
+            </h2>
+            <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
+              {details.map(({ label, value }) => (
+                <div key={label} className="contents">
+                  <dt className="text-muted-foreground">{label}</dt>
+                  <dd className="font-medium">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
       </div>
 
       <Card className="self-start">

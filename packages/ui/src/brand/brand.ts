@@ -19,7 +19,7 @@ export interface CompanyDetails {
 }
 
 const COMPANY: CompanyDetails = {
-  email: 'info@walls.rs',
+  email: 'contact@walls.rs',
   legalName: null,
   streetAddress: null,
   registrationNumber: null,
@@ -77,8 +77,9 @@ export const brand = {
   },
 
   /**
-   * The company behind the brand, shown on the contact page. `null` values are shown as
-   * "being registered" until the company exists; replace them when it does.
+   * The company behind the brand. The contact page lists only the details that are set, and
+   * hides the section while all are `null` (the company is not registered yet, decision
+   * 2026-10-21); fill them in once it is.
    */
   company: COMPANY,
 

@@ -1271,8 +1271,7 @@
       "legalName": "Registered name",
       "address": "Address",
       "registrationNumber": "Registration number (MB)",
-      "taxId": "Tax ID (PIB)",
-      "pending": "Being registered"
+      "taxId": "Tax ID (PIB)"
     },
     "form": {
       "title": "Send us a message",
@@ -1303,7 +1302,7 @@
       "sections": {
         "controller": {
           "title": "Who is responsible",
-          "body": "{brand} ({domain}) is run by a company that is currently being registered in Serbia. Its details will be listed on the contact page once registration is complete. You can reach us at {email}."
+          "body": "{brand} ({domain}) is responsible for the personal data described in this policy. You can reach us at {email}."
         },
         "collect": {
           "title": "What we collect",

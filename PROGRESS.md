@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-21 (advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -792,6 +792,15 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   `info@walls.rs` must receive mail (Resend only sends), the company details and a reviewed
   legal text must replace the placeholders, and `LAST_UPDATED` in `legal-page.tsx` must be
   updated with every change. The unused "coming soon" component and texts were removed.
+- **No company details at launch (2026-10-21, user's decision):** the company won't be
+  registered before launch, so the site carries no legal business information. The contact
+  page's "Company details" section appears only once at least one of `brand.company`'s legal
+  fields is set, and then lists only the set ones (the "U postupku registracije" text is gone);
+  the privacy policy's "Who is responsible" no longer mentions a company being registered. The
+  inbox moved from `info@walls.rs` to **`contact@walls.rs`** (user's choice): it needs a
+  Cloudflare Email Routing rule before the form is used. Open for the lawyer: who the data
+  controller is until the company exists. After registration: fill in `brand.company`, restore
+  a controller sentence naming the company, bump `LAST_UPDATED`.
 
 ## Technical decisions
 

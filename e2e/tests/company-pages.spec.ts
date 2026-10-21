@@ -1,7 +1,7 @@
 import { emailedText } from '../support/api-log';
 import { expect, test } from '../support/fixtures';
 
-const INBOX = 'info@walls.rs';
+const INBOX = 'contact@walls.rs';
 
 test('a visitor reads about Walls, writes through the contact form and finds the legal pages', async ({
   page,
@@ -18,11 +18,12 @@ test('a visitor reads about Walls, writes through the contact form and finds the
     '/en/partners',
   );
 
-  // Contact: details marked as pending, and the form delivers to the company inbox.
+  // Contact: no company details until the company is registered, and the form delivers to
+  // the company inbox.
   await footer.getByRole('link', { name: 'Contact' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Contact us' })).toBeVisible();
-  const company = page.getByRole('region', { name: 'Company details' });
-  await expect(company.getByText('Being registered').first()).toBeVisible();
+  await expect(page.getByRole('link', { name: INBOX })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Company details' })).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Send message' }).click();
   await expect(page.getByLabel('Your name')).toHaveAttribute('aria-invalid', 'true');

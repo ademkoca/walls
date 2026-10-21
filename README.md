@@ -124,10 +124,12 @@ verification or reset link, to its console instead of sending it.
 ### Company details and the contact inbox
 
 The contact page shows the company details from `brand.company` in
-[`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts); details set to `null`
-read "being registered". The contact form emails `brand.company.email` (`info@walls.rs`), so
-that address must be able to receive mail: Resend only sends, so set up receiving or forwarding
-at the domain's email provider.
+[`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). They are all `null` until
+the company is registered, and the page shows only the details that are set, so none appear
+for now; fill them in there once registration is done. The contact form emails
+`brand.company.email` (`contact@walls.rs`), so that address must be able to receive mail:
+Resend only sends, so forward it with Cloudflare Email Routing (walls.rs's DNS is at
+Cloudflare).
 
 ### First Super Admin
 
