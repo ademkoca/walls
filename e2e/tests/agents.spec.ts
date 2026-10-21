@@ -101,7 +101,7 @@ test('an agent applies, is approved, activates the account and gets profile chan
   await admin.getByRole('alertdialog').getByRole('button', { name: 'Approve changes' }).click();
   await expect(admin.getByText('Profile changes approved.')).toBeVisible();
 
-  // A visitor sees the agent badge (no "approved" label), the bio and the phone with its status.
+  // A visitor sees the agent badge (no "approved" label), the bio and the phone.
   const { page: visitor, errors: visitorErrors } = await openPage(browser);
   await visitor.goto(profileUrl);
   await expect(visitor.getByRole('heading', { name: agent.name })).toBeVisible();
@@ -110,7 +110,8 @@ test('an agent applies, is approved, activates the account and gets profile chan
   await expect(visitor.getByText('Kvadrat nekretnine')).toBeVisible();
   await expect(visitor.getByText('Prodajem stanove na Dorćolu već deset godina.')).toBeVisible();
   await expect(visitor.getByRole('link', { name: PHONE })).toBeVisible();
-  await expect(visitor.getByText('Not verified')).toBeVisible();
+  // No phone verification before launch: unverified numbers carry no label (SPEC §3).
+  await expect(visitor.getByText(/^(Not verified|Verified)$/)).toHaveCount(0);
   await expect(visitor.getByText(agent.email)).toHaveCount(0);
 
   expect(errors, 'uncaught browser errors (admin)').toEqual([]);
@@ -202,7 +203,8 @@ test('a private seller edits their profile, which is public immediately', async 
   await expect(visitor.getByText('Private seller')).toBeVisible();
   await expect(visitor.getByText('Prodajem porodični stan.')).toBeVisible();
   await expect(visitor.getByRole('link', { name: PHONE })).toBeVisible();
-  await expect(visitor.getByText('Not verified')).toBeVisible();
+  // No phone verification before launch: unverified numbers carry no label (SPEC §3).
+  await expect(visitor.getByText(/^(Not verified|Verified)$/)).toHaveCount(0);
   await expect(visitor.getByText('No published listings at the moment.')).toBeVisible();
   expect(errors, 'uncaught browser errors (visitor)').toEqual([]);
 });

@@ -102,7 +102,7 @@
         },
         "phonePublic": {
           "question": "Is my phone number shown to everyone?",
-          "answer": "You choose whether your phone number is shown on your public profile. When it is shown, we also label whether it's verified."
+          "answer": "You choose whether your phone number is shown on your public profile."
         },
         "currency": {
           "question": "Which currencies can I see prices in?",
@@ -892,11 +892,6 @@
       "phoneAlwaysPublic": "Your phone number is always shown on your profile.",
       "emailPublic": "Show my email address on my profile"
     },
-    "phoneStatus": {
-      "UNVERIFIED": "Not verified",
-      "VERIFIED": "Verified"
-    },
-    "phoneStatusHint": "Phone numbers are shown as not verified; you can't verify them yourself.",
     "save": "Save profile",
     "submitForReview": "Send changes for review",
     "saved": "Profile saved.",
@@ -989,8 +984,6 @@
     },
     "listingCount": "{count, plural, =0 {No listings} one {# listing} other {# listings}}",
     "phoneVerified": "Verified",
-    "phoneUnverified": "Not verified",
-    "phoneUnverifiedHint": "Walls hasn't verified this phone number.",
     "contact": "Contact",
     "noContact": "No public contact details.",
     "memberSince": "On Walls since {date}",
@@ -1236,10 +1229,6 @@
       "address": {
         "title": "Exact addresses stay private",
         "text": "The exact address is hidden by default; visitors see an approximate area until the seller chooses to show it."
-      },
-      "phone": {
-        "title": "Honest contact details",
-        "text": "Phone numbers are labelled as verified or unverified, and an unverified number is never shown as verified."
       },
       "free": {
         "title": "Free to list",

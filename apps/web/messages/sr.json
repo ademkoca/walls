@@ -102,7 +102,7 @@
         },
         "phonePublic": {
           "question": "Da li je moj broj telefona vidljiv svima?",
-          "answer": "Sami birate da li će vaš broj telefona biti prikazan na javnom profilu. Kada je prikazan, označavamo i da li je verifikovan."
+          "answer": "Sami birate da li će vaš broj telefona biti prikazan na javnom profilu."
         },
         "currency": {
           "question": "U kojim valutama mogu videti cene?",
@@ -892,11 +892,6 @@
       "phoneAlwaysPublic": "Broj telefona se uvek prikazuje na vašem profilu.",
       "emailPublic": "Prikaži moju email adresu na profilu"
     },
-    "phoneStatus": {
-      "UNVERIFIED": "Nije verifikovan",
-      "VERIFIED": "Verifikovan"
-    },
-    "phoneStatusHint": "Brojevi telefona prikazuju se kao neverifikovani; ne možete ih sami verifikovati.",
     "save": "Sačuvaj profil",
     "submitForReview": "Pošalji izmene na proveru",
     "saved": "Profil je sačuvan.",
@@ -989,8 +984,6 @@
     },
     "listingCount": "{count, plural, =0 {Nema oglasa} one {# oglas} few {# oglasa} other {# oglasa}}",
     "phoneVerified": "Verifikovan",
-    "phoneUnverified": "Nije verifikovan",
-    "phoneUnverifiedHint": "Walls nije verifikovao ovaj broj telefona.",
     "contact": "Kontakt",
     "noContact": "Nema javnih kontakt podataka.",
     "memberSince": "Na Walls od {date}",
@@ -1236,10 +1229,6 @@
       "address": {
         "title": "Tačna adresa ostaje privatna",
         "text": "Tačna adresa je podrazumevano skrivena; posetioci vide približnu oblast dok prodavac ne odluči da je prikaže."
-      },
-      "phone": {
-        "title": "Iskreni kontakt podaci",
-        "text": "Brojeve telefona označavamo kao verifikovane ili neverifikovane i nikada ne prikazujemo neverifikovan broj kao verifikovan."
       },
       "free": {
         "title": "Oglašavanje je besplatno",

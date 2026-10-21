@@ -10,7 +10,6 @@ import {
   HomeIcon,
   type LucideIcon,
   MegaphoneIcon,
-  PhoneIcon,
   SearchIcon,
   UserCheckIcon,
 } from 'lucide-react';
@@ -45,11 +44,10 @@ const WAYS: { key: 'find' | 'sell' | 'agent'; href: string; icon: LucideIcon }[]
   { key: 'agent', href: PARTNERS_PATH, icon: UserCheckIcon },
 ];
 
-const TRUST: { key: 'reviewed' | 'agents' | 'address' | 'phone' | 'free'; icon: LucideIcon }[] = [
+const TRUST: { key: 'reviewed' | 'agents' | 'address' | 'free'; icon: LucideIcon }[] = [
   { key: 'reviewed', icon: ClipboardCheckIcon },
   { key: 'agents', icon: BadgeCheckIcon },
   { key: 'address', icon: EyeOffIcon },
-  { key: 'phone', icon: PhoneIcon },
   { key: 'free', icon: HandCoinsIcon },
 ];
 
@@ -104,7 +102,7 @@ export default async function AboutPage({ params }: PageProps<'/[locale]/about'>
         <h2 id="about-trust" className="text-2xl font-semibold tracking-tight">
           {t('trustTitle', values)}
         </h2>
-        <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
           {TRUST.map(({ key, icon: Icon }) => (
             <li key={key} className="flex gap-4">
               <Icon className="mt-0.5 size-6 shrink-0 text-primary" aria-hidden />

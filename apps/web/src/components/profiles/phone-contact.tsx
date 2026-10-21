@@ -7,8 +7,9 @@ import { useTranslations } from 'next-intl';
 const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, '')}`;
 
 /**
- * A public phone number with its verification status, which must always be shown next to
- * the number and never claim "verified" for an unverified number (SPEC §3–4).
+ * A public phone number. Only a number a trusted verification process marked as verified
+ * gets a "Verified" badge; unverified numbers carry no label (SPEC §3–4). The MVP has no
+ * phone verification, so no number shows the badge until it is built after launch.
  */
 export function PhoneContact({ contact }: { contact: PublicPhoneContact }) {
   const t = useTranslations('publicProfile');
@@ -19,14 +20,10 @@ export function PhoneContact({ contact }: { contact: PublicPhoneContact }) {
       <a href={telHref(contact.phone)} className="font-medium hover:underline">
         {contact.phone}
       </a>
-      {verified ? (
+      {verified && (
         <Badge variant="secondary">
           <BadgeCheckIcon data-icon="inline-start" aria-hidden />
           {t('phoneVerified')}
-        </Badge>
-      ) : (
-        <Badge variant="outline" title={t('phoneUnverifiedHint')}>
-          {t('phoneUnverified')}
         </Badge>
       )}
     </div>

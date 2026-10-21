@@ -9,7 +9,6 @@ import {
 } from '@walls/shared';
 import { type ProfileInput, PROFILE_INPUT_LIMITS, profileInputSchema } from '@walls/validation';
 import { Alert, AlertDescription, AlertTitle } from '@walls/ui/components/alert';
-import { Badge } from '@walls/ui/components/badge';
 import { Button, buttonVariants } from '@walls/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
 import { FieldGroup } from '@walls/ui/components/field';
@@ -196,24 +195,14 @@ export function ProfileEditor({ initialProfile }: { initialProfile: MyProfile })
 
         <Section title={t('sections.contact')}>
           <FieldGroup>
-            <FormField
-              id="phone"
-              label={t('fields.phone')}
-              description={t('phoneStatusHint')}
-              error={errors.phone}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <Input
-                  {...fieldAria('phone', errors.phone, true)}
-                  type="tel"
-                  autoComplete="tel"
-                  className="max-w-xs"
-                  {...form.register('phone')}
-                />
-                <Badge variant="outline">
-                  {t(`phoneStatus.${profile.phoneVerificationStatus}`)}
-                </Badge>
-              </div>
+            <FormField id="phone" label={t('fields.phone')} error={errors.phone}>
+              <Input
+                {...fieldAria('phone', errors.phone)}
+                type="tel"
+                autoComplete="tel"
+                className="max-w-xs"
+                {...form.register('phone')}
+              />
             </FormField>
             {isPhoneAlwaysPublic(profile.role) ? (
               <p className="text-sm text-muted-foreground">{t('fields.phoneAlwaysPublic')}</p>
