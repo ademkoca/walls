@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-21 (advertiser types pushed; phone verification labels hidden, phone verification planned after launch). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-21 (advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -133,6 +133,18 @@ numbers without a label; `PhoneContact` shows a "Verified" badge only for `VERIF
 The About page's "honest contact details" trust point and the FAQ's labelling sentence were
 removed. Phone verification is planned as the first post-launch feature: proposal and open
 decisions in SPEC §45.1.
+
+**Link previews (2026-10-21):** no page had an `og:image`: Next.js replaces a
+parent's `openGraph` as a whole, so the locale layout's `openGraph` dropped
+`app/opengraph-image.png`. Now `openGraph(locale, page)` in `apps/web/src/lib/seo.ts` gives every
+page the site name, locale and the logo card (with localized alt text); pages that set their own
+build on it. Listings use the cover and profiles the profile picture (logo card without one),
+cropped by the API through `MediaStorage.linkPreviewImage` (Cloudinary
+`c_fill,g_auto,w_1200,h_630,f_jpg,q_auto` for listings, 600×600 for profile pictures, about
+50–90 KB, small enough for WhatsApp/Viber). Profiles with a picture use X's square `summary`
+card. Home, listing and profile pages send `og:url`. The web falls back to the uncropped image
+while the API lacks `linkPreviewImage`. After deploying: re-scrape in Facebook's Sharing Debugger
+and LinkedIn's Post Inspector; messaging apps cache per device (test with `?v=2`).
 
 **`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
 reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
