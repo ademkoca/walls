@@ -85,7 +85,7 @@ Examples:
 -   private-seller email verification
 -   agent application review and approval
 -   publication requirements
--   phone verification-status display
+-   phone verification-status integrity
 -   profile change approval
 -   price conversion
 
@@ -193,7 +193,7 @@ Private sellers register with email/password and must verify email before their 
 
 Provide a separate “For professionals” application flow for agents, agencies and investors. Collect the advertiser type, professional details and supporting proof; do not create/activate a professional account or public profile until an Admin/Super Admin approves the application. Do not expose an agent role selector in ordinary public registration.
 
-Phone verification status must be stored and displayed accurately wherever public contact details show a phone number. Never allow a user to mark their own number verified. No phone-verification workflow is in MVP scope.
+Phone verification status must be stored accurately. Public contact details label only verified numbers ("Verified") and never present an unverified number as verified; unverified numbers carry no label. Never allow a user to mark their own number verified. No phone-verification workflow is in MVP scope; it is planned after launch (`SPEC.md` §45.1).
 
 Authentication and authorization must be tested independently.
 

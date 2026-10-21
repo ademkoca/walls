@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-21 (advertiser types: agencies and investors, uncommitted). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-21 (advertiser types pushed; phone verification labels hidden, phone verification planned after launch). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -95,7 +95,7 @@ systemd 2026-10-20: 23 tables, 2116 rows, 139 KB. The age private key is on the 
 (`/opt/walls/backup/age-key.txt`) and **must also be in the user's password manager**.
 
 **Advertiser types: agencies and investors (user's decision 2026-10-20, built 2026-10-21,
-uncommitted, awaiting the user's review):** for the Novi Pazar launch, where most professional
+pushed `cafa62e` + docs `01ea83d`, CI and Deploy (VPS) green; preview re-seeded by the user):** for the Novi Pazar launch, where most professional
 advertisers are agencies and investors. SPEC §2.1, §5, §16, §17, §19 updated. Decisions:
 
 - Types: private seller, **agent, agency, investor** ("investor" covers developers/builders).
@@ -125,6 +125,14 @@ advertisers are agencies and investors. SPEC §2.1, §5, §16, §17, §19 update
   "Professional"; lists show the kind.
 - Demo data: Stefan → agency "Primer Nekretnine", Tamara → investor "Primer Gradnja" (keys
   `agencija`, `investitor`); the listing assigned to Tamara is now assigned to the agency.
+
+**Phone verification labels hidden (user's decision 2026-10-21):** no number can be verified in
+the MVP, so the "Not verified" badge was noise. Public pages and the dashboard profile show phone
+numbers without a label; `PhoneContact` shows a "Verified" badge only for `VERIFIED` numbers
+(none until verification exists). The status is still stored and reset on every number change.
+The About page's "honest contact details" trust point and the FAQ's labelling sentence were
+removed. Phone verification is planned as the first post-launch feature: proposal and open
+decisions in SPEC §45.1.
 
 **`TRUST_PROXY_HOPS` analysis (2026-10-14, from real Render request logs):** a browser request
 reaches Express with `x-forwarded-for: <visitor>, <Netlify edge>, <Netlify proxy egress, AWS
@@ -1021,5 +1029,13 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 9. **Inquiries, notifications, analytics.**
 10. **Hardening:** extend the Playwright E2E suite (started in Phase 4) to SPEC §38 flows, responsive pass, security review,
     deployment configs (Netlify/Render/Supabase; check pnpm 12 on build images).
+
+**After launch:**
+
+11. **Phone verification** (first post-launch feature, SPEC §45.1): SMS one-time codes behind an
+    `SmsService` abstraction, rate limits and an SMS budget, `VERIFIED` status with audit entry,
+    "Verified" badge (already rendered for verified numbers). Decide the open questions in
+    §45.1 with the user first: required or optional, how unverified numbers are labelled, agents'
+    change-request order, provider and budget, admin verification by other means.
 
 Also: update this file, README, SPEC and `.env.example` as each phase lands.

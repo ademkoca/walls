@@ -216,7 +216,7 @@ Private sellers can manage their own listings and have public seller profile pag
 
 Both private sellers and approved professionals submit listings for review. Admins/Super Admins must approve listings before they appear publicly.
 
-Phone verification is not required for MVP. Public contact details must clearly label phone numbers as verified or unverified; users cannot self-mark a number as verified.
+Phone verification is not required for MVP and is planned for after launch (SPEC §45.1). Until then, public contact details show phone numbers without a verification label; only a verified number would get a "Verified" badge, and users cannot self-mark a number as verified.
 
 Admins can manage all listings and approved agents. Super Admins additionally manage administrators and permanent deletion.
 
@@ -439,7 +439,6 @@ The MVP includes:
 -   private-seller registration and email verification
 -   private-seller dashboard and public seller profiles
 -   separate application for agents, agencies and investors, with proof and admin approval
--   phone verification-status labels (without phone verification workflow)
 -   sale/rent support
 -   property search
 -   filtering and sorting

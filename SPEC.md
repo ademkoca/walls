@@ -206,7 +206,7 @@ Private sellers register through the standard public registration flow. Once the
 
 Prospective agents, agencies and investors use a distinct “For professionals” entry point and submit their advertiser type, professional details and supporting proof. Admin/Super Admin approval is required before an active account and public profile are created. After approval, the agent completes account setup using a secure email flow; never send or manually share passwords.
 
-Phone verification is not required in the MVP. Whenever a phone number is shown in public seller/agent contact details, its verification status must be clearly labelled. Unverified phone numbers must never be presented as verified. Do not implement phone verification as part of MVP.
+Phone verification is not required in the MVP. Because no number can be verified before phone verification exists, public contact details show phone numbers without a verification label (decision 2026-10-21): only a number with status `VERIFIED` gets a "Verified" badge, and unverified numbers are never presented as verified. Do not implement phone verification as part of MVP; it is planned after launch (§45).
 
 However, authentication architecture MUST allow Google login to be added later without replacing the existing user model.
 
@@ -226,7 +226,7 @@ Private sellers and agents may edit permitted profile information such as:
 
 Email changes for active accounts require the email-verification flow and must not silently replace the authenticated identity. Retain administrator approval for agent email/phone changes where applicable under the existing agent-profile workflow. Private seller contact changes must be auditable.
 
-Phone verification is not required for MVP. Store phone verification status explicitly (for example, `UNVERIFIED` / `VERIFIED`) and display a clear status label beside public phone contact details. The status may only be set to verified by a trusted verification process; users must not be able to mark their own phone number verified. No phone-verification process is included in MVP, so newly supplied numbers remain unverified unless a future approved verification feature is implemented.
+Phone verification is not required for MVP. Store phone verification status explicitly (for example, `UNVERIFIED` / `VERIFIED`). Public contact details label only verified numbers ("Verified"); unverified numbers carry no label (§3). The status may only be set to verified by a trusted verification process; users must not be able to mark their own phone number verified. No phone-verification process is included in MVP, so newly supplied numbers remain unverified unless a future approved verification feature is implemented.
 
 Approval rules by account type:
 
@@ -740,7 +740,6 @@ Public professional pages show:
 -   display name
 -   approved public contact information
 -   biography and professional details
--   phone verification status alongside the phone number
 -   all currently public listings attributed to that professional
 -   a badge with their advertiser type (agent, agency or investor)
 
@@ -748,12 +747,11 @@ Public private-seller pages show:
 
 -   display name and optional profile picture/bio
 -   contact information the seller has chosen to make public
--   phone verification status alongside the phone number
 -   all currently public listings attributed to that seller
 
 Contact details on public profiles: a professional's phone number is always shown; a private seller chooses whether to show theirs. An email address is shown only when its owner opts in (for agents, that choice is part of the reviewed profile change). A professional's page lists the public listings they created and those assigned to them.
 
-A public profile must not expose internal/admin-only information, email addresses unless explicitly configured for public display, agent application documents, identity evidence, or other verification evidence. Every professional account exists only after an Admin/Super Admin approved its application, so the public site names the advertiser type (private seller, agent, agency, investor) and shows no separate "approved" or "verified" label for professionals. Phone verification status is separate from professional approval.
+A public profile must not expose internal/admin-only information, email addresses unless explicitly configured for public display, agent application documents, identity evidence, or other verification evidence. Every professional account exists only after an Admin/Super Admin approved its application, so the public site names the advertiser type (private seller, agent, agency, investor) and shows no separate "approved" or "verified" label for professionals. A phone number is labelled "Verified" only when its status is `VERIFIED` (§3); this is separate from professional approval.
 
 ------------------------------------------------------------------------
 
@@ -1480,7 +1478,6 @@ The MVP includes:
 -   private-seller dashboard and public profile pages
 -   separate application for agents, agencies and investors, with supporting proof and admin approval
 -   advertiser-type badges and an advertiser-type search filter
--   public phone verification-status labels (no phone verification flow)
 -   property search
 -   filtering
 -   sorting
@@ -1562,6 +1559,37 @@ Design clean extension points for:
 
 Do not prematurely implement these features.
 
+## 45.1 Planned after launch: phone verification
+
+Decided 2026-10-21: phone verification is the first feature after launch. It is **not part of
+the MVP**; do not implement it until the open decisions below are made and recorded here.
+
+Proposed approach:
+
+-   The owner of a number verifies it from their dashboard profile by entering a one-time code
+    sent by SMS to that number.
+-   SMS is sent through an `SmsService` abstraction with one provider behind it (candidates:
+    Infobip, Twilio, Vonage), so the domain logic does not depend on the provider, as with
+    `EmailService`.
+-   Codes are short-lived, single-use and stored only as a hash. Attempts are limited, and
+    sending is rate-limited per number, account and IP address, since every SMS costs money.
+-   A successful check sets `phoneVerificationStatus = VERIFIED` with the time of verification
+    and an audit entry. Changing the number resets it to `UNVERIFIED` (already the case).
+-   Public pages show a "Verified" badge next to verified numbers (already implemented for
+    `VERIFIED` numbers).
+
+Open decisions:
+
+-   Whether verification is required, and for whom (professionals, private sellers who show
+    their number), and what happens to numbers added before launch.
+-   How unverified numbers are shown once verification exists: no label (as in the MVP) or
+    "Not verified".
+-   For agents, whose phone changes need Admin approval: verify the new number before the
+    change request is sent, or after it is approved.
+-   The SMS provider and a monthly SMS budget.
+-   Whether Admins may mark a number verified by other means (for example a phone call), which
+    would need its own audit rule.
+
 ------------------------------------------------------------------------
 
 # 46. Acceptance Criteria
@@ -1593,7 +1621,7 @@ Do not prematurely implement these features.
 -   Private seller cannot publish directly.
 -   Private seller can see rejection reasons and resubmit rejected listings.
 -   Private seller has a public profile page showing their public listings.
--   Public contact details clearly show whether the phone number is verified; phone verification is not required for MVP.
+-   Public contact details never present an unverified phone number as verified; phone verification is not required for MVP (planned after launch, §45.1).
 -   Private seller cannot access or manage another user's listings.
 
 ## Agent (agents, agencies and investors)
@@ -1608,7 +1636,7 @@ Do not prematurely implement these features.
 -   Agent cannot publish directly.
 -   Agent can see rejection reasons and resubmit rejected listings.
 -   Agent can see inquiries for their listings.
--   Public profile shows the advertiser type as a badge, with no separate "approved" label, and the phone's verification status separately.
+-   Public profile shows the advertiser type as a badge, with no separate "approved" label.
 
 ## Admin
 
