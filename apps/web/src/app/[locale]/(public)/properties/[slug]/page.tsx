@@ -23,7 +23,7 @@ import type { AppLocale } from '@/i18n/routing';
 import { getPublicListing } from '@/lib/api/public';
 import { intlLocale } from '@/lib/intl-locale';
 import { getPricing } from '@/lib/pricing';
-import { absoluteUrl, jsonLd, localizedAlternates } from '@/lib/seo';
+import { absoluteUrl, jsonLd, localizedAlternates, openGraph, previewImage } from '@/lib/seo';
 
 const DESCRIPTION_LENGTH = 160;
 
@@ -40,12 +40,19 @@ export async function generateMetadata({
   if (!listing) return {};
   const title = localized(listing.title, locale);
   const description = localized(listing.description, locale).slice(0, DESCRIPTION_LENGTH);
-  const cover = listing.images[0];
+  // The cover cropped for link previews; the API may not send it yet, then the cover itself.
+  const image = listing.linkPreviewImage ?? listing.images[0];
+  const alternates = localizedAlternates(locale, publicListingPath(slug));
   return {
     title,
     description,
-    alternates: localizedAlternates(locale, publicListingPath(slug)),
-    openGraph: { title, description, ...(cover ? { images: [cover.url] } : {}) },
+    alternates,
+    openGraph: await openGraph(locale, {
+      title,
+      description,
+      url: alternates.canonical,
+      ...(image ? { images: [previewImage(image, title)] } : {}),
+    }),
   };
 }
 

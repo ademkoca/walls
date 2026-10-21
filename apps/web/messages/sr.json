@@ -2,7 +2,8 @@
   "metadata": {
     "title": "{brand} – nekretnine u Srbiji",
     "titleTemplate": "%s | {brand}",
-    "description": "Pronađite stanove, kuće, poslovne prostore i placeve za prodaju i izdavanje širom Srbije."
+    "description": "Pronađite stanove, kuće, poslovne prostore i placeve za prodaju i izdavanje širom Srbije.",
+    "imageAlt": "Logo {brand} {descriptor}"
   },
   "common": {
     "skipToContent": "Preskoči na sadržaj",

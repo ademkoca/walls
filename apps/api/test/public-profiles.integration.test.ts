@@ -68,6 +68,20 @@ describe('public seller profiles (SPEC §19)', () => {
     });
   });
 
+  it('offers the profile picture for link previews, or nothing without one', async () => {
+    const seller = await ctx.signedInUser();
+    const path = `/api/v1/public/sellers/${seller.user.slug}`;
+    expect(pageOf(await ctx.client().get(path)).linkPreviewImage).toBeNull();
+
+    const avatarUrl = 'https://media.test/avatars/preview';
+    await setProfile(seller.user.id, { avatarStorageKey: 'avatars/preview', avatarUrl });
+    expect(pageOf(await ctx.client().get(path)).linkPreviewImage).toEqual({
+      url: avatarUrl,
+      width: null,
+      height: null,
+    });
+  });
+
   it('lists the seller’s published listings only', async () => {
     const seller = await ctx.signedInUser();
     const { id } = await publishedListing(seller);

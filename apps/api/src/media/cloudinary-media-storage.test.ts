@@ -72,3 +72,27 @@ describe('Cloudinary uploads (dynamic folders)', () => {
     expect(form.get('signature')).toBe(expectedSignature(form));
   });
 });
+
+describe('Cloudinary link preview images', () => {
+  const storage = new CloudinaryMediaStorage(credentials);
+  const media = {
+    key: 'listings/abc/def',
+    url: 'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto/listings/abc/def',
+  };
+
+  it('crops listing covers to the wide preview shape, as JPEG', () => {
+    expect(storage.linkPreviewImage(media, 'wide')).toEqual({
+      url: 'https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,w_1200,h_630,f_jpg,q_auto/listings/abc/def',
+      width: 1200,
+      height: 630,
+    });
+  });
+
+  it('crops profile pictures to a square', () => {
+    expect(storage.linkPreviewImage(media, 'square')).toEqual({
+      url: 'https://res.cloudinary.com/demo/image/upload/c_fill,g_auto,w_600,h_600,f_jpg,q_auto/listings/abc/def',
+      width: 600,
+      height: 600,
+    });
+  });
+});

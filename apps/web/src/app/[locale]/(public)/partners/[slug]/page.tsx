@@ -5,7 +5,7 @@ import { PublicProfileView } from '@/components/public/public-profile-view';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { getPublicProfile } from '@/lib/api/public';
 import { getPricing } from '@/lib/pricing';
-import { localizedAlternates } from '@/lib/seo';
+import { localizedAlternates, openGraph, previewImage } from '@/lib/seo';
 
 const DESCRIPTION_LENGTH = 160;
 
@@ -16,11 +16,21 @@ export async function generateMetadata({
   const page = await getPublicProfile('partners', slug);
   if (!page) return {};
   const { displayName, bio, avatarUrl } = page.profile;
+  const alternates = localizedAlternates(locale, `${PARTNERS_PATH}/${slug}`);
+  // The profile picture cropped for link previews (the API may not send it yet), or the
+  // site's logo card when there is no picture.
+  const image =
+    page.linkPreviewImage ?? (avatarUrl ? { url: avatarUrl, width: null, height: null } : null);
   return {
     title: displayName,
-    alternates: localizedAlternates(locale, `${PARTNERS_PATH}/${slug}`),
+    alternates,
     ...(bio ? { description: bio.slice(0, DESCRIPTION_LENGTH) } : {}),
-    ...(avatarUrl ? { openGraph: { images: [avatarUrl] } } : {}),
+    openGraph: await openGraph(locale, {
+      url: alternates.canonical,
+      ...(image ? { images: [previewImage(image, displayName)] } : {}),
+    }),
+    // A square picture shows whole in the small card, not cropped to a wide one.
+    ...(image ? { twitter: { card: 'summary' } } : {}),
   };
 }
 

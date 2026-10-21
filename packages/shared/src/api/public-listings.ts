@@ -29,6 +29,16 @@ export interface PublicListingImage {
   height: number | null;
 }
 
+/**
+ * An image for link previews on social media and messaging apps. The size is known when the
+ * provider crops it to the preview shape (Cloudinary), otherwise null.
+ */
+export interface LinkPreviewImage {
+  url: string;
+  width: number | null;
+  height: number | null;
+}
+
 /** A published listing's public page. Never includes a hidden address or private data. */
 export interface PublicListingDetail {
   id: string;
@@ -44,6 +54,8 @@ export interface PublicListingDetail {
   location: PublicListingLocation;
   /** Approved images in display order, the cover first. */
   images: PublicListingImage[];
+  /** The cover image, cropped for link previews. */
+  linkPreviewImage: LinkPreviewImage | null;
   /** The listing's creator (SPEC §5). */
   advertiser: PublicProfile;
   /** The agent an Admin assigned to the listing, if any (SPEC §46). */

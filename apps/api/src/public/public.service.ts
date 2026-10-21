@@ -8,6 +8,7 @@ import {
 } from '@walls/shared';
 import type { PartnerDirectoryQuery } from '@walls/validation';
 import { notFound } from '../http/errors';
+import type { MediaStorage } from '../media/media-storage';
 import { toPage } from '../http/paging';
 import { toCards } from './listing-cards';
 import { advertiserType, toPublicProfile } from './public-profile-view';
@@ -18,13 +19,24 @@ export const PARTNERS_PAGE_SIZE = 24;
 
 /** Public private-seller and professional profiles (SPEC §19). */
 export class PublicService {
-  constructor(private readonly db: Database) {}
+  constructor(
+    private readonly db: Database,
+    private readonly media: MediaStorage,
+  ) {}
 
   async profile(role: Role, slug: string): Promise<PublicProfilePage> {
     const user = await findPublicUser(this.db, slug, role);
     if (!user) throw notFound();
     const listings = await toCards(this.db, await findPublicListingsOf(this.db, user.id));
-    return { profile: toPublicProfile(user), listings };
+    const { avatarStorageKey, avatarUrl } = user;
+    return {
+      profile: toPublicProfile(user),
+      listings,
+      linkPreviewImage:
+        avatarStorageKey && avatarUrl
+          ? this.media.linkPreviewImage({ key: avatarStorageKey, url: avatarUrl }, 'square')
+          : null,
+    };
   }
 
   /** The directory of agents, agencies and investors, optionally of one kind (SPEC §16). */

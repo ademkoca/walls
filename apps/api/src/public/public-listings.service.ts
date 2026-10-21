@@ -13,6 +13,7 @@ import {
 import type { ListingSearch } from '@walls/validation';
 import type { ExchangeRatesService } from '../exchange-rates/exchange-rates.service';
 import { notFound } from '../http/errors';
+import type { MediaStorage } from '../media/media-storage';
 import { priceView, storedPrice } from '../listings/listing-content';
 import { toCards } from './listing-cards';
 import {
@@ -31,6 +32,7 @@ export class PublicListingsService {
   constructor(
     private readonly db: Database,
     private readonly rates: ExchangeRatesService,
+    private readonly media: MediaStorage,
   ) {}
 
   async search(search: ListingSearch): Promise<ListingSearchResult> {
@@ -71,7 +73,11 @@ export class PublicListingsService {
   async listing(slug: string): Promise<PublicListingDetail> {
     const row = await findPublicListing(this.db, slug);
     if (!row) throw notFound();
-    return toPublicListingDetail(row);
+    const cover = row.images[0];
+    return {
+      ...toPublicListingDetail(row),
+      linkPreviewImage: cover ? this.media.linkPreviewImage(cover, 'wide') : null,
+    };
   }
 
   async sitemap(): Promise<SitemapEntries> {
@@ -92,7 +98,9 @@ export class PublicListingsService {
  * The public page of a listing. The street address and coordinates are left out unless
  * the advertiser made them public (SPEC §13); the approximate area is given instead.
  */
-function toPublicListingDetail(row: PublicListingRow): PublicListingDetail {
+function toPublicListingDetail(
+  row: PublicListingRow,
+): Omit<PublicListingDetail, 'linkPreviewImage'> {
   const { listing, property, location, texts } = row;
   const text = (locale: Locale) => texts.find((entry) => entry.locale === locale);
   const english = text(Locale.EN);
@@ -133,7 +141,7 @@ function toPublicListingDetail(row: PublicListingRow): PublicListingDetail {
       },
       listing.isExactAddressPublic,
     ),
-    images: row.images,
+    images: row.images.map(({ url, width, height }) => ({ url, width, height })),
     advertiser: toPublicProfile(row.creator),
     assignedAgent: row.assignedAgent ? toPublicProfile(row.assignedAgent) : null,
     publishedAt: listing.publishedAt!.toISOString(),

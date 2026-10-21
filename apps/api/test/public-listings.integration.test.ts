@@ -260,6 +260,13 @@ describe('public listing page (SPEC §13, §16)', () => {
     expect(listing.location.approximate).toMatchObject({ radiusMeters: 250 });
     expect(JSON.stringify(listing)).not.toContain('Njegoševa');
     expect(listing.images).toHaveLength(3);
+    // The cover, as the storage delivers it for link previews (untransformed in tests).
+    expect(listing.linkPreviewImage).toEqual({
+      url: listing.images[0]?.url,
+      width: null,
+      height: null,
+    });
+    expect(listing.images[0]).not.toHaveProperty('key');
   });
 
   it('shows the exact address and the assigned agent when there are', async () => {

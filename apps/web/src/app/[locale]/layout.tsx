@@ -7,9 +7,8 @@ import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { BrowserSetup } from '@/components/layout/browser-setup';
 import { routing } from '@/i18n/routing';
+import { openGraph } from '@/lib/seo';
 import { uiFont } from '../fonts';
-
-const OPEN_GRAPH_LOCALES = { sr: 'sr_RS', en: 'en_US' } as const;
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -27,7 +26,7 @@ export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Pr
     },
     description: t('description'),
     applicationName: brand.name,
-    openGraph: { siteName: brand.name, locale: OPEN_GRAPH_LOCALES[locale], type: 'website' },
+    openGraph: await openGraph(locale),
   };
 }
 

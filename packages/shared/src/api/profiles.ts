@@ -11,6 +11,7 @@ import type { ProfileField } from '../user/profile';
 import type { PublicPhoneContact } from '../user/phone';
 import type { ProfessionalSellerType } from '../user/seller-type';
 import type { PriceView, UserReference } from './listings';
+import type { LinkPreviewImage } from './public-listings';
 
 /** Profile, agent-application and public-profile shapes. Dates are ISO 8601 strings. */
 
@@ -154,6 +155,8 @@ export interface PublicProfile {
 export interface PublicProfilePage {
   profile: PublicProfile;
   listings: PublicListingCard[];
+  /** The profile picture, cropped for link previews; null without a picture. */
+  linkPreviewImage: LinkPreviewImage | null;
 }
 
 /** An approved professional in the public directory (SPEC §16, §19). */

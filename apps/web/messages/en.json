@@ -2,7 +2,8 @@
   "metadata": {
     "title": "{brand} – real estate in Serbia",
     "titleTemplate": "%s | {brand}",
-    "description": "Find apartments, houses, commercial spaces and land for sale and rent across Serbia."
+    "description": "Find apartments, houses, commercial spaces and land for sale and rent across Serbia.",
+    "imageAlt": "{brand} {descriptor} logo"
   },
   "common": {
     "skipToContent": "Skip to content",

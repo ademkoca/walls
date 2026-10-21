@@ -17,10 +17,12 @@ import { Link } from '@/i18n/navigation';
 import { getPublicHome } from '@/lib/api/public';
 import type { Pricing } from '@/lib/currency';
 import { getPricing } from '@/lib/pricing';
-import { localizedAlternates } from '@/lib/seo';
+import { localizedAlternates, openGraph } from '@/lib/seo';
 
 export async function generateMetadata({ params }: PageProps<'/[locale]'>): Promise<Metadata> {
-  return { alternates: localizedAlternates(await metadataLocale(params), '/') };
+  const locale = await metadataLocale(params);
+  const alternates = localizedAlternates(locale, '/');
+  return { alternates, openGraph: await openGraph(locale, { url: alternates.canonical }) };
 }
 
 async function ListingSection({

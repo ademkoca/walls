@@ -256,7 +256,12 @@ export async function findPublicListing(db: DbExecutor, slug: string) {
       .orderBy(asc(amenities.sortOrder)),
     // Only approved images are public; images added by a pending revision wait (SPEC §6).
     db
-      .select({ url: listingMedia.url, width: listingMedia.width, height: listingMedia.height })
+      .select({
+        key: listingMedia.storageKey,
+        url: listingMedia.url,
+        width: listingMedia.width,
+        height: listingMedia.height,
+      })
       .from(listingMedia)
       .where(
         and(

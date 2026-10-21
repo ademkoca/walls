@@ -142,6 +142,35 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await expect(visitor.getByText('Dobračina')).toHaveCount(0);
   await expect(visitor.getByText(user.name, { exact: true })).toBeVisible();
 
+  // Link previews show the listing's own photo, not the logo card.
+  const listingImage = visitor.locator('meta[property="og:image"]');
+  await expect(listingImage).toHaveCount(1);
+  await expect(listingImage).not.toHaveAttribute('content', /opengraph-image/);
+  await expect(visitor.locator('meta[property="og:site_name"]')).toHaveAttribute(
+    'content',
+    'Walls',
+  );
+  await expect(visitor.locator('meta[property="og:url"]')).toHaveAttribute(
+    'content',
+    new RegExp(`/en/properties/${slug}$`),
+  );
+
+  // The seller has no profile picture, so their profile's preview is the logo card.
+  const profilePath = await visitor
+    .getByRole('link', { name: 'View profile' })
+    .first()
+    .getAttribute('href');
+  const profile = await (await browser.newContext()).newPage();
+  await profile.goto(profilePath!);
+  await expect(profile.locator('meta[property="og:image"]')).toHaveAttribute(
+    'content',
+    /\/opengraph-image\.png$/,
+  );
+  await expect(profile.locator('meta[name="twitter:card"]')).toHaveAttribute(
+    'content',
+    'summary_large_image',
+  );
+
   // Prices in dinars, converted at the cached rate, with the price as listed.
   await visitor.getByRole('button', { name: 'RSD', exact: true }).click();
   await expect(visitor.getByText('≈ RSD 16,994,000')).toBeVisible();
@@ -155,4 +184,25 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   // Search engines find the listing in the sitemap.
   const sitemap = await visitor.request.get('/sitemap.xml');
   expect(await sitemap.text()).toContain(`/properties/${slug}</loc>`);
+});
+
+test('link previews show the logo card on pages without an image of their own', async ({
+  page,
+}) => {
+  for (const path of ['/', '/en', '/en/about']) {
+    await page.goto(path);
+    const image = page.locator('meta[property="og:image"]');
+    await expect(image).toHaveAttribute('content', /^https?:\/\/.+\/opengraph-image\.png$/);
+    await expect(page.locator('meta[property="og:image:alt"]')).toHaveAttribute(
+      'content',
+      path === '/' ? 'Logo Walls Real Estate' : 'Walls Real Estate logo',
+    );
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
+      'content',
+      'summary_large_image',
+    );
+  }
+  const response = await page.request.get('/opengraph-image.png');
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toBe('image/png');
 });

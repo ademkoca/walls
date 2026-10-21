@@ -115,8 +115,8 @@ export function createApp({
   );
   const profilesService = new ProfilesService(db, authService, mediaStorage, logger);
   const profileChangesService = new ProfileChangesService(db, config, mediaStorage, logger);
-  const publicService = new PublicService(db);
-  const publicListingsService = new PublicListingsService(db, exchangeRates);
+  const publicService = new PublicService(db, mediaStorage);
+  const publicListingsService = new PublicListingsService(db, exchangeRates, mediaStorage);
   const inquiriesService = new InquiriesService(db, config, logger);
   const contactService = new ContactService(db, logger);
   const viewsService = new ListingViewsService(db, config.sessionSecret);

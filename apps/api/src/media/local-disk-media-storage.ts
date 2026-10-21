@@ -1,7 +1,8 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import express, { type RequestHandler } from 'express';
-import type { MediaStorage, StoredMedia } from './media-storage';
+import type { LinkPreviewImage } from '@walls/shared';
+import { type MediaStorage, type StoredMedia, untransformedPreview } from './media-storage';
 
 /** Path under which the API serves locally stored files (reached through the web proxy). */
 export const LOCAL_MEDIA_ROUTE = '/api/v1/media';
@@ -31,6 +32,10 @@ export class LocalDiskMediaStorage implements MediaStorage {
 
   async delete(key: string): Promise<void> {
     await rm(this.pathFor(key), { force: true });
+  }
+
+  linkPreviewImage(media: StoredMedia): LinkPreviewImage {
+    return untransformedPreview(media);
   }
 
   /** Serves stored files. Keys are random, so files can be cached forever. */

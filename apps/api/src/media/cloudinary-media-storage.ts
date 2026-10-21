@@ -1,5 +1,11 @@
+import type { LinkPreviewImage } from '@walls/shared';
 import { CloudinaryClient, type CloudinaryCredentials, assetFolder } from './cloudinary-client';
-import type { MediaStorage, StoredMedia } from './media-storage';
+import {
+  LINK_PREVIEW_SIZES,
+  type LinkPreviewShape,
+  type MediaStorage,
+  type StoredMedia,
+} from './media-storage';
 
 const DELIVERY_BASE = 'https://res.cloudinary.com';
 /** Let Cloudinary pick the best format and quality per browser (SPEC §37). */
@@ -28,11 +34,26 @@ export class CloudinaryMediaStorage implements MediaStorage {
       new Blob([new Uint8Array(file.data)], { type: file.contentType }),
     );
     const { public_id: publicId } = (await response.json()) as UploadResponse;
-    const { cloudName } = this.client.credentials;
     return {
       key: publicId,
-      url: `${DELIVERY_BASE}/${cloudName}/image/upload/${DELIVERY_TRANSFORMATION}/${publicId}`,
+      url: this.deliveryUrl(DELIVERY_TRANSFORMATION, publicId),
     };
+  }
+
+  /**
+   * Cropped to the preview shape around the most important part of the image, as a JPEG:
+   * every link preview reader supports it, and the file stays small (some messaging apps
+   * skip large preview images).
+   */
+  linkPreviewImage(media: StoredMedia, shape: LinkPreviewShape): LinkPreviewImage {
+    const { width, height } = LINK_PREVIEW_SIZES[shape];
+    const transformation = `c_fill,g_auto,w_${width},h_${height},f_jpg,q_auto`;
+    return { url: this.deliveryUrl(transformation, media.key), width, height };
+  }
+
+  private deliveryUrl(transformation: string, publicId: string): string {
+    const { cloudName } = this.client.credentials;
+    return `${DELIVERY_BASE}/${cloudName}/image/upload/${transformation}/${publicId}`;
   }
 
   async delete(key: string): Promise<void> {
