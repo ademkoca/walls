@@ -17,8 +17,9 @@ describe('phone numbers', () => {
   );
 });
 
-describe('agent application', () => {
+describe('professional application', () => {
   const valid = {
+    sellerType: 'REAL_ESTATE_AGENT',
     fullName: 'Marko Marković',
     email: 'marko@example.com',
     phone: '+381 64 123 4567',
@@ -28,6 +29,15 @@ describe('agent application', () => {
 
   it('accepts an application without an agency name', () => {
     expect(agentApplicationInputSchema.parse(valid)).toEqual(valid);
+  });
+
+  it('is for an agent, agency or investor account, never a private seller or an admin', () => {
+    for (const sellerType of ['AGENCY', 'INVESTOR']) {
+      expect(agentApplicationInputSchema.safeParse({ ...valid, sellerType }).success).toBe(true);
+    }
+    for (const sellerType of ['PRIVATE_SELLER', 'ADMIN', undefined]) {
+      expect(agentApplicationInputSchema.safeParse({ ...valid, sellerType }).success).toBe(false);
+    }
   });
 
   it('requires a phone number and refuses unknown fields such as a role', () => {

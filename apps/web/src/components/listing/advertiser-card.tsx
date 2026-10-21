@@ -1,16 +1,17 @@
 import type { PublicProfile } from '@walls/shared';
 import { publicProfilePath } from '@walls/shared';
-import { Badge } from '@walls/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
-import { BadgeCheckIcon, Building2Icon, MailIcon } from 'lucide-react';
+import { Building2Icon, MailIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { PhoneContact } from '../profiles/phone-contact';
 import { ProfileAvatar } from '../profiles/profile-avatar';
+import { SellerTypeBadge } from '../profiles/seller-type-badge';
 
 /**
- * Who advertises the listing, with the contact details they made public (SPEC §19). Phone
- * numbers always carry their verification status; agent approval is shown separately.
+ * Who advertises the listing, or the agent or agency assigned to it, with the contact details
+ * they made public (SPEC §19). A badge names the kind of advertiser; phone numbers always
+ * carry their verification status.
  */
 export function AdvertiserCard({ title, profile }: { title: string; profile: PublicProfile }) {
   const t = useTranslations('listing');
@@ -32,14 +33,7 @@ export function AdvertiserCard({ title, profile }: { title: string; profile: Pub
           />
           <div className="min-w-0 space-y-1">
             <p className="truncate text-base font-semibold">{profile.displayName}</p>
-            {profile.approvedAgent ? (
-              <Badge title={tProfile('approvedAgentHint')}>
-                <BadgeCheckIcon data-icon="inline-start" aria-hidden />
-                {tProfile('approvedAgent')}
-              </Badge>
-            ) : (
-              <Badge variant="secondary">{tProfile('privateSeller')}</Badge>
-            )}
+            <SellerTypeBadge sellerType={profile.sellerType} />
           </div>
         </div>
         {profile.agencyName && (

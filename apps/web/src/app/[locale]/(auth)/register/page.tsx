@@ -1,3 +1,4 @@
+import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
 import { getTranslations } from 'next-intl/server';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { AuthCard } from '@/components/auth/auth-card';
@@ -32,7 +33,7 @@ export default async function RegisterPage({ params }: PageProps<'/[locale]/regi
           </p>
           <p>
             {t('agentPrompt')}{' '}
-            <Link href="/for-agents" className={linkClass}>
+            <Link href={FOR_PROFESSIONALS_PATH} className={linkClass}>
               {t('agentLink')}
             </Link>
           </p>

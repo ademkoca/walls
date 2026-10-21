@@ -55,13 +55,13 @@ export interface PublicListingDetail {
 export interface PublicHome {
   featured: PublicListingCard[];
   latest: PublicListingCard[];
-  /** Public listings, the cities they are in, and active agents. */
-  stats: { listings: number; cities: number; agents: number };
+  /** Public listings, the cities they are in, and active professionals. */
+  stats: { listings: number; cities: number; partners: number };
 }
 
 /** What the sitemap lists (SPEC §32). */
 export interface SitemapEntries {
   listings: { slug: string; updatedAt: string }[];
-  agents: { slug: string; updatedAt: string }[];
+  partners: { slug: string; updatedAt: string }[];
   sellers: { slug: string; updatedAt: string }[];
 }

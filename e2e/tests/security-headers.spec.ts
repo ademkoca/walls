@@ -51,8 +51,8 @@ test('pages carry security headers and never break their own Content Security Po
     '/en',
     '/en/properties',
     `/en/properties/${slug}`,
-    '/en/agents',
-    '/en/for-agents',
+    '/en/partners',
+    '/en/for-professionals',
     '/en/login',
     '/sr',
   ]) {

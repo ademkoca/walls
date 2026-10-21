@@ -1,4 +1,4 @@
-import { Locale, ReviewStatus, enumValues } from '@walls/shared';
+import { Locale, PROFESSIONAL_SELLER_TYPES, ReviewStatus, enumValues } from '@walls/shared';
 import { z } from 'zod';
 import { AUTH_INPUT_LIMITS, displayNameSchema, emailSchema } from './auth';
 import { ADMIN_LIST_LIMITS } from './user';
@@ -38,10 +38,13 @@ export const optionalPhoneSchema = z
   .refine((value) => value === '' || isPhoneNumber(value), { message: 'Invalid phone number' });
 
 /**
- * "For real-estate agents" application (SPEC §2.1). Proof files travel in the same
- * multipart request and are checked separately from their content.
+ * "For professionals" application from an agent, agency or investor (SPEC §2.1). `fullName`
+ * is the public name: a person's, or an agency's or company's. The API keeps the agency name
+ * of agents only. Proof files travel in the same multipart request and are checked
+ * separately from their content.
  */
 export const agentApplicationInputSchema = z.strictObject({
+  sellerType: z.enum(PROFESSIONAL_SELLER_TYPES),
   fullName: displayNameSchema,
   email: emailSchema,
   phone: phoneSchema,
@@ -51,8 +54,8 @@ export const agentApplicationInputSchema = z.strictObject({
 export type AgentApplicationInput = z.infer<typeof agentApplicationInputSchema>;
 
 /**
- * The editable profile (SPEC §4). Role rules (agents must have a phone, only agents have
- * an agency name, agents' phones are always public) are applied by the API.
+ * The editable profile (SPEC §4). Account rules (professionals must have a phone, which is
+ * always public; only agents have an agency name) are applied by the API.
  */
 export const profileInputSchema = z.strictObject({
   displayName: displayNameSchema,
@@ -80,3 +83,10 @@ export const reviewQueueQuerySchema = z.strictObject({
 export type ReviewQueueQuery = z.infer<typeof reviewQueueQuerySchema>;
 
 export const publicPageQuerySchema = z.strictObject({ page: pageSchema });
+
+/** The public directory of professionals, optionally one kind only (SPEC §16). */
+export const partnerDirectoryQuerySchema = z.strictObject({
+  type: z.enum(PROFESSIONAL_SELLER_TYPES).optional(),
+  page: pageSchema,
+});
+export type PartnerDirectoryQuery = z.infer<typeof partnerDirectoryQuerySchema>;

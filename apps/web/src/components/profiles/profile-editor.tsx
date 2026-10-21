@@ -169,7 +169,7 @@ export function ProfileEditor({ initialProfile }: { initialProfile: MyProfile })
                 {...form.register('displayName')}
               />
             </FormField>
-            {hasAgencyName(profile.role) && (
+            {hasAgencyName(profile.sellerType) && (
               <FormField id="agencyName" label={t('fields.agencyName')} error={errors.agencyName}>
                 <Input
                   {...fieldAria('agencyName', errors.agencyName)}

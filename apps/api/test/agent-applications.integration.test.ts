@@ -21,6 +21,7 @@ const applicationOf = (response: { body: unknown }) =>
 
 function fields(email: string, overrides: Record<string, string> = {}) {
   return {
+    sellerType: 'REAL_ESTATE_AGENT',
     fullName: 'Marko Marković',
     email,
     phone: '+381 64 123 4567',
@@ -33,8 +34,9 @@ function fields(email: string, overrides: Record<string, string> = {}) {
 async function apply(
   email = uniqueEmail(),
   files: { data: Buffer; name: string }[] = [{ data: PDF, name: 'licenca.pdf' }],
+  overrides: Record<string, string> = {},
 ) {
-  const response = await ctx.client().multipart(APPLICATIONS, fields(email), files);
+  const response = await ctx.client().multipart(APPLICATIONS, fields(email, overrides), files);
   return { email, response };
 }
 
@@ -64,7 +66,11 @@ describe('submitting an agent application (SPEC §2.1)', () => {
     expect(response.status).toBe(202);
 
     const stored = await pendingApplicationFor(email);
-    expect(stored).toMatchObject({ status: 'PENDING', agencyName: 'Kvadrat nekretnine' });
+    expect(stored).toMatchObject({
+      status: 'PENDING',
+      sellerType: 'REAL_ESTATE_AGENT',
+      agencyName: 'Kvadrat nekretnine',
+    });
     expect((await ctx.lastEmailTo(email))?.subject).toContain('Primili smo vašu prijavu');
 
     const admin = await ctx.signedInUser(Role.ADMIN);
@@ -82,6 +88,25 @@ describe('submitting an agent application (SPEC §2.1)', () => {
     expect(download.headers['content-type']).toBe('application/pdf');
     expect(download.headers['cache-control']).toBe('private, no-store');
     expect(Buffer.from(download.body as Buffer).equals(PDF)).toBe(true);
+  });
+
+  it('is for an agent, agency or investor; only agents name the agency they work for', async () => {
+    const agency = await apply(uniqueEmail(), undefined, {
+      sellerType: 'AGENCY',
+      fullName: 'Kvadrat nekretnine',
+    });
+    expect(agency.response.status).toBe(202);
+    expect(await pendingApplicationFor(agency.email)).toMatchObject({
+      sellerType: 'AGENCY',
+      fullName: 'Kvadrat nekretnine',
+      agencyName: null,
+    });
+
+    for (const sellerType of ['PRIVATE_SELLER', 'SUPER_ADMIN', '']) {
+      const refused = await apply(uniqueEmail(), undefined, { sellerType });
+      expect(refused.response.status, sellerType).toBe(400);
+      expect(await pendingApplicationFor(refused.email)).toBeUndefined();
+    }
   });
 
   it('keeps proof files and applications away from everyone but admins', async () => {
@@ -190,6 +215,7 @@ describe('reviewing agent applications (SPEC §2.1)', () => {
     const [agent] = await ctx.db.select().from(users).where(eq(users.email, email));
     expect(agent).toMatchObject({
       role: 'REAL_ESTATE_AGENT',
+      sellerType: 'REAL_ESTATE_AGENT',
       status: 'PENDING_SETUP',
       phone: '+381 64 123 4567',
       agencyName: 'Kvadrat nekretnine',
@@ -226,6 +252,29 @@ describe('reviewing agent applications (SPEC §2.1)', () => {
     expect((await admin.client.get(`${APPLICATIONS}/${stored!.id}/files/${fileId}`)).status).toBe(
       200,
     );
+  });
+
+  it('approval creates an investor or agency account of the kind applied for', async () => {
+    const admin = await ctx.signedInUser(Role.ADMIN);
+    for (const sellerType of ['INVESTOR', 'AGENCY'] as const) {
+      const { email } = await apply(uniqueEmail(), undefined, {
+        sellerType,
+        fullName: 'Gradnja Pazar',
+      });
+      const stored = await pendingApplicationFor(email);
+      const detail = applicationOf(await admin.client.get(`${APPLICATIONS}/${stored!.id}`));
+      expect(detail).toMatchObject({ sellerType, agencyName: null });
+
+      await admin.client.post(`${APPLICATIONS}/${stored!.id}/approve`);
+      const [account] = await ctx.db.select().from(users).where(eq(users.email, email));
+      expect(account).toMatchObject({
+        role: 'REAL_ESTATE_AGENT',
+        sellerType,
+        displayName: 'Gradnja Pazar',
+        agencyName: null,
+        status: 'PENDING_SETUP',
+      });
+    }
   });
 
   it('cannot approve when the email has meanwhile been registered', async () => {

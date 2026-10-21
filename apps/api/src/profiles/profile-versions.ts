@@ -3,7 +3,7 @@ import {
   type ProfileChangeRequestView,
   type ProfileVersion,
   type ProfileView,
-  type Role,
+  type SellerAccount,
   diffProfile,
   normalizeProfile,
 } from '@walls/shared';
@@ -27,9 +27,9 @@ export interface Proposal {
 
 const emptyToNull = (value: string) => value.trim() || null;
 
-/** Form input → the stored profile for the user's role (empty strings become null). */
-export function profileFromInput(role: Role, input: ProfileInput): EditableProfile {
-  return normalizeProfile(role, {
+/** Form input → the stored profile for the user's account (empty strings become null). */
+export function profileFromInput(account: SellerAccount, input: ProfileInput): EditableProfile {
+  return normalizeProfile(account, {
     displayName: input.displayName,
     bio: emptyToNull(input.bio),
     agencyName: emptyToNull(input.agencyName),
@@ -39,9 +39,9 @@ export function profileFromInput(role: Role, input: ProfileInput): EditableProfi
   });
 }
 
-/** The live profile, read through the role rules (an agent's phone is always public). */
+/** The live profile, read through the account rules (a professional's phone is always public). */
 export function liveProfile(user: UserRow): EditableProfile {
-  return normalizeProfile(user.role, {
+  return normalizeProfile(user, {
     displayName: user.displayName,
     bio: user.bio,
     agencyName: user.agencyName,

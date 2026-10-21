@@ -99,6 +99,13 @@
       "when": 1791846321555,
       "tag": "0013_inquiry_sender",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792564373814,
+      "tag": "0014_advertiser_types",
+      "breakpoints": true
     }
   ]
 }

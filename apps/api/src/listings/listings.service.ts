@@ -22,7 +22,6 @@ import {
   nextStatus,
   planPublishedEdit,
   requireActive,
-  sellerTypeForRole,
 } from '@walls/shared';
 import type { ListingInput, ListingListQuery } from '@walls/validation';
 import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
@@ -131,7 +130,8 @@ export class ListingsService {
 
   async create(actor: Actor): Promise<{ id: string }> {
     assertAllowed(canCreateListing(actor));
-    const sellerType = sellerTypeForRole(actor.role)!;
+    // canCreateListing allows only accounts with a seller type.
+    const sellerType = actor.sellerType!;
 
     return this.db.transaction(async (tx) => {
       const property = await insertProperty(tx, { createdById: actor.id });

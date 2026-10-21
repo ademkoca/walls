@@ -11,7 +11,7 @@ export async function HomeStats({ stats }: { stats: PublicHome['stats'] | undefi
   const items = [
     { key: 'listings', count: stats.listings },
     { key: 'cities', count: stats.cities },
-    { key: 'agents', count: stats.agents },
+    { key: 'partners', count: stats.partners },
   ] as const;
   const shown = items.filter((item) => item.count > 0);
   if (shown.length === 0) return null;

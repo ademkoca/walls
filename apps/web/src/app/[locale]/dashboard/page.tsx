@@ -1,4 +1,4 @@
-import { isReviewer, sellerTypeForRole } from '@walls/shared';
+import { advertisesListings, isReviewer } from '@walls/shared';
 import { buttonVariants } from '@walls/ui/components/button';
 import {
   Card,
@@ -19,7 +19,7 @@ export default async function DashboardPage({ params }: PageProps<'/[locale]/das
   // The layout has already redirected anonymous visitors; this read is deduplicated.
   const user = await getCurrentUser();
   if (!user) return null;
-  const advertises = sellerTypeForRole(user.role) !== null;
+  const advertises = advertisesListings(user);
   const [inquiries, platform] = await Promise.all([
     getInquiryCounts(),
     isReviewer(user) ? getPlatformAnalytics() : null,
@@ -32,7 +32,9 @@ export default async function DashboardPage({ params }: PageProps<'/[locale]/das
           {t('dashboard.welcome', { name: user.displayName })}
         </h1>
         <p className="text-muted-foreground">
-          {t('dashboard.signedInAs', { role: t(`roles.${user.role}`) })}
+          {t('dashboard.signedInAs', {
+            role: user.sellerType ? t(`accountKinds.${user.sellerType}`) : t(`roles.${user.role}`),
+          })}
         </p>
       </div>
 

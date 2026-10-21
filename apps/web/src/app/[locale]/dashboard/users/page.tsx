@@ -92,7 +92,12 @@ export default async function UsersPage({
                   <TableCell className="hidden max-w-64 truncate text-muted-foreground md:table-cell">
                     {user.email}
                   </TableCell>
-                  <TableCell>{tEnums(`role.${user.role}`)}</TableCell>
+                  <TableCell>
+                    {/* Professionals by their kind: agent, agency or investor. */}
+                    {user.sellerType && user.role === Role.REAL_ESTATE_AGENT
+                      ? tEnums(`sellerType.${user.sellerType}`)
+                      : tEnums(`role.${user.role}`)}
+                  </TableCell>
                   <TableCell>
                     <UserStatusBadge status={user.status} />
                   </TableCell>

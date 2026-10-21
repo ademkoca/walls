@@ -1,4 +1,4 @@
-import type { PublicListingCard } from '@walls/shared';
+import { FOR_PROFESSIONALS_PATH, type PublicListingCard } from '@walls/shared';
 import { buttonVariants } from '@walls/ui/components/button';
 import { ArrowRightIcon } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -138,7 +138,7 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
             <p className="text-sidebar-foreground/85">{t('agentBanner.text')}</p>
           </div>
           <Link
-            href="/for-agents"
+            href={FOR_PROFESSIONALS_PATH}
             className={buttonVariants({ size: 'xl', className: 'shrink-0' })}
           >
             {t('agentBanner.action')}

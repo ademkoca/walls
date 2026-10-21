@@ -6,7 +6,6 @@ import {
   type Role,
   hasPublicProfile,
   isReviewer,
-  sellerTypeForRole,
 } from '@walls/shared';
 import { cn } from '@walls/ui/lib/utils';
 import {
@@ -57,8 +56,8 @@ const DASHBOARD_NAV: readonly {
     href: '/dashboard/listings',
     labelKey: 'listings',
     icon: Building2Icon,
-    // Private sellers and agents advertise listings (canCreateListing).
-    show: (role: Role) => sellerTypeForRole(role) !== null,
+    // Private sellers and professionals advertise listings (canCreateListing).
+    show: hasPublicProfile,
   },
   {
     href: '/dashboard/listings',

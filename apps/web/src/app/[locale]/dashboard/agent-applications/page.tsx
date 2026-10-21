@@ -10,6 +10,7 @@ import type { Metadata } from 'next';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import { Pager, pageParam } from '@/components/admin/pager';
 import { ReviewStatusTabs, reviewStatusParam } from '@/components/admin/review-status-tabs';
+import { SellerTypeBadge } from '@/components/profiles/seller-type-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
 import { getAgentApplications } from '@/lib/api/server';
@@ -61,6 +62,7 @@ export default async function AgentApplicationsPage({
             <TableHeader>
               <TableRow>
                 <TableHead>{t('columns.name')}</TableHead>
+                <TableHead>{t('columns.type')}</TableHead>
                 <TableHead className="hidden md:table-cell">{t('columns.email')}</TableHead>
                 <TableHead className="hidden lg:table-cell">{t('columns.agency')}</TableHead>
                 <TableHead>{t('columns.files')}</TableHead>
@@ -77,6 +79,9 @@ export default async function AgentApplicationsPage({
                     >
                       {application.fullName}
                     </Link>
+                  </TableCell>
+                  <TableCell>
+                    <SellerTypeBadge sellerType={application.sellerType} />
                   </TableCell>
                   <TableCell className="hidden max-w-64 truncate text-muted-foreground md:table-cell">
                     {application.email}

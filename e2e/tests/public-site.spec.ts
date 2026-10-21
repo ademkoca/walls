@@ -65,13 +65,12 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
     '/en/properties?location=Beograd',
   );
 
-  // Platform totals under the search, and the call to agents.
+  // Platform totals under the search, and the call to professionals.
   await expect(visitor.getByText(/^published listings?$/)).toBeVisible();
-  const agentBanner = visitor.getByRole('region', { name: 'Are you a real-estate agent?' });
-  await expect(agentBanner.getByRole('link', { name: 'Apply as an agent' })).toHaveAttribute(
-    'href',
-    '/en/for-agents',
-  );
+  const agentBanner = visitor.getByRole('region', { name: 'An agent, agency or investor?' });
+  await expect(
+    agentBanner.getByRole('link', { name: 'Apply for a professional account' }),
+  ).toHaveAttribute('href', '/en/for-professionals');
 
   // The seller journey and an FAQ answer, further down the home page.
   const howItWorks = visitor.getByRole('region', { name: 'How it works' });
@@ -116,6 +115,21 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await visitor.getByRole('option', { name: 'Any' }).click();
   await filters.getByRole('button', { name: 'Show results' }).click();
   await expect(visitor.getByRole('heading', { name: '1 property' })).toBeVisible();
+
+  // The advertiser filter: a private seller's listing is not an agency's.
+  const advertiser = filters.getByRole('combobox', { name: 'Advertiser' });
+  await advertiser.click();
+  await visitor.getByRole('option', { name: 'Agency', exact: true }).click();
+  await filters.getByRole('button', { name: 'Show results' }).click();
+  await expect(visitor).toHaveURL(/sellerType=AGENCY/);
+  await expect(visitor.getByText('No properties match your search')).toBeVisible();
+  await advertiser.click();
+  await visitor.getByRole('option', { name: 'Private seller', exact: true }).click();
+  await filters.getByRole('button', { name: 'Show results' }).click();
+  await expect(visitor.getByRole('heading', { name: '1 property' })).toBeVisible();
+  // The card names the kind of advertiser.
+  const card = visitor.getByRole('article').filter({ hasText: title });
+  await expect(card.getByText('Private seller', { exact: true })).toBeVisible();
   await visitor.getByRole('link', { name: new RegExp(title) }).click();
 
   // The listing page: price, facts, and only the approximate location.

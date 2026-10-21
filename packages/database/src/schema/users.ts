@@ -16,6 +16,7 @@ import {
   localeEnum,
   phoneVerificationStatusEnum,
   roleEnum,
+  sellerTypeEnum,
   timestamps,
   timestamptz,
   userStatusEnum,
@@ -29,6 +30,11 @@ export const users = pgTable(
     /** Null for accounts that have not completed setup (and, later, OAuth-only accounts). */
     passwordHash: text(),
     role: roleEnum().notNull(),
+    /**
+     * The kind of advertiser (SPEC §5): PRIVATE_SELLER for private sellers; agent, agency or
+     * investor for professionals (all with the REAL_ESTATE_AGENT role); null for admins.
+     */
+    sellerType: sellerTypeEnum(),
     status: userStatusEnum().notNull(),
     emailVerifiedAt: timestamptz(),
     /** Language of emails sent to the user. */
@@ -36,7 +42,7 @@ export const users = pgTable(
 
     // Public profile (SPEC §19).
     displayName: text().notNull(),
-    /** Stable public profile URL segment, e.g. /agents/marko-markovic. */
+    /** Stable public profile URL segment, e.g. /partners/marko-markovic. */
     slug: text().notNull().unique(),
     bio: text(),
     /** Provider-agnostic media storage key of the profile picture. */
@@ -63,6 +69,14 @@ export const users = pgTable(
     check(
       'users_avatar_key_and_url',
       sql`(${table.avatarStorageKey} IS NULL) = (${table.avatarUrl} IS NULL)`,
+    ),
+    check(
+      'users_seller_type_matches_role',
+      sql`CASE ${table.role}
+        WHEN 'PRIVATE_SELLER' THEN ${table.sellerType} IS NOT DISTINCT FROM 'PRIVATE_SELLER'
+        WHEN 'REAL_ESTATE_AGENT' THEN COALESCE(${table.sellerType} IN ('REAL_ESTATE_AGENT', 'AGENCY', 'INVESTOR'), false)
+        ELSE ${table.sellerType} IS NULL
+      END`,
     ),
     check(
       'users_active_has_verified_email',

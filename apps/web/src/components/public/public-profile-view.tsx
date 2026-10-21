@@ -1,15 +1,18 @@
 import type { PublicProfilePage } from '@walls/shared';
-import { Badge } from '@walls/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
-import { BadgeCheckIcon, Building2Icon, MailIcon } from 'lucide-react';
+import { Building2Icon, MailIcon } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { intlLocale } from '@/lib/intl-locale';
 import { PhoneContact } from '../profiles/phone-contact';
 import { ProfileAvatar } from '../profiles/profile-avatar';
+import { SellerTypeBadge } from '../profiles/seller-type-badge';
 import type { Pricing } from '@/lib/currency';
 import { ListingGrid } from './listing-card';
 
-/** A public agent or private-seller page (SPEC §19): profile, contact and listings. */
+/**
+ * A public page of a professional (agent, agency, investor) or private seller (SPEC §19):
+ * profile, contact and listings.
+ */
 export async function PublicProfileView({
   page,
   pricing,
@@ -39,14 +42,7 @@ export async function PublicProfileView({
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold tracking-tight">{profile.displayName}</h1>
               <div className="flex flex-wrap items-center gap-2">
-                {profile.approvedAgent ? (
-                  <Badge title={t('approvedAgentHint')}>
-                    <BadgeCheckIcon data-icon="inline-start" aria-hidden />
-                    {t('approvedAgent')}
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary">{t('privateSeller')}</Badge>
-                )}
+                <SellerTypeBadge sellerType={profile.sellerType} />
                 {profile.agencyName && (
                   <span className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Building2Icon className="size-4" aria-hidden />

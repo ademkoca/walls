@@ -1,4 +1,4 @@
-import type { Role, UserStatus } from '../enums';
+import type { Role, SellerType, UserStatus } from '../enums';
 import type { UserReference } from './listings';
 import type { AgentApplicationFileView } from './profiles';
 
@@ -9,6 +9,8 @@ export interface UserSummary {
   email: string;
   displayName: string;
   role: Role;
+  /** Null for Admins and Super Admins. */
+  sellerType: SellerType | null;
   status: UserStatus;
   createdAt: string;
   deactivatedAt: string | null;
@@ -19,7 +21,7 @@ export interface UserDetail extends UserSummary {
   /** Listings the user created (any status, excluding deleted drafts). */
   listingCount: number;
   /**
-   * For agents: the approved application their account was created from, kept with its
+   * For professionals: the approved application their account was created from, kept with its
    * private proof files as evidence of eligibility (SPEC §2.1).
    */
   agentApplication: {

@@ -9,6 +9,7 @@ import {
   PropertyType,
   RentalPeriod,
   Role,
+  SellerType,
   TransactionType,
   checkSubmissionRequirements,
 } from '@walls/shared';
@@ -70,6 +71,12 @@ describe('translation catalogues (SPEC §31)', () => {
     }
   });
 
+  it('name every kind of advertiser for the signed-in user', () => {
+    for (const sellerType of Object.values(SellerType)) {
+      expect(catalogues.sr[`accountKinds.${sellerType}`], sellerType).toBeDefined();
+    }
+  });
+
   it('label every listing enum value', () => {
     const enums = {
       propertyType: PropertyType,
@@ -78,6 +85,7 @@ describe('translation catalogues (SPEC §31)', () => {
       heatingType: HeatingType,
       furnishedStatus: FurnishedStatus,
       rentalPeriod: RentalPeriod,
+      sellerType: SellerType,
     };
     for (const [name, values] of Object.entries(enums)) {
       for (const value of Object.values(values)) {

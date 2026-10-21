@@ -9,6 +9,7 @@ import {
   ListingField,
   ReviewStatus,
   canAssignAgent,
+  canBeAssigned,
   canPerformListingAction,
   canPermanentlyDeleteListing,
   canReviewRevision,
@@ -348,8 +349,9 @@ export class ListingReviewService {
   }
 
   /**
-   * Assigns an active agent to the listing, or removes the assignment. The creator keeps
-   * access either way (SPEC §5).
+   * Assigns an active agent or agency to the listing, or removes the assignment. Investors
+   * advertise only their own projects and cannot be assigned. The creator keeps access
+   * either way (SPEC §5).
    */
   async assignAgent(actor: Actor, id: string, input: AssignAgentInput): Promise<ListingDetail> {
     await this.db.transaction(async (tx) => {
@@ -359,8 +361,12 @@ export class ListingReviewService {
 
       if (input.agentId) {
         const agent = await findUserById(tx, input.agentId);
-        if (agent?.role !== Role.REAL_ESTATE_AGENT || agent.status !== UserStatus.ACTIVE) {
-          throw validationFailed(['agentId'], 'Choose an active real-estate agent');
+        if (
+          agent?.role !== Role.REAL_ESTATE_AGENT ||
+          !canBeAssigned(agent.sellerType) ||
+          agent.status !== UserStatus.ACTIVE
+        ) {
+          throw validationFailed(['agentId'], 'Choose an active agent or agency');
         }
       }
       if (input.agentId === listing.assignedAgentId) return;

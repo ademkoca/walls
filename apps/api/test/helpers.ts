@@ -12,7 +12,7 @@ import { hashPassword } from '../src/auth/passwords';
 import { type EmailMessage, RecordingEmailService } from '../src/email/email-service';
 import { InMemoryMediaStorage } from '../src/media/media-storage';
 import { InMemoryPrivateFileStorage } from '../src/media/private-file-storage';
-import { Role, UserStatus } from '@walls/shared';
+import { Role, SellerType, UserStatus } from '@walls/shared';
 import sharp from 'sharp';
 import { processOutbox } from '../src/email/outbox';
 import { FixedExchangeRateProvider } from '../src/exchange-rates/exchange-rate-provider';
@@ -52,6 +52,14 @@ export function uniqueEmail(): string {
 }
 
 /** An app wired to the test database, with emails and media captured in memory. */
+/** The kind of advertiser a test user of each role gets by default. */
+const DEFAULT_SELLER_TYPES: Record<Role, SellerType | null> = {
+  [Role.SUPER_ADMIN]: null,
+  [Role.ADMIN]: null,
+  [Role.REAL_ESTATE_AGENT]: SellerType.REAL_ESTATE_AGENT,
+  [Role.PRIVATE_SELLER]: SellerType.PRIVATE_SELLER,
+};
+
 export function createTestContext(
   overrides: Partial<
     Pick<
@@ -130,15 +138,20 @@ export function createTestContext(
 
   /**
    * Creates an active user with the given role directly in the database and returns a
-   * logged-in client. Agents and admins have no self-service signup, so tests seed them.
+   * logged-in client. Professionals and admins have no self-service signup, so tests seed
+   * them. Professionals are agents unless `sellerType` names another kind.
    */
-  async function signedInUser(role: Role = Role.PRIVATE_SELLER) {
+  async function signedInUser(
+    role: Role = Role.PRIVATE_SELLER,
+    sellerType: SellerType | null = DEFAULT_SELLER_TYPES[role],
+  ) {
     const email = uniqueEmail();
     const user = await insertUser(db, {
       email,
-      displayName: `Test ${role}`,
+      displayName: `Test ${sellerType ?? role}`,
       slug: `test-${randomUUID()}`,
       role,
+      sellerType,
       status: UserStatus.ACTIVE,
       emailVerifiedAt: new Date(),
       passwordHash: await hashPassword(PASSWORD),

@@ -7,11 +7,13 @@ import {
   type FurnishedStatus,
   type PropertyType,
   ROOM_FILTER_OPTIONS,
+  type SellerType,
   type TransactionType,
   amenitiesFor,
   enumValues,
   FurnishedStatus as FurnishedStatuses,
   PropertyType as PropertyTypes,
+  SellerType as SellerTypes,
   TransactionType as TransactionTypes,
 } from '@walls/shared';
 import { Button } from '@walls/ui/components/button';
@@ -42,6 +44,7 @@ interface FilterValues {
   bedrooms: string;
   bathrooms: string;
   furnishedStatus: FurnishedStatus | '';
+  sellerType: SellerType | '';
   amenities: Amenity[];
 }
 
@@ -58,6 +61,7 @@ function initialValues(search: ListingSearch): FilterValues {
     bedrooms: text(search.bedrooms),
     bathrooms: text(search.bathrooms),
     furnishedStatus: search.furnishedStatus ?? '',
+    sellerType: search.sellerType ?? '',
     amenities: search.amenities ?? [],
   };
 }
@@ -154,6 +158,19 @@ export function SearchFilters({
           options={enumValues(PropertyTypes).map((value) => ({
             value,
             label: tEnums(`propertyType.${value}`),
+          }))}
+        />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor={field('sellerType')}>{t('sellerType')}</FieldLabel>
+        <FilterSelect
+          id={field('sellerType')}
+          value={values.sellerType}
+          onChange={(value) => set('sellerType', value)}
+          anyLabel={t('any')}
+          options={enumValues(SellerTypes).map((value) => ({
+            value,
+            label: tEnums(`sellerType.${value}`),
           }))}
         />
       </Field>

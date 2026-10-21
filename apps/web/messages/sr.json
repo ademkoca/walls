@@ -12,10 +12,10 @@
   "nav": {
     "mainLabel": "Glavna navigacija",
     "properties": "Nekretnine",
-    "agents": "Agenti",
+    "partners": "Partneri",
     "about": "O nama",
     "contact": "Kontakt",
-    "forAgents": "Za agente",
+    "forProfessionals": "Za profesionalce",
     "login": "Prijava",
     "register": "Registracija",
     "dashboard": "Kontrolna tabla",
@@ -39,7 +39,7 @@
   },
   "home": {
     "title": "Pronađite zidove u kojima ćete se osećati kao kod kuće.",
-    "subtitle": "Stanovi, kuće i poslovni prostori za prodaju i izdavanje širom Srbije — od privatnih prodavaca i proverenih agenata.",
+    "subtitle": "Stanovi, kuće i poslovni prostori za prodaju i izdavanje širom Srbije — od privatnih prodavaca, agenata, agencija i investitora.",
     "advertise": "Oglasite nekretninu",
     "browse": "Pregledajte nekretnine",
     "searchLabel": "Pretraga nekretnina",
@@ -57,9 +57,9 @@
     "advertiseTitle": "Prodajete ili izdajete nekretninu?",
     "advertiseText": "Napravite besplatan nalog privatnog prodavca i objavite oglas. Naš tim pregleda svaki oglas pre objave.",
     "agentBanner": {
-      "title": "Agent ste za nekretnine?",
-      "text": "Objavljujte oglase pod svojim profilom agenta, sa svim vašim oglasima na jednom mestu, i primajte upite posetilaca direktno. Pošaljite prijavu sa dokazom da radite kao agent; naš tim je pregleda pre otvaranja naloga.",
-      "action": "Prijavite se kao agent"
+      "title": "Agent, agencija ili investitor?",
+      "text": "Objavljujte oglase pod svojim profilom, sa svim vašim oglasima na jednom mestu, i primajte upite posetilaca direktno. Pošaljite prijavu sa dokazom o svojoj delatnosti; naš tim je pregleda pre otvaranja naloga.",
+      "action": "Prijavite se za profesionalni nalog"
     },
     "transactionTypeLabel": "Kupovina ili iznajmljivanje",
     "browseByTypeTitle": "Pretražite po vrsti nekretnine",
@@ -90,7 +90,7 @@
         },
         "agentRequired": {
           "question": "Da li moram biti agent za nekretnine da bih oglasio svoju nekretninu?",
-          "answer": "Ne. Privatni prodavci mogu oglasiti sopstvenu nekretninu nakon potvrde email adrese. Agenti za nekretnine se prijavljuju posebno i dobijaju profil proverenog agenta."
+          "answer": "Ne. Privatni prodavci mogu oglasiti sopstvenu nekretninu nakon potvrde email adrese. Agenti, agencije i investitori se prijavljuju posebno, uz dokaz o svojoj delatnosti."
         },
         "review": {
           "question": "Kako funkcioniše pregled oglasa?",
@@ -114,7 +114,7 @@
       "label": "{brand} u brojkama",
       "listings": "{count, plural, one {objavljen oglas} few {objavljena oglasa} other {objavljenih oglasa}}",
       "cities": "{count, plural, one {grad} few {grada} other {gradova}}",
-      "agents": "{count, plural, one {provereni agent} few {proverena agenta} other {proverenih agenata}}"
+      "partners": "{count, plural, one {profesionalni oglašivač} few {profesionalna oglašivača} other {profesionalnih oglašivača}}"
     },
     "seoLinksTitle": "Popularne pretrage",
     "seoLinks": {
@@ -184,8 +184,8 @@
       "submit": "Napravi nalog",
       "haveAccount": "Već imate nalog?",
       "login": "Prijavite se",
-      "agentPrompt": "Agent ste za nekretnine?",
-      "agentLink": "Prijavite se kao agent",
+      "agentPrompt": "Agent, agencija ili investitor?",
+      "agentLink": "Prijavite se za profesionalni nalog",
       "checkEmailTitle": "Proverite email",
       "checkEmailDescription": "Poslali smo link za potvrdu na {email}. Otvorite ga da biste aktivirali nalog. Link važi 24 sata.",
       "resend": "Pošalji link ponovo",
@@ -247,7 +247,7 @@
       "users": "Korisnici",
       "auditLog": "Dnevnik izmena",
       "profile": "Moj profil",
-      "agentApplications": "Prijave agenata",
+      "agentApplications": "Prijave profesionalaca",
       "profileChanges": "Izmene profila",
       "waiting": "Na čekanju: {count}",
       "inquiries": "Upiti"
@@ -448,7 +448,7 @@
     "details": {
       "creator": "Oglašivač",
       "sellerType": "Vrsta oglašivača",
-      "assignedAgent": "Dodeljeni agent",
+      "assignedAgent": "Dodeljeni agent ili agencija",
       "none": "Nema",
       "publishedAt": "Objavljen",
       "slug": "Adresa oglasa"
@@ -472,12 +472,12 @@
     "featuredUntil": "Izdvojen do (opciono)",
     "saveFeatured": "Sačuvaj",
     "featuredSaved": "Izdvajanje je sačuvano.",
-    "agent": "Dodeljeni agent",
-    "searchAgents": "Pretražite agente po imenu ili emailu",
-    "noAgents": "Nema aktivnih agenata koji odgovaraju pretrazi.",
+    "agent": "Dodeljeni agent ili agencija",
+    "searchAgents": "Pretražite agente i agencije po imenu ili emailu",
+    "noAgents": "Nema aktivnih agenata ni agencija koji odgovaraju pretrazi.",
     "assign": "Dodeli",
-    "unassign": "Ukloni agenta",
-    "agentSaved": "Dodela agenta je sačuvana.",
+    "unassign": "Ukloni dodelu",
+    "agentSaved": "Dodela je sačuvana.",
     "permanentDelete": "Trajno obriši",
     "permanentDeleteTitle": "Trajno obrisati oglas?",
     "permanentDeleteDescription": "Oglas, njegove slike i istorija biće trajno obrisani; ostaje samo zapis u dnevniku izmena. Ova radnja se ne može poništiti.",
@@ -515,7 +515,7 @@
   },
   "users": {
     "title": "Korisnici",
-    "description": "Nalozi privatnih prodavaca, agenata i administratora.",
+    "description": "Nalozi privatnih prodavaca, profesionalaca (agenata, agencija i investitora) i administratora.",
     "search": "Pretraga po imenu ili emailu",
     "allRoles": "Sve uloge",
     "allStatuses": "Svi statusi",
@@ -524,6 +524,7 @@
       "name": "Ime",
       "email": "Email",
       "role": "Uloga",
+      "type": "Vrsta",
       "status": "Status",
       "joined": "Registrovan"
     },
@@ -558,7 +559,7 @@
     "inviteSubmit": "Pošalji poziv",
     "invited": "Poziv je poslat.",
     "agentApplication": {
-      "title": "Prijava za agenta",
+      "title": "Prijava za nalog",
       "approvedOn": "Odobrena {date}.",
       "private": "Dokazi se čuvaju kao potvrda ispunjenosti uslova i vide ih samo administratori.",
       "view": "Pogledaj prijavu"
@@ -631,6 +632,12 @@
     "REAL_ESTATE_AGENT": "agent za nekretnine",
     "PRIVATE_SELLER": "privatni prodavac"
   },
+  "accountKinds": {
+    "PRIVATE_SELLER": "privatni prodavac",
+    "REAL_ESTATE_AGENT": "agent za nekretnine",
+    "AGENCY": "agencija",
+    "INVESTOR": "investitor"
+  },
   "enums": {
     "propertyType": {
       "APARTMENT": "Stan",
@@ -699,12 +706,14 @@
     },
     "sellerType": {
       "PRIVATE_SELLER": "Privatni prodavac",
-      "REAL_ESTATE_AGENT": "Agent za nekretnine"
+      "REAL_ESTATE_AGENT": "Agent",
+      "AGENCY": "Agencija",
+      "INVESTOR": "Investitor"
     },
     "role": {
       "SUPER_ADMIN": "Super administrator",
       "ADMIN": "Administrator",
-      "REAL_ESTATE_AGENT": "Agent",
+      "REAL_ESTATE_AGENT": "Profesionalac",
       "PRIVATE_SELLER": "Privatni prodavac"
     },
     "userStatus": {
@@ -761,27 +770,43 @@
     "EMAIL_IN_USE": "Ova email adresa već pripada nalogu."
   },
   "agentApplication": {
-    "title": "Oglašavajte kao agent za nekretnine",
-    "intro": "Agenti objavljuju oglase pod svojim profilom agenta. Pošaljite nam svoje podatke i dokaz da radite kao agent; naš tim proverava svaku prijavu pre nego što se otvori nalog agenta.",
+    "title": "Oglašavajte kao agent, agencija ili investitor",
+    "intro": "Profesionalci objavljuju oglase pod svojim javnim profilom. Pošaljite nam svoje podatke i dokaz o svojoj delatnosti; naš tim proverava svaku prijavu pre nego što se otvori nalog.",
     "stepsTitle": "Kako funkcioniše",
     "steps": {
-      "apply": "Pošaljite podatke i dokaz, na primer licencu ili potvrdu o zaposlenju u agenciji.",
+      "apply": "Izaberite vrstu naloga i pošaljite podatke i dokaz: agent na primer licencu ili potvrdu o zaposlenju u agenciji, agencija ili investitor izvod iz APR-a.",
       "review": "Naš tim proverava prijavu i javlja vam ishod emailom.",
       "setup": "Nakon odobrenja postavljate lozinku iz emaila i možete da objavljujete oglase."
     },
-    "sellerNote": "Prodajete svoju nekretninu? Ne treba vam nalog agenta.",
+    "sellerNote": "Prodajete ili izdajete svoju nekretninu? Ne treba vam profesionalni nalog.",
     "sellerLink": "Registrujte se kao privatni prodavac",
     "formTitle": "Prijava",
+    "types": {
+      "REAL_ESTATE_AGENT": {
+        "label": "Agent",
+        "description": "Agent za nekretnine, samostalan ili zaposlen u agenciji."
+      },
+      "AGENCY": {
+        "label": "Agencija",
+        "description": "Agencija za nekretnine koja oglašava pod svojim nazivom."
+      },
+      "INVESTOR": {
+        "label": "Investitor",
+        "description": "Investitor ili graditelj koji prodaje ili izdaje svoje nekretnine."
+      }
+    },
     "fields": {
-      "fullName": "Ime i prezime",
+      "fullName": "{type, select, AGENCY {Naziv agencije} INVESTOR {Ime ili naziv firme} other {Ime i prezime}}",
       "email": "Email adresa",
-      "emailHint": "Nalog agenta koristiće ovu adresu. Ne sme već pripadati nalogu na Walls.",
+      "emailHint": "Vaš nalog koristiće ovu adresu. Ne sme već pripadati nalogu na Walls.",
       "phone": "Broj telefona",
-      "phoneHint": "Prikazuje se na vašem javnom profilu agenta.",
+      "phoneHint": "Prikazuje se na vašem javnom profilu.",
       "agencyName": "Agencija (opciono)",
-      "files": "Dokaz"
+      "files": "Dokaz",
+      "sellerType": "Vrsta naloga"
     },
     "filesHint": "PDF, JPG ili PNG, najviše {max} datoteka i 3,5 MB ukupno. Fotografije se automatski smanjuju, PDF datoteke ne. Vidi ih samo naš tim.",
+    "proofHint": "{type, select, REAL_ESTATE_AGENT {Na primer licenca ili potvrda o zaposlenju u agenciji.} other {Na primer izvod iz APR-a (Agencija za privredne registre).}}",
     "chooseFiles": "Izaberi datoteke",
     "removeFile": "Ukloni {name}",
     "noFiles": "Dodajte bar jednu datoteku.",
@@ -799,8 +824,8 @@
     "successDescription": "Poslali smo potvrdu na {email}. Javićemo vam se emailom kada naš tim pregleda vašu prijavu."
   },
   "agentApplications": {
-    "title": "Prijave agenata",
-    "description": "Proverite podatke i dokaze svakog kandidata pre nego što odobrite nalog agenta.",
+    "title": "Prijave profesionalaca",
+    "description": "Proverite podatke i dokaze svakog kandidata pre nego što odobrite nalog.",
     "tabs": {
       "PENDING": "Na čekanju",
       "APPROVED": "Odobrene",
@@ -808,6 +833,7 @@
     },
     "columns": {
       "name": "Kandidat",
+      "type": "Vrsta",
       "email": "Email",
       "agency": "Agencija",
       "files": "Datoteke",
@@ -823,16 +849,17 @@
       "submitted": "Primljeno",
       "reviewedBy": "Pregledao/la",
       "reviewedAt": "Pregledano",
-      "account": "Nalog agenta",
-      "none": "—"
+      "account": "Nalog",
+      "none": "—",
+      "type": "Vrsta naloga"
     },
     "files": "Dokazi",
     "filesPrivate": "Privatno: vide ih samo administratori.",
     "openFile": "Otvori {name}",
     "emailInUse": "Ova email adresa sada pripada postojećem nalogu, pa prijava ne može biti odobrena. Odbijte je i zamolite kandidata da se prijavi sa drugom adresom.",
-    "approve": "Odobri agenta",
-    "approveTitle": "Odobriti ovog agenta?",
-    "approveDescription": "Od ovih podataka otvara se nalog agenta, a kandidat dobija email da postavi lozinku.",
+    "approve": "Odobri prijavu",
+    "approveTitle": "Odobriti ovu prijavu?",
+    "approveDescription": "Od ovih podataka otvara se nalog izabrane vrste, a kandidat dobija email da postavi lozinku.",
     "approved": "Prijava je odobrena. Kandidatu je poslat email.",
     "reject": "Odbij",
     "rejectTitle": "Odbiti ovu prijavu?",
@@ -845,7 +872,7 @@
     "title": "Moj profil",
     "description": "Ono što posetioci vide na vašoj javnoj stranici profila.",
     "viewPublic": "Pogledaj javni profil",
-    "approvalNotice": "Naš tim proverava izmene profila agenta pre nego što postanu javne.",
+    "approvalNotice": "Naš tim proverava izmene vašeg profila pre nego što postanu javne.",
     "pendingNotice": "Vaše izmene čekaju proveru. Javni profil ostaje isti dok ih ne odobrimo; do tada možete nastaviti sa izmenama.",
     "rejectedNotice": "Vaše poslednje izmene nisu odobrene. Razlog:",
     "showingProposed": "Obrazac prikazuje vaše izmene koje čekaju proveru.",
@@ -862,7 +889,7 @@
       "agencyName": "Agencija",
       "phone": "Broj telefona",
       "phonePublic": "Prikaži moj broj telefona na profilu",
-      "phoneAlwaysPublic": "Broj telefona agenta uvek se prikazuje na profilu.",
+      "phoneAlwaysPublic": "Broj telefona se uvek prikazuje na vašem profilu.",
       "emailPublic": "Prikaži moju email adresu na profilu"
     },
     "phoneStatus": {
@@ -906,14 +933,14 @@
   },
   "profileChanges": {
     "title": "Izmene profila",
-    "description": "Izmene profila agenata postaju javne tek nakon odobrenja.",
+    "description": "Izmene profila agenata, agencija i investitora postaju javne tek nakon odobrenja.",
     "tabs": {
       "PENDING": "Na čekanju",
       "APPROVED": "Odobrene",
       "REJECTED": "Odbijene"
     },
     "columns": {
-      "agent": "Agent",
+      "agent": "Nalog",
       "changes": "Izmene",
       "updated": "Poslednja izmena"
     },
@@ -926,7 +953,7 @@
     },
     "fields": {
       "DISPLAY_NAME": "Ime",
-      "BIO": "O agentu",
+      "BIO": "Opis",
       "AGENCY_NAME": "Agencija",
       "PHONE": "Broj telefona",
       "PHONE_PUBLIC": "Telefon javno prikazan",
@@ -940,24 +967,27 @@
     "viewUser": "Pogledaj nalog",
     "approve": "Odobri izmene",
     "approveTitle": "Objaviti ove izmene profila?",
-    "approveDescription": "Javni profil agenta se ažurira i agent dobija obaveštenje emailom.",
+    "approveDescription": "Javni profil se ažurira i vlasnik naloga dobija obaveštenje emailom.",
     "approved": "Izmene profila su odobrene.",
     "reject": "Odbij",
     "rejectTitle": "Odbiti ove izmene?",
-    "rejectDescription": "Javni profil ostaje isti. Agent dobija razlog emailom.",
-    "reason": "Razlog (šalje se agentu)",
+    "rejectDescription": "Javni profil ostaje isti. Vlasnik naloga dobija razlog emailom.",
+    "reason": "Razlog (šalje se vlasniku naloga)",
     "rejected": "Izmene profila su odbijene.",
     "rejectionReason": "Razlog odbijanja",
     "reviewedBy": "Pregledao/la: {name}"
   },
   "publicProfile": {
-    "agentsTitle": "Agenti za nekretnine",
-    "agentsDescription": "Agenti koje je proverio Walls i nekretnine koje oglašavaju.",
-    "agentsEmpty": "Još nema agenata.",
+    "partnersTitle": "Agenti, agencije i investitori",
+    "partnersDescription": "Profesionalni oglašivači na Walls i nekretnine koje oglašavaju.",
+    "partnersEmpty": "Ovde još nema nikoga.",
+    "tabs": {
+      "all": "Svi",
+      "REAL_ESTATE_AGENT": "Agenti",
+      "AGENCY": "Agencije",
+      "INVESTOR": "Investitori"
+    },
     "listingCount": "{count, plural, =0 {Nema oglasa} one {# oglas} few {# oglasa} other {# oglasa}}",
-    "approvedAgent": "Proveren agent",
-    "approvedAgentHint": "Walls je proverio profesionalne podatke ovog agenta.",
-    "privateSeller": "Privatni prodavac",
     "phoneVerified": "Verifikovan",
     "phoneUnverified": "Nije verifikovan",
     "phoneUnverifiedHint": "Walls nije verifikovao ovaj broj telefona.",
@@ -1012,6 +1042,7 @@
     "bedrooms": "Spavaće sobe",
     "bathrooms": "Kupatila",
     "furnishedStatus": "Nameštenost",
+    "sellerType": "Oglašivač",
     "atLeast": "{count}+",
     "amenities": "Karakteristike",
     "apply": "Prikaži rezultate",
@@ -1052,7 +1083,7 @@
     "mapLabel": "Mapa sa lokacijom nekretnine",
     "approximateNote": "Oglašivač ne prikazuje tačnu adresu. Krug prikazuje oblast u kojoj se nekretnina nalazi.",
     "advertiser": "Oglašivač",
-    "assignedAgent": "Agent za ovu nekretninu",
+    "assignedAgent": "{type, select, AGENCY {Agencija za ovu nekretninu} other {Agent za ovu nekretninu}}",
     "viewProfile": "Pogledaj profil",
     "published": "Objavljeno {date}",
     "facts": {
@@ -1111,7 +1142,7 @@
       "received": "Primljeno"
     },
     "readOnly": "Samo čitanje",
-    "readOnlyHint": "Ovaj upit vodi agent dodeljen oglasu. Možete ga čitati, ali ne i menjati njegov status.",
+    "readOnlyHint": "Ovaj upit vodi agent ili agencija dodeljena oglasu. Možete ga čitati, ali ne i menjati njegov status.",
     "untitled": "Oglas bez naslova",
     "backToList": "Svi upiti",
     "from": "Od",
@@ -1122,7 +1153,7 @@
     "listing": "Oglas",
     "received": "Primljeno",
     "recipient": "Vodi ga",
-    "assignedAgent": "Dodeljeni agent",
+    "assignedAgent": "Dodeljeni agent ili agencija",
     "status": "Status",
     "reply": "Odgovori emailom",
     "replyHint": "Samo oglašivač koji prima ovaj upit odgovara posetiocu.",
@@ -1166,13 +1197,13 @@
     "open": "Prikaži fotografiju {position} veću"
   },
   "about": {
-    "metaDescription": "Zašto smo napravili Walls: jedno mesto za traženje, prodaju i izdavanje nekretnina u Srbiji, samostalno ili uz proverenog agenta.",
+    "metaDescription": "Zašto smo napravili Walls: jedno mesto za traženje, prodaju i izdavanje nekretnina u Srbiji, samostalno ili uz profesionalca.",
     "title": "Zašto smo napravili Walls",
     "lead": "Jedno mesto za sve koji traže, prodaju ili izdaju nekretninu u Srbiji.",
     "story": {
       "problem": "Traženje stana ili kuće u Srbiji obično znači skakanje sa sajta na sajt i pitanje da li je oglas još aktuelan i ko zapravo stoji iza njega. Ni prodaja ili izdavanje sopstvene nekretnine nije lakše: ili je prepustite agenciji, ili okušate sreću na sajtu za male oglase.",
-      "solution": "Napravili smo {brand} da bi se sve to dešavalo na jednom mestu. Možete pronaći nekretninu za kupovinu ili zakup, sami oglasiti svoju nekretninu ili sarađivati sa proverenim agentom za nekretnine ako više volite da to prepustite profesionalcu. Izbor je vaš.",
-      "trust": "Pošto je poverenje najvažnije kada je ulog ovako velik, naš tim pregleda svaki oglas pre objave, a agenta odobrava tek kada vidi dokaz da se bavi tim poslom."
+      "solution": "Napravili smo {brand} da bi se sve to dešavalo na jednom mestu. Možete pronaći nekretninu za kupovinu ili zakup, sami oglasiti svoju nekretninu ili sarađivati sa agentom ili agencijom ako više volite da to prepustite profesionalcu. Izbor je vaš.",
+      "trust": "Pošto je poverenje najvažnije kada je ulog ovako velik, naš tim pregleda svaki oglas pre objave, a agente, agencije i investitore odobrava tek kada vidi dokaz o njihovoj delatnosti."
     },
     "waysTitle": "Tri načina da koristite {brand}",
     "ways": {
@@ -1187,9 +1218,9 @@
         "action": "Oglasite nekretninu"
       },
       "agent": {
-        "title": "Sarađujte sa agentom",
-        "text": "Više volite profesionalca? Pregledajte proverene agente za nekretnine i njihove oglase.",
-        "action": "Pronađite agenta"
+        "title": "Sarađujte sa profesionalcem",
+        "text": "Više volite profesionalca? Pregledajte agente, agencije i investitore i njihove oglase.",
+        "action": "Pogledajte partnere"
       }
     },
     "trustTitle": "Kako čuvamo poverenje na {brand}",
@@ -1199,8 +1230,8 @@
         "text": "Naš tim proverava svaki oglas pre objave, i ponovo kada se promene važni podaci."
       },
       "agents": {
-        "title": "Agenti se odobravaju uz dokaz",
-        "text": "Profil agenta otvaramo tek kada proverimo dokaz da se osoba bavi poslom agenta."
+        "title": "Profesionalci se odobravaju uz dokaz",
+        "text": "Nalog agenta, agencije ili investitora otvaramo tek kada proverimo dokaz o njegovoj delatnosti."
       },
       "address": {
         "title": "Tačna adresa ostaje privatna",
@@ -1217,7 +1248,7 @@
     },
     "numbersTitle": "{brand} danas",
     "ctaTitle": "Spremni da počnete?",
-    "ctaText": "Pregledajte oglase, oglasite svoju nekretninu ili se prijavite kao agent."
+    "ctaText": "Pregledajte oglase, oglasite svoju nekretninu ili se prijavite za profesionalni nalog."
   },
   "contact": {
     "metaDescription": "Kontaktirajte Walls tim.",
@@ -1230,9 +1261,9 @@
         "action": "Pregledajte nekretnine"
       },
       "agent": {
-        "title": "Agent ste za nekretnine?",
-        "text": "Prijavite se za nalog agenta i profil proverenog agenta.",
-        "action": "Prijavite se kao agent"
+        "title": "Agent, agencija ili investitor?",
+        "text": "Prijavite se za profesionalni nalog i javni profil sa svim vašim oglasima.",
+        "action": "Pošaljite prijavu"
       },
       "faq": {
         "title": "Imate kratko pitanje?",
@@ -1286,7 +1317,7 @@
         },
         "collect": {
           "title": "Šta prikupljamo",
-          "body": "Podaci o nalogu: ime, email adresa i lozinka (čuvamo je samo u obliku bezbednog heša), kao i broj telefona, profilna slika i kratka biografija ako ih dodate.\n\nPrijave agenata: ime i prezime, email adresa, broj telefona, naziv agencije i dokumenti koje priložite. Dokumente vide samo naši administratori.\n\nOglasi: podaci o nekretnini, slike, cena i lokacija.\n\nUpiti: ime, email adresa, broj telefona (neobavezno) i poruka koju posetilac pošalje o oglasu.\n\nPoruke sa kontakt forme: ime, email adresa, tema i poruka.\n\nPregledi oglasa: da bismo pregled brojali jednom po posetiocu dnevno, koristimo otisak IP adrese i pregledača napravljen ključem koji se menja svakog dana. Samu IP adresu ne čuvamo."
+          "body": "Podaci o nalogu: ime, email adresa i lozinka (čuvamo je samo u obliku bezbednog heša), kao i broj telefona, profilna slika i kratka biografija ako ih dodate.\n\nPrijave za profesionalne naloge (agenti, agencije i investitori): ime i prezime ili naziv firme, email adresa, broj telefona, vrsta naloga, naziv agencije (za agente) i dokumenti koje priložite. Dokumente vide samo naši administratori.\n\nOglasi: podaci o nekretnini, slike, cena i lokacija.\n\nUpiti: ime, email adresa, broj telefona (neobavezno) i poruka koju posetilac pošalje o oglasu.\n\nPoruke sa kontakt forme: ime, email adresa, tema i poruka.\n\nPregledi oglasa: da bismo pregled brojali jednom po posetiocu dnevno, koristimo otisak IP adrese i pregledača napravljen ključem koji se menja svakog dana. Samu IP adresu ne čuvamo."
         },
         "use": {
           "title": "Zašto ih koristimo",
@@ -1294,7 +1325,7 @@
         },
         "share": {
           "title": "Ko ih vidi",
-          "body": "Javni profili i objavljeni oglasi vidljivi su svima. Broj telefona agenta uvek je prikazan na profilu; privatni prodavci biraju da li će prikazati svoj. Email adresa prikazuje se samo ako to vlasnik izabere, a tačna adresa nekretnine samo ako to izabere oglašivač.\n\nUpiti stižu samo oglašivaču ili agentu dodeljenom oglasu, a poruke sa kontakt forme samo nama. Lične podatke ne prodajemo."
+          "body": "Javni profili i objavljeni oglasi vidljivi su svima. Broj telefona agenata, agencija i investitora uvek je prikazan na profilu; privatni prodavci biraju da li će prikazati svoj. Email adresa prikazuje se samo ako to vlasnik izabere, a tačna adresa nekretnine samo ako to izabere oglašivač.\n\nUpiti stižu samo oglašivaču ili agentu ili agenciji dodeljenoj oglasu, a poruke sa kontakt forme samo nama. Lične podatke ne prodajemo."
         },
         "providers": {
           "title": "Pružaoci usluga",
@@ -1329,7 +1360,7 @@
         },
         "accounts": {
           "title": "Nalozi",
-          "body": "Dužni ste da unesete tačne podatke i čuvate svoju lozinku. Nalog privatnog prodavca postaje aktivan kada potvrdite email adresu. Nalog agenta otvara se tek kada odobrimo prijavu uz dokaz da se bavite poslom agenta. Ulogu ne možete sami izabrati ni promeniti."
+          "body": "Dužni ste da unesete tačne podatke i čuvate svoju lozinku. Nalog privatnog prodavca postaje aktivan kada potvrdite email adresu. Nalog agenta, agencije ili investitora otvara se tek kada odobrimo prijavu uz dokaz o vašoj delatnosti. Ulogu ne možete sami izabrati ni promeniti."
         },
         "listings": {
           "title": "Oglasi",

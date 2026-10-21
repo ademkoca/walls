@@ -1,3 +1,4 @@
+import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
 import { brand } from '@walls/ui/brand';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
 import { ArrowRightIcon, MailIcon, MapPinIcon } from 'lucide-react';
@@ -22,7 +23,7 @@ export async function generateMetadata({
 
 const SHORTCUTS = [
   { key: 'property', href: '/properties' },
-  { key: 'agent', href: '/for-agents' },
+  { key: 'agent', href: FOR_PROFESSIONALS_PATH },
   { key: 'faq', href: { pathname: '/', hash: 'home-faq' } },
 ] as const;
 

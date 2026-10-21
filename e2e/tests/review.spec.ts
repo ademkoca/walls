@@ -60,8 +60,12 @@ test('an admin rejects a listing, the seller resubmits, and the admin publishes 
   await expect(admin.getByRole('dialog')).toBeHidden();
 
   // The agent search needs something to search for: not empty, not only spaces or symbols.
-  const agentSearch = admin.getByRole('textbox', { name: 'Search agents by name or email' });
-  const searchButton = admin.getByRole('button', { name: 'Search agents by name or email' });
+  const agentSearch = admin.getByRole('textbox', {
+    name: 'Search agents and agencies by name or email',
+  });
+  const searchButton = admin.getByRole('button', {
+    name: 'Search agents and agencies by name or email',
+  });
   await expect(searchButton).toBeDisabled();
   await agentSearch.fill('  -_. ');
   await expect(searchButton).toBeDisabled();

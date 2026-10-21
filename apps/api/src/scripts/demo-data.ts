@@ -1,6 +1,6 @@
 /**
- * Demo data for the preview site (`pnpm demo:seed`): made-up sellers, agents and published
- * listings for testing search, filters and sorting. Nothing here is real: names, agencies,
+ * Demo data for the preview site (`pnpm demo:seed`): made-up sellers, agents, an agency, an
+ * investor and published listings for testing search, filters and sorting. Nothing here is real: names, agencies,
  * phone numbers and addresses are invented; photos are free Unsplash Licence photos.
  */
 import {
@@ -10,7 +10,7 @@ import {
   HeatingType,
   PropertyType,
   RentalPeriod,
-  Role,
+  SellerType,
   TransactionType,
 } from '@walls/shared';
 
@@ -26,7 +26,7 @@ export const DEMO_MEDIA_PREFIX = 'demo/listings';
 
 export interface DemoUser {
   key: string;
-  role: typeof Role.PRIVATE_SELLER | typeof Role.REAL_ESTATE_AGENT;
+  sellerType: SellerType;
   displayName: string;
   phone: string;
   isPhonePublic: boolean;
@@ -40,7 +40,7 @@ const DEMO_NOTE = 'Demo nalog za testiranje sajta.';
 export const DEMO_USERS: readonly DemoUser[] = [
   {
     key: 'milica',
-    role: Role.PRIVATE_SELLER,
+    sellerType: SellerType.PRIVATE_SELLER,
     displayName: 'Milica Jovanović',
     phone: '+381 60 000 0101',
     isPhonePublic: true,
@@ -49,7 +49,7 @@ export const DEMO_USERS: readonly DemoUser[] = [
   },
   {
     key: 'nenad',
-    role: Role.PRIVATE_SELLER,
+    sellerType: SellerType.PRIVATE_SELLER,
     displayName: 'Nenad Petrović',
     phone: '+381 60 000 0102',
     isPhonePublic: true,
@@ -58,7 +58,7 @@ export const DEMO_USERS: readonly DemoUser[] = [
   },
   {
     key: 'jelena',
-    role: Role.PRIVATE_SELLER,
+    sellerType: SellerType.PRIVATE_SELLER,
     displayName: 'Jelena Stojanović',
     phone: '+381 60 000 0103',
     isPhonePublic: false,
@@ -67,7 +67,7 @@ export const DEMO_USERS: readonly DemoUser[] = [
   },
   {
     key: 'dragan',
-    role: Role.PRIVATE_SELLER,
+    sellerType: SellerType.PRIVATE_SELLER,
     displayName: 'Dragan Nikolić',
     phone: '+381 60 000 0104',
     isPhonePublic: true,
@@ -76,7 +76,7 @@ export const DEMO_USERS: readonly DemoUser[] = [
   },
   {
     key: 'marko',
-    role: Role.REAL_ESTATE_AGENT,
+    sellerType: SellerType.REAL_ESTATE_AGENT,
     displayName: 'Marko Ilić',
     phone: '+381 60 000 0201',
     isPhonePublic: true,
@@ -86,7 +86,7 @@ export const DEMO_USERS: readonly DemoUser[] = [
   },
   {
     key: 'ana',
-    role: Role.REAL_ESTATE_AGENT,
+    sellerType: SellerType.REAL_ESTATE_AGENT,
     displayName: 'Ana Popović',
     phone: '+381 60 000 0202',
     isPhonePublic: true,
@@ -95,23 +95,22 @@ export const DEMO_USERS: readonly DemoUser[] = [
     bio: `Stanovi na Novom Beogradu i Voždovcu, kuće u okolini Beograda. ${DEMO_NOTE}`,
   },
   {
-    key: 'stefan',
-    role: Role.REAL_ESTATE_AGENT,
-    displayName: 'Stefan Đorđević',
+    key: 'agencija',
+    sellerType: SellerType.AGENCY,
+    displayName: 'Primer Nekretnine',
     phone: '+381 60 000 0203',
     isPhonePublic: true,
     isEmailPublic: false,
-    bio: `Samostalni agent: Novi Sad, Fruška gora, Zlatibor i Kopaonik. ${DEMO_NOTE}`,
+    bio: `Agencija za nekretnine: Novi Sad, Fruška gora, Zlatibor i Kopaonik. ${DEMO_NOTE}`,
   },
   {
-    key: 'tamara',
-    role: Role.REAL_ESTATE_AGENT,
-    displayName: 'Tamara Kostić',
+    key: 'investitor',
+    sellerType: SellerType.INVESTOR,
+    displayName: 'Primer Gradnja',
     phone: '+381 60 000 0204',
     isPhonePublic: true,
     isEmailPublic: true,
-    agencyName: 'Primer Poslovni Prostori',
-    bio: `Poslovni prostori, lokali, magacini i industrijsko zemljište. ${DEMO_NOTE}`,
+    bio: `Investitor: gradimo i izdajemo poslovne prostore, lokale, magacine i industrijske parcele. ${DEMO_NOTE}`,
   },
 ];
 
@@ -744,7 +743,7 @@ export interface DemoListing {
   } | null;
   exact?: boolean;
   featured?: boolean;
-  /** An agent the admin assigned to this (private seller's) listing. */
+  /** An agent or agency the admin assigned to this (private seller's) listing. */
   assign?: string;
 }
 
@@ -965,7 +964,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     price: { amount: 158000 },
   },
   {
-    by: 'stefan',
+    by: 'agencija',
     type: APARTMENT,
     deal: SALE,
     at: 'grbavica',
@@ -1024,7 +1023,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     price: { amount: 61000 },
   },
   {
-    by: 'stefan',
+    by: 'agencija',
     type: APARTMENT,
     deal: SALE,
     at: 'zlatibor',
@@ -1156,7 +1155,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     price: { amount: 550, period: MONTH },
   },
   {
-    by: 'stefan',
+    by: 'agencija',
     type: APARTMENT,
     deal: RENT,
     at: 'kopaonik',
@@ -1242,7 +1241,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     features: [GARDEN, GARAGE_FEATURE, PETS_ALLOWED, SEWAGE, GAS_CONNECTION],
     price: { amount: 189000, negotiable: true },
     exact: true,
-    assign: 'stefan',
+    assign: 'agencija',
   },
   {
     by: 'jelena',
@@ -1265,7 +1264,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     price: { amount: 13500000, currency: RSD },
   },
   {
-    by: 'stefan',
+    by: 'agencija',
     type: HOUSE,
     deal: SALE,
     at: 'karlovci',
@@ -1409,7 +1408,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     featured: true,
   },
   {
-    by: 'stefan',
+    by: 'agencija',
     type: VILLA,
     deal: SALE,
     at: 'karlovci',
@@ -1466,7 +1465,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
 
   // Offices
   {
-    by: 'tamara',
+    by: 'investitor',
     type: OFFICE,
     deal: RENT,
     at: 'blok23',
@@ -1488,7 +1487,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     featured: true,
   },
   {
-    by: 'tamara',
+    by: 'investitor',
     type: OFFICE,
     deal: RENT,
     at: 'knezMihailova',
@@ -1523,10 +1522,10 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     heating: DISTRICT,
     features: [ELEVATOR, AIR_CONDITIONING, INTERNET],
     price: { amount: 165000 },
-    assign: 'tamara',
+    assign: 'agencija',
   },
   {
-    by: 'stefan',
+    by: 'agencija',
     type: OFFICE,
     deal: RENT,
     at: 'liman',
@@ -1563,7 +1562,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
 
   // Retail
   {
-    by: 'tamara',
+    by: 'investitor',
     type: RETAIL,
     deal: RENT,
     at: 'knezMihailova',
@@ -1640,7 +1639,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
 
   // Warehouses
   {
-    by: 'tamara',
+    by: 'investitor',
     type: WAREHOUSE,
     deal: RENT,
     at: 'dobanovci',
@@ -1679,7 +1678,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     price: { amount: 420000, negotiable: true },
   },
   {
-    by: 'tamara',
+    by: 'investitor',
     type: WAREHOUSE,
     deal: SALE,
     at: 'smederevo',
@@ -1727,7 +1726,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     exact: true,
   },
   {
-    by: 'stefan',
+    by: 'agencija',
     type: LAND,
     deal: SALE,
     at: 'zlatibor',
@@ -1739,7 +1738,7 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     price: { amount: 4680000, currency: RSD, negotiable: true },
   },
   {
-    by: 'tamara',
+    by: 'investitor',
     type: LAND,
     deal: SALE,
     at: 'dobanovci',

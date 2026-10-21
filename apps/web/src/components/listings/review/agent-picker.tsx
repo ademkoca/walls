@@ -11,8 +11,12 @@ import { toast } from 'sonner';
 import { usersApi } from '@/lib/api/users';
 import { hasSearchableText } from '@/lib/search-text';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { SellerTypeBadge } from '../../profiles/seller-type-badge';
 
-/** Shows the assigned agent and lets a reviewer assign another active agent or remove it. */
+/**
+ * Shows the assigned agent or agency and lets a reviewer assign another active agent or
+ * agency, or remove the assignment.
+ */
 export function AgentPicker({
   agent,
   onAssign,
@@ -35,7 +39,7 @@ export function AgentPicker({
     if (!canSearch) return;
     setSearching(true);
     try {
-      setResults((await usersApi.activeAgents(query.trim())).items);
+      setResults((await usersApi.assignableProfessionals(query.trim())).items);
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -97,7 +101,10 @@ export function AgentPicker({
           {results.map((candidate) => (
             <li key={candidate.id} className="flex items-center justify-between gap-2 px-3 py-2">
               <span className="min-w-0 text-sm">
-                <span className="block truncate font-medium">{candidate.displayName}</span>
+                <span className="flex items-center gap-2">
+                  <span className="truncate font-medium">{candidate.displayName}</span>
+                  {candidate.sellerType && <SellerTypeBadge sellerType={candidate.sellerType} />}
+                </span>
                 <span className="block truncate text-muted-foreground">{candidate.email}</span>
               </span>
               <Button

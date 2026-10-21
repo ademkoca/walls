@@ -13,9 +13,9 @@ test('a visitor reads about Walls, writes through the contact form and finds the
   await footer.getByRole('link', { name: 'About' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Why we built Walls' })).toBeVisible();
   const ways = page.getByRole('region', { name: 'Three ways to use Walls' });
-  await expect(ways.getByRole('link', { name: 'Find an agent' })).toHaveAttribute(
+  await expect(ways.getByRole('link', { name: 'Browse partners' })).toHaveAttribute(
     'href',
-    '/en/agents',
+    '/en/partners',
   );
 
   // Contact: details marked as pending, and the form delivers to the company inbox.

@@ -1,5 +1,6 @@
 'use client';
 
+import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
 import { Button, buttonVariants } from '@walls/ui/components/button';
 import { Separator } from '@walls/ui/components/separator';
 import {
@@ -37,7 +38,10 @@ export function MobileNav() {
           <SheetTitle>{t('mainLabel')}</SheetTitle>
         </SheetHeader>
         <nav aria-label={t('mainLabel')} className="flex flex-col gap-1 px-4">
-          {[...MAIN_NAV, { href: '/for-agents', labelKey: 'forAgents' } as const].map((item) => (
+          {[
+            ...MAIN_NAV,
+            { href: FOR_PROFESSIONALS_PATH, labelKey: 'forProfessionals' } as const,
+          ].map((item) => (
             <Link key={item.href} href={item.href} className={linkClass} onClick={close}>
               {t(item.labelKey)}
             </Link>

@@ -111,20 +111,27 @@ export async function approveListingViaApi(admin: Page, id: string): Promise<str
 const PROOF_PDF = Buffer.from('%PDF-1.7\n1 0 obj << /Type /Catalog >> endobj\ntrailer\n%%EOF\n');
 
 /**
- * Creates an approved, activated agent the way the product does: a public application with
- * proof, approval by the signed-in `admin`, and account setup from the emailed link. The
- * application and approval go through the API (their UI is covered in agents.spec.ts); the
- * agent is left signed in on `page`.
+ * Creates an approved, activated professional (an agent unless `sellerType` names an agency
+ * or investor) the way the product does: a public application with proof, approval by the
+ * signed-in `admin`, and account setup from the emailed link. The application and approval
+ * go through the API (their UI is covered in agents.spec.ts); the professional is left
+ * signed in on `page`.
  */
-export async function createActiveAgent(page: Page, admin: Page): Promise<TestUser> {
+export async function createActiveAgent(
+  page: Page,
+  admin: Page,
+  sellerType: 'REAL_ESTATE_AGENT' | 'AGENCY' | 'INVESTOR' = 'REAL_ESTATE_AGENT',
+): Promise<TestUser> {
   const user = newTestUser();
   // A unique name: parallel runs would otherwise race for the same profile slug.
-  const agent = { ...user, name: `Agent Test ${user.email.slice(0, 6)}` };
+  const label = { REAL_ESTATE_AGENT: 'Agent', AGENCY: 'Agency', INVESTOR: 'Investor' }[sellerType];
+  const agent = { ...user, name: `${label} Test ${user.email.slice(0, 6)}` };
   const headers = { Origin: WEB_ORIGIN };
 
   const applied = await page.request.post('/api/v1/agent-applications', {
     headers,
     multipart: {
+      sellerType,
       fullName: agent.name,
       email: agent.email,
       phone: '+381 64 123 4567',

@@ -271,7 +271,10 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
           </Card>
           <AdvertiserCard title={t('advertiser')} profile={listing.advertiser} />
           {listing.assignedAgent && (
-            <AdvertiserCard title={t('assignedAgent')} profile={listing.assignedAgent} />
+            <AdvertiserCard
+              title={t('assignedAgent', { type: listing.assignedAgent.sellerType })}
+              profile={listing.assignedAgent}
+            />
           )}
           <p className="text-sm text-muted-foreground">{t('published', { date: publishedOn })}</p>
         </aside>

@@ -194,40 +194,44 @@ const COPY: Record<Locale, Copy> = {
       action: { label: 'Prijavite se', url: loginLink },
     }),
     AGENT_APPLICATION_RECEIVED: ({ fullName }) => ({
-      subject: 'Primili smo vašu prijavu za agente',
+      subject: 'Primili smo vašu prijavu za profesionalni nalog',
       paragraphs: [
         `Zdravo ${fullName},`,
-        `hvala na prijavi za agente na ${brand.name}. Naš tim će pregledati vaše podatke i dokaze i javiti vam ishod emailom.`,
+        `hvala na prijavi za profesionalni nalog na ${brand.name}. Naš tim će pregledati vaše podatke i dokaze i javiti vam ishod emailom.`,
       ],
     }),
     AGENT_APPLICATION_EMAIL_IN_USE: ({ fullName, loginLink, applyLink }) => ({
-      subject: 'Prijava za agente nije primljena',
+      subject: 'Prijava za profesionalni nalog nije primljena',
       paragraphs: [
         `Zdravo ${fullName},`,
-        `primili smo prijavu za agente sa ove email adrese, ali ona već pripada nalogu na ${brand.name}. Nalog agenta mora imati svoju email adresu, pa vas molimo da se prijavite ponovo sa drugom adresom.`,
+        `primili smo prijavu za profesionalni nalog sa ove email adrese, ali ona već pripada nalogu na ${brand.name}. Profesionalni nalog mora imati svoju email adresu, pa vas molimo da se prijavite ponovo sa drugom adresom.`,
         `Ako niste vi poslali prijavu, zanemarite ovu poruku. Svom postojećem nalogu možete pristupiti ovde: ${loginLink}`,
       ],
       action: { label: 'Pošalji novu prijavu', url: applyLink },
     }),
     AGENT_APPLICATION_DUPLICATE: ({ fullName }) => ({
-      subject: 'Vaša prijava za agente je već u obradi',
+      subject: 'Vaša prijava za profesionalni nalog je već u obradi',
       paragraphs: [
         `Zdravo ${fullName},`,
-        'sa ove email adrese već imamo prijavu za agente koja čeka proveru, pa novu prijavu nismo sačuvali. Javićemo vam ishod emailom.',
+        'sa ove email adrese već imamo prijavu za profesionalni nalog koja čeka proveru, pa novu prijavu nismo sačuvali. Javićemo vam ishod emailom.',
       ],
     }),
     AGENT_APPLICATION_APPROVED: ({ displayName, link }) => ({
-      subject: 'Vaša prijava za agente je odobrena',
+      subject: 'Vaša prijava za profesionalni nalog je odobrena',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `vaša prijava za agente na ${brand.name} je odobrena. Postavite lozinku da biste aktivirali nalog agenta i počeli da objavljujete oglase.`,
+        `vaša prijava za profesionalni nalog na ${brand.name} je odobrena. Postavite lozinku da biste aktivirali nalog i počeli da objavljujete oglase.`,
         `Link važi ${setupDays} dana.`,
       ],
       action: { label: 'Podesi nalog', url: link },
     }),
     AGENT_APPLICATION_REJECTED: ({ fullName, reason }) => ({
-      subject: 'Vaša prijava za agente nije odobrena',
-      paragraphs: [`Zdravo ${fullName},`, 'vaša prijava za agente nije odobrena. Razlog:', reason],
+      subject: 'Vaša prijava za profesionalni nalog nije odobrena',
+      paragraphs: [
+        `Zdravo ${fullName},`,
+        'vaša prijava za profesionalni nalog nije odobrena. Razlog:',
+        reason,
+      ],
     }),
     EMAIL_CHANGE_VERIFICATION: ({ displayName, newEmail, link }) => ({
       subject: 'Potvrdite novu email adresu',
@@ -396,42 +400,42 @@ const COPY: Record<Locale, Copy> = {
       action: { label: 'Log in', url: loginLink },
     }),
     AGENT_APPLICATION_RECEIVED: ({ fullName }) => ({
-      subject: 'We received your agent application',
+      subject: 'We received your application for a professional account',
       paragraphs: [
         `Hello ${fullName},`,
-        `thank you for applying as an agent on ${brand.name}. Our team will review your details and proof and email you the outcome.`,
+        `thank you for applying for a professional account on ${brand.name}. Our team will review your details and proof and email you the outcome.`,
       ],
     }),
     AGENT_APPLICATION_EMAIL_IN_USE: ({ fullName, loginLink, applyLink }) => ({
-      subject: 'Your agent application was not received',
+      subject: 'Your application for a professional account was not received',
       paragraphs: [
         `Hello ${fullName},`,
-        `we received an agent application from this email address, but it already belongs to a ${brand.name} account. An agent account needs its own email address, so please apply again with a different one.`,
+        `we received an application for a professional account from this email address, but it already belongs to a ${brand.name} account. A professional account needs its own email address, so please apply again with a different one.`,
         `If you didn't send this application, you can ignore this email. You can log in to your existing account here: ${loginLink}`,
       ],
       action: { label: 'Apply again', url: applyLink },
     }),
     AGENT_APPLICATION_DUPLICATE: ({ fullName }) => ({
-      subject: 'Your agent application is already in review',
+      subject: 'Your application for a professional account is already in review',
       paragraphs: [
         `Hello ${fullName},`,
-        "we already have an agent application from this email address waiting for review, so we didn't save the new one. We'll email you the outcome.",
+        "we already have an application for a professional account from this email address waiting for review, so we didn't save the new one. We'll email you the outcome.",
       ],
     }),
     AGENT_APPLICATION_APPROVED: ({ displayName, link }) => ({
-      subject: 'Your agent application was approved',
+      subject: 'Your application for a professional account was approved',
       paragraphs: [
         `Hello ${displayName},`,
-        `your agent application on ${brand.name} has been approved. Set a password to activate your agent account and start publishing listings.`,
+        `your application for a professional account on ${brand.name} has been approved. Set a password to activate your account and start publishing listings.`,
         `The link is valid for ${setupDays} days.`,
       ],
       action: { label: 'Set up account', url: link },
     }),
     AGENT_APPLICATION_REJECTED: ({ fullName, reason }) => ({
-      subject: 'Your agent application was not approved',
+      subject: 'Your application for a professional account was not approved',
       paragraphs: [
         `Hello ${fullName},`,
-        'your agent application was not approved. Reason:',
+        'your application for a professional account was not approved. Reason:',
         reason,
       ],
     }),

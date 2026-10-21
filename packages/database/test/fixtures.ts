@@ -6,13 +6,22 @@ import { listings, properties, users } from '../src/schema';
 type NewUser = typeof users.$inferInsert;
 type NewListing = typeof listings.$inferInsert;
 
+/** The seller type that matches a role by default: advertisers have one, admins do not. */
+function defaultSellerType(role: NewUser['role']): NewUser['sellerType'] {
+  if (role === 'PRIVATE_SELLER') return 'PRIVATE_SELLER';
+  if (role === 'REAL_ESTATE_AGENT') return 'REAL_ESTATE_AGENT';
+  return null;
+}
+
 export async function insertUser(db: Database, overrides: Partial<NewUser> = {}) {
   const unique = randomUUID();
+  const role = overrides.role ?? 'PRIVATE_SELLER';
   const [user] = await db
     .insert(users)
     .values({
       email: `${unique}@example.com`,
-      role: 'PRIVATE_SELLER',
+      role,
+      sellerType: defaultSellerType(role),
       status: 'ACTIVE',
       emailVerifiedAt: new Date(),
       displayName: 'Test User',

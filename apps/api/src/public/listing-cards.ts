@@ -77,6 +77,7 @@ export async function toCards(db: DbExecutor, rows: CardRow[]): Promise<PublicLi
       plotArea: property.plotArea,
       bedrooms: property.bedrooms,
       bathrooms: property.bathrooms,
+      sellerType: listing.sellerType,
       publishedAt: listing.publishedAt!.toISOString(),
     };
   });

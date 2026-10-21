@@ -4,6 +4,7 @@ import { ImageIcon, MapPinIcon } from 'lucide-react';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import type { Pricing } from '@/lib/currency';
+import { SellerTypeBadge } from '../profiles/seller-type-badge';
 import { PriceTag } from './price-tag';
 
 /** A published listing in public lists. English pages fall back to the Serbian title. */
@@ -48,6 +49,7 @@ export function ListingCard({
           <Badge className="absolute top-3 left-3">
             {tEnums(`transactionType.${listing.transactionType}`)}
           </Badge>
+          <SellerTypeBadge sellerType={listing.sellerType} className="absolute top-3 right-3" />
         </div>
         <div className="flex flex-1 flex-col gap-2 p-4">
           <h3 className="line-clamp-2 font-medium group-hover:underline group-focus-visible:underline">

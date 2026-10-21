@@ -26,10 +26,16 @@ export const UserStatus = {
 } as const;
 export type UserStatus = ValueOf<typeof UserStatus>;
 
-/** Who advertises a listing (SPEC §5). */
+/**
+ * What kind of advertiser a user is, and so who advertises a listing (SPEC §5). Agents,
+ * agencies and investors are approved professionals: all three have the `REAL_ESTATE_AGENT`
+ * role, which decides their permissions.
+ */
 export const SellerType = {
   PRIVATE_SELLER: 'PRIVATE_SELLER',
   REAL_ESTATE_AGENT: 'REAL_ESTATE_AGENT',
+  AGENCY: 'AGENCY',
+  INVESTOR: 'INVESTOR',
 } as const;
 export type SellerType = ValueOf<typeof SellerType>;
 

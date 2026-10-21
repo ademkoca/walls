@@ -1,3 +1,4 @@
+import { FOR_PROFESSIONALS_PATH, PARTNERS_PATH } from '@walls/shared';
 import { brand } from '@walls/ui/brand';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
@@ -24,13 +25,13 @@ export async function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link href="/agents" className={linkClass}>
-                {t('nav.agents')}
+              <Link href={PARTNERS_PATH} className={linkClass}>
+                {t('nav.partners')}
               </Link>
             </li>
             <li>
-              <Link href="/for-agents" className={linkClass}>
-                {t('nav.forAgents')}
+              <Link href={FOR_PROFESSIONALS_PATH} className={linkClass}>
+                {t('nav.forProfessionals')}
               </Link>
             </li>
           </ul>

@@ -1,3 +1,4 @@
+import { FOR_PROFESSIONALS_PATH, PARTNERS_PATH } from '@walls/shared';
 import { brand } from '@walls/ui/brand';
 import { buttonVariants } from '@walls/ui/components/button';
 import {
@@ -41,7 +42,7 @@ const STORY = ['problem', 'solution', 'trust'] as const;
 const WAYS: { key: 'find' | 'sell' | 'agent'; href: string; icon: LucideIcon }[] = [
   { key: 'find', href: '/properties', icon: SearchIcon },
   { key: 'sell', href: '/register', icon: MegaphoneIcon },
-  { key: 'agent', href: '/agents', icon: UserCheckIcon },
+  { key: 'agent', href: PARTNERS_PATH, icon: UserCheckIcon },
 ];
 
 const TRUST: { key: 'reviewed' | 'agents' | 'address' | 'phone' | 'free'; icon: LucideIcon }[] = [
@@ -137,7 +138,7 @@ export default async function AboutPage({ params }: PageProps<'/[locale]/about'>
           {/* The dark surface's light text would otherwise carry over onto the light buttons. */}
           {[
             { href: '/register', label: tHome('advertise') },
-            { href: '/for-agents', label: tHome('agentBanner.action') },
+            { href: FOR_PROFESSIONALS_PATH, label: tHome('agentBanner.action') },
           ].map(({ href, label }) => (
             <Link
               key={href}

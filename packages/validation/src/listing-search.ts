@@ -6,6 +6,7 @@ import {
   ListingSort,
   PropertyType,
   ROOM_FILTER_OPTIONS,
+  SellerType,
   TransactionType,
   enumValues,
 } from '@walls/shared';
@@ -51,6 +52,8 @@ const listingSearchShape = {
   bathrooms: rooms.optional(),
   furnishedStatus: z.enum(enumValues(FurnishedStatus)).optional(),
   amenities: amenities.optional(),
+  /** Who advertises the listing: private seller, agent, agency or investor. */
+  sellerType: z.enum(enumValues(SellerType)).optional(),
   sort: z.enum(enumValues(ListingSort)).default(DEFAULT_LISTING_SORT),
   page: z.coerce.number().int().min(1).max(S.maxPage).default(1),
 };

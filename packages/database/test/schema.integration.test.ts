@@ -38,6 +38,25 @@ describe('users', () => {
     });
   });
 
+  it('gives each role a matching kind of advertiser (SPEC §5)', async () => {
+    for (const sellerType of ['REAL_ESTATE_AGENT', 'AGENCY', 'INVESTOR'] as const) {
+      const professional = await insertUser(db, { role: 'REAL_ESTATE_AGENT', sellerType });
+      expect(professional.sellerType).toBe(sellerType);
+    }
+    const mismatches = [
+      { role: 'PRIVATE_SELLER', sellerType: 'AGENCY' },
+      { role: 'PRIVATE_SELLER', sellerType: null },
+      { role: 'REAL_ESTATE_AGENT', sellerType: 'PRIVATE_SELLER' },
+      { role: 'REAL_ESTATE_AGENT', sellerType: null },
+      { role: 'ADMIN', sellerType: 'AGENCY' },
+    ] as const;
+    for (const mismatch of mismatches) {
+      await expectDbError(insertUser(db, mismatch), {
+        constraint: 'users_seller_type_matches_role',
+      });
+    }
+  });
+
   it('keeps deactivation status and timestamp consistent', async () => {
     await expectDbError(insertUser(db, { status: 'DEACTIVATED' }), {
       constraint: 'users_deactivated_at_matches_status',
@@ -169,6 +188,7 @@ describe('listing media', () => {
 
 describe('agent applications', () => {
   const application = (email: string) => ({
+    sellerType: 'REAL_ESTATE_AGENT' as const,
     fullName: 'Ana Anić',
     email,
     phone: '+381 64 765 4321',
@@ -179,6 +199,15 @@ describe('agent applications', () => {
     await expectDbError(db.insert(agentApplications).values(application('ANA@agency.rs')), {
       constraint: 'agent_applications_one_pending_per_email',
     });
+  });
+
+  it('are for a professional account only', async () => {
+    await expectDbError(
+      db
+        .insert(agentApplications)
+        .values({ ...application('seller@agency.rs'), sellerType: 'PRIVATE_SELLER' }),
+      { constraint: 'agent_applications_professional_seller_type' },
+    );
   });
 
   it('requires a reason to reject', async () => {

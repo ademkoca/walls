@@ -8,7 +8,8 @@ import {
   isReviewer,
   requireActive,
 } from '../access/decision';
-import { ListingStatus, Role, SellerType, type TransactionType } from '../enums';
+import { ListingStatus, Role, type TransactionType } from '../enums';
+import { isSellerTypeValidForRole } from '../user/seller-type';
 import {
   LISTING_TRANSITIONS,
   ListingAction,
@@ -56,29 +57,23 @@ const inStatus =
     statuses.includes(listing.status) ? allow() : deny(DenialReason.INVALID_STATE);
 
 /**
- * The seller type a new listing gets from its creator's role (SPEC §5), or null when the
- * role does not advertise listings. Never taken from client input.
+ * Whether an account advertises listings: private sellers and approved professionals do;
+ * Admins and Super Admins have no kind of advertiser (SPEC §2.1).
  */
-export function sellerTypeForRole(role: Role): SellerType | null {
-  switch (role) {
-    case Role.PRIVATE_SELLER:
-      return SellerType.PRIVATE_SELLER;
-    case Role.REAL_ESTATE_AGENT:
-      return SellerType.REAL_ESTATE_AGENT;
-    default:
-      return null;
-  }
+export function advertisesListings(account: Pick<Actor, 'role' | 'sellerType'>): boolean {
+  return account.sellerType !== null && isSellerTypeValidForRole(account.role, account.sellerType);
 }
 
 /**
- * Creating a listing: private sellers and approved agents advertise properties (SPEC §2.1).
+ * Creating a listing: private sellers and approved professionals advertise properties
+ * (SPEC §2.1). A new listing's seller type is its creator's stored one, never client input.
  * Admins manage listings but do not create them; like direct content edits by admins, that
  * is an open product question, so it is denied by default.
  */
 export function canCreateListing(actor: Actor): Decision {
   return firstDenial(
     () => requireActive(actor),
-    () => (sellerTypeForRole(actor.role) ? allow() : deny(DenialReason.ROLE_NOT_PERMITTED)),
+    () => (advertisesListings(actor) ? allow() : deny(DenialReason.ROLE_NOT_PERMITTED)),
   );
 }
 

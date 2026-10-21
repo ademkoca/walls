@@ -1,10 +1,11 @@
 import { type DbExecutor, listings, properties, propertyLocations, users } from '@walls/database';
 import { Role, UserStatus } from '@walls/shared';
+import type { PartnerDirectoryQuery } from '@walls/validation';
 import { type SQL, and, asc, count, desc, eq, or } from 'drizzle-orm';
 import { pageBounds } from '../http/paging';
 import { type CardRow, cardColumns, creator, publiclyVisible } from './listing-cards';
 
-/** An active agent or private seller with a public profile page. */
+/** An active professional or private seller with a public profile page. */
 export async function findPublicUser(db: DbExecutor, slug: string, role: Role) {
   const [user] = await db
     .select()
@@ -14,7 +15,10 @@ export async function findPublicUser(db: DbExecutor, slug: string, role: Role) {
   return user;
 }
 
-/** Public listings advertised by a user, or assigned to them as the agent; newest first. */
+/**
+ * Public listings advertised by a user, or assigned to them as the agent or agency; newest
+ * first.
+ */
 export async function findPublicListingsOf(db: DbExecutor, userId: string): Promise<CardRow[]> {
   return db
     .select(cardColumns)
@@ -31,9 +35,16 @@ export async function findPublicListingsOf(db: DbExecutor, userId: string): Prom
     .orderBy(desc(listings.publishedAt), asc(listings.id));
 }
 
-/** One page of active agents by name, with their number of public listings. */
-export async function findPublicAgents(db: DbExecutor, page: number, pageSize: number) {
-  const { limit, offset } = pageBounds(page, pageSize);
+/**
+ * One page of active professionals (agents, agencies, investors; or one kind) by name, with
+ * their number of public listings.
+ */
+export async function findPublicPartners(
+  db: DbExecutor,
+  query: PartnerDirectoryQuery,
+  pageSize: number,
+) {
+  const { limit, offset } = pageBounds(query.page, pageSize);
   const listingCount = db
     .select({ agentId: users.id, total: count(listings.id).as('total') })
     .from(users)
@@ -49,6 +60,7 @@ export async function findPublicAgents(db: DbExecutor, page: number, pageSize: n
   const conditions: SQL[] = [
     eq(users.role, Role.REAL_ESTATE_AGENT),
     eq(users.status, UserStatus.ACTIVE),
+    ...(query.type ? [eq(users.sellerType, query.type)] : []),
   ];
   return db
     .select({ user: users, listingCount: listingCount.total })

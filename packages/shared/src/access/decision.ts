@@ -1,4 +1,4 @@
-import { Role, UserStatus } from '../enums';
+import { Role, type SellerType, UserStatus } from '../enums';
 
 /** Why an action is not allowed. The API maps each reason to an HTTP status. */
 export const DenialReason = {
@@ -24,6 +24,8 @@ export const deny = (reason: DenialReason): Decision => ({ allowed: false, reaso
 export interface Actor {
   id: string;
   role: Role;
+  /** The kind of advertiser the account is (SPEC §5); null for Admins and Super Admins. */
+  sellerType: SellerType | null;
   status: UserStatus;
   emailVerified: boolean;
 }

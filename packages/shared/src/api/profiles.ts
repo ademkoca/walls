@@ -4,10 +4,12 @@ import type {
   PropertyType,
   ReviewStatus,
   Role,
+  SellerType,
   TransactionType,
 } from '../enums';
 import type { ProfileField } from '../user/profile';
 import type { PublicPhoneContact } from '../user/phone';
+import type { ProfessionalSellerType } from '../user/seller-type';
 import type { PriceView, UserReference } from './listings';
 
 /** Profile, agent-application and public-profile shapes. Dates are ISO 8601 strings. */
@@ -40,12 +42,14 @@ export interface ProfileChangeRequestView {
 /** GET /me/profile: the signed-in user's own profile. */
 export interface MyProfile {
   role: Role;
+  /** Null for Admins, who do not advertise. */
+  sellerType: SellerType | null;
   email: string;
   slug: string;
   /** Null for roles without a public profile page (Admins). */
   publicPath: string | null;
   phoneVerificationStatus: PhoneVerificationStatus;
-  /** True for agents: changes wait for Admin approval. */
+  /** True for professionals: changes wait for Admin approval. */
   changesRequireApproval: boolean;
   live: ProfileView;
   /** The pending request, or the latest reviewed one (to show a rejection). */
@@ -78,6 +82,8 @@ export interface AgentApplicationFileView {
 
 export interface AgentApplicationSummary {
   id: string;
+  /** The kind of professional account applied for. */
+  sellerType: ProfessionalSellerType;
   fullName: string;
   email: string;
   agencyName: string | null;
@@ -93,7 +99,7 @@ export interface AgentApplicationDetail extends AgentApplicationSummary {
   rejectionReason: string | null;
   reviewedAt: string | null;
   reviewedBy: UserReference | null;
-  /** The agent account created on approval. */
+  /** The professional account created on approval. */
   resultingUser: UserReference | null;
   /** True when an account with this email exists, so approval is impossible. */
   emailInUse: boolean;
@@ -124,13 +130,17 @@ export interface PublicListingCard {
   plotArea: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
+  /** Who advertises the listing: its creator's kind of advertiser (SPEC §5). */
+  sellerType: SellerType;
   publishedAt: string;
 }
 
-/** A public seller or agent profile (SPEC §19). Never includes private data. */
+/** A public private-seller or professional profile (SPEC §19). Never includes private data. */
 export interface PublicProfile {
   slug: string;
   role: Role;
+  /** Shown as the profile's badge: private seller, agent, agency or investor. */
+  sellerType: SellerType;
   displayName: string;
   bio: string | null;
   agencyName: string | null;
@@ -138,8 +148,6 @@ export interface PublicProfile {
   /** With its verification status, which must always be shown next to the number. */
   phone: PublicPhoneContact | null;
   email: string | null;
-  /** True for agents: their application was approved by an Admin. */
-  approvedAgent: boolean;
   memberSince: string;
 }
 
@@ -148,8 +156,10 @@ export interface PublicProfilePage {
   listings: PublicListingCard[];
 }
 
-export interface PublicAgentSummary {
+/** An approved professional in the public directory (SPEC §16, §19). */
+export interface PublicPartnerSummary {
   slug: string;
+  sellerType: ProfessionalSellerType;
   displayName: string;
   agencyName: string | null;
   avatarUrl: string | null;

@@ -31,6 +31,24 @@ const nextConfig: NextConfig = {
   // even though the API is hosted elsewhere (Render).
   rewrites: () =>
     Promise.resolve([{ source: '/api/:path*', destination: `${apiInternalUrl()}/api/:path*` }]),
+  // Old public URLs (before agencies and investors joined agents) keep working: profiles
+  // moved from /agents to /partners, the application from /for-agents to /for-professionals.
+  redirects: () =>
+    Promise.resolve(
+      ['', '/en'].flatMap((prefix) => [
+        { source: `${prefix}/agents`, destination: `${prefix}/partners`, permanent: true },
+        {
+          source: `${prefix}/agents/:slug`,
+          destination: `${prefix}/partners/:slug`,
+          permanent: true,
+        },
+        {
+          source: `${prefix}/for-agents`,
+          destination: `${prefix}/for-professionals`,
+          permanent: true,
+        },
+      ]),
+    ),
   // Security headers on every response. A preview deployment (SITE_INDEXING=off) also tells
   // search engines not to index any response.
   headers: () =>

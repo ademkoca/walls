@@ -72,6 +72,9 @@ export default async function UserPage({ params }: PageProps<'/[locale]/dashboar
           <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
             <Detail label={t('columns.email')}>{user.email}</Detail>
             <Detail label={t('columns.role')}>{tEnums(`role.${user.role}`)}</Detail>
+            {user.sellerType && (
+              <Detail label={t('columns.type')}>{tEnums(`sellerType.${user.sellerType}`)}</Detail>
+            )}
             <Detail label={t('details.emailVerified')}>
               {user.emailVerified ? t('details.yes') : t('details.no')}
             </Detail>

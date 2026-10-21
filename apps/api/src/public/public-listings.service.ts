@@ -75,14 +75,14 @@ export class PublicListingsService {
   }
 
   async sitemap(): Promise<SitemapEntries> {
-    const { listingRows, agentRows, sellerRows } = await findSitemapEntries(this.db);
+    const { listingRows, partnerRows, sellerRows } = await findSitemapEntries(this.db);
     const entry = (row: { slug: string | null; updatedAt: Date | null }) => ({
       slug: row.slug!,
       updatedAt: (row.updatedAt ?? new Date()).toISOString(),
     });
     return {
       listings: listingRows.map(entry),
-      agents: agentRows.map(entry),
+      partners: partnerRows.map(entry),
       sellers: sellerRows.map(entry),
     };
   }

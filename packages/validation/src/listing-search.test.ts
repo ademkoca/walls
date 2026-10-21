@@ -20,6 +20,7 @@ describe('listing search query (SPEC §17)', () => {
         minArea: '40',
         bedrooms: '2',
         amenities: 'ELEVATOR,PARKING,ELEVATOR',
+        sellerType: 'AGENCY',
       }),
     ).toEqual({
       q: 'stan',
@@ -32,6 +33,7 @@ describe('listing search query (SPEC §17)', () => {
       minArea: 40,
       bedrooms: 2,
       amenities: ['ELEVATOR', 'PARKING'],
+      sellerType: 'AGENCY',
       sort: 'NEWEST',
       page: 1,
     });
@@ -43,6 +45,7 @@ describe('listing search query (SPEC §17)', () => {
       { minPrice: '-1' },
       { bedrooms: '0' },
       { amenities: 'ELEVATOR,JACUZZI' },
+      { sellerType: 'ADMIN' },
       { sort: 'RANDOM' },
       { page: '0' },
       { utm_source: 'x' },
@@ -94,5 +97,6 @@ describe('listing search query (SPEC §17)', () => {
   it('tells a filtered search from a plain one', () => {
     expect(hasListingFilters(parseListingSearch({ sort: 'PRICE_DESC', page: '3' }))).toBe(false);
     expect(hasListingFilters(parseListingSearch({ bathrooms: '2' }))).toBe(true);
+    expect(hasListingFilters(parseListingSearch({ sellerType: 'INVESTOR' }))).toBe(true);
   });
 });

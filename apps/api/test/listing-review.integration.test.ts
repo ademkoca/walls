@@ -6,7 +6,7 @@ import {
   listings,
   properties,
 } from '@walls/database';
-import { type ListingSummary, Role } from '@walls/shared';
+import { type ListingSummary, Role, SellerType } from '@walls/shared';
 import { and, eq } from 'drizzle-orm';
 import { afterAll, describe, expect, it } from 'vitest';
 import { createTestContext, errorOf } from './helpers';
@@ -246,15 +246,48 @@ describe('assigning agents (SPEC §5)', () => {
     );
   });
 
-  it('only assigns active real-estate agents', async () => {
+  it('assigns an agency like an agent', async () => {
     const seller = await ctx.signedInUser();
     const admin = await ctx.signedInUser(Role.ADMIN);
+    const agency = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.AGENCY);
     const id = await submittedListing(seller.client);
+
     const response = await admin.client.put(`${LISTINGS}/${id}/assignment`, {
-      agentId: seller.user.id,
+      agentId: agency.user.id,
     });
-    expect(response.status).toBe(400);
-    expect(errorOf(response).code).toBe('VALIDATION_FAILED');
+    expect(response.status).toBe(200);
+    expect(detailOf(response).assignedAgent?.id).toBe(agency.user.id);
+    expect((await agency.client.get(`${LISTINGS}/${id}`)).status).toBe(200);
+  });
+
+  it('only assigns active agents and agencies: never sellers or investors', async () => {
+    const seller = await ctx.signedInUser();
+    const admin = await ctx.signedInUser(Role.ADMIN);
+    const investor = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.INVESTOR);
+    const id = await submittedListing(seller.client);
+    for (const candidate of [seller, investor]) {
+      const response = await admin.client.put(`${LISTINGS}/${id}/assignment`, {
+        agentId: candidate.user.id,
+      });
+      expect(response.status).toBe(400);
+      expect(errorOf(response).code).toBe('VALIDATION_FAILED');
+    }
+  });
+
+  it('offers agents and agencies, not investors, when searching whom to assign', async () => {
+    const admin = await ctx.signedInUser(Role.ADMIN);
+    const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
+    const agency = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.AGENCY);
+    const investor = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.INVESTOR);
+    const found = async (user: { email: string }) => {
+      const query = new URLSearchParams({ status: 'ACTIVE', assignable: 'true', q: user.email });
+      const response = await admin.client.get(`/api/v1/users?${query.toString()}`);
+      expect(response.status).toBe(200);
+      return (response.body as { items: { id: string; sellerType: string }[] }).items;
+    };
+    expect(await found(agent.user)).toMatchObject([{ sellerType: 'REAL_ESTATE_AGENT' }]);
+    expect(await found(agency.user)).toMatchObject([{ sellerType: 'AGENCY' }]);
+    expect(await found(investor.user)).toEqual([]);
   });
 
   it('does not let agents assign themselves', async () => {

@@ -39,8 +39,11 @@ test('an agent applies, is approved, activates the account and gets profile chan
   test.slow();
   const agent = { ...newTestUser(), name: `Marko Agent ${Date.now().toString(36)}` };
 
-  // The separate "For agents" application with private proof.
-  await applicant.goto('/en/for-agents');
+  // The separate "For professionals" application with private proof.
+  await applicant.goto('/en/for-professionals');
+  await applicant.getByRole('button', { name: 'Send application' }).click();
+  await expect(applicant.getByLabel('Agency (optional)')).toHaveCount(0);
+  await applicant.getByRole('radio', { name: /^Agent/ }).check();
   await applicant.getByLabel('Full name').fill(agent.name);
   await applicant.getByLabel('Email address').fill(agent.email);
   await applicant.getByLabel('Phone number', { exact: true }).fill(PHONE);
@@ -57,19 +60,19 @@ test('an agent applies, is approved, activates the account and gets profile chan
   // An admin checks the proof and approves the application.
   const { page: admin, errors } = await openPage(browser);
   await signInAsSuperAdmin(admin);
-  await openFromDashboard(admin, 'Agent applications', agent.name);
+  await openFromDashboard(admin, 'Professional applications', agent.name);
   await expect(admin.getByRole('link', { name: 'Open licenca.pdf' })).toBeVisible();
   const proof = await admin.request.get(
     (await admin.getByRole('link', { name: 'Open licenca.pdf' }).getAttribute('href'))!,
   );
   expect(proof.headers()['content-type']).toBe('application/pdf');
-  await admin.getByRole('button', { name: 'Approve agent' }).click();
-  await admin.getByRole('alertdialog').getByRole('button', { name: 'Approve agent' }).click();
+  await admin.getByRole('button', { name: 'Approve application' }).click();
+  await admin.getByRole('alertdialog').getByRole('button', { name: 'Approve application' }).click();
   await expect(admin.getByText('Application approved.')).toBeVisible();
 
   // The proof stays available from the new agent's account page.
   await admin.getByRole('link', { name: agent.name }).click();
-  await expect(admin.getByText('Agent application', { exact: true })).toBeVisible();
+  await expect(admin.getByText('Account application', { exact: true })).toBeVisible();
   await expect(admin.getByRole('link', { name: 'Open licenca.pdf' })).toBeVisible();
 
   // The applicant activates the agent account from the emailed link.
@@ -85,7 +88,7 @@ test('an agent applies, is approved, activates the account and gets profile chan
     .getByRole('navigation', { name: 'Dashboard navigation' })
     .getByRole('link', { name: 'My profile' })
     .click();
-  await expect(applicant.getByText("Agents' phone numbers are always shown")).toBeVisible();
+  await expect(applicant.getByText('Your phone number is always shown')).toBeVisible();
   await applicant.getByLabel('About you').fill('Prodajem stanove na Dorćolu već deset godina.');
   await applicant.getByRole('button', { name: 'Send changes for review' }).click();
   await expect(applicant.getByText('Your changes were sent for review.')).toBeVisible();
@@ -98,15 +101,80 @@ test('an agent applies, is approved, activates the account and gets profile chan
   await admin.getByRole('alertdialog').getByRole('button', { name: 'Approve changes' }).click();
   await expect(admin.getByText('Profile changes approved.')).toBeVisible();
 
-  // A visitor sees the approved agent, the bio and the phone with its status.
+  // A visitor sees the agent badge (no "approved" label), the bio and the phone with its status.
   const { page: visitor, errors: visitorErrors } = await openPage(browser);
   await visitor.goto(profileUrl);
   await expect(visitor.getByRole('heading', { name: agent.name })).toBeVisible();
-  await expect(visitor.getByText('Approved agent')).toBeVisible();
+  await expect(visitor.getByRole('main').getByText('Agent', { exact: true })).toBeVisible();
+  await expect(visitor.getByText('Approved agent')).toHaveCount(0);
+  await expect(visitor.getByText('Kvadrat nekretnine')).toBeVisible();
   await expect(visitor.getByText('Prodajem stanove na Dorćolu već deset godina.')).toBeVisible();
   await expect(visitor.getByRole('link', { name: PHONE })).toBeVisible();
   await expect(visitor.getByText('Not verified')).toBeVisible();
   await expect(visitor.getByText(agent.email)).toHaveCount(0);
+
+  expect(errors, 'uncaught browser errors (admin)').toEqual([]);
+  expect(visitorErrors, 'uncaught browser errors (visitor)').toEqual([]);
+});
+
+test('an agency applies with its own name, and visitors find it among the partners', async ({
+  page: applicant,
+  browser,
+}) => {
+  test.slow();
+  const agency = { ...newTestUser(), name: `Agencija Pazar ${Date.now().toString(36)}` };
+
+  await applicant.goto('/en/for-professionals');
+  await applicant.getByRole('radio', { name: /^Agency/ }).check();
+  // An agency is named by its own name; the "agency you work for" field is for agents only.
+  await expect(applicant.getByLabel('Agency (optional)')).toHaveCount(0);
+  await expect(
+    applicant.getByText('For example an extract from the Business Registers'),
+  ).toBeVisible();
+  await applicant.getByLabel('Agency name').fill(agency.name);
+  await applicant.getByLabel('Email address').fill(agency.email);
+  await applicant.getByLabel('Phone number', { exact: true }).fill(PHONE);
+  await applicant
+    .getByLabel('Proof')
+    .setInputFiles({ name: 'apr-izvod.pdf', mimeType: 'application/pdf', buffer: PROOF_PDF });
+  await applicant.getByRole('button', { name: 'Send application' }).click();
+  await expect(applicant.getByRole('heading', { name: 'Thank you for applying' })).toBeVisible();
+
+  // The admin sees the kind of account applied for before approving.
+  const { page: admin, errors } = await openPage(browser);
+  await signInAsSuperAdmin(admin);
+  await openFromDashboard(admin, 'Professional applications', agency.name);
+  await expect(admin.getByRole('main').getByText('Agency', { exact: true })).toBeVisible();
+  await admin.getByRole('button', { name: 'Approve application' }).click();
+  await admin.getByRole('alertdialog').getByRole('button', { name: 'Approve application' }).click();
+  await expect(admin.getByText('Application approved.')).toBeVisible();
+
+  await applicant.goto(await emailedLink(agency.email));
+  await applicant.getByLabel('New password', { exact: true }).fill(agency.password);
+  await applicant.getByRole('button', { name: 'Activate account' }).click();
+  await expect(applicant.getByText('Your account is active.')).toBeVisible();
+  await logIn(applicant, agency);
+  await expect(applicant.getByText("You're signed in as an agency.")).toBeVisible();
+  await applicant.goto('/en/dashboard/profile');
+  const profileUrl = await publicProfileUrl(applicant);
+  expect(profileUrl).toMatch(/^\/en\/partners\//);
+
+  // Visitors find it on the Agencies tab, not on the Investors tab, with an "Agency" badge.
+  const { page: visitor, errors: visitorErrors } = await openPage(browser);
+  await visitor.goto('/en/partners');
+  await visitor.getByRole('link', { name: 'Agencies', exact: true }).click();
+  await expect(visitor).toHaveURL(/\/en\/partners\?type=AGENCY$/);
+  await expect(visitor.getByRole('link', { name: new RegExp(agency.name) })).toBeVisible();
+  await visitor.getByRole('link', { name: 'Investors', exact: true }).click();
+  await expect(visitor.getByRole('link', { name: new RegExp(agency.name) })).toHaveCount(0);
+
+  // Old agent profile links lead to the same page.
+  const slug = profileUrl.split('/').at(-1)!;
+  await visitor.goto(`/en/agents/${slug}`);
+  await expect(visitor).toHaveURL(profileUrl);
+  await expect(visitor.getByRole('heading', { name: agency.name })).toBeVisible();
+  await expect(visitor.getByRole('main').getByText('Agency', { exact: true })).toBeVisible();
+  await expect(visitor.getByText(/Approved|Verified agent/)).toHaveCount(0);
 
   expect(errors, 'uncaught browser errors (admin)').toEqual([]);
   expect(visitorErrors, 'uncaught browser errors (visitor)').toEqual([]);
@@ -144,9 +212,10 @@ test('an application with a large photo as proof is reduced and accepted, a larg
   page,
 }) => {
   test.slow();
-  await page.goto('/en/for-agents');
+  await page.goto('/en/for-professionals');
   const user = newTestUser();
-  await page.getByLabel('Full name').fill(user.name);
+  await page.getByRole('radio', { name: /^Investor/ }).check();
+  await page.getByLabel('Name or company name').fill(user.name);
   await page.getByLabel('Email address').fill(user.email);
   await page.getByLabel('Phone number', { exact: true }).fill(PHONE);
 

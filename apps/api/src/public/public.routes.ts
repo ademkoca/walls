@@ -3,7 +3,7 @@ import {
   contactInputSchema,
   inquiryInputSchema,
   listingSearchQuerySchema,
-  publicPageQuerySchema,
+  partnerDirectoryQuerySchema,
   slugParamSchema,
 } from '@walls/validation';
 import { Router } from 'express';
@@ -88,12 +88,11 @@ export function publicRoutes({
     res.json(await listings.sitemap());
   });
 
-  router.get('/agents', async (req, res) => {
-    const { page } = publicPageQuerySchema.parse(req.query);
-    res.json(await profiles.agents(page));
+  router.get('/partners', async (req, res) => {
+    res.json(await profiles.partners(partnerDirectoryQuerySchema.parse(req.query)));
   });
 
-  router.get('/agents/:slug', async (req, res) => {
+  router.get('/partners/:slug', async (req, res) => {
     res.json(
       await profiles.profile(Role.REAL_ESTATE_AGENT, slugParamSchema.parse(req.params.slug)),
     );

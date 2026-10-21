@@ -5,6 +5,7 @@ import {
   type PublicHome,
   type PublicListingDetail,
   Role,
+  SellerType,
   type SitemapEntries,
 } from '@walls/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -41,6 +42,11 @@ async function published(client: TestClient, overrides: Record<string, unknown> 
 }
 
 const inCity = (city: string) => ({ location: { ...completeApartment.location, city } });
+
+async function detail(slug: string) {
+  const response = await ctx.client().get(`${PUBLIC}/listings/${slug}`);
+  return { status: response.status, listing: response.body as PublicListingDetail };
+}
 
 async function search(query: Record<string, string>) {
   const response = await ctx
@@ -170,6 +176,11 @@ describe('public property search (SPEC §17)', () => {
     expect(await ordered({ furnishedStatus: 'UNFURNISHED' })).toEqual([]);
   });
 
+  it('marks every card with its advertiser type, the creator’s', async () => {
+    const result = await search({ location: city });
+    expect(result.items.map((item) => item.sellerType)).toEqual(Array(4).fill('PRIVATE_SELLER'));
+  });
+
   it('compares prices across currencies at the current rate; "on request" never matches', async () => {
     expect(await ordered({ minPrice: '175000', currency: 'EUR' })).toEqual([ids.apartment]);
     expect(await ordered({ maxPrice: '180000' })).toEqual([ids.rental, ids.house]);
@@ -222,11 +233,6 @@ describe('public property search (SPEC §17)', () => {
 });
 
 describe('public listing page (SPEC §13, §16)', () => {
-  const detail = async (slug: string) => {
-    const response = await ctx.client().get(`${PUBLIC}/listings/${slug}`);
-    return { status: response.status, listing: response.body as PublicListingDetail };
-  };
-
   it('shows the listing without the hidden address, with an approximate area', async () => {
     const seller = await ctx.signedInUser();
     const { slug } = await published(seller.client);
@@ -242,7 +248,13 @@ describe('public listing page (SPEC §13, §16)', () => {
       attributes: { floorArea: 74.5, bedrooms: 2, floor: 3, heatingType: 'DISTRICT' },
       amenityCodes: ['ELEVATOR', 'BALCONY'],
       location: { city: 'Beograd', municipality: 'Vračar', exact: null },
-      advertiser: { slug: seller.user.slug, role: 'PRIVATE_SELLER', phone: null, email: null },
+      advertiser: {
+        slug: seller.user.slug,
+        role: 'PRIVATE_SELLER',
+        sellerType: 'PRIVATE_SELLER',
+        phone: null,
+        email: null,
+      },
       assignedAgent: null,
     });
     expect(listing.location.approximate).toMatchObject({ radiusMeters: 250 });
@@ -260,7 +272,10 @@ describe('public listing page (SPEC §13, §16)', () => {
       exact: { street: 'Njegoševa', streetNumber: '12a', latitude: 44.8, longitude: 20.47 },
       approximate: null,
     });
-    expect(listing.assignedAgent).toMatchObject({ slug: agent.user.slug, approvedAgent: true });
+    expect(listing.assignedAgent).toMatchObject({
+      slug: agent.user.slug,
+      sellerType: 'REAL_ESTATE_AGENT',
+    });
   });
 
   it('keeps showing the published version while edits wait for review', async () => {
@@ -324,12 +339,55 @@ describe('home page listings (SPEC §16, §22)', () => {
     await published(banned.client, inCity(`Banned ${code}`));
     await admin.client.post(`/api/v1/users/${banned.user.id}/deactivate`, { reason: 'Prevara.' });
     await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
+    await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.INVESTOR);
 
     expect(await stats()).toEqual({
       listings: before.listings + 2,
       cities: before.cities + 1,
-      agents: before.agents + 1,
+      partners: before.partners + 2,
     });
+  });
+});
+
+describe('searching by advertiser type (SPEC §17)', () => {
+  const city = `Tipgrad ${randomUUID().slice(0, 8)}`;
+  const ids: Partial<Record<SellerType, string>> = {};
+  const ordered = async (query: Record<string, string>) =>
+    (await search({ location: city, ...query })).items.map((item) => item.id);
+
+  beforeAll(async () => {
+    const seller = await ctx.signedInUser();
+    ids.PRIVATE_SELLER = (await published(seller.client, inCity(city))).id;
+    for (const sellerType of [
+      SellerType.REAL_ESTATE_AGENT,
+      SellerType.AGENCY,
+      SellerType.INVESTOR,
+    ]) {
+      const professional = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, sellerType);
+      ids[sellerType] = (await published(professional.client, inCity(city))).id;
+    }
+  });
+
+  it('keeps only listings advertised by that kind of advertiser', async () => {
+    for (const sellerType of Object.values(SellerType)) {
+      expect(await ordered({ sellerType }), sellerType).toEqual([ids[sellerType]]);
+    }
+  });
+
+  it('goes by the creator even when an agency is assigned to the listing', async () => {
+    const agency = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.AGENCY);
+    await admin.client.put(`${LISTINGS}/${ids.PRIVATE_SELLER}/assignment`, {
+      agentId: agency.user.id,
+    });
+    expect(await ordered({ sellerType: 'PRIVATE_SELLER' })).toEqual([ids.PRIVATE_SELLER]);
+    expect(await ordered({ sellerType: 'AGENCY' })).toEqual([ids.AGENCY]);
+  });
+
+  it('shows the advertiser and an assigned agency with their kinds on the listing page', async () => {
+    const card = (await search({ location: city, sellerType: 'PRIVATE_SELLER' })).items[0]!;
+    const { listing } = await detail(card.slug);
+    expect(listing.advertiser).toMatchObject({ sellerType: 'PRIVATE_SELLER' });
+    expect(listing.assignedAgent).toMatchObject({ sellerType: 'AGENCY', agencyName: null });
   });
 });
 
@@ -350,16 +408,18 @@ describe('exchange rate (SPEC §12)', () => {
 });
 
 describe('sitemap entries (SPEC §32)', () => {
-  it('lists public listings, active agents and sellers with public listings', async () => {
+  it('lists public listings, active professionals and sellers with public listings', async () => {
     const seller = await ctx.signedInUser();
     const quietSeller = await ctx.signedInUser();
     const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
+    const agency = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.AGENCY);
     const { slug } = await published(seller.client);
 
     const entries = (await ctx.client().get(`${PUBLIC}/sitemap`)).body as SitemapEntries;
     const slugs = (list: { slug: string }[]) => list.map((entry) => entry.slug);
     expect(slugs(entries.listings)).toContain(slug);
-    expect(slugs(entries.agents)).toContain(agent.user.slug);
+    expect(slugs(entries.partners)).toContain(agent.user.slug);
+    expect(slugs(entries.partners)).toContain(agency.user.slug);
     expect(slugs(entries.sellers)).toContain(seller.user.slug);
     expect(slugs(entries.sellers)).not.toContain(quietSeller.user.slug);
   });

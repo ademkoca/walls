@@ -14,6 +14,7 @@ export * from './analytics/days';
 export * from './user/permissions';
 export * from './user/phone';
 export * from './user/profile';
+export * from './user/seller-type';
 export * from './user/agent-application';
 export * from './media/image-rules';
 export * from './pricing/money';

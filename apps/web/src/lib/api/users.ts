@@ -7,9 +7,10 @@ type UserResponse = { user: UserDetail };
 /** Browser-side calls to user administration endpoints (Admin / Super Admin). */
 export const usersApi = {
   /** Active agents matching `q`, for assigning listings. */
-  activeAgents: (q: string) =>
+  /** Active agents and agencies, whom a listing can be assigned to (SPEC §5). */
+  assignableProfessionals: (q: string) =>
     apiFetch<Page<UserSummary>>(
-      `/users?${new URLSearchParams({ role: 'REAL_ESTATE_AGENT', status: 'ACTIVE', q }).toString()}`,
+      `/users?${new URLSearchParams({ role: 'REAL_ESTATE_AGENT', status: 'ACTIVE', assignable: 'true', q }).toString()}`,
     ),
   deactivate: async (id: string, reason: string) =>
     (

@@ -4,7 +4,9 @@ import {
   type Actor,
   type CurrentUser,
   type Locale,
+  type ProfessionalSellerType,
   Role,
+  SellerType,
   UserStatus,
   nextFreeSlug,
   slugify,
@@ -46,6 +48,7 @@ export function toCurrentUser(user: UserRow): CurrentUser {
     id: user.id,
     email: user.email,
     role: user.role,
+    sellerType: user.sellerType,
     displayName: user.displayName,
     slug: user.slug,
     preferredLocale: user.preferredLocale,
@@ -57,6 +60,7 @@ export function toActor(user: UserRow): Actor {
   return {
     id: user.id,
     role: user.role,
+    sellerType: user.sellerType,
     status: user.status,
     emailVerified: user.emailVerifiedAt !== null,
   };
@@ -71,6 +75,8 @@ export interface InviteInput {
   email: string;
   displayName: string;
   role: Role;
+  /** The kind of professional, for approved applicants; none for Admins. */
+  sellerType?: ProfessionalSellerType;
   locale: Locale;
 }
 
@@ -146,6 +152,7 @@ export class AuthService {
           email: input.email,
           passwordHash,
           role: Role.PRIVATE_SELLER,
+          sellerType: SellerType.PRIVATE_SELLER,
           status: UserStatus.PENDING_VERIFICATION,
           displayName: input.displayName,
           slug: await this.uniqueSlug(tx, input.displayName),
@@ -323,7 +330,7 @@ export class AuthService {
 
   /**
    * Creates an account that its owner activates by setting a password from an emailed
-   * link: invited Admins, approved agents and the bootstrap Super Admin. Passwords are
+   * link: invited Admins, approved professionals and the bootstrap Super Admin. Passwords are
    * never sent or shared (SPEC §3).
    */
   async inviteUser(input: InviteInput, invitedById: string | null): Promise<UserRow> {
@@ -343,6 +350,7 @@ export class AuthService {
     const user = await insertUser(tx, {
       email: input.email,
       role: input.role,
+      sellerType: input.sellerType ?? null,
       status: UserStatus.PENDING_SETUP,
       displayName: input.displayName,
       slug: await this.uniqueSlug(tx, input.displayName),
@@ -356,7 +364,7 @@ export class AuthService {
       action: AuditAction.USER_INVITED,
       entityType: AuditEntity.USER,
       entityId: user.id,
-      after: { role: user.role, status: user.status },
+      after: { role: user.role, sellerType: user.sellerType, status: user.status },
     });
     await enqueueEmail(tx, {
       template,

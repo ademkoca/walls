@@ -1,4 +1,4 @@
-import type { Locale, Role } from '../enums';
+import type { Locale, Role, SellerType } from '../enums';
 
 /**
  * Types shared by the REST API and its clients. The API is the only producer of these
@@ -46,6 +46,8 @@ export interface CurrentUser {
   id: string;
   email: string;
   role: Role;
+  /** The kind of advertiser; null for Admins and Super Admins. */
+  sellerType: SellerType | null;
   displayName: string;
   slug: string;
   preferredLocale: Locale;

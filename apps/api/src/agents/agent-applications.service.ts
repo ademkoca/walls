@@ -7,11 +7,15 @@ import {
   type AgentApplicationSummary,
   AUTH_PAGE_PATHS,
   DenialReason,
+  FOR_PROFESSIONALS_PATH,
   type Page,
+  type ProfessionalSellerType,
   ReviewStatus,
   Role,
   canReviewAgentMatters,
   checkProofFile,
+  hasAgencyName,
+  isProfessionalSellerType,
 } from '@walls/shared';
 import type { AgentApplicationInput, ReviewQueueQuery } from '@walls/validation';
 import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
@@ -52,7 +56,6 @@ export interface UploadedFile {
   data: Buffer;
 }
 
-const FOR_AGENTS_PATH = '/for-agents';
 const FILE_NAME_MAX_LENGTH = 200;
 const CONTROL_CHARACTERS = /\p{Cc}/gu;
 const STORAGE_PREFIX = 'agent-applications';
@@ -63,9 +66,18 @@ function cleanFileName(name: string): string {
   return cleaned || 'file';
 }
 
+/** The database only stores professional types on applications; this narrows the type. */
+function professionalType(application: AgentApplicationRow): ProfessionalSellerType {
+  if (!isProfessionalSellerType(application.sellerType)) {
+    throw new Error(`Application ${application.id} has no professional seller type`);
+  }
+  return application.sellerType;
+}
+
 function toSummary(application: AgentApplicationRow, fileCount: number): AgentApplicationSummary {
   return {
     id: application.id,
+    sellerType: professionalType(application),
     fullName: application.fullName,
     email: application.email,
     agencyName: application.agencyName,
@@ -76,9 +88,9 @@ function toSummary(application: AgentApplicationRow, fileCount: number): AgentAp
 }
 
 /**
- * The "For real-estate agents" application (SPEC §2.1): public submission with private
- * proof files, and review by Admins / Super Admins. Approval creates the agent account,
- * which the applicant activates from an emailed setup link.
+ * The "For professionals" application of agents, agencies and investors (SPEC §2.1): public
+ * submission with private proof files, and review by Admins / Super Admins. Approval creates
+ * the professional account, which the applicant activates from an emailed setup link.
  */
 export class AgentApplicationsService {
   constructor(
@@ -130,7 +142,7 @@ export class AgentApplicationsService {
         payload: {
           fullName: input.fullName,
           loginLink: this.link(input.locale, AUTH_PAGE_PATHS.login),
-          applyLink: this.link(input.locale, FOR_AGENTS_PATH),
+          applyLink: this.link(input.locale, FOR_PROFESSIONALS_PATH),
         },
       });
       return true;
@@ -171,10 +183,12 @@ export class AgentApplicationsService {
           tx,
           {
             id: applicationId,
+            sellerType: input.sellerType,
             fullName: input.fullName,
             email: input.email,
             phone: input.phone,
-            agencyName: input.agencyName || null,
+            // Only individual agents name the agency they work for.
+            agencyName: (hasAgencyName(input.sellerType) && input.agencyName) || null,
             locale: input.locale,
           },
           stored.map(({ key, file }) => ({
@@ -189,7 +203,7 @@ export class AgentApplicationsService {
           action: AuditAction.AGENT_APPLICATION_SUBMITTED,
           entityType: AuditEntity.AGENT_APPLICATION,
           entityId: applicationId,
-          after: { fileCount: stored.length },
+          after: { sellerType: input.sellerType, fileCount: stored.length },
         });
         await enqueueEmail(tx, {
           template: EmailTemplate.AGENT_APPLICATION_RECEIVED,
@@ -279,8 +293,9 @@ export class AgentApplicationsService {
   }
 
   /**
-   * Approves an application: creates the agent account from the application's details
-   * and emails the applicant a link to set their password (SPEC §2.1, §3).
+   * Approves an application: creates the professional account (agent, agency or investor)
+   * from the application's details and emails the applicant a link to set their password
+   * (SPEC §2.1, §3).
    */
   async approve(actor: Actor, id: string): Promise<AgentApplicationDetail> {
     await this.db.transaction(async (tx) => {
@@ -293,6 +308,7 @@ export class AgentApplicationsService {
           email: application.email,
           displayName: application.fullName,
           role: Role.REAL_ESTATE_AGENT,
+          sellerType: professionalType(application),
           locale: application.locale,
           phone: application.phone,
           agencyName: application.agencyName,

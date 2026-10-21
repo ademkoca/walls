@@ -82,6 +82,7 @@ export class ProfilesService {
     ]);
     return {
       role: user.role,
+      sellerType: user.sellerType,
       email: user.email,
       slug: user.slug,
       publicPath: publicProfilePath(user.role, user.slug),
@@ -111,7 +112,7 @@ export class ProfilesService {
 
   async update(actor: Actor, input: ProfileInput): Promise<MyProfile> {
     return this.withUser(actor, async (tx, user, cleanup) => {
-      const profile = profileFromInput(user.role, input);
+      const profile = profileFromInput(user, input);
       if (isPhoneRequired(user.role) && !profile.phone) {
         throw validationFailed(['phone'], 'Agents must keep a phone number on their profile');
       }

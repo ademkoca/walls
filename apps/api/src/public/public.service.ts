@@ -1,15 +1,22 @@
 import type { Database } from '@walls/database';
-import type { Page, PublicAgentSummary, PublicProfilePage, Role } from '@walls/shared';
+import {
+  type Page,
+  type PublicPartnerSummary,
+  type PublicProfilePage,
+  type Role,
+  isProfessionalSellerType,
+} from '@walls/shared';
+import type { PartnerDirectoryQuery } from '@walls/validation';
 import { notFound } from '../http/errors';
 import { toPage } from '../http/paging';
 import { toCards } from './listing-cards';
-import { toPublicProfile } from './public-profile-view';
-import { findPublicAgents, findPublicListingsOf, findPublicUser } from './public.repository';
+import { advertiserType, toPublicProfile } from './public-profile-view';
+import { findPublicListingsOf, findPublicPartners, findPublicUser } from './public.repository';
 
-/** Agents per page in the public directory. */
-export const AGENTS_PAGE_SIZE = 24;
+/** Professionals per page in the public directory. */
+export const PARTNERS_PAGE_SIZE = 24;
 
-/** Public seller and agent profiles (SPEC §19). */
+/** Public private-seller and professional profiles (SPEC §19). */
 export class PublicService {
   constructor(private readonly db: Database) {}
 
@@ -20,19 +27,27 @@ export class PublicService {
     return { profile: toPublicProfile(user), listings };
   }
 
-  async agents(page: number): Promise<Page<PublicAgentSummary>> {
-    const rows = await findPublicAgents(this.db, page, AGENTS_PAGE_SIZE);
+  /** The directory of agents, agencies and investors, optionally of one kind (SPEC §16). */
+  async partners(query: PartnerDirectoryQuery): Promise<Page<PublicPartnerSummary>> {
+    const rows = await findPublicPartners(this.db, query, PARTNERS_PAGE_SIZE);
     return toPage(
       rows,
-      page,
-      ({ user, listingCount }) => ({
-        slug: user.slug,
-        displayName: user.displayName,
-        agencyName: user.agencyName,
-        avatarUrl: user.avatarUrl,
-        listingCount: listingCount ?? 0,
-      }),
-      AGENTS_PAGE_SIZE,
+      query.page,
+      ({ user, listingCount }) => {
+        const sellerType = advertiserType(user);
+        if (!isProfessionalSellerType(sellerType)) {
+          throw new Error(`Professional ${user.id} has seller type ${sellerType}`);
+        }
+        return {
+          slug: user.slug,
+          sellerType,
+          displayName: user.displayName,
+          agencyName: toPublicProfile(user).agencyName,
+          avatarUrl: user.avatarUrl,
+          listingCount: listingCount ?? 0,
+        };
+      },
+      PARTNERS_PAGE_SIZE,
     );
   }
 }

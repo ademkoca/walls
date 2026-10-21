@@ -3,7 +3,9 @@ import { DenialReason } from '../access/decision';
 import { ListingStatus, SellerType, TransactionType, UserStatus } from '../enums';
 import {
   admin,
+  agency,
   agent,
+  investor,
   listing,
   otherAgent,
   otherSeller,
@@ -23,7 +25,6 @@ import {
   canReviewRevision,
   canSetFeatured,
   canViewListing,
-  sellerTypeForRole,
 } from './permissions';
 
 const denied = (reason: DenialReason) => ({ allowed: false, reason });
@@ -227,17 +228,24 @@ describe('admin-only operations', () => {
 });
 
 describe('creating listings', () => {
-  it('lets active private sellers and agents create listings with their own seller type', () => {
-    expect(canCreateListing(seller)).toEqual(allowed);
-    expect(canCreateListing(agent)).toEqual(allowed);
-    expect(sellerTypeForRole(seller.role)).toBe(SellerType.PRIVATE_SELLER);
-    expect(sellerTypeForRole(agent.role)).toBe(SellerType.REAL_ESTATE_AGENT);
+  it('lets active private sellers and every kind of professional create listings', () => {
+    for (const advertiser of [seller, agent, agency, investor]) {
+      expect(canCreateListing(advertiser)).toEqual(allowed);
+    }
   });
 
   it('does not let admins create listings', () => {
     expect(canCreateListing(admin)).toEqual(denied(DenialReason.ROLE_NOT_PERMITTED));
     expect(canCreateListing(superAdmin)).toEqual(denied(DenialReason.ROLE_NOT_PERMITTED));
-    expect(sellerTypeForRole(admin.role)).toBeNull();
+  });
+
+  it('refuses an account whose seller type does not match its role', () => {
+    expect(canCreateListing({ ...seller, sellerType: SellerType.AGENCY })).toEqual(
+      denied(DenialReason.ROLE_NOT_PERMITTED),
+    );
+    expect(canCreateListing({ ...admin, sellerType: SellerType.PRIVATE_SELLER })).toEqual(
+      denied(DenialReason.ROLE_NOT_PERMITTED),
+    );
   });
 
   it('requires an active account', () => {

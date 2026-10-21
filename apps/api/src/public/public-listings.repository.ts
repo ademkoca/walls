@@ -121,6 +121,7 @@ function searchConditions(search: ListingSearch, rate: string | null): SQL {
     search.bedrooms === undefined ? undefined : gte(properties.bedrooms, search.bedrooms),
     search.bathrooms === undefined ? undefined : gte(properties.bathrooms, search.bathrooms),
     search.furnishedStatus ? eq(properties.furnishedStatus, search.furnishedStatus) : undefined,
+    search.sellerType ? eq(listings.sellerType, search.sellerType) : undefined,
     ...(search.amenities ?? []).map(hasAmenity),
   ];
   return and(...conditions)!;
@@ -201,11 +202,14 @@ export async function findFeaturedListings(
 }
 
 /**
- * Cities with public listings, and active agents, for the home page. Cities are typed in by
- * advertisers, so they are told apart ignoring case and accents.
+ * Cities with public listings, and active professionals (agents, agencies, investors), for
+ * the home page. Cities are typed in by advertisers, so they are told apart ignoring case and
+ * accents.
  */
-export async function countHomeStats(db: DbExecutor): Promise<{ cities: number; agents: number }> {
-  const [[cityRow], [agentRow]] = await Promise.all([
+export async function countHomeStats(
+  db: DbExecutor,
+): Promise<{ cities: number; partners: number }> {
+  const [[cityRow], [partnerRow]] = await Promise.all([
     db
       .select({
         cities: sql<number>`count(distinct lower(walls_unaccent(trim(${propertyLocations.city}))))::int`,
@@ -215,11 +219,11 @@ export async function countHomeStats(db: DbExecutor): Promise<{ cities: number; 
       .innerJoin(propertyLocations, eq(propertyLocations.propertyId, listings.propertyId))
       .where(publiclyVisible),
     db
-      .select({ agents: count() })
+      .select({ partners: count() })
       .from(users)
       .where(and(eq(users.role, Role.REAL_ESTATE_AGENT), eq(users.status, UserStatus.ACTIVE))),
   ]);
-  return { cities: cityRow?.cities ?? 0, agents: agentRow?.agents ?? 0 };
+  return { cities: cityRow?.cities ?? 0, partners: partnerRow?.partners ?? 0 };
 }
 
 /** A published listing by its slug, with its creator; undefined when not public. */
@@ -293,11 +297,11 @@ async function findActiveAgent(db: DbExecutor, id: string) {
 }
 
 /**
- * Pages for the sitemap (SPEC §32): public listings, active agents, and private sellers
- * with at least one public listing (an empty seller page has nothing to find).
+ * Pages for the sitemap (SPEC §32): public listings, active professionals, and private
+ * sellers with at least one public listing (an empty seller page has nothing to find).
  */
 export async function findSitemapEntries(db: DbExecutor) {
-  const [listingRows, agentRows, sellerRows] = await Promise.all([
+  const [listingRows, partnerRows, sellerRows] = await Promise.all([
     db
       .select({ slug: listings.slug, updatedAt: listings.updatedAt })
       .from(listings)
@@ -317,5 +321,5 @@ export async function findSitemapEntries(db: DbExecutor) {
       .groupBy(creator.slug)
       .orderBy(asc(creator.slug)),
   ]);
-  return { listingRows, agentRows, sellerRows };
+  return { listingRows, partnerRows, sellerRows };
 }

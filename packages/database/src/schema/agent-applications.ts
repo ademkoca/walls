@@ -1,13 +1,27 @@
 import { sql } from 'drizzle-orm';
 import { check, index, integer, pgTable, text, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
-import { citext, id, localeEnum, reviewStatusEnum, timestamps, timestamptz } from './columns';
+import {
+  citext,
+  id,
+  localeEnum,
+  reviewStatusEnum,
+  sellerTypeEnum,
+  timestamps,
+  timestamptz,
+} from './columns';
 import { users } from './users';
 
-/** "For real-estate agents" applications, reviewed by Admins/Super Admins (SPEC §2.1). */
+/**
+ * "For professionals" applications from agents, agencies and investors, reviewed by
+ * Admins/Super Admins (SPEC §2.1).
+ */
 export const agentApplications = pgTable(
   'agent_applications',
   {
     id: id(),
+    /** The kind of professional account applied for: agent, agency or investor. */
+    sellerType: sellerTypeEnum().notNull(),
+    /** The applicant's public name: a person's full name, or an agency's or company's name. */
     fullName: text().notNull(),
     email: citext().notNull(),
     phone: text().notNull(),
@@ -18,7 +32,7 @@ export const agentApplications = pgTable(
     rejectionReason: text(),
     reviewedById: uuid().references(() => users.id, { onDelete: 'restrict' }),
     reviewedAt: timestamptz(),
-    /** The agent account created or activated on approval. */
+    /** The professional account created or activated on approval. */
     resultingUserId: uuid().references(() => users.id, { onDelete: 'restrict' }),
     ...timestamps(),
   },
@@ -28,6 +42,10 @@ export const agentApplications = pgTable(
     uniqueIndex('agent_applications_one_pending_per_email')
       .on(table.email)
       .where(sql`${table.status} = 'PENDING'`),
+    check(
+      'agent_applications_professional_seller_type',
+      sql`${table.sellerType} IN ('REAL_ESTATE_AGENT', 'AGENCY', 'INVESTOR')`,
+    ),
     check(
       'agent_applications_review_fields',
       sql`(${table.status} = 'PENDING') = (${table.reviewedAt} IS NULL AND ${table.reviewedById} IS NULL)`,

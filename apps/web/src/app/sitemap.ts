@@ -1,4 +1,10 @@
-import { publicListingPath, publicProfilePath, Role } from '@walls/shared';
+import {
+  FOR_PROFESSIONALS_PATH,
+  PARTNERS_PATH,
+  Role,
+  publicListingPath,
+  publicProfilePath,
+} from '@walls/shared';
 import type { MetadataRoute } from 'next';
 import { getPathname } from '@/i18n/navigation';
 import { routing } from '@/i18n/routing';
@@ -11,8 +17,8 @@ export const dynamic = 'force-dynamic';
 const STATIC_PAGES = [
   '/',
   '/properties',
-  '/agents',
-  '/for-agents',
+  PARTNERS_PATH,
+  FOR_PROFESSIONALS_PATH,
   '/about',
   '/contact',
   '/privacy',
@@ -32,13 +38,13 @@ function localizedEntries(href: string, lastModified?: string): MetadataRoute.Si
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const { listings, agents, sellers } = await getSitemapEntries();
+  const { listings, partners, sellers } = await getSitemapEntries();
   return [
     ...STATIC_PAGES.flatMap((href) => localizedEntries(href)),
     ...listings.flatMap((entry) =>
       localizedEntries(publicListingPath(entry.slug), entry.updatedAt),
     ),
-    ...agents.flatMap((entry) =>
+    ...partners.flatMap((entry) =>
       localizedEntries(publicProfilePath(Role.REAL_ESTATE_AGENT, entry.slug)!, entry.updatedAt),
     ),
     ...sellers.flatMap((entry) =>

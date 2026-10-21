@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
+import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { AgentApplicationForm } from '@/components/agents/agent-application-form';
@@ -8,20 +9,22 @@ import { localizedAlternates } from '@/lib/seo';
 
 export async function generateMetadata({
   params,
-}: PageProps<'/[locale]/for-agents'>): Promise<Metadata> {
+}: PageProps<'/[locale]/for-professionals'>): Promise<Metadata> {
   const locale = await metadataLocale(params);
   const t = await getTranslations({ locale, namespace: 'agentApplication' });
   return {
     title: t('title'),
     description: t('intro'),
-    alternates: localizedAlternates(locale, '/for-agents'),
+    alternates: localizedAlternates(locale, FOR_PROFESSIONALS_PATH),
   };
 }
 
 const STEPS = ['apply', 'review', 'setup'] as const;
 
-/** The separate "For real-estate agents" entry point (SPEC §2.1, §3). */
-export default async function ForAgentsPage({ params }: PageProps<'/[locale]/for-agents'>) {
+/** The separate "For professionals" entry point of agents, agencies and investors (SPEC §2.1, §3). */
+export default async function ForProfessionalsPage({
+  params,
+}: PageProps<'/[locale]/for-professionals'>) {
   await resolveLocale(params);
   const t = await getTranslations('agentApplication');
 

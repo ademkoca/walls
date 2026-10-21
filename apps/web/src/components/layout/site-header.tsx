@@ -1,3 +1,4 @@
+import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
 import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 import { Link } from '@/i18n/navigation';
@@ -22,10 +23,10 @@ export async function SiteHeader() {
         <MainNav />
         <div className="ml-auto flex items-center gap-3">
           <Link
-            href="/for-agents"
+            href={FOR_PROFESSIONALS_PATH}
             className="hidden text-sm font-medium text-muted-foreground hover:text-foreground lg:block"
           >
-            {t('forAgents')}
+            {t('forProfessionals')}
           </Link>
           <CurrencySwitcher className="hidden sm:flex" />
           <Suspense>

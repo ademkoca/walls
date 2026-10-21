@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Role } from '../enums';
+import { Role, SellerType } from '../enums';
 import {
   type ProfileVersion,
   ProfileField,
@@ -28,16 +28,25 @@ describe('public profiles (SPEC §19)', () => {
     expect(hasPublicProfile(Role.SUPER_ADMIN)).toBe(false);
   });
 
-  it('always show an agent phone number, which agents must therefore keep', () => {
-    const normalized = normalizeProfile(Role.REAL_ESTATE_AGENT, { ...live, isPhonePublic: false });
-    expect(normalized.isPhonePublic).toBe(true);
+  it('always show a professional phone number, which professionals must therefore keep', () => {
+    const agent = { role: Role.REAL_ESTATE_AGENT, sellerType: SellerType.REAL_ESTATE_AGENT };
+    const normalized = normalizeProfile(agent, { ...live, isPhonePublic: false });
+    expect(normalized).toMatchObject({ isPhonePublic: true, agencyName: 'Kvadrat nekretnine' });
     expect(isPhoneRequired(Role.REAL_ESTATE_AGENT)).toBe(true);
     expect(isPhoneRequired(Role.PRIVATE_SELLER)).toBe(false);
   });
 
   it('let private sellers hide their phone, and drop an agency name they cannot have', () => {
-    const normalized = normalizeProfile(Role.PRIVATE_SELLER, { ...live, isPhonePublic: false });
+    const seller = { role: Role.PRIVATE_SELLER, sellerType: SellerType.PRIVATE_SELLER };
+    const normalized = normalizeProfile(seller, { ...live, isPhonePublic: false });
     expect(normalized).toMatchObject({ isPhonePublic: false, agencyName: null });
+  });
+
+  it('keep the agency name for agents only: an agency or investor is named by its display name', () => {
+    for (const sellerType of [SellerType.AGENCY, SellerType.INVESTOR]) {
+      const normalized = normalizeProfile({ role: Role.REAL_ESTATE_AGENT, sellerType }, live);
+      expect(normalized).toMatchObject({ isPhonePublic: true, agencyName: null });
+    }
   });
 });
 

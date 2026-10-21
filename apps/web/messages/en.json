@@ -12,10 +12,10 @@
   "nav": {
     "mainLabel": "Main navigation",
     "properties": "Properties",
-    "agents": "Agents",
+    "partners": "Partners",
     "about": "About",
     "contact": "Contact",
-    "forAgents": "For agents",
+    "forProfessionals": "For professionals",
     "login": "Log in",
     "register": "Register",
     "dashboard": "Dashboard",
@@ -39,7 +39,7 @@
   },
   "home": {
     "title": "Find the walls that feel like home.",
-    "subtitle": "Apartments, houses and commercial spaces for sale and rent across Serbia — from private sellers and approved agents.",
+    "subtitle": "Apartments, houses and commercial spaces for sale and rent across Serbia — from private sellers, agents, agencies and investors.",
     "advertise": "List a property",
     "browse": "Browse properties",
     "searchLabel": "Property search",
@@ -57,9 +57,9 @@
     "advertiseTitle": "Selling or renting out a property?",
     "advertiseText": "Create a free private-seller account and publish your listing. Our team reviews every listing before it goes live.",
     "agentBanner": {
-      "title": "Are you a real-estate agent?",
-      "text": "Publish listings under your own agent profile, with all your listings in one place, and receive visitors' inquiries directly. Apply with proof that you work as an agent; our team reviews every application before your account is created.",
-      "action": "Apply as an agent"
+      "title": "An agent, agency or investor?",
+      "text": "Publish listings under your own profile, with all your listings in one place, and receive visitors' inquiries directly. Apply with proof of your business; our team reviews every application before your account is created.",
+      "action": "Apply for a professional account"
     },
     "transactionTypeLabel": "Buy or rent",
     "browseByTypeTitle": "Browse by property type",
@@ -90,7 +90,7 @@
         },
         "agentRequired": {
           "question": "Do I need to be a real-estate agent to list my property?",
-          "answer": "No. Private sellers can list their own properties once they verify their email address. Real-estate agents apply separately and get a verified agent profile."
+          "answer": "No. Private sellers can list their own properties once they verify their email address. Agents, agencies and investors apply separately, with proof of their business."
         },
         "review": {
           "question": "How does the review process work?",
@@ -114,7 +114,7 @@
       "label": "{brand} in numbers",
       "listings": "{count, plural, one {published listing} other {published listings}}",
       "cities": "{count, plural, one {city} other {cities}}",
-      "agents": "{count, plural, one {approved agent} other {approved agents}}"
+      "partners": "{count, plural, one {professional advertiser} other {professional advertisers}}"
     },
     "seoLinksTitle": "Popular searches",
     "seoLinks": {
@@ -184,8 +184,8 @@
       "submit": "Create account",
       "haveAccount": "Already have an account?",
       "login": "Log in",
-      "agentPrompt": "Are you a real-estate agent?",
-      "agentLink": "Apply as an agent",
+      "agentPrompt": "An agent, agency or investor?",
+      "agentLink": "Apply for a professional account",
       "checkEmailTitle": "Check your email",
       "checkEmailDescription": "We've sent a confirmation link to {email}. Open it to activate your account. The link is valid for 24 hours.",
       "resend": "Resend link",
@@ -247,7 +247,7 @@
       "users": "Users",
       "auditLog": "Audit log",
       "profile": "My profile",
-      "agentApplications": "Agent applications",
+      "agentApplications": "Professional applications",
       "profileChanges": "Profile changes",
       "waiting": "{count} waiting",
       "inquiries": "Inquiries"
@@ -448,7 +448,7 @@
     "details": {
       "creator": "Advertiser",
       "sellerType": "Advertiser type",
-      "assignedAgent": "Assigned agent",
+      "assignedAgent": "Assigned agent or agency",
       "none": "None",
       "publishedAt": "Published",
       "slug": "Listing address"
@@ -472,12 +472,12 @@
     "featuredUntil": "Featured until (optional)",
     "saveFeatured": "Save",
     "featuredSaved": "Featuring saved.",
-    "agent": "Assigned agent",
-    "searchAgents": "Search agents by name or email",
-    "noAgents": "No active agents match.",
+    "agent": "Assigned agent or agency",
+    "searchAgents": "Search agents and agencies by name or email",
+    "noAgents": "No active agents or agencies match.",
     "assign": "Assign",
-    "unassign": "Remove agent",
-    "agentSaved": "Agent assignment saved.",
+    "unassign": "Remove assignment",
+    "agentSaved": "Assignment saved.",
     "permanentDelete": "Delete permanently",
     "permanentDeleteTitle": "Delete this listing permanently?",
     "permanentDeleteDescription": "The listing, its images and its history are deleted for good; only the audit log keeps a record. This can't be undone.",
@@ -515,7 +515,7 @@
   },
   "users": {
     "title": "Users",
-    "description": "Private seller, agent and administrator accounts.",
+    "description": "Private seller, professional (agent, agency and investor) and administrator accounts.",
     "search": "Search by name or email",
     "allRoles": "All roles",
     "allStatuses": "All statuses",
@@ -524,6 +524,7 @@
       "name": "Name",
       "email": "Email",
       "role": "Role",
+      "type": "Type",
       "status": "Status",
       "joined": "Joined"
     },
@@ -558,7 +559,7 @@
     "inviteSubmit": "Send invitation",
     "invited": "Invitation sent.",
     "agentApplication": {
-      "title": "Agent application",
+      "title": "Account application",
       "approvedOn": "Approved on {date}.",
       "private": "The proof files are kept as evidence of eligibility and are visible to administrators only.",
       "view": "View application"
@@ -631,6 +632,12 @@
     "REAL_ESTATE_AGENT": "a real-estate agent",
     "PRIVATE_SELLER": "a private seller"
   },
+  "accountKinds": {
+    "PRIVATE_SELLER": "a private seller",
+    "REAL_ESTATE_AGENT": "a real-estate agent",
+    "AGENCY": "an agency",
+    "INVESTOR": "an investor"
+  },
   "enums": {
     "propertyType": {
       "APARTMENT": "Apartment",
@@ -699,12 +706,14 @@
     },
     "sellerType": {
       "PRIVATE_SELLER": "Private seller",
-      "REAL_ESTATE_AGENT": "Real-estate agent"
+      "REAL_ESTATE_AGENT": "Agent",
+      "AGENCY": "Agency",
+      "INVESTOR": "Investor"
     },
     "role": {
       "SUPER_ADMIN": "Super Admin",
       "ADMIN": "Admin",
-      "REAL_ESTATE_AGENT": "Agent",
+      "REAL_ESTATE_AGENT": "Professional",
       "PRIVATE_SELLER": "Private seller"
     },
     "userStatus": {
@@ -761,27 +770,43 @@
     "EMAIL_IN_USE": "This email address already belongs to an account."
   },
   "agentApplication": {
-    "title": "Advertise as a real-estate agent",
-    "intro": "Agents publish listings under their own agent profile. Tell us about yourself and send proof that you work as an agent; our team reviews every application before an agent account is created.",
+    "title": "Advertise as an agent, agency or investor",
+    "intro": "Professionals publish listings under their own public profile. Tell us about yourself and send proof of your business; our team reviews every application before an account is created.",
     "stepsTitle": "How it works",
     "steps": {
-      "apply": "Send your details and proof, such as a licence or an employment confirmation from your agency.",
+      "apply": "Choose the account type and send your details and proof: an agent, for example, a licence or an employment confirmation from their agency; an agency or investor, an extract from the Business Registers Agency (APR).",
       "review": "Our team checks your application and emails you the outcome.",
       "setup": "Once approved, you set your password from the email and can start publishing listings."
     },
-    "sellerNote": "Selling your own property? You don't need an agent account.",
+    "sellerNote": "Selling or renting out your own property? You don't need a professional account.",
     "sellerLink": "Register as a private seller",
     "formTitle": "Application",
+    "types": {
+      "REAL_ESTATE_AGENT": {
+        "label": "Agent",
+        "description": "A real-estate agent, independent or working for an agency."
+      },
+      "AGENCY": {
+        "label": "Agency",
+        "description": "A real-estate agency advertising under its own name."
+      },
+      "INVESTOR": {
+        "label": "Investor",
+        "description": "An investor or developer selling or renting out its own properties."
+      }
+    },
     "fields": {
-      "fullName": "Full name",
+      "fullName": "{type, select, AGENCY {Agency name} INVESTOR {Name or company name} other {Full name}}",
       "email": "Email address",
-      "emailHint": "Your agent account will use this address. It can't already belong to a Walls account.",
+      "emailHint": "Your account will use this address. It can't already belong to a Walls account.",
       "phone": "Phone number",
-      "phoneHint": "Shown on your public agent profile.",
+      "phoneHint": "Shown on your public profile.",
       "agencyName": "Agency (optional)",
-      "files": "Proof"
+      "files": "Proof",
+      "sellerType": "Account type"
     },
     "filesHint": "PDF, JPG or PNG, at most {max} files and 3.5 MB in total. Photos are reduced automatically, PDF files are not. Only our team can see them.",
+    "proofHint": "{type, select, REAL_ESTATE_AGENT {For example a licence or an employment confirmation from your agency.} other {For example an extract from the Business Registers Agency (APR).}}",
     "chooseFiles": "Choose files",
     "removeFile": "Remove {name}",
     "noFiles": "Add at least one file.",
@@ -799,8 +824,8 @@
     "successDescription": "We've sent a confirmation to {email}. You'll hear from us by email once our team has reviewed your application."
   },
   "agentApplications": {
-    "title": "Agent applications",
-    "description": "Check each applicant's details and proof before approving an agent account.",
+    "title": "Professional applications",
+    "description": "Check each applicant's details and proof before approving the account.",
     "tabs": {
       "PENDING": "Waiting",
       "APPROVED": "Approved",
@@ -808,6 +833,7 @@
     },
     "columns": {
       "name": "Applicant",
+      "type": "Type",
       "email": "Email",
       "agency": "Agency",
       "files": "Files",
@@ -823,16 +849,17 @@
       "submitted": "Received",
       "reviewedBy": "Reviewed by",
       "reviewedAt": "Reviewed",
-      "account": "Agent account",
-      "none": "—"
+      "account": "Account",
+      "none": "—",
+      "type": "Account type"
     },
     "files": "Proof files",
     "filesPrivate": "Private: visible to administrators only.",
     "openFile": "Open {name}",
     "emailInUse": "This email address now belongs to an existing account, so the application can't be approved. Reject it and ask the applicant to apply with another address.",
-    "approve": "Approve agent",
-    "approveTitle": "Approve this agent?",
-    "approveDescription": "An agent account is created from these details and the applicant receives an email to set their password.",
+    "approve": "Approve application",
+    "approveTitle": "Approve this application?",
+    "approveDescription": "An account of the chosen type is created from these details and the applicant receives an email to set their password.",
     "approved": "Application approved. The applicant has been emailed.",
     "reject": "Reject",
     "rejectTitle": "Reject this application?",
@@ -845,7 +872,7 @@
     "title": "My profile",
     "description": "What visitors see on your public profile page.",
     "viewPublic": "View public profile",
-    "approvalNotice": "Changes to your agent profile are checked by our team before they become public.",
+    "approvalNotice": "Changes to your profile are checked by our team before they become public.",
     "pendingNotice": "Your changes are waiting for review. Your public profile stays as it is until they're approved; you can keep editing until then.",
     "rejectedNotice": "Your last changes were not approved. Reason:",
     "showingProposed": "The form shows your changes waiting for review.",
@@ -862,7 +889,7 @@
       "agencyName": "Agency",
       "phone": "Phone number",
       "phonePublic": "Show my phone number on my profile",
-      "phoneAlwaysPublic": "Agents' phone numbers are always shown on their profile.",
+      "phoneAlwaysPublic": "Your phone number is always shown on your profile.",
       "emailPublic": "Show my email address on my profile"
     },
     "phoneStatus": {
@@ -906,14 +933,14 @@
   },
   "profileChanges": {
     "title": "Profile changes",
-    "description": "Agents' profile changes become public only after approval.",
+    "description": "Profile changes of agents, agencies and investors become public only after approval.",
     "tabs": {
       "PENDING": "Waiting",
       "APPROVED": "Approved",
       "REJECTED": "Rejected"
     },
     "columns": {
-      "agent": "Agent",
+      "agent": "Account",
       "changes": "Changes",
       "updated": "Last change"
     },
@@ -940,24 +967,27 @@
     "viewUser": "View account",
     "approve": "Approve changes",
     "approveTitle": "Publish these profile changes?",
-    "approveDescription": "The agent's public profile is updated and they're notified by email.",
+    "approveDescription": "The public profile is updated and the account holder is notified by email.",
     "approved": "Profile changes approved.",
     "reject": "Reject",
     "rejectTitle": "Reject these changes?",
-    "rejectDescription": "The public profile stays as it is. The agent receives the reason by email.",
-    "reason": "Reason (sent to the agent)",
+    "rejectDescription": "The public profile stays as it is. The account holder receives the reason by email.",
+    "reason": "Reason (sent to the account holder)",
     "rejected": "Profile changes rejected.",
     "rejectionReason": "Reason for rejection",
     "reviewedBy": "Reviewed by {name}"
   },
   "publicProfile": {
-    "agentsTitle": "Real-estate agents",
-    "agentsDescription": "Agents approved by Walls and the properties they advertise.",
-    "agentsEmpty": "No agents yet.",
+    "partnersTitle": "Agents, agencies and investors",
+    "partnersDescription": "Professional advertisers on Walls and the properties they advertise.",
+    "partnersEmpty": "Nobody here yet.",
+    "tabs": {
+      "all": "All",
+      "REAL_ESTATE_AGENT": "Agents",
+      "AGENCY": "Agencies",
+      "INVESTOR": "Investors"
+    },
     "listingCount": "{count, plural, =0 {No listings} one {# listing} other {# listings}}",
-    "approvedAgent": "Approved agent",
-    "approvedAgentHint": "Walls checked this agent's professional details.",
-    "privateSeller": "Private seller",
     "phoneVerified": "Verified",
     "phoneUnverified": "Not verified",
     "phoneUnverifiedHint": "Walls hasn't verified this phone number.",
@@ -1012,6 +1042,7 @@
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",
     "furnishedStatus": "Furnishing",
+    "sellerType": "Advertiser",
     "atLeast": "{count}+",
     "amenities": "Features",
     "apply": "Show results",
@@ -1052,7 +1083,7 @@
     "mapLabel": "Map of the property's location",
     "approximateNote": "The advertiser keeps the exact address private. The circle shows the area the property is in.",
     "advertiser": "Advertiser",
-    "assignedAgent": "Agent for this property",
+    "assignedAgent": "{type, select, AGENCY {Agency for this property} other {Agent for this property}}",
     "viewProfile": "View profile",
     "published": "Published {date}",
     "facts": {
@@ -1111,7 +1142,7 @@
       "received": "Received"
     },
     "readOnly": "Read only",
-    "readOnlyHint": "The agent assigned to this listing handles this inquiry. You can read it but not change its status.",
+    "readOnlyHint": "The agent or agency assigned to this listing handles this inquiry. You can read it but not change its status.",
     "untitled": "Untitled listing",
     "backToList": "All inquiries",
     "from": "From",
@@ -1122,7 +1153,7 @@
     "listing": "Listing",
     "received": "Received",
     "recipient": "Handled by",
-    "assignedAgent": "Assigned agent",
+    "assignedAgent": "Assigned agent or agency",
     "status": "Status",
     "reply": "Reply by email",
     "replyHint": "Only the advertiser who receives this inquiry replies to the visitor.",
@@ -1166,13 +1197,13 @@
     "open": "View photo {position} larger"
   },
   "about": {
-    "metaDescription": "Why we built Walls: one place to find, sell or rent out property in Serbia, directly or with an approved agent.",
+    "metaDescription": "Why we built Walls: one place to find, sell or rent out property in Serbia, directly or through a professional.",
     "title": "Why we built Walls",
     "lead": "One place for everyone looking for, selling or renting out property in Serbia.",
     "story": {
       "problem": "Looking for a home in Serbia usually means jumping between sites, wondering whether a listing is still available and who is really behind it. Selling or renting out your own property isn't easier: you either hand it to an agency or try your luck on a classifieds site.",
-      "solution": "We built {brand} so that all of this happens in one place. You can find a property to buy or rent, advertise your own property yourself, or work with an approved real-estate agent if you'd rather have a professional handle it. The choice is yours.",
-      "trust": "Because trust matters most when the stakes are this high, our team reviews every listing before it goes live, and approves an agent only after seeing proof that they work as one."
+      "solution": "We built {brand} so that all of this happens in one place. You can find a property to buy or rent, advertise your own property yourself, or work with an agent or agency if you'd rather have a professional handle it. The choice is yours.",
+      "trust": "Because trust matters most when the stakes are this high, our team reviews every listing before it goes live, and approves agents, agencies and investors only after seeing proof of their business."
     },
     "waysTitle": "Three ways to use {brand}",
     "ways": {
@@ -1187,9 +1218,9 @@
         "action": "List a property"
       },
       "agent": {
-        "title": "Work with an agent",
-        "text": "Prefer a professional? Browse approved real-estate agents and their listings.",
-        "action": "Find an agent"
+        "title": "Work with a professional",
+        "text": "Prefer a professional? Browse agents, agencies and investors and their listings.",
+        "action": "Browse partners"
       }
     },
     "trustTitle": "How we keep {brand} trustworthy",
@@ -1199,8 +1230,8 @@
         "text": "Our team checks every listing before it's published, and again when important details change."
       },
       "agents": {
-        "title": "Agents are approved with proof",
-        "text": "An agent profile is created only after we've checked proof that the person works as an agent."
+        "title": "Professionals are approved with proof",
+        "text": "An agent, agency or investor account is created only after we've checked proof of their business."
       },
       "address": {
         "title": "Exact addresses stay private",
@@ -1217,7 +1248,7 @@
     },
     "numbersTitle": "{brand} today",
     "ctaTitle": "Ready to start?",
-    "ctaText": "Browse listings, advertise your property or apply as an agent."
+    "ctaText": "Browse listings, advertise your property or apply for a professional account."
   },
   "contact": {
     "metaDescription": "Get in touch with the Walls team.",
@@ -1230,9 +1261,9 @@
         "action": "Browse properties"
       },
       "agent": {
-        "title": "Are you a real-estate agent?",
-        "text": "Apply for an agent account and a verified agent profile.",
-        "action": "Apply as an agent"
+        "title": "An agent, agency or investor?",
+        "text": "Apply for a professional account and a public profile with all your listings.",
+        "action": "Apply"
       },
       "faq": {
         "title": "Have a quick question?",
@@ -1286,7 +1317,7 @@
         },
         "collect": {
           "title": "What we collect",
-          "body": "Account details: your name, email address and password (stored only as a secure hash) and, if you add them, your phone number, profile picture and short bio.\n\nAgent applications: full name, email address, phone number, agency name and the proof files you upload. Proof files are visible only to our administrators.\n\nListings: the property's details, photos, price and location.\n\nInquiries: the name, email address, optional phone number and message a visitor sends about a listing.\n\nContact form messages: your name, email address, subject and message.\n\nListing views: to count a view once per visitor per day we use a fingerprint of the IP address and browser, made with a key that changes every day. We don't store the IP address itself."
+          "body": "Account details: your name, email address and password (stored only as a secure hash) and, if you add them, your phone number, profile picture and short bio.\n\nProfessional account applications (agents, agencies and investors): full name or company name, email address, phone number, account type, agency name (for agents) and the proof files you upload. Proof files are visible only to our administrators.\n\nListings: the property's details, photos, price and location.\n\nInquiries: the name, email address, optional phone number and message a visitor sends about a listing.\n\nContact form messages: your name, email address, subject and message.\n\nListing views: to count a view once per visitor per day we use a fingerprint of the IP address and browser, made with a key that changes every day. We don't store the IP address itself."
         },
         "use": {
           "title": "Why we use it",
@@ -1294,7 +1325,7 @@
         },
         "share": {
           "title": "Who sees it",
-          "body": "Public profiles and published listings are visible to everyone. Agents' phone numbers are always shown on their profiles; private sellers choose whether to show theirs. An email address is shown only if its owner chooses so, and a property's exact address only if the advertiser chooses so.\n\nInquiries go only to the advertiser or the agent assigned to the listing, and contact messages only to us. We don't sell personal data."
+          "body": "Public profiles and published listings are visible to everyone. Agents', agencies' and investors' phone numbers are always shown on their profiles; private sellers choose whether to show theirs. An email address is shown only if its owner chooses so, and a property's exact address only if the advertiser chooses so.\n\nInquiries go only to the advertiser or the agent or agency assigned to the listing, and contact messages only to us. We don't sell personal data."
         },
         "providers": {
           "title": "Service providers",
@@ -1329,7 +1360,7 @@
         },
         "accounts": {
           "title": "Accounts",
-          "body": "You must give accurate details and keep your password safe. A private-seller account becomes active once you confirm your email address. An agent account is created only after we approve an application with proof that you work as an agent. You can't choose or change your own role."
+          "body": "You must give accurate details and keep your password safe. A private-seller account becomes active once you confirm your email address. An agent, agency or investor account is created only after we approve an application with proof of your business. You can't choose or change your own role."
         },
         "listings": {
           "title": "Listings",

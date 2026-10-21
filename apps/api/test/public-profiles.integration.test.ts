@@ -1,5 +1,11 @@
 import { users } from '@walls/database';
-import { type Page, type PublicAgentSummary, type PublicProfilePage, Role } from '@walls/shared';
+import {
+  type Page,
+  type PublicPartnerSummary,
+  type PublicProfilePage,
+  Role,
+  SellerType,
+} from '@walls/shared';
 import { eq } from 'drizzle-orm';
 import { afterAll, describe, expect, it } from 'vitest';
 import { createTestContext } from './helpers';
@@ -14,11 +20,19 @@ async function setProfile(userId: string, values: Partial<typeof users.$inferIns
   await ctx.db.update(users).set(values).where(eq(users.id, userId));
 }
 
-/** An agent's entry in the public directory, searching every page (other tests add agents). */
-async function directoryEntry(slug: string): Promise<PublicAgentSummary | undefined> {
+/**
+ * A professional's entry in the public directory (optionally filtered by kind), searching
+ * every page (other tests add professionals).
+ */
+async function directoryEntry(
+  slug: string,
+  type?: SellerType,
+): Promise<PublicPartnerSummary | undefined> {
   for (let page = 1; ; page += 1) {
-    const directory = (await ctx.client().get(`/api/v1/public/agents?page=${page}`))
-      .body as Page<PublicAgentSummary>;
+    const query = new URLSearchParams({ page: String(page), ...(type ? { type } : {}) });
+    const response = await ctx.client().get(`/api/v1/public/partners?${query.toString()}`);
+    expect(response.status).toBe(200);
+    const directory = response.body as Page<PublicPartnerSummary>;
     const entry = directory.items.find((item) => item.slug === slug);
     if (entry || !directory.hasMore) return entry;
   }
@@ -37,7 +51,11 @@ describe('public seller profiles (SPEC §19)', () => {
     await setProfile(seller.user.id, { phone: '+381 64 123 4567', bio: 'Zdravo!' });
 
     const hidden = pageOf(await ctx.client().get(`/api/v1/public/sellers/${seller.user.slug}`));
-    expect(hidden.profile).toMatchObject({ phone: null, email: null, approvedAgent: false });
+    expect(hidden.profile).toMatchObject({
+      sellerType: 'PRIVATE_SELLER',
+      phone: null,
+      email: null,
+    });
     expect(hidden.profile).not.toHaveProperty('status');
     expect(JSON.stringify(hidden)).not.toContain(seller.user.email);
 
@@ -68,7 +86,9 @@ describe('public seller profiles (SPEC §19)', () => {
   it('is not found for deactivated users, admins, or the wrong profile type', async () => {
     const seller = await ctx.signedInUser();
     const admin = await ctx.signedInUser(Role.ADMIN);
-    expect((await ctx.client().get(`/api/v1/public/agents/${seller.user.slug}`)).status).toBe(404);
+    expect((await ctx.client().get(`/api/v1/public/partners/${seller.user.slug}`)).status).toBe(
+      404,
+    );
     expect((await ctx.client().get(`/api/v1/public/sellers/${admin.user.slug}`)).status).toBe(404);
 
     await admin.client.post(`/api/v1/users/${seller.user.id}/deactivate`, { reason: 'Prevara.' });
@@ -76,17 +96,18 @@ describe('public seller profiles (SPEC §19)', () => {
   });
 });
 
-describe('public agent profiles (SPEC §19)', () => {
-  it('always shows the agent phone with its status, and marks the agent approved', async () => {
+describe('public professional profiles (SPEC §19)', () => {
+  it('always shows the agent phone with its status, and names the kind of advertiser', async () => {
     const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
     await setProfile(agent.user.id, {
       phone: '+381 11 222 3333',
       agencyName: 'Kvadrat',
       isPhonePublic: false,
     });
-    const page = pageOf(await ctx.client().get(`/api/v1/public/agents/${agent.user.slug}`));
+    const page = pageOf(await ctx.client().get(`/api/v1/public/partners/${agent.user.slug}`));
+    expect(page.profile).not.toHaveProperty('approvedAgent');
     expect(page.profile).toMatchObject({
-      approvedAgent: true,
+      sellerType: 'REAL_ESTATE_AGENT',
       agencyName: 'Kvadrat',
       phone: { phone: '+381 11 222 3333', verificationStatus: 'UNVERIFIED' },
       email: null,
@@ -102,7 +123,7 @@ describe('public agent profiles (SPEC §19)', () => {
       agentId: agent.user.id,
     });
 
-    const page = pageOf(await ctx.client().get(`/api/v1/public/agents/${agent.user.slug}`));
+    const page = pageOf(await ctx.client().get(`/api/v1/public/partners/${agent.user.slug}`));
     expect(page.listings.map((listing) => listing.id).sort()).toEqual([own.id, assigned.id].sort());
 
     expect((await directoryEntry(agent.user.slug))?.listingCount).toBe(2);
@@ -118,7 +139,48 @@ describe('public agent profiles (SPEC §19)', () => {
     await assigned.admin.client.post(`/api/v1/users/${seller.user.id}/deactivate`, {
       reason: 'Prevara.',
     });
-    const page = pageOf(await ctx.client().get(`/api/v1/public/agents/${agent.user.slug}`));
+    const page = pageOf(await ctx.client().get(`/api/v1/public/partners/${agent.user.slug}`));
     expect(page.listings).toEqual([]);
+  });
+
+  it('shows agencies and investors with their kind, without an agency name', async () => {
+    for (const sellerType of [SellerType.AGENCY, SellerType.INVESTOR]) {
+      const partner = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, sellerType);
+      await setProfile(partner.user.id, { phone: '+381 20 123 456', agencyName: 'Stari naziv' });
+      const page = pageOf(await ctx.client().get(`/api/v1/public/partners/${partner.user.slug}`));
+      expect(page.profile).toMatchObject({
+        sellerType,
+        agencyName: null,
+        phone: { phone: '+381 20 123 456', verificationStatus: 'UNVERIFIED' },
+      });
+    }
+  });
+});
+
+describe('public partner directory (SPEC §16)', () => {
+  it('lists agents, agencies and investors, each kind on its own tab', async () => {
+    const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
+    const agency = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.AGENCY);
+    const investor = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.INVESTOR);
+
+    expect(await directoryEntry(agent.user.slug)).toMatchObject({
+      sellerType: 'REAL_ESTATE_AGENT',
+    });
+    expect(await directoryEntry(agency.user.slug)).toMatchObject({ sellerType: 'AGENCY' });
+    expect(await directoryEntry(investor.user.slug)).toMatchObject({ sellerType: 'INVESTOR' });
+
+    expect(await directoryEntry(agency.user.slug, SellerType.AGENCY)).toBeDefined();
+    expect(await directoryEntry(agent.user.slug, SellerType.AGENCY)).toBeUndefined();
+    expect(await directoryEntry(investor.user.slug, SellerType.AGENCY)).toBeUndefined();
+    expect(await directoryEntry(investor.user.slug, SellerType.INVESTOR)).toBeDefined();
+  });
+
+  it('never lists private sellers and refuses an unknown kind', async () => {
+    const seller = await ctx.signedInUser();
+    expect(await directoryEntry(seller.user.slug)).toBeUndefined();
+    for (const type of ['PRIVATE_SELLER', 'ADMIN']) {
+      const response = await ctx.client().get(`/api/v1/public/partners?type=${type}`);
+      expect(response.status).toBe(400);
+    }
   });
 });

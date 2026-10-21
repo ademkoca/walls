@@ -1,3 +1,4 @@
+import { hasAgencyName } from '@walls/shared';
 import { Alert, AlertDescription, AlertTitle } from '@walls/ui/components/alert';
 import {
   Card,
@@ -14,6 +15,7 @@ import type { ReactNode } from 'react';
 import { AgentApplicationActions } from '@/components/admin/agent-application-actions';
 import { ProofFileList } from '@/components/admin/proof-file-list';
 import { ReviewStatusBadge } from '@/components/admin/review-status-badge';
+import { SellerTypeBadge } from '@/components/profiles/seller-type-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
 import { NotAccessibleError, getAgentApplication } from '@/lib/api/server';
@@ -63,6 +65,7 @@ export default async function AgentApplicationPage({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
           <h1 className="truncate text-2xl font-semibold tracking-tight">{application.fullName}</h1>
+          <SellerTypeBadge sellerType={application.sellerType} />
           <ReviewStatusBadge status={application.status} />
         </div>
         {application.canReview && (
@@ -91,9 +94,11 @@ export default async function AgentApplicationPage({
           <dl className="grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
             <Detail label={t('details.email')}>{application.email}</Detail>
             <Detail label={t('details.phone')}>{application.phone}</Detail>
-            <Detail label={t('details.agency')}>
-              {application.agencyName ?? t('details.none')}
-            </Detail>
+            {hasAgencyName(application.sellerType) && (
+              <Detail label={t('details.agency')}>
+                {application.agencyName ?? t('details.none')}
+              </Detail>
+            )}
             <Detail label={t('details.language')}>{tEnums(`locale.${application.locale}`)}</Detail>
             <Detail label={t('details.submitted')}>{date(application.createdAt)}</Detail>
             {application.reviewedAt && (

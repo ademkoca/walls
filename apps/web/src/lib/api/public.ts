@@ -3,7 +3,8 @@ import type {
   ExchangeRateView,
   ListingSearchResult,
   Page,
-  PublicAgentSummary,
+  ProfessionalSellerType,
+  PublicPartnerSummary,
   PublicHome,
   PublicListingDetail,
   PublicProfilePage,
@@ -36,13 +37,21 @@ async function requiredGet<T>(path: string): Promise<T> {
   return body;
 }
 
-export function getPublicAgents(page: number): Promise<Page<PublicAgentSummary> | null> {
-  return publicGet<Page<PublicAgentSummary>>(`/agents?page=${page}`);
+/** One page of the professionals directory, optionally of one kind. */
+export function getPublicPartners(query: {
+  type: ProfessionalSellerType | undefined;
+  page: number;
+}): Promise<Page<PublicPartnerSummary> | null> {
+  const search = new URLSearchParams({
+    page: String(query.page),
+    ...(query.type ? { type: query.type } : {}),
+  });
+  return publicGet<Page<PublicPartnerSummary>>(`/partners?${search.toString()}`);
 }
 
-/** A public agent or seller profile with its listings, or null when not found. */
+/** A public professional or private-seller profile with its listings, or null when not found. */
 export function getPublicProfile(
-  kind: 'agents' | 'sellers',
+  kind: 'partners' | 'sellers',
   slug: string,
 ): Promise<PublicProfilePage | null> {
   return publicGet<PublicProfilePage>(`/${kind}/${encodeURIComponent(slug)}`);

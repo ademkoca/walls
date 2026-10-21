@@ -43,14 +43,15 @@ import {
   PriceMode,
   ReviewStatus,
   Role,
+  SellerType,
   UserStatus,
+  canBeAssigned,
   checkListingImage,
   checkSubmissionRequirements,
   contentSubmissionSnapshot,
   listingSlugBase,
   mergeListingContent,
   nextFreeSlug,
-  sellerTypeForRole,
   slugify,
 } from '@walls/shared';
 import { listingInputSchema, newPasswordSchema } from '@walls/validation';
@@ -82,6 +83,7 @@ import {
   DEMO_PLACES,
   DEMO_USERS,
   type DemoListing,
+  type DemoUser,
   PHOTO_PLAN,
   PHOTO_POOLS,
   type PhotoPool,
@@ -230,12 +232,25 @@ async function loadPhotos(ids: ReadonlySet<string>): Promise<Map<string, Buffer>
 // ---------------------------------------------------------------------------------------
 // Seeding
 
+/** A created demo account, as listings need it. */
+interface DemoCreator {
+  id: string;
+  sellerType: SellerType;
+}
+
+/** Private sellers have their own role; agents, agencies and investors are professionals. */
+function demoRole(user: DemoUser): Role {
+  return user.sellerType === SellerType.PRIVATE_SELLER
+    ? Role.PRIVATE_SELLER
+    : Role.REAL_ESTATE_AGENT;
+}
+
 async function createDemoUsers(
   db: Database,
   password: string,
   reviewerId: string,
-): Promise<Map<string, { id: string; role: Role }>> {
-  const created = new Map<string, { id: string; role: Role }>();
+): Promise<Map<string, DemoCreator>> {
+  const created = new Map<string, DemoCreator>();
   const now = new Date();
   await db.transaction(async (tx) => {
     for (const user of DEMO_USERS) {
@@ -245,7 +260,8 @@ async function createDemoUsers(
         .values({
           email: demoEmail(user),
           passwordHash: await hashPassword(password),
-          role: user.role,
+          role: demoRole(user),
+          sellerType: user.sellerType,
           status: UserStatus.ACTIVE,
           emailVerifiedAt: now,
           preferredLocale: Locale.SR,
@@ -258,11 +274,12 @@ async function createDemoUsers(
           isEmailPublic: user.isEmailPublic,
         })
         .returning({ id: users.id });
-      created.set(user.key, { id: row!.id, role: user.role });
+      created.set(user.key, { id: row!.id, sellerType: user.sellerType });
 
-      if (user.role === Role.REAL_ESTATE_AGENT) {
-        // Agents are public only after an approved application (SPEC §2.1).
+      if (demoRole(user) === Role.REAL_ESTATE_AGENT) {
+        // Professionals are public only after an approved application (SPEC §2.1).
         await tx.insert(agentApplications).values({
+          sellerType: user.sellerType,
           fullName: user.displayName,
           email: demoEmail(user),
           phone: user.phone,
@@ -348,7 +365,7 @@ async function createDemoListing(
     listing: DemoListing;
     index: number;
     photos: readonly Buffer[];
-    creator: { id: string; role: Role };
+    creator: DemoCreator;
     assignedAgentId: string | null;
     reviewerId: string;
   },
@@ -377,7 +394,7 @@ async function createDemoListing(
         id: listingId,
         propertyId: property.id,
         createdById: creator.id,
-        sellerType: sellerTypeForRole(creator.role)!,
+        sellerType: creator.sellerType,
         createdAt,
       });
 
@@ -494,6 +511,9 @@ async function seed(db: Database, env: Env, skipConfirmation: boolean): Promise<
     if (!creator || (listing.assign && !agent)) {
       throw new Error(`${listing.title[0]}: unknown demo user`);
     }
+    if (agent && !canBeAssigned(agent.sellerType)) {
+      throw new Error(`${listing.title[0]}: only agents and agencies can be assigned`);
+    }
     await createDemoListing(db, storage, {
       listing,
       index,
@@ -507,7 +527,7 @@ async function seed(db: Database, env: Env, skipConfirmation: boolean): Promise<
 
   console.info(
     `\nDone. Sign in as any demo user with DEMO_PASSWORD:\n` +
-      DEMO_USERS.map((user) => `  ${user.role.padEnd(18)} ${demoEmail(user)}`).join('\n'),
+      DEMO_USERS.map((user) => `  ${user.sellerType.padEnd(18)} ${demoEmail(user)}`).join('\n'),
   );
 }
 

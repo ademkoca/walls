@@ -37,6 +37,7 @@ function toUserSummary(user: UserRow): UserSummary {
     email: user.email,
     displayName: user.displayName,
     role: user.role,
+    sellerType: user.sellerType,
     status: user.status,
     createdAt: user.createdAt.toISOString(),
     deactivatedAt: user.deactivatedAt?.toISOString() ?? null,
@@ -59,6 +60,7 @@ export class UsersService {
     const rows = await findUsers(this.db, {
       ...(query.role ? { role: query.role } : {}),
       ...(query.status ? { status: query.status } : {}),
+      ...(query.assignable ? { assignable: true } : {}),
       ...(query.q ? { q: query.q } : {}),
       page: query.page,
     });
