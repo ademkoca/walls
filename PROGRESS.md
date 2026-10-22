@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-22 (floor shown without the total on ground and basement floors). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -804,6 +804,12 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Floor on the listing page (2026-10-22, user's decision):** "{floor} of {total}" ("2 od 4")
   only for floors above ground. The ground floor reads "Ground floor" / "Prizemlje" and a
   basement floor just its number ("-1"), without the total, since "Prizemlje od 4" reads oddly.
+- **Serbian dates (2026-10-22, user's report):** month names are in the genitive ("Na Walls od
+  oktobra 2026.", "Objavljeno 12. oktobra 2026."), which Intl/CLDR doesn't provide, through
+  `formatDate` in `apps/web/src/lib/intl-locale.ts`. It also fixed Cyrillic months on the
+  legal pages' "Poslednja izmena" and the dashboard inquiry's "Primljeno" (next-intl's
+  formatter uses plain `sr`), and a double period after Serbian dates in `rateNote` and
+  `approvedOn`. Serbian plurals already follow CLDR (53 objavljena / 58 objavljenih oglasa).
 
 ## Technical decisions
 

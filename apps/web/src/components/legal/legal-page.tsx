@@ -1,7 +1,8 @@
 import { brand } from '@walls/ui/brand';
 import { Alert, AlertDescription, AlertTitle } from '@walls/ui/components/alert';
 import { FileWarningIcon } from 'lucide-react';
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { formatDate } from '@/lib/intl-locale';
 
 /** When the legal texts were last changed; update it with every change to them. */
 const LAST_UPDATED = new Date('2026-10-21T12:00:00Z');
@@ -38,10 +39,10 @@ type LegalDocument =
  * Section bodies separate paragraphs with blank lines.
  */
 export async function LegalPage({ document, sections }: LegalDocument) {
-  const [t, tLegal, format] = await Promise.all([
+  const [t, tLegal, locale] = await Promise.all([
     getTranslations(`legal.${document}`),
     getTranslations('legal'),
-    getFormatter(),
+    getLocale(),
   ]);
   const values = { brand: brand.name, domain: brand.domain, email: brand.company.email };
   // Each document has its own section keys; the union of both is looked up by key here.
@@ -53,7 +54,7 @@ export async function LegalPage({ document, sections }: LegalDocument) {
       <header className="space-y-3">
         <h1 className="text-3xl font-semibold tracking-tight">{t('title')}</h1>
         <p className="text-sm text-muted-foreground">
-          {tLegal('lastUpdated', { date: format.dateTime(LAST_UPDATED, { dateStyle: 'long' }) })}
+          {tLegal('lastUpdated', { date: formatDate(locale, LAST_UPDATED, { dateStyle: 'long' }) })}
         </p>
       </header>
       <Alert>

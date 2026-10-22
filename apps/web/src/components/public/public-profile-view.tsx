@@ -2,7 +2,7 @@ import type { PublicProfilePage } from '@walls/shared';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
 import { Building2Icon, MailIcon } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import { intlLocale } from '@/lib/intl-locale';
+import { formatDate } from '@/lib/intl-locale';
 import { PhoneContact } from '../profiles/phone-contact';
 import { ProfileAvatar } from '../profiles/profile-avatar';
 import { SellerTypeBadge } from '../profiles/seller-type-badge';
@@ -21,10 +21,7 @@ export async function PublicProfileView({
   pricing: Pricing;
 }) {
   const t = await getTranslations('publicProfile');
-  const monthYear = new Intl.DateTimeFormat(intlLocale(await getLocale()), {
-    month: 'long',
-    year: 'numeric',
-  });
+  const locale = await getLocale();
   const { profile, listings } = page;
   const hasContact = profile.phone !== null || profile.email !== null;
 
@@ -53,7 +50,9 @@ export async function PublicProfileView({
             </div>
             {profile.bio && <p className="max-w-prose whitespace-pre-line">{profile.bio}</p>}
             <p className="text-sm text-muted-foreground">
-              {t('memberSince', { date: monthYear.format(new Date(profile.memberSince)) })}
+              {t('memberSince', {
+                date: formatDate(locale, profile.memberSince, { month: 'long', year: 'numeric' }),
+              })}
             </p>
           </div>
         </div>

@@ -312,6 +312,11 @@ workflows.
     never from `next/link` or `next/navigation`, so URLs keep the locale.
 -   Call `resolveLocale(params)` at the top of every page and layout
     under `[locale]` so pages can render statically.
+-   Print dates with month names (`dateStyle: 'long'`, `month: 'long'`)
+    with `formatDate` from `@/lib/intl-locale`, not next-intl's
+    `format.dateTime`: it keeps Serbian in Latin script and puts the month
+    in the genitive ("15. oktobra 2026."). Serbian dates end with a
+    period, so a Serbian message must not add another after `{date}`.
 -   Validate forms with the shared `@walls/validation` schemas through
     `useSchemaForm`; show API errors with `useErrorMessage`.
 -   Do not export values (constants, functions) from `'use client'`

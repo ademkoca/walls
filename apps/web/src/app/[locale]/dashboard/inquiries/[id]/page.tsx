@@ -6,12 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/c
 import { ChevronLeftIcon, ExternalLinkIcon, InfoIcon, MailIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getFormatter, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { InquiryStatusActions } from '@/components/inquiries/inquiry-status-actions';
 import { InquiryStatusBadge } from '@/components/inquiries/inquiry-status-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
 import { NotAccessibleError, getInquiry } from '@/lib/api/server';
+import { formatDate } from '@/lib/intl-locale';
 
 export async function generateMetadata({
   params,
@@ -33,13 +34,9 @@ async function loadInquiry(id: string) {
 export default async function InquiryPage({
   params,
 }: PageProps<'/[locale]/dashboard/inquiries/[id]'>) {
-  await resolveLocale(params);
+  const locale = await resolveLocale(params);
   const { id } = await params;
-  const [t, format, inquiry] = await Promise.all([
-    getTranslations('inquiries'),
-    getFormatter(),
-    loadInquiry(id),
-  ]);
+  const [t, inquiry] = await Promise.all([getTranslations('inquiries'), loadInquiry(id)]);
   if (!inquiry) return null;
   const title = inquiry.listing.title ?? t('untitled');
 
@@ -75,7 +72,7 @@ export default async function InquiryPage({
     ],
     [
       t('received'),
-      format.dateTime(new Date(inquiry.createdAt), { dateStyle: 'long', timeStyle: 'short' }),
+      formatDate(locale, inquiry.createdAt, { dateStyle: 'long', timeStyle: 'short' }),
     ],
     [t('recipient'), inquiry.recipient.displayName],
     ...(inquiry.assignedAgent

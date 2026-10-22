@@ -21,7 +21,7 @@ import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link, getPathname } from '@/i18n/navigation';
 import type { AppLocale } from '@/i18n/routing';
 import { getPublicListing } from '@/lib/api/public';
-import { intlLocale } from '@/lib/intl-locale';
+import { formatDate } from '@/lib/intl-locale';
 import { getPricing } from '@/lib/pricing';
 import { absoluteUrl, jsonLd, localizedAlternates, openGraph, previewImage } from '@/lib/seo';
 
@@ -144,9 +144,7 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
       attributes.furnishedStatus && tEnums(`furnishedStatus.${attributes.furnishedStatus}`),
     ],
   ];
-  const publishedOn = new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: 'long' }).format(
-    new Date(listing.publishedAt),
-  );
+  const publishedOn = formatDate(locale, listing.publishedAt, { dateStyle: 'long' });
 
   return (
     <article className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">

@@ -15,7 +15,7 @@ import { SortSelect } from '@/components/search/sort-select';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
 import { searchListings } from '@/lib/api/public';
-import { intlLocale } from '@/lib/intl-locale';
+import { formatDate } from '@/lib/intl-locale';
 import { getPricing } from '@/lib/pricing';
 import { localizedAlternates } from '@/lib/seo';
 
@@ -63,9 +63,7 @@ export default async function PropertiesPage({
   const pages = Math.max(1, Math.ceil(result.total / result.pageSize));
   const filtered = hasListingFilters(search);
   const rateDate = pricing.rate
-    ? new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: 'long' }).format(
-        new Date(pricing.rate.fetchedAt),
-      )
+    ? formatDate(locale, pricing.rate.fetchedAt, { dateStyle: 'long' })
     : null;
   const pageHref = (page: number) => ({
     pathname: '/properties',

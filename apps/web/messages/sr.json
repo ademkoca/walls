@@ -561,7 +561,7 @@
     "invited": "Poziv je poslat.",
     "agentApplication": {
       "title": "Prijava za nalog",
-      "approvedOn": "Odobrena {date}.",
+      "approvedOn": "Odobrena {date}",
       "private": "Dokazi se čuvaju kao potvrda ispunjenosti uslova i vide ih samo administratori.",
       "view": "Pogledaj prijavu"
     }
@@ -1055,7 +1055,7 @@
     "pageOf": "Strana {page} od {pages}",
     "previous": "Prethodna",
     "next": "Sledeća",
-    "rateNote": "Cene u drugoj valuti preračunate su po srednjem kursu Narodne banke Srbije, preuzetom {date}."
+    "rateNote": "Cene u drugoj valuti preračunate su po srednjem kursu Narodne banke Srbije, preuzetom {date}"
   },
   "listing": {
     "backToSearch": "Sve nekretnine",
