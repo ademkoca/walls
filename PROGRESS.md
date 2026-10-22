@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-22 (floor shown without the total on ground and basement floors). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -801,6 +801,9 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   Cloudflare Email Routing rule before the form is used. Open for the lawyer: who the data
   controller is until the company exists. After registration: fill in `brand.company`, restore
   a controller sentence naming the company, bump `LAST_UPDATED`.
+- **Floor on the listing page (2026-10-22, user's decision):** "{floor} of {total}" ("2 od 4")
+  only for floors above ground. The ground floor reads "Ground floor" / "Prizemlje" and a
+  basement floor just its number ("-1"), without the total, since "Prizemlje od 4" reads oddly.
 
 ## Technical decisions
 

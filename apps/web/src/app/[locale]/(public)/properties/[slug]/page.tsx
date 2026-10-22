@@ -117,7 +117,14 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
     .join(', ');
   const address = location.exact ? `${location.exact.street} ${location.exact.streetNumber}` : null;
   const area = (value: number) => t('facts.areaValue', { area: format.number(value) });
-  const floor = attributes.floor === 0 ? t('facts.groundFloor') : attributes.floor;
+  const floor = (() => {
+    if (attributes.floor === 0) return t('facts.groundFloor');
+    // "-1 of 4" reads oddly ("-1 od 4" even more so), so ground and basement floors stand alone.
+    if (attributes.floor === null || attributes.floor < 0 || attributes.totalFloors === null) {
+      return attributes.floor;
+    }
+    return t('facts.floorOf', { floor: String(attributes.floor), total: attributes.totalFloors });
+  })();
   const facts: [string, string | number | null][] = [
     [t('facts.propertyType'), tEnums(`propertyType.${listing.propertyType}`)],
     [t('facts.transactionType'), tEnums(`transactionType.${listing.transactionType}`)],
@@ -125,12 +132,7 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
     [t('facts.plotArea'), attributes.plotArea === null ? null : area(attributes.plotArea)],
     [t('facts.bedrooms'), attributes.bedrooms],
     [t('facts.bathrooms'), attributes.bathrooms],
-    [
-      t('facts.floor'),
-      floor !== null && attributes.totalFloors !== null
-        ? t('facts.floorOf', { floor: String(floor), total: attributes.totalFloors })
-        : floor,
-    ],
+    [t('facts.floor'), floor],
     [t('facts.yearBuilt'), attributes.yearBuilt],
     [t('facts.parkingSpaces'), attributes.parkingSpaces],
     [
