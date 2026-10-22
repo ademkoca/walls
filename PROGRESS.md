@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -863,6 +863,12 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   one if location search gets slow.
 - **Review queues** (applications, profile changes): `?status=PENDING|APPROVED|REJECTED` tabs,
   pending items oldest first, 50 per page.
+- **Dependency audit (2026-10-22):** Next.js 16.4.0 → 16.4.2 (two critical remote code
+  execution advisories and a Server Actions DoS, fixed in 16.4.1) and `ip-address` 10.7.4
+  (used by the API's rate limiter). `pnpm audit` still lists two dev-only findings, left as is:
+  `braces` (no fix released; used by the Next.js ESLint plugin and the shadcn CLI on our own
+  globs) and `esbuild` ≤0.24 inside `drizzle-kit` (affects esbuild's dev server, which
+  drizzle-kit doesn't start). Recheck with `pnpm audit` when upgrading.
 
 ## Gotchas learned the hard way
 
