@@ -1,9 +1,9 @@
 /* Generated from packages/ui/src/brand/brand.ts by `pnpm brand:generate`. Do not edit. */
 :root {
-  --brand-paper: #FFFFFF;
-  --brand-stone: #E4E6E3;
-  --brand-ink: #15181C;
-  --brand-green: #17775F;
-  --brand-mint: #E3F1EC;
-  --brand-graphite: #5E636A;
+  --brand-paper: #ffffff;
+  --brand-stone: #e4e6e3;
+  --brand-ink: #15181c;
+  --brand-green: #17775f;
+  --brand-mint: #e3f1ec;
+  --brand-graphite: #5e636a;
 }

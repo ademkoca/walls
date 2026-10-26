@@ -120,8 +120,9 @@ function encodeIco(images: { size: number; png: Buffer }[]): Buffer {
 /** CSS custom properties for the brand palette, consumed by the theme in globals.css. */
 function brandTokensCss(): string {
   const toKebab = (name: string) => name.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`);
+  // Lower-case hex, as Prettier writes it, so the generated file passes `format:check`.
   const declarations = Object.entries(brand.colors).map(
-    ([name, value]) => `  --brand-${toKebab(name)}: ${value};`,
+    ([name, value]) => `  --brand-${toKebab(name)}: ${value.toLowerCase()};`,
   );
   return [
     '/* Generated from packages/ui/src/brand/brand.ts by `pnpm brand:generate`. Do not edit. */',
