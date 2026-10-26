@@ -54,6 +54,7 @@ async function main(): Promise<void> {
     // Deliver the setup email now rather than waiting for the API's outbox worker; only
     // this one, so other queued mail is still sent (and logged) by the API.
     await processOutbox(db, createEmailService(config, logger), logger, {
+      webOrigin: config.webOrigin,
       recipient: user.email,
     });
     console.info(

@@ -32,7 +32,13 @@ const server = createApp({ db, config, logger, mediaStorage, privateFiles, excha
     logger.info({ port: config.port, env: config.env }, 'API listening');
   },
 );
-const stopOutboxWorker = startOutboxWorker(db, emailService, logger, OUTBOX_POLL_INTERVAL_MS);
+const stopOutboxWorker = startOutboxWorker(
+  db,
+  emailService,
+  logger,
+  OUTBOX_POLL_INTERVAL_MS,
+  config.webOrigin,
+);
 const stopRateRefresher = startExchangeRateRefresher(exchangeRates, logger);
 
 function shutdown(signal: string): void {

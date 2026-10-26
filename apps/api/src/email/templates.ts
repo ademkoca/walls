@@ -1,6 +1,7 @@
 import type { Locale } from '@walls/shared';
 import { brand } from '@walls/ui/brand';
 import { TOKEN_TTL_HOURS } from '../auth/token-policy';
+import { renderEmailLayout } from './layout';
 
 export const EmailTemplate = {
   EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
@@ -505,21 +506,15 @@ const COPY: Record<Locale, Copy> = {
   },
 };
 
-const HTML_ESCAPES: Record<string, string> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-};
-const escapeHtml = (value: string) =>
-  value.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char);
-
-/** Renders a template into a plain-text and a minimal, escaped HTML version. */
+/**
+ * Renders a template into a plain-text version and an HTML version in the shared email layout.
+ * `webOrigin` is the web app's origin, which serves the logo.
+ */
 export function renderEmail<T extends EmailTemplate>(
   template: T,
   locale: Locale,
   payload: EmailPayloads[T],
+  webOrigin: string,
 ): { subject: string; html: string; text: string; replyTo?: string } {
   const content = (COPY[locale][template] as (payload: EmailPayloads[T]) => EmailContent)(payload);
   const subject = `${content.subject} – ${brand.name}`;
@@ -530,17 +525,13 @@ export function renderEmail<T extends EmailTemplate>(
     `— ${brand.name} · ${brand.domain}`,
   ].join('\n\n');
 
-  const html = [
-    `<div style="font-family:Arial,sans-serif;color:${brand.colors.charcoal};max-width:560px">`,
-    ...content.paragraphs.map(
-      (paragraph) => `<p style="white-space:pre-line">${escapeHtml(paragraph)}</p>`,
-    ),
-    content.action
-      ? `<p><a href="${escapeHtml(content.action.url)}" style="background:${brand.colors.orange};color:${brand.colors.cream};padding:12px 20px;text-decoration:none;font-weight:bold;display:inline-block">${escapeHtml(content.action.label)}</a></p>`
-      : '',
-    `<p style="color:${brand.colors.slate}">${escapeHtml(brand.name)} · ${escapeHtml(brand.domain)}</p>`,
-    '</div>',
-  ].join('');
+  const html = renderEmailLayout({
+    locale,
+    title: content.subject,
+    paragraphs: content.paragraphs,
+    ...(content.action ? { action: content.action } : {}),
+    webOrigin,
+  });
 
   return { subject, html, text, ...(content.replyTo ? { replyTo: content.replyTo } : {}) };
 }

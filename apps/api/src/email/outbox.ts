@@ -30,15 +30,16 @@ const retryDelayMs = (attempts: number) => BASE_RETRY_DELAY_MS * 2 ** (attempts 
  * Sends due emails. Rows are locked with SKIP LOCKED, so several API instances never
  * send the same email. Payloads are cleared once sent (or given up on) because they can
  * contain single-use links. `recipient` limits the run to one address (used by scripts
- * that must not deliver other people's mail). Returns the number of emails processed.
+ * that must not deliver other people's mail); `webOrigin` serves the logo in the email layout.
+ * Returns the number of emails processed.
  */
 export async function processOutbox(
   db: Database,
   emailService: EmailService,
   logger: Logger,
-  options: { batchSize?: number; recipient?: string } = {},
+  options: { webOrigin: string; batchSize?: number; recipient?: string },
 ): Promise<number> {
-  const { batchSize = DEFAULT_BATCH_SIZE, recipient } = options;
+  const { webOrigin, batchSize = DEFAULT_BATCH_SIZE, recipient } = options;
   return db.transaction(async (tx) => {
     const due = await tx
       .select()
@@ -60,6 +61,7 @@ export async function processOutbox(
           email.template as EmailTemplate,
           email.locale,
           email.payload as EmailPayloads[EmailTemplate],
+          webOrigin,
         );
         await emailService.send({ to: email.recipientEmail, ...message });
         await tx
@@ -99,12 +101,13 @@ export function startOutboxWorker(
   emailService: EmailService,
   logger: Logger,
   intervalMs: number,
+  webOrigin: string,
 ): () => void {
   let running = false;
   const timer = setInterval(() => {
     if (running) return;
     running = true;
-    processOutbox(db, emailService, logger)
+    processOutbox(db, emailService, logger, { webOrigin })
       .catch((error: unknown) => logger.error({ err: error }, 'Email outbox processing failed'))
       .finally(() => {
         running = false;

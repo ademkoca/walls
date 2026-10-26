@@ -101,7 +101,7 @@ export function createTestContext(
 
   /** Delivers every queued email (the outbox sends in batches) and returns the latest to `to`. */
   async function lastEmailTo(to: string): Promise<EmailMessage | undefined> {
-    while ((await processOutbox(db, emails, logger)) > 0) {
+    while ((await processOutbox(db, emails, logger, { webOrigin: WEB_ORIGIN })) > 0) {
       // Keep going until the outbox is empty.
     }
     return emails.sent.filter((email) => email.to === to).at(-1);
