@@ -9,7 +9,15 @@ import {
   propertyLocations,
   users,
 } from '@walls/database';
-import { Currency, ListingSort, MediaType, Role, UserStatus, toMinorUnits } from '@walls/shared';
+import {
+  Currency,
+  ListingSort,
+  MediaType,
+  type PropertyType,
+  Role,
+  UserStatus,
+  toMinorUnits,
+} from '@walls/shared';
 import type { ListingSearch } from '@walls/validation';
 import {
   type SQL,
@@ -202,14 +210,16 @@ export async function findFeaturedListings(
 }
 
 /**
- * Cities with public listings, and active professionals (agents, agencies, investors), for
- * the home page. Cities are typed in by advertisers, so they are told apart ignoring case and
- * accents.
+ * Cities with public listings, public listings per property type, and active professionals
+ * (agents, agencies, investors), for the home page. Cities are typed in by advertisers, so they
+ * are told apart ignoring case and accents.
  */
-export async function countHomeStats(
-  db: DbExecutor,
-): Promise<{ cities: number; partners: number }> {
-  const [[cityRow], [partnerRow]] = await Promise.all([
+export async function countHomeStats(db: DbExecutor): Promise<{
+  cities: number;
+  partners: number;
+  byPropertyType: Partial<Record<PropertyType, number>>;
+}> {
+  const [[cityRow], [partnerRow], typeRows] = await Promise.all([
     db
       .select({
         cities: sql<number>`count(distinct lower(walls_unaccent(trim(${propertyLocations.city}))))::int`,
@@ -222,8 +232,19 @@ export async function countHomeStats(
       .select({ partners: count() })
       .from(users)
       .where(and(eq(users.role, Role.REAL_ESTATE_AGENT), eq(users.status, UserStatus.ACTIVE))),
+    db
+      .select({ propertyType: properties.propertyType, listings: count() })
+      .from(listings)
+      .innerJoin(creator, eq(creator.id, listings.createdById))
+      .innerJoin(properties, eq(properties.id, listings.propertyId))
+      .where(publiclyVisible)
+      .groupBy(properties.propertyType),
   ]);
-  return { cities: cityRow?.cities ?? 0, partners: partnerRow?.partners ?? 0 };
+  const byPropertyType: Partial<Record<PropertyType, number>> = {};
+  for (const row of typeRows) {
+    if (row.propertyType) byPropertyType[row.propertyType] = row.listings;
+  }
+  return { cities: cityRow?.cities ?? 0, partners: partnerRow?.partners ?? 0, byPropertyType };
 }
 
 /** A published listing by its slug, with its creator; undefined when not public. */

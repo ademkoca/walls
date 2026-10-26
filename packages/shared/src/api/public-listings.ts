@@ -68,7 +68,16 @@ export interface PublicHome {
   featured: PublicListingCard[];
   latest: PublicListingCard[];
   /** Public listings, the cities they are in, and active professionals. */
-  stats: { listings: number; cities: number; partners: number };
+  stats: {
+    listings: number;
+    cities: number;
+    partners: number;
+    /**
+     * Public listings per property type; types without any are left out. Optional because the
+     * web app may be deployed before an API that sends it.
+     */
+    byPropertyType?: Partial<Record<PropertyType, number>>;
+  };
 }
 
 /** What the sitemap lists (SPEC §32). */

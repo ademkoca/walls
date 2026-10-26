@@ -333,7 +333,7 @@ describe('home page listings (SPEC §16, §22)', () => {
     expect(home.latest.length).toBeLessThanOrEqual(8);
   });
 
-  it('counts public listings, their cities ignoring case and accents, and active agents', async () => {
+  it('counts public listings, per property type, their cities ignoring case and accents, and active agents', async () => {
     const stats = async () => ((await ctx.client().get(`${PUBLIC}/home`)).body as PublicHome).stats;
     const before = await stats();
 
@@ -348,11 +348,16 @@ describe('home page listings (SPEC §16, §22)', () => {
     await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
     await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.INVESTOR);
 
-    expect(await stats()).toEqual({
+    const after = await stats();
+    expect(after).toMatchObject({
       listings: before.listings + 2,
       cities: before.cities + 1,
       partners: before.partners + 2,
     });
+    expect(after.byPropertyType?.APARTMENT).toBe((before.byPropertyType?.APARTMENT ?? 0) + 2);
+    expect(Object.values(after.byPropertyType ?? {}).reduce((sum, n) => sum + n, 0)).toBe(
+      after.listings,
+    );
   });
 });
 
