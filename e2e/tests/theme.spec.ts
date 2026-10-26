@@ -6,8 +6,8 @@ test('the home page looks the same with the OS in dark mode', async ({ browser }
     const page = await browser.newPage({ colorScheme });
     await page.goto('/en');
     const style = await page
-      .getByRole('region', { name: 'Find the walls that feel like home.' })
-      .getByRole('link', { name: 'List a property' })
+      .getByRole('region', { name: "You know what you're getting." })
+      .getByRole('group', { name: 'Buy or rent' })
       .evaluate((element) => {
         const computed = getComputedStyle(element);
         return { border: computed.borderColor, background: computed.backgroundColor };
@@ -17,6 +17,6 @@ test('the home page looks the same with the OS in dark mode', async ({ browser }
   }
 
   const light = await ctaStyle('light');
-  expect(light.border, 'outline buttons have a visible border').not.toBe('rgba(0, 0, 0, 0)');
+  expect(light.border, 'the buy/rent switch has a visible border').not.toBe('rgba(0, 0, 0, 0)');
   expect(await ctaStyle('dark')).toEqual(light);
 });

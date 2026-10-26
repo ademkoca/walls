@@ -41,7 +41,7 @@ export default async function ForProfessionalsPage({
             {STEPS.map((step, index) => (
               <li key={step} className="flex gap-3">
                 <span
-                  className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+                  className="flex size-7 shrink-0 items-center justify-center bg-primary font-mono text-sm font-semibold text-primary-foreground"
                   aria-hidden
                 >
                   {index + 1}

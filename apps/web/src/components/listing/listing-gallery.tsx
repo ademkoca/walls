@@ -48,7 +48,7 @@ export function ListingGallery({ images, title }: { images: PublicListingImage[]
               type="button"
               variant="secondary"
               size="icon"
-              className="absolute top-1/2 left-3 -translate-y-1/2 rounded-full"
+              className="absolute top-1/2 left-3 -translate-y-1/2"
               aria-label={t('previous')}
               onClick={() => go(index - 1)}
             >
@@ -58,7 +58,7 @@ export function ListingGallery({ images, title }: { images: PublicListingImage[]
               type="button"
               variant="secondary"
               size="icon"
-              className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full"
+              className="absolute top-1/2 right-3 -translate-y-1/2"
               aria-label={t('next')}
               onClick={() => go(index + 1)}
             >
@@ -85,7 +85,7 @@ export function ListingGallery({ images, title }: { images: PublicListingImage[]
                 className={cn(
                   'block overflow-hidden rounded-md border-2 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none',
                   position === index
-                    ? 'border-primary'
+                    ? 'border-emphasis'
                     : 'border-transparent opacity-80 hover:opacity-100',
                 )}
               >

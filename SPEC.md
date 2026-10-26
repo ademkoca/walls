@@ -1194,26 +1194,34 @@ The sitemap lists the public pages, every public listing, every active agent, an
 
 The brand is **Walls**, using the domain **walls.rs**. Do not invent or substitute another brand name.
 
-Use the approved Walls logo: a geometric, architectural house/roof mark above the spaced `WALLS` wordmark, with `REAL ESTATE` as the descriptor where space permits. The mark uses angular building forms in orange, charcoal, and cream/white. Use the provided scalable SVG asset as the source of truth for the logo.
+Use the approved Walls logo (decision 2026-10-26, "Folding screen"): four wall panels folded like a folding screen into a `W`, alternating ink and green, above the lowercase `walls` wordmark, with `REAL ESTATE` as the descriptor where space permits. On dark surfaces the ink panels and the wordmark turn white and the green panels stay green. Use the provided scalable SVG asset as the source of truth for the logo.
 
-### Brand color palette
+### Visual identity "Tlocrt" (decision 2026-10-26)
 
-- Primary orange: `#C2410C` (logo, buttons, accents)
-- Orange on dark surfaces: `#FF6A00` (the logo and accents on charcoal; never behind text)
-- Charcoal: `#171B1E`
-- Slate gray: `#6B7280`
-- Cream: `#F8F7F4`
-- White: `#FFFFFF` (neutral surface)
+The owner replaced "Beton" (concrete, ink and road-sign yellow, 2026-10-23) because it still felt generic: a portal template with a borrowed retail look and no moment of its own. "Tlocrt" (floor plan) draws Walls the way Serbian buyers first read a property: as a plan. The home page is an apartment plan whose rooms lead into the search by property type and whose hallway holds the search. Tagline: "Znate šta dobijate." ("You know what you're getting.")
+
+Palette:
+
+- Paper: `#FFFFFF` (page background and cards)
+- Stone: `#E4E6E3` (quiet fills, the email backdrop)
+- Ink: `#15181C` (text, wall lines, borders, footer)
+- Green: `#17775F` (the primary action and the selected item, with white text; two of the logo's panels)
+- Mint: `#E3F1EC` (a selected or hovered room's floor, behind ink text)
+- Graphite: `#5E636A` (secondary text, dimension lines)
 
 ### Typography
 
-Montserrat is the typeface for all UI text, headings and body. It matches the logo wordmark. The choice is centralized in the branding configuration so it can be changed later.
+- Hanken Grotesk: UI text, and headings in its heaviest weight (800) with tight tracking.
+- Red Hat Mono: measured figures (prices, areas, counts, statistics).
+- The logo wordmark is Hanken Grotesk 800; the descriptor is Red Hat Mono.
+
+Both are free Google Fonts with Serbian Latin characters, self-hosted by the web app. The choice is centralized in the branding configuration so it can be changed later.
 
 The approved artwork sets the wordmark as live text; production logo files are generated from it with the text converted to outlines (see `packages/ui/brand/README.md`).
 
-Use orange for primary actions and selected accents, charcoal for strong text and dark surfaces, slate gray for secondary text/borders, and cream for warm page backgrounds. Maintain accessible text contrast; do not use orange for small text on cream/white unless contrast is verified.
+### Shapes and color use
 
-The orange and charcoal values match the approved logo artwork, which is authoritative for brand color. The owner changed the orange from `#FF6A00` to the deeper `#C2410C` (2026-10-15) so that text on orange passes WCAG AA: cream on orange is 4.83:1 (white 5.18:1), and orange text on white/cream is 5.18:1 / 4.83:1. On charcoal, `#C2410C` is only 3.35:1, so the logo on dark surfaces (inverse variants) and orange accents there use the lighter `#FF6A00` (6.03:1). Buttons stay `#C2410C` everywhere, because cream text on `#FF6A00` would be 2.68:1. See `packages/ui/brand/README.md`.
+Corners are square throughout, like wall junctions on a plan. Containers are drawn as walls: ink borders, 4–8px where a section is a room of the plan and 1px on cards and fields; no shadows on resting surfaces. Green is reserved for the primary action and the selected item (white on green 5.47:1, green on white 5.47:1); there is one green action per region. Ink on paper is 17.81:1, graphite on paper 6.05:1 and on stone 4.82:1. On ink surfaces, text is white and marks and focus rings are mint. See `packages/ui/brand/README.md`.
 
 The branding must remain easy to replace. Do NOT scatter branding values through components. Centralize the brand name, domain, logo asset, favicon, colors, typography, and theme tokens in one clearly documented branding/theme configuration.
 

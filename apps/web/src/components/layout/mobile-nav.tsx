@@ -55,7 +55,11 @@ export function MobileNav() {
             </Link>
           ) : (
             <>
-              <Link href="/register" className={buttonVariants()} onClick={close}>
+              <Link
+                href="/register"
+                className={buttonVariants({ variant: 'outline' })}
+                onClick={close}
+              >
                 {t('register')}
               </Link>
               <Link

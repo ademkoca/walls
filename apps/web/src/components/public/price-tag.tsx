@@ -6,6 +6,7 @@ import {
   toDisplayPrice,
 } from '@walls/shared';
 import { useFormatter, useTranslations } from 'next-intl';
+import { cn } from '@walls/ui/lib/utils';
 import type { Pricing } from '@/lib/currency';
 
 /** Formats an amount with its currency and, for rentals, the period ("600 € / month"). */
@@ -39,12 +40,12 @@ export function PriceTag({
   const formatPrice = usePriceFormat();
   const display = toDisplayPrice(price, pricing.currency, pricing.rate);
   if (display.mode === PriceMode.ON_REQUEST) {
-    return <p className={className}>{t('priceOnRequest')}</p>;
+    return <p className={cn('font-mono', className)}>{t('priceOnRequest')}</p>;
   }
   const amount = formatPrice(display.amount, display.currency, display.period);
   return (
     <div>
-      <p className={className}>
+      <p className={cn('font-mono tabular-nums', className)}>
         {display.original ? t('approximately', { price: amount }) : amount}
       </p>
       {display.original && (

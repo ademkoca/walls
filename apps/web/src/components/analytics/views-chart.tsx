@@ -32,7 +32,7 @@ export async function ViewsChart({ days }: { days: DailyCount[] }) {
           <div
             key={day.day}
             title={label(day)}
-            className="flex-1 rounded-t-sm bg-primary/80 hover:bg-primary"
+            className="flex-1 bg-chart-1 hover:bg-chart-1/80"
             style={{ height: `${(day.value / highest) * 100}%`, minHeight: day.value ? 2 : 0 }}
           />
         ))}

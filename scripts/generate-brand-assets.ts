@@ -12,6 +12,7 @@ const repoRoot = path.resolve(import.meta.dirname, '..');
 const brandDir = path.join(repoRoot, 'packages/ui/brand');
 const webAppDir = path.join(repoRoot, 'apps/web/src/app');
 const webIconsDir = path.join(repoRoot, 'apps/web/public/icons');
+const webPublicDir = path.join(repoRoot, 'apps/web/public');
 const brandTokensFile = path.join(repoRoot, 'packages/ui/src/styles/brand-tokens.css');
 
 const FAVICON_SIZES = [16, 32, 48];
@@ -19,6 +20,8 @@ const APPLE_ICON_SIZE = 180;
 const PWA_ICON_SIZES = [192, 512];
 /** Share of a padded icon's width taken by the mark; stays inside the 80% maskable safe zone. */
 const PADDED_MARK_SCALE = 0.6;
+/** Email logo pixel density (2× for sharp logos on high-density screens). */
+const EMAIL_LOGO_SCALE = 2;
 /** Open Graph / social preview card size recommended by Facebook, LinkedIn and X. */
 const OPEN_GRAPH_SIZE = { width: 1200, height: 630 } as const;
 /** Share of the card height taken by the stacked logo. */
@@ -38,19 +41,19 @@ async function renderSvg(svg: Buffer, size: number): Promise<Buffer> {
     .toBuffer();
 }
 
-/** The mark centered on an opaque cream square, as required by iOS and Android launchers. */
+/** The mark centered on an opaque paper square, as required by iOS and Android launchers. */
 async function renderPaddedIcon(svg: Buffer, size: number): Promise<Buffer> {
   const markSize = Math.round(size * PADDED_MARK_SCALE);
   const mark = await renderSvg(svg, markSize);
   return sharp({
-    create: { width: size, height: size, channels: 4, background: brand.colors.cream },
+    create: { width: size, height: size, channels: 4, background: brand.colors.paper },
   })
     .composite([{ input: mark, gravity: 'center' }])
     .png()
     .toBuffer();
 }
 
-/** The stacked logo centred on a cream card, used as the default link preview image. */
+/** The stacked logo centred on a paper card, used as the default link preview image. */
 async function renderOpenGraphImage(logoSvg: Buffer): Promise<Buffer> {
   const height = Math.round(OPEN_GRAPH_SIZE.height * OPEN_GRAPH_LOGO_SCALE);
   const { height: svgHeight = height } = await sharp(logoSvg).metadata();
@@ -60,8 +63,29 @@ async function renderOpenGraphImage(logoSvg: Buffer): Promise<Buffer> {
     .resize({ height })
     .png()
     .toBuffer();
-  return sharp({ create: { ...OPEN_GRAPH_SIZE, channels: 4, background: brand.colors.cream } })
+  return sharp({ create: { ...OPEN_GRAPH_SIZE, channels: 4, background: brand.colors.paper } })
     .composite([{ input: logo, gravity: 'center' }])
+    .png()
+    .toBuffer();
+}
+
+/**
+ * The horizontal inverse logo on an opaque ink background, for email headers. Opaque so that it
+ * stays readable when an email client's dark mode recolors the header behind it.
+ */
+async function renderEmailLogo(logoSvg: Buffer): Promise<Buffer> {
+  const width = brand.emailLogo.width * EMAIL_LOGO_SCALE;
+  const height = brand.emailLogo.height * EMAIL_LOGO_SCALE;
+  const { width: svgWidth = width } = await sharp(logoSvg).metadata();
+  const logo = await sharp(logoSvg, {
+    density: Math.ceil((CSS_DPI * width * SUPERSAMPLE) / svgWidth),
+  })
+    .resize(width, height, { fit: 'contain', background: brand.colors.ink })
+    .png()
+    .toBuffer();
+  return sharp({ create: { width, height, channels: 4, background: brand.colors.ink } })
+    .composite([{ input: logo, gravity: 'center' }])
+    .flatten({ background: brand.colors.ink })
     .png()
     .toBuffer();
 }
@@ -111,7 +135,10 @@ function brandTokensCss(): string {
 async function main(): Promise<void> {
   const markSvg = await readFile(path.join(brandDir, brand.assets.mark));
   const stackedLogoSvg = await readFile(path.join(brandDir, brand.assets.logoStacked));
+  const inverseLogoSvg = await readFile(path.join(brandDir, brand.assets.logoHorizontalInverse));
+  const emailLogoFile = path.join(webPublicDir, brand.emailLogo.path);
   await mkdir(webIconsDir, { recursive: true });
+  await mkdir(path.dirname(emailLogoFile), { recursive: true });
 
   const outputs: Record<string, Buffer> = {
     [path.join(webAppDir, 'favicon.ico')]: encodeIco(
@@ -125,6 +152,7 @@ async function main(): Promise<void> {
     [path.join(webAppDir, 'opengraph-image.alt.txt')]: Buffer.from(
       `${brand.name} ${brand.descriptor} logo`,
     ),
+    [emailLogoFile]: await renderEmailLogo(inverseLogoSvg),
     [brandTokensFile]: Buffer.from(brandTokensCss()),
   };
   for (const size of PWA_ICON_SIZES) {

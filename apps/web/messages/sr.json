@@ -39,7 +39,9 @@
     "terms": "Uslovi korišćenja"
   },
   "home": {
-    "title": "Pronađite zidove u kojima ćete se osećati kao kod kuće.",
+    "title": "Znate šta dobijate.",
+    "promise": "Svaki oglas pregledamo pre nego što ga vidite.",
+    "roomListings": "{count, plural, one {oglas} few {oglasa} other {oglasa}}",
     "subtitle": "Stanovi, kuće i poslovni prostori za prodaju i izdavanje širom Srbije — od privatnih prodavaca, agenata, agencija i investitora.",
     "advertise": "Oglasite nekretninu",
     "browse": "Pregledajte nekretnine",

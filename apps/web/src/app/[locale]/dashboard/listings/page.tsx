@@ -42,7 +42,7 @@ async function MyListings() {
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+          <h1 className="text-4xl font-bold">{t('title')}</h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <NewListingButton />
@@ -70,7 +70,7 @@ async function ReviewListings({ tab }: { tab: string | string[] | undefined }) {
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+        <h1 className="text-4xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground">{t('description')}</p>
       </div>
 
@@ -83,7 +83,7 @@ async function ReviewListings({ tab }: { tab: string | string[] | undefined }) {
             className={cn(
               '-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors',
               key === active.key
-                ? 'border-primary text-foreground'
+                ? 'border-emphasis text-foreground'
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >

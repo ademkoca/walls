@@ -38,7 +38,7 @@ export default async function SentInquiriesPage({
   return (
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+        <h1 className="text-4xl font-bold">{t('title')}</h1>
         <p className="text-muted-foreground">{t('sentDescription')}</p>
       </div>
       <InquiryStatusTabs active={SENT_TAB} label={t('title')} showSent />

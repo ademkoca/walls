@@ -8,14 +8,14 @@ export async function HowItWorks() {
 
   return (
     <section aria-labelledby="how-it-works" className="space-y-6">
-      <h2 id="how-it-works" className="text-2xl font-semibold tracking-tight">
+      <h2 id="how-it-works" className="text-4xl">
         {t('title')}
       </h2>
       <ol className="grid gap-6 sm:grid-cols-3">
         {STEPS.map((step, index) => (
           <li key={step} className="flex flex-col gap-2">
             <span
-              className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+              className="flex size-9 shrink-0 items-center justify-center border-2 border-foreground font-mono text-sm font-semibold"
               aria-hidden
             >
               {index + 1}

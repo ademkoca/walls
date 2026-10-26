@@ -15,16 +15,12 @@ The authoritative product and technical requirements are defined in:
 
 - **Brand:** Walls
 - **Domain:** [walls.rs](https://walls.rs)
-- **Logo:** approved geometric architectural mark with the WALLS wordmark; SVG sources in [`packages/ui/brand/`](./packages/ui/brand/README.md).
-- **Primary orange:** `#C2410C`
-- **Orange on dark surfaces:** `#FF6A00` (logo and accents on charcoal)
-- **Charcoal:** `#171B1E`
-- **Slate gray:** `#6B7280`
-- **Cream:** `#F8F7F4`
-- **White:** `#FFFFFF`
-- **Typeface:** Montserrat (headings and body)
+- **Identity "Tlocrt" (floor plan):** the site is drawn as a plan: ink wall lines on white paper, one green door. Tagline "Znate šta dobijate."
+- **Logo:** four wall panels folded into a `W` like a folding screen, alternating ink and green, above the lowercase `walls` wordmark; SVG sources in [`packages/ui/brand/`](./packages/ui/brand/README.md).
+- **Palette:** paper `#FFFFFF`, stone `#E4E6E3`, ink `#15181C`, green `#17775F`, mint `#E3F1EC`, graphite `#5E636A`
+- **Typefaces:** Hanken Grotesk (text, and headings at weight 800), Red Hat Mono (prices, areas and other figures)
 
-Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Text on orange is cream (4.83:1, passes WCAG AA). On charcoal the logo and accents use the lighter `#FF6A00` (6.03:1); buttons keep `#C2410C`, since cream text on the lighter orange would fail. Contrast table: [`packages/ui/brand/README.md`](./packages/ui/brand/README.md).
+Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Green is for the primary action and the selected item only (white on green 5.47:1). Contrast table: [`packages/ui/brand/README.md`](./packages/ui/brand/README.md).
 
 ## Architecture
 
@@ -97,7 +93,9 @@ packages/
   http://localhost:3000.
 - Components come from shadcn/ui (Base UI primitives) in `packages/ui`; the theme
   in `packages/ui/src/styles/globals.css` derives every color from the brand
-  palette.
+  palette. Green (`primary`) is for the primary action and the selected item; icons,
+  selected tabs and other marks use `emphasis`, which is ink on light surfaces and mint on
+  ink (`surface-ink`).
 
 ### Listing images and maps in development
 
@@ -120,6 +118,11 @@ E2E suite always use a fixed rate. Production must use `nbs`.
 
 Without `RESEND_API_KEY`, the API prints every email, including its
 verification or reset link, to its console instead of sending it.
+
+Emails share one HTML layout (`apps/api/src/email/layout.ts`): ink header with the logo, the
+message on a card, and a footer, built from tables and inline styles so it holds up in Gmail,
+Outlook and Apple Mail. The logo is a PNG served by the web app at `WEB_ORIGIN/email/walls-logo.png`,
+so it only shows in a real mailbox when `WEB_ORIGIN` is a public address.
 
 ### Company details and the contact inbox
 

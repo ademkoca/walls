@@ -165,10 +165,10 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
       <header className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0 space-y-3">
           <div className="flex flex-wrap gap-2">
-            <Badge>{tEnums(`transactionType.${listing.transactionType}`)}</Badge>
+            <Badge variant="accent">{tEnums(`transactionType.${listing.transactionType}`)}</Badge>
             <Badge variant="secondary">{tEnums(`propertyType.${listing.propertyType}`)}</Badge>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight text-balance">{title}</h1>
+          <h1 className="text-4xl font-bold text-balance sm:text-5xl">{title}</h1>
           <p className="flex items-center gap-1 text-muted-foreground">
             <MapPinIcon className="size-4 shrink-0" aria-hidden />
             {[address, place].filter(Boolean).join(', ')}
@@ -196,7 +196,7 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
           <ListingGallery images={listing.images} title={title} />
 
           <section className="space-y-4" aria-labelledby="listing-facts">
-            <h2 id="listing-facts" className="text-xl font-semibold">
+            <h2 id="listing-facts" className="text-2xl font-bold">
               {t('keyFacts')}
             </h2>
             <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
@@ -212,7 +212,7 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
           </section>
 
           <section className="space-y-4" aria-labelledby="listing-description">
-            <h2 id="listing-description" className="text-xl font-semibold">
+            <h2 id="listing-description" className="text-2xl font-bold">
               {t('description')}
             </h2>
             {locale === 'en' && !listing.description.en && (
@@ -230,13 +230,13 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
 
           {listing.amenityCodes.length > 0 && (
             <section className="space-y-4" aria-labelledby="listing-features">
-              <h2 id="listing-features" className="text-xl font-semibold">
+              <h2 id="listing-features" className="text-2xl font-bold">
                 {t('features')}
               </h2>
               <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {listing.amenityCodes.map((code) => (
                   <li key={code} className="flex items-center gap-2">
-                    <CheckIcon className="size-4 text-primary" aria-hidden />
+                    <CheckIcon className="size-4 text-emphasis" aria-hidden />
                     {tEnums(`amenity.${code as Amenity}`)}
                   </li>
                 ))}
@@ -245,7 +245,7 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
           )}
 
           <section className="space-y-4" aria-labelledby="listing-location">
-            <h2 id="listing-location" className="text-xl font-semibold">
+            <h2 id="listing-location" className="text-2xl font-bold">
               {t('location')}
             </h2>
             <p>{[address, place].filter(Boolean).join(', ')}</p>

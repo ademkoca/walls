@@ -58,7 +58,7 @@ export default async function ContactPage({ params }: PageProps<'/[locale]/conta
           </h2>
           <dl className="space-y-3">
             <div className="flex items-start gap-3">
-              <MailIcon className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
+              <MailIcon className="mt-0.5 size-5 shrink-0 text-emphasis" aria-hidden />
               <div>
                 <dt className="text-sm text-muted-foreground">{t('emailLabel')}</dt>
                 <dd>
@@ -72,7 +72,7 @@ export default async function ContactPage({ params }: PageProps<'/[locale]/conta
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <MapPinIcon className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden />
+              <MapPinIcon className="mt-0.5 size-5 shrink-0 text-emphasis" aria-hidden />
               <div>
                 <dt className="text-sm text-muted-foreground">{t('locationLabel')}</dt>
                 <dd className="font-medium">{t('location')}</dd>

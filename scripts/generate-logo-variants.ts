@@ -1,9 +1,9 @@
 /**
  * Generates the outlined logo variants from the approved source artwork
- * (packages/ui/brand/walls-logo.svg). The source sets the wordmark as live text in
- * Montserrat, which renders in a fallback font wherever Montserrat is unavailable
- * (e.g. <img>, emails, favicons). This script converts the text to vector paths using
- * the real font, keeping the source's sizes, weights, letter spacing and baselines.
+ * (packages/ui/brand/walls-logo.svg). The source sets the wordmark in Hanken Grotesk and the
+ * descriptor in Red Hat Mono as live text, which renders in a fallback font wherever those are
+ * unavailable (e.g. <img>, emails, favicons). This script converts the text to vector paths
+ * using the real fonts, keeping the source's sizes, weights, letter spacing and baselines.
  *
  * Run with `pnpm brand:generate`; commit the output.
  */
@@ -14,16 +14,30 @@ import { brand } from '../packages/ui/src/brand/brand.ts';
 
 const repoRoot = path.resolve(import.meta.dirname, '..');
 const brandDir = path.join(repoRoot, 'packages/ui/brand');
-const fontDir = path.join(repoRoot, 'node_modules/@fontsource/montserrat/files');
+const fontDir = (family: string) => path.join(repoRoot, `node_modules/@fontsource/${family}/files`);
 
 // Typography and layout of the source artwork (walls-logo.svg).
 const SOURCE = {
   /** Horizontal centre of the mark; both text lines are centred on it. */
   centerX: 185,
-  wordmark: { text: 'WALLS', weight: 600, size: 47, letterSpacing: 12, baseline: 202 },
-  descriptor: { text: 'REAL ESTATE', weight: 500, size: 15, letterSpacing: 6.1, baseline: 235 },
+  wordmark: {
+    text: 'walls',
+    font: 'hanken-grotesk',
+    weight: 800,
+    size: 60,
+    letterSpacing: -2,
+    baseline: 200,
+  },
+  descriptor: {
+    text: 'REAL ESTATE',
+    font: 'red-hat-mono',
+    weight: 500,
+    size: 13,
+    letterSpacing: 4,
+    baseline: 226,
+  },
   /** Bounding box of the mark's shapes in the source coordinate space. */
-  mark: { minX: 137, minY: 50, maxX: 233, maxY: 146 },
+  mark: { minX: 137, minY: 62, maxX: 233, maxY: 134 },
 } as const;
 
 /** Gap between mark and text in the horizontal lockup, as a share of the mark height. */
@@ -40,8 +54,10 @@ interface OutlinedLine {
   capHeight: number;
 }
 
-function loadFont(weight: number): fontkit.Font {
-  const font = fontkit.openSync(path.join(fontDir, `montserrat-latin-${weight}-normal.woff`));
+function loadFont(family: string, weight: number): fontkit.Font {
+  const font = fontkit.openSync(
+    path.join(fontDir(family), `${family}-latin-${weight}-normal.woff`),
+  );
   if (!('layout' in font)) throw new Error(`Expected a single font for weight ${weight}`);
   return font;
 }
@@ -52,7 +68,7 @@ const roundPathData = (d: string) =>
 
 /** Converts a line of text to outlines, applying letter spacing between glyphs. */
 function outline(line: TextLine): OutlinedLine {
-  const font = loadFont(line.weight);
+  const font = loadFont(line.font, line.weight);
   const scale = line.size / font.unitsPerEm;
   const run = font.layout(line.text);
 
@@ -93,19 +109,20 @@ async function readMark(): Promise<string> {
 type Tone = 'default' | 'inverse';
 
 /**
- * Inverse variants, for dark surfaces, swap charcoal for cream and the orange for the
- * lighter `orangeOnDark`, which keeps the mark bright on charcoal.
+ * The source artwork draws two of the mark's panels and the wordmark in ink, and the other two
+ * panels in green. Inverse variants, for ink surfaces, draw the ink panels and wordmark in paper
+ * and keep the green panels (3.3:1 on ink, enough for a graphic).
  */
 function colors(tone: Tone) {
   if (tone === 'default') {
-    return { ink: brand.colors.charcoal, recolorMark: (mark: string) => mark };
+    return { ink: brand.colors.ink, recolorMark: (mark: string) => mark };
   }
-  const ink = brand.colors.cream;
+  const swap: Record<string, string> = {
+    [brand.colors.ink.toLowerCase()]: brand.colors.paper,
+  };
   const recolorMark = (mark: string) =>
-    mark
-      .replaceAll(brand.colors.charcoal, ink)
-      .replaceAll(brand.colors.orange, brand.colors.orangeOnDark);
-  return { ink, recolorMark };
+    mark.replace(/#[0-9a-f]{6}/gi, (color) => swap[color.toLowerCase()] ?? color);
+  return { ink: brand.colors.paper, recolorMark };
 }
 
 function svgDocument(width: number, height: number, title: string, body: string): string {

@@ -26,7 +26,7 @@ export function ListingCard({
   const area = listing.floorArea ?? listing.plotArea;
 
   return (
-    <article className="group h-full overflow-hidden rounded-lg border bg-card">
+    <article className="group h-full overflow-hidden border border-foreground bg-card">
       <Link
         href={`/properties/${listing.slug}`}
         className="flex h-full flex-col focus-visible:outline-none"
@@ -46,13 +46,13 @@ export function ListingCard({
               <span className="sr-only">{t('noImage')}</span>
             </div>
           )}
-          <Badge className="absolute top-3 left-3">
+          <Badge variant="accent" className="absolute top-3 left-3">
             {tEnums(`transactionType.${listing.transactionType}`)}
           </Badge>
           <SellerTypeBadge sellerType={listing.sellerType} className="absolute top-3 right-3" />
         </div>
         <div className="flex flex-1 flex-col gap-2 p-4">
-          <h3 className="line-clamp-2 font-medium group-hover:underline group-focus-visible:underline">
+          <h3 className="line-clamp-2 font-semibold group-hover:underline group-focus-visible:underline">
             {title}
           </h3>
           {place && (

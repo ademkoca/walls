@@ -322,6 +322,11 @@ workflows.
 -   Do not export values (constants, functions) from `'use client'`
     modules for use in Server Components: they arrive as client
     references, not values. Put shared values in plain modules.
+-   Use `bg-primary` (green, white text) only for the primary action and
+    the selected item, one green action per region. For icons, selected
+    tabs, borders and other marks use `text-emphasis` / `border-emphasis`:
+    ink on light surfaces, mint inside `surface-ink` (the site footer and
+    dark banners). Green on ink is 3.3:1, so it is never text there.
 -   Add shadcn/ui components with
     `pnpm dlx shadcn@<version> add <component> -c apps/web`; they are
     written to `packages/ui/src/components` and use Base UI primitives.

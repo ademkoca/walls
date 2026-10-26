@@ -44,13 +44,13 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-dvh flex-col lg:flex-row">
       <SkipLink />
-      <aside className="bg-sidebar text-sidebar-foreground lg:sticky lg:top-0 lg:h-dvh lg:w-64 lg:shrink-0">
+      <aside className="border-b-4 border-sidebar-border bg-sidebar text-sidebar-foreground lg:sticky lg:border-r-4 lg:border-b-0 lg:top-0 lg:h-dvh lg:w-64 lg:shrink-0">
         <div className="flex flex-col gap-4 px-4 py-4 lg:gap-8 lg:py-6">
           <Link
             href="/dashboard"
             className="rounded transition-opacity hover:opacity-80 focus-visible:ring-3 focus-visible:ring-sidebar-ring/60 focus-visible:outline-none"
           >
-            <Logo tone="inverse" className="w-32" />
+            <Logo className="w-32" />
           </Link>
           <DashboardNav role={user.role} counts={counts} />
         </div>

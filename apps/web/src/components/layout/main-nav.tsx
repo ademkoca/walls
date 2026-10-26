@@ -23,8 +23,10 @@ export function MainNav() {
             href={item.href}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none',
-              active ? 'text-foreground' : 'text-muted-foreground',
+              'px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none',
+              active
+                ? 'text-foreground shadow-[inset_0_-3px_0_var(--primary)]'
+                : 'text-muted-foreground hover:text-foreground',
             )}
           >
             {t(item.labelKey)}

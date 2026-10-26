@@ -182,7 +182,7 @@ export function AgentApplicationForm() {
                 {PROFESSIONAL_SELLER_TYPES.map((type) => (
                   <Label
                     key={type}
-                    className="flex cursor-pointer items-start gap-3 rounded-md border p-3 font-normal has-data-checked:border-primary has-data-checked:bg-primary/5"
+                    className="flex cursor-pointer items-start gap-3 rounded-md border p-3 font-normal has-data-checked:border-emphasis has-data-checked:bg-accent"
                   >
                     <RadioGroupItem value={type} className="mt-0.5" />
                     <span className="space-y-1">

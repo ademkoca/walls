@@ -64,7 +64,7 @@ export default async function AboutPage({ params }: PageProps<'/[locale]/about'>
   return (
     <div className="mx-auto max-w-6xl space-y-16 px-4 py-12 sm:px-6 lg:px-8">
       <section aria-labelledby="about-title" className="max-w-3xl space-y-6">
-        <HomeIcon className="size-8 text-primary" aria-hidden />
+        <HomeIcon className="size-8 text-emphasis" aria-hidden />
         <h1 id="about-title" className="text-4xl font-semibold tracking-tight text-balance">
           {t('title')}
         </h1>
@@ -83,7 +83,7 @@ export default async function AboutPage({ params }: PageProps<'/[locale]/about'>
         <ul className="grid gap-4 md:grid-cols-3">
           {WAYS.map(({ key, href, icon: Icon }) => (
             <li key={key} className="flex flex-col gap-3 rounded-xl border bg-card p-6">
-              <Icon className="size-6 text-primary" aria-hidden />
+              <Icon className="size-6 text-emphasis" aria-hidden />
               <h3 className="text-lg font-semibold">{t(`ways.${key}.title`)}</h3>
               <p className="text-muted-foreground">{t(`ways.${key}.text`)}</p>
               <Link
@@ -105,7 +105,7 @@ export default async function AboutPage({ params }: PageProps<'/[locale]/about'>
         <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
           {TRUST.map(({ key, icon: Icon }) => (
             <li key={key} className="flex gap-4">
-              <Icon className="mt-0.5 size-6 shrink-0 text-primary" aria-hidden />
+              <Icon className="mt-0.5 size-6 shrink-0 text-emphasis" aria-hidden />
               <div className="space-y-1">
                 <h3 className="font-semibold">{t(`trustPoints.${key}.title`)}</h3>
                 <p className="text-sm text-muted-foreground">{t(`trustPoints.${key}.text`)}</p>
@@ -124,10 +124,10 @@ export default async function AboutPage({ params }: PageProps<'/[locale]/about'>
         </section>
       )}
 
-      <section className="flex flex-col gap-6 rounded-xl bg-sidebar p-6 text-sidebar-foreground sm:p-10 md:flex-row md:items-center md:justify-between">
+      <section className="surface-ink flex flex-col gap-6 p-6 sm:p-10 md:flex-row md:items-center md:justify-between">
         <div className="max-w-xl space-y-2">
           <h2 className="text-2xl font-semibold tracking-tight">{t('ctaTitle')}</h2>
-          <p className="text-sidebar-foreground/85">{t('ctaText')}</p>
+          <p className="text-muted-foreground">{t('ctaText')}</p>
         </div>
         <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link href="/properties" className={buttonVariants({ size: 'xl' })}>

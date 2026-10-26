@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono; uncommitted, awaiting the user's review). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -719,7 +719,67 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Deactivation:** Admins deactivate sellers and agents; Super Admins also deactivate Admins
   (my addition, user hasn't objected). Reason required, audit-logged, user emailed. Nobody
   deactivates themselves or Super Admins.
-- **Branding:** logo colors are authoritative: orange `#C2410C`, charcoal `#171B1E`.
+- **Visual identity "Tlocrt" (2026-10-26, replaces Beton below; uncommitted, awaiting the
+  user's review):** the user found Beton still generic (portal template layout, a borrowed
+  retail look from the yellow and dark header, no signature moment) and wanted it "sharp and
+  modern"; only the name and walls.rs were kept. Chosen from two rounds of directions (the first
+  bold round was declined in favour of a safer one) with the impeccable skill. Decisions:
+  - **Concept:** the site is drawn as a floor plan (tlocrt). The home page's first screen is an
+    apartment plan: the living room holds the headline, four rooms (Stan, Kuća, Plac, Lokal)
+    link to the search by type with live counts, the hallway holds the search, and a green front
+    door opens below the plan. A dimension line above it shows the number of published listings.
+    The rotating hero photos and their four Unsplash images were removed.
+  - **Copy (the user's pick the same day):** the tagline is the headline, "Znate šta dobijate." /
+    "You know what you're getting.", with the review promise under it in bold ink, "Svaki oglas
+    pregledamo pre nego što ga vidite." / "We review every listing before you see it." (`home.promise`;
+    kept on the first screen as the reason behind the headline, not moved to "How it works", which
+    speaks to sellers). The headline stays green (5.47:1 on white); the promise is ink.
+  - **Palette:** paper `#FFFFFF`, stone `#E4E6E3`, ink `#15181C`, green `#17775F` (primary action
+    and selected item, white text 5.47:1), mint `#E3F1EC` (selected room floor), graphite
+    `#5E636A` (secondary text). One green action per region. Square corners; walls 4–8px on
+    plan-like sections, 1px on cards and fields; no shadows.
+  - **Type:** Hanken Grotesk (text; headings 800, tracking -0.03em, no capitals), Red Hat Mono
+    (figures). Barlow Condensed, Archivo, IBM Plex Mono and Montserrat are gone
+    (`@fontsource/montserrat` replaced by `@fontsource/hanken-grotesk` and `/red-hat-mono` for
+    `pnpm brand:generate`).
+  - **Logo ("Folding screen", the user's pick the same day):** four wall panels folded into a
+    `W` like a folding screen, alternating ink and green, above the lowercase `walls` wordmark
+    (Hanken 800) and `REAL ESTATE` (Red Hat Mono); a descendant of the original slanted-plane
+    mark. It replaced a first Tlocrt logo (a two-room plan with a green door) after the user
+    compared eight options. Inverse: white ink panels, green panels stay. All variants, icons,
+    the OG image and the email logo regenerated; the favicon is cropped closer to the mark.
+  - **Surfaces:** white header with an ink rule; footer and dark banners use `surface-ink`;
+    dashboard sidebar is white behind a 4px ink wall with the current section in green.
+  - **API:** `GET /public/home` stats now include `byPropertyType` (published listings per type,
+    optional in the shared type so an older API still works with the new web app).
+  - **Emails:** green button with white text, green rule, white card on stone, plain bold
+    headings.
+- **Visual identity "Beton" (2026-10-23, superseded by Tlocrt above; replaced the orange/cream branding below):** the user
+  read that cream + terracotta is a common giveaway of AI-made sites and wanted a more distinctive
+  look. Compared four directions on mockups, then Beton as real screenshots of the app. Palette:
+  concrete `#E3E5E1` (page), board `#F6F6F4` (cards, fields), ink `#1D2022` (text, borders, header,
+  footer, sidebar), signal yellow `#F2C100` (primary fills), aggregate `#5A5F5C` (secondary text).
+  The user noticed the yellow and dark header resemble tehnomanija.rs (`#FFCB05`, same hue) and was
+  shown a light header and ochre/sulphur yellows, but **chose to keep the dark header and the
+  original yellow**. Type: Archivo (text), Barlow Condensed in capitals (h1/h2, card titles),
+  IBM Plex Mono (prices, areas, stats). **Logo wordmark stays Montserrat** (the user preferred its
+  thin, wide capitals over Barlow Condensed/Archivo/Plex versions); the mark is recolored: ink with
+  a yellow slab, yellow with a concrete slab on ink. Radius 0 everywhere except radio buttons and
+  switches; cards, fields and outline buttons have ink borders. Yellow is a fill only (1.34:1 on
+  concrete): icons, selected tabs and other marks use the new `emphasis` token (ink on light,
+  yellow in `surface-ink`/sidebar). `surface-ink` utility redefines the theme tokens for the ink
+  site header. Property portals checked for collisions: Halo Oglasi blue/green/red, 4zida green,
+  CityExpert red, KupujemProdajem blue (nekretnine.rs blocked automated visits).
+- **Email layout (2026-10-23):** every email uses one HTML frame (`apps/api/src/email/layout.ts`):
+  ink header with the logo (PNG `apps/web/public/email/walls-logo.png`, generated by
+  `brand:generate`, served from `WEB_ORIGIN`, so `processOutbox`/`startOutboxWorker` now take the
+  web origin), a yellow rule, the subject as a heading in condensed capitals, the message on a
+  board card with an ink border, a yellow button that keeps its padding in Outlook plus the plain
+  link under it, and a footer (site tagline, "Questions? contact@walls.rs", © year and the site
+  host). Tables and inline styles only, no web fonts (Gmail/Outlook drop them; Arial, with Arial
+  Narrow for the heading), light-only color scheme, hidden inbox preview text (the first
+  paragraph after the greeting). The plain-text version is unchanged.
+- **Branding (superseded by Beton above):** logo colors are authoritative: orange `#C2410C`, charcoal `#171B1E`.
   **2026-10-15: the user changed the orange from `#FF6A00` to `#C2410C`** (after comparing it
   with a green `#236500` and a two-tone variant in screenshots), so text on orange passes AA:
   cream on orange 4.83:1 (the earlier knowingly-below-AA cream-on-`#FF6A00` exception is gone).

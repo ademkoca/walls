@@ -28,9 +28,7 @@ export default async function DashboardPage({ params }: PageProps<'/[locale]/das
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t('dashboard.welcome', { name: user.displayName })}
-        </h1>
+        <h1 className="text-4xl font-bold">{t('dashboard.welcome', { name: user.displayName })}</h1>
         <p className="text-muted-foreground">
           {t('dashboard.signedInAs', {
             role: user.sellerType ? t(`accountKinds.${user.sellerType}`) : t(`roles.${user.role}`),

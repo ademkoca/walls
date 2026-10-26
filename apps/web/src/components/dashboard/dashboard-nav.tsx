@@ -121,7 +121,7 @@ export function DashboardNav({ role, counts }: { role: Role; counts: NavCounts }
               className={cn(
                 itemClass,
                 active
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                  ? 'bg-sidebar-primary font-semibold text-sidebar-primary-foreground'
                   : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
               )}
             >
@@ -129,7 +129,12 @@ export function DashboardNav({ role, counts }: { role: Role; counts: NavCounts }
               <span className="flex-1">{t(labelKey)}</span>
               {count > 0 && (
                 <span
-                  className="rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground"
+                  className={cn(
+                    'px-1.5 font-mono text-xs font-semibold',
+                    active
+                      ? 'bg-sidebar text-sidebar-foreground'
+                      : 'bg-primary text-primary-foreground',
+                  )}
                   aria-label={t('waiting', { count })}
                 >
                   {count}

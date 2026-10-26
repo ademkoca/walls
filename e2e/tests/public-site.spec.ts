@@ -27,24 +27,30 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await signInAsSuperAdmin(admin);
   const slug = await approveListingViaApi(admin, id);
 
-  // The home page hero leads to the listings and to registration.
+  // The home page plan leads to registration, and its rooms are shortcuts into the search.
   await visitor.goto('/en');
-  const hero = visitor.getByRole('region', { name: 'Find the walls that feel like home.' });
-  await expect(hero.getByRole('link', { name: 'Browse properties' })).toHaveAttribute(
-    'href',
-    '/en/properties',
-  );
+  const hero = visitor.getByRole('region', { name: "You know what you're getting." });
   await expect(hero.getByRole('link', { name: 'List a property' })).toHaveAttribute(
     'href',
     '/en/register',
   );
-
-  // Property-type tiles and the popular searches are shortcuts into the search.
-  const byType = visitor.getByRole('region', { name: 'Browse by property type' });
-  await expect(byType.getByRole('link', { name: 'Apartment', exact: true })).toHaveAttribute(
+  const rooms = hero.getByRole('navigation', { name: 'Browse by property type' });
+  await expect(rooms.getByRole('link', { name: /^Apartment/ })).toHaveAttribute(
     'href',
     '/en/properties?propertyType=APARTMENT',
   );
+  await expect(rooms.getByRole('link', { name: /^Garage/ })).toHaveAttribute(
+    'href',
+    '/en/properties?propertyType=GARAGE',
+  );
+  // Choosing a type in the hallway search lights up its room.
+  await hero.getByRole('combobox', { name: 'Property type' }).click();
+  await visitor.getByRole('option', { name: 'Apartment', exact: true }).click();
+  await expect(rooms.getByRole('link', { name: /^Apartment/ })).toHaveAttribute(
+    'data-selected',
+    'true',
+  );
+
   const popular = visitor.getByRole('region', { name: 'Popular searches' });
   await expect(popular.getByRole('link', { name: 'Houses for rent', exact: true })).toHaveAttribute(
     'href',
@@ -65,8 +71,8 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
     '/en/properties?location=Beograd',
   );
 
-  // Platform totals under the search, and the call to professionals.
-  await expect(visitor.getByText(/^published listings?$/)).toBeVisible();
+  // Platform totals on the plan's dimension line, and the call to professionals.
+  await expect(visitor.getByText(/^\d+ published listings?( · |$)/)).toBeVisible();
   const agentBanner = visitor.getByRole('region', { name: 'An agent, agency or investor?' });
   await expect(
     agentBanner.getByRole('link', { name: 'Apply for a professional account' }),
@@ -81,14 +87,19 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await firstQuestion.click();
   await expect(faq.getByText('Yes. Creating an account')).toBeVisible();
 
-  // The home page search opens the results with the choices in the URL.
+  // The home page search opens the results with the choices in the URL, including the type
+  // chosen above, whose room is lit.
   const homeSearch = visitor.getByRole('search', { name: 'Property search' });
   await homeSearch.getByRole('button', { name: 'Buy' }).click();
   await homeSearch.getByPlaceholder('City, municipality or neighbourhood').fill('Stari grad');
   await homeSearch.getByRole('button', { name: 'Search' }).click();
   await expect(visitor).toHaveURL(/\/en\/properties\?/);
   const query = new URL(visitor.url()).searchParams;
-  expect(Object.fromEntries(query)).toEqual({ transactionType: 'SALE', location: 'Stari grad' });
+  expect(Object.fromEntries(query)).toEqual({
+    transactionType: 'SALE',
+    location: 'Stari grad',
+    propertyType: 'APARTMENT',
+  });
 
   // Filters narrow the results; the whole search stays in the URL.
   const filters = visitor.getByRole('complementary').getByRole('search', { name: 'Filters' });

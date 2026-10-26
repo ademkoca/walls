@@ -39,7 +39,9 @@
     "terms": "Terms of use"
   },
   "home": {
-    "title": "Find the walls that feel like home.",
+    "title": "You know what you're getting.",
+    "promise": "We review every listing before you see it.",
+    "roomListings": "{count, plural, one {listing} other {listings}}",
     "subtitle": "Apartments, houses and commercial spaces for sale and rent across Serbia — from private sellers, agents, agencies and investors.",
     "advertise": "List a property",
     "browse": "Browse properties",

@@ -41,7 +41,7 @@ export async function HomeFaq() {
           }),
         }}
       />
-      <h2 id="home-faq" className="text-2xl font-semibold tracking-tight">
+      <h2 id="home-faq" className="text-4xl">
         {t('title')}
       </h2>
       <Accordion>

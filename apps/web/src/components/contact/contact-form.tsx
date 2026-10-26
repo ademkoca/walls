@@ -46,7 +46,7 @@ export function ContactForm() {
     return (
       <div className="space-y-3" aria-live="polite">
         <p className="flex items-center gap-2 font-semibold">
-          <CheckCircle2Icon className="size-5 text-primary" aria-hidden />
+          <CheckCircle2Icon className="size-5 text-emphasis" aria-hidden />
           {t('sentTitle')}
         </p>
         <p className="text-sm text-muted-foreground">{t('sentDescription', sent)}</p>

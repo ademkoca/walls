@@ -21,7 +21,7 @@ export async function HomeStats({ stats }: { stats: PublicHome['stats'] | undefi
       {shown.map(({ key, count }) => (
         <div key={key} className="flex flex-col-reverse">
           <dt className="text-sm text-muted-foreground">{t(key, { count })}</dt>
-          <dd className="text-2xl font-semibold tracking-tight">{format.number(count)}</dd>
+          <dd className="font-mono text-3xl font-semibold">{format.number(count)}</dd>
         </div>
       ))}
     </dl>

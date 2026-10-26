@@ -24,7 +24,7 @@ export function AuthCard({
     <Card className="w-full">
       <CardHeader>
         <CardTitle>
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          <h1 className="text-4xl font-bold">{title}</h1>
         </CardTitle>
         {description && <CardDescription>{description}</CardDescription>}
       </CardHeader>

@@ -12,7 +12,7 @@ export function HeaderAuth() {
   const t = useTranslations('nav');
   const { session, refresh } = useSession();
 
-  if (session.status === 'loading') return <Skeleton className="size-8 rounded-full" />;
+  if (session.status === 'loading') return <Skeleton className="size-8" />;
   if (session.status === 'authenticated') {
     return <UserMenu user={session.user} onLoggedOut={() => void refresh()} />;
   }
@@ -21,7 +21,7 @@ export function HeaderAuth() {
       <Link href="/login" className={buttonVariants({ variant: 'ghost' })}>
         {t('login')}
       </Link>
-      <Link href="/register" className={buttonVariants({ variant: 'default' })}>
+      <Link href="/register" className={buttonVariants({ variant: 'outline' })}>
         {t('register')}
       </Link>
     </div>

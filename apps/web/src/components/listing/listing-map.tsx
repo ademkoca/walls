@@ -60,8 +60,8 @@ export function ListingMap({
         L.circle(center, {
           radius,
           // Brand color from the theme (CSS beats Leaflet's SVG attributes).
-          className: 'fill-primary stroke-primary',
-          fillOpacity: 0.2,
+          className: 'fill-primary stroke-foreground',
+          fillOpacity: 0.35,
           weight: 2,
           interactive: false,
         }).addTo(map);

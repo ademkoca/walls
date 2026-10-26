@@ -3,8 +3,8 @@
  *
  * Brand colors come from brand-tokens.css (generated from src/brand/brand.ts). Every UI
  * color below is derived from those values, so rebranding only touches brand.ts.
- * Contrast rules (see packages/ui/brand/README.md): text on orange is cream (4.83:1, AA);
- * dark surfaces use the lighter --brand-orange-on-dark for accents, never behind text.
+ * Tlocrt: a floor plan on white paper. Ink text and wall lines, green for the primary action
+ * and the selected item (white on green 5.5:1), mint as a selected room's floor.
  */
 @import 'tailwindcss';
 @import 'tw-animate-css';
@@ -22,9 +22,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  /* next/font sets --font-montserrat on <html>; see apps/web/src/app/fonts.ts. */
-  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  /* next/font sets the font variables on <html>; see apps/web/src/app/fonts.ts. */
+  --font-sans: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-sans);
+  --font-mono: var(--font-figures), ui-monospace, Menlo, monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -34,6 +35,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-emphasis: var(--emphasis);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -68,51 +70,89 @@
 }
 
 :root {
-  /* Warm cream page background, white surfaces, charcoal text. */
-  --background: var(--brand-cream);
-  --foreground: var(--brand-charcoal);
-  --card: var(--brand-white);
-  --card-foreground: var(--brand-charcoal);
-  --popover: var(--brand-white);
-  --popover-foreground: var(--brand-charcoal);
+  /* White paper, ink text. Cards are paper too: a wall line, not a tint, separates them. */
+  --background: var(--brand-paper);
+  --foreground: var(--brand-ink);
+  --card: var(--brand-paper);
+  --card-foreground: var(--brand-ink);
+  --popover: var(--brand-paper);
+  --popover-foreground: var(--brand-ink);
 
-  /* Orange for primary actions, also on dark surfaces, since buttons carry cream text
-     (4.83:1); the lighter orange would drop that to 2.68:1. */
-  --primary: var(--brand-orange);
-  --primary-foreground: var(--brand-cream);
-  --secondary: color-mix(in oklab, var(--brand-slate) 12%, var(--brand-white));
-  --secondary-foreground: var(--brand-charcoal);
-  --muted: color-mix(in oklab, var(--brand-slate) 8%, var(--brand-cream));
-  --muted-foreground: var(--brand-slate);
-  --accent: color-mix(in oklab, var(--brand-orange) 10%, var(--brand-white));
-  --accent-foreground: var(--brand-charcoal);
+  /* Green for the primary action, always with white text (5.5:1). */
+  --primary: var(--brand-green);
+  --primary-foreground: var(--brand-paper);
+  /* Icons, selected tabs and other marks drawn as lines: ink, so green stays for actions. */
+  --emphasis: var(--brand-ink);
+  --secondary: var(--brand-ink);
+  --secondary-foreground: var(--brand-paper);
+  --muted: color-mix(in oklab, var(--brand-stone) 45%, var(--brand-paper));
+  --muted-foreground: var(--brand-graphite);
+  /* A selected room's floor: highlighted menu options, drop zones. */
+  --accent: var(--brand-mint);
+  --accent-foreground: var(--brand-ink);
   /* Not a brand color: errors need a conventional red. */
-  --destructive: oklch(0.55 0.22 27);
+  --destructive: oklch(0.52 0.2 27);
 
-  /* Decorative separators can be light; form field borders need 3:1 (WCAG 1.4.11). */
-  --border: color-mix(in oklab, var(--brand-slate) 25%, var(--brand-white));
-  --input: var(--brand-slate);
-  --ring: var(--brand-orange);
+  /* Hairline separators are stone; walls (cards, fields, controls) are ink. */
+  --border: color-mix(in oklab, var(--brand-graphite) 28%, var(--brand-paper));
+  --input: var(--brand-ink);
+  /* Green focus rings read on paper (5.5:1) and stay distinct from ink walls. */
+  --ring: var(--brand-green);
 
-  --chart-1: var(--brand-orange);
-  --chart-2: var(--brand-charcoal);
-  --chart-3: var(--brand-slate);
-  --chart-4: color-mix(in oklab, var(--brand-orange) 50%, var(--brand-white));
-  --chart-5: color-mix(in oklab, var(--brand-slate) 40%, var(--brand-white));
+  --chart-1: var(--brand-ink);
+  --chart-2: var(--brand-green);
+  --chart-3: var(--brand-graphite);
+  --chart-4: var(--brand-stone);
+  --chart-5: color-mix(in oklab, var(--brand-green) 45%, var(--brand-paper));
 
-  /* Flat, modern shapes (SPEC §33). */
-  --radius: 0.5rem;
+  /* Square corners, like wall junctions on a plan. */
+  --radius: 0rem;
 
-  /* Charcoal surfaces (dashboard sidebar, hero, footer): accents use the lighter orange
-     (6.03:1 on charcoal); text on it must be charcoal (cream would be 2.68:1). */
-  --sidebar: var(--brand-charcoal);
-  --sidebar-foreground: var(--brand-cream);
-  --sidebar-primary: var(--brand-orange-on-dark);
-  --sidebar-primary-foreground: var(--brand-charcoal);
-  --sidebar-accent: color-mix(in oklab, var(--brand-cream) 10%, var(--brand-charcoal));
-  --sidebar-accent-foreground: var(--brand-cream);
-  --sidebar-border: color-mix(in oklab, var(--brand-cream) 14%, var(--brand-charcoal));
-  --sidebar-ring: var(--brand-orange-on-dark);
+  /* Dashboard sidebar: paper behind an ink wall; the current section is a green fill. */
+  --sidebar: var(--brand-paper);
+  --sidebar-foreground: var(--brand-ink);
+  --sidebar-primary: var(--brand-green);
+  --sidebar-primary-foreground: var(--brand-paper);
+  --sidebar-accent: var(--brand-mint);
+  --sidebar-accent-foreground: var(--brand-ink);
+  --sidebar-border: var(--brand-ink);
+  --sidebar-ring: var(--brand-green);
+}
+
+/*
+ * An ink surface (site footer, banners): redefines the theme tokens so components inside keep
+ * readable colors. Green stays the button fill (white text); mint marks and rings (15.3:1).
+ */
+@utility surface-ink {
+  --background: var(--brand-ink);
+  --foreground: var(--brand-paper);
+  --card: color-mix(in oklab, var(--brand-paper) 8%, var(--brand-ink));
+  --card-foreground: var(--brand-paper);
+  --muted: color-mix(in oklab, var(--brand-paper) 12%, var(--brand-ink));
+  --muted-foreground: color-mix(in oklab, var(--brand-paper) 72%, var(--brand-ink));
+  --accent: color-mix(in oklab, var(--brand-paper) 12%, var(--brand-ink));
+  --accent-foreground: var(--brand-paper);
+  --secondary: var(--brand-paper);
+  --secondary-foreground: var(--brand-ink);
+  --border: color-mix(in oklab, var(--brand-paper) 18%, var(--brand-ink));
+  --input: color-mix(in oklab, var(--brand-paper) 45%, var(--brand-ink));
+  --ring: var(--brand-mint);
+  --emphasis: var(--brand-mint);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* A plan door swinging open: the leaf turns from the wall about its hinge while its arc is drawn
+   (the arc's path has pathLength 1). Used by the home page floor plan. */
+@keyframes plan-door-swing {
+  from {
+    rotate: -90deg;
+  }
+}
+@keyframes plan-door-arc {
+  from {
+    stroke-dashoffset: 1;
+  }
 }
 
 @layer base {
@@ -121,6 +161,18 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+  }
+  /* Page and section headings: the text face at its heaviest, tightly set. */
+  h1,
+  h2 {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+  }
+  ::selection {
+    background-color: var(--brand-mint);
+    color: var(--brand-ink);
   }
   /* Tailwind 4 gives buttons the default arrow cursor; clickable things show a pointer. */
   button:not(:disabled),

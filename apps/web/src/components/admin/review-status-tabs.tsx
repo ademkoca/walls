@@ -24,7 +24,7 @@ export function ReviewStatusTabs({
           className={cn(
             '-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors',
             status === active
-              ? 'border-primary text-foreground'
+              ? 'border-emphasis text-foreground'
               : 'border-transparent text-muted-foreground hover:text-foreground',
           )}
         >

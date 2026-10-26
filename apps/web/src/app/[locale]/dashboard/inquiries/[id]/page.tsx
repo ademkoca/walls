@@ -92,7 +92,7 @@ export default async function InquiryPage({
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">{inquiry.visitorName}</h1>
+            <h1 className="text-4xl font-bold">{inquiry.visitorName}</h1>
             {inquiry.fromRegisteredUser && (
               <Badge variant="secondary" title={t('registeredUserHint')}>
                 {t('registeredUser')}

@@ -171,7 +171,7 @@ export function ListingImages({
           }}
           className={cn(
             'flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-4 py-8 text-center text-sm',
-            dragOver ? 'border-primary bg-accent' : 'border-border',
+            dragOver ? 'border-emphasis bg-accent' : 'border-border',
           )}
         >
           {uploading ? (

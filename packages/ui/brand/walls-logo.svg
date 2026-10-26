@@ -1,20 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="370" height="292" viewBox="0 0 370 292" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="370" height="260" viewBox="0 0 370 260" role="img" aria-labelledby="title desc">
   <title id="title">Walls Real Estate logo</title>
-  <desc id="desc">Geometric orange and charcoal architectural mark above the WALLS wordmark and REAL ESTATE descriptor.</desc>
+  <desc id="desc">Four wall panels folded like a folding screen into a W, alternating ink and green, above the walls wordmark and REAL ESTATE descriptor.</desc>
   <g id="mark">
-    <path fill="#C2410C" d="M137 94 155 76 155 146 137 146Z"/>
-    <path fill="#C2410C" d="M163 68 181 50 181 102 163 120Z"/>
-    <path fill="#C2410C" d="M189 50 207 68 207 120 189 102Z"/>
-    <path fill="#171B1E" d="M215 76 233 94 233 146 215 146Z"/>
-    <g fill="#C2410C">
-      <rect x="177" y="124" width="6" height="6"/>
-      <rect x="187" y="124" width="6" height="6"/>
-      <rect x="177" y="134" width="6" height="6"/>
-      <rect x="187" y="134" width="6" height="6"/>
-    </g>
+    <path fill="#15181C" d="M137 62 158 78 158 134 137 118Z"/>
+    <path fill="#17775F" d="M162 78 183 62 183 118 162 134Z"/>
+    <path fill="#15181C" d="M187 62 208 78 208 134 187 118Z"/>
+    <path fill="#17775F" d="M212 78 233 62 233 118 212 134Z"/>
   </g>
-  <g fill="#171B1E" text-anchor="middle" font-family="Montserrat, 'Avenir Next', Arial, sans-serif">
-    <text x="185" y="202" font-size="47" font-weight="600" letter-spacing="12">WALLS</text>
-    <text x="185" y="235" font-size="15" font-weight="500" letter-spacing="6.1">REAL ESTATE</text>
+  <g fill="#15181C" text-anchor="middle">
+    <text x="185" y="200" font-family="'Hanken Grotesk', Arial, sans-serif" font-size="60" font-weight="800" letter-spacing="-2">walls</text>
+    <text x="185" y="226" font-family="'Red Hat Mono', Menlo, monospace" font-size="13" font-weight="500" letter-spacing="4">REAL ESTATE</text>
   </g>
 </svg>

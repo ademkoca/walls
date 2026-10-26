@@ -13,7 +13,7 @@ export function Stat({
   return (
     <div className={cn('rounded-lg border bg-card p-4', className)}>
       <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold tabular-nums">{value}</dd>
+      <dd className="mt-1 font-mono text-3xl font-semibold tabular-nums">{value}</dd>
     </div>
   );
 }

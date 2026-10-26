@@ -8,7 +8,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { BrowserSetup } from '@/components/layout/browser-setup';
 import { routing } from '@/i18n/routing';
 import { openGraph } from '@/lib/seo';
-import { uiFont } from '../fonts';
+import { fontVariables } from '../fonts';
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -36,7 +36,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={uiFont.variable}>
+    <html lang={locale} className={fontVariables}>
       <body className="min-h-dvh">
         <NextIntlClientProvider>
           <BrowserSetup />
