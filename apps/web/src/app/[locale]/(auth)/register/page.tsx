@@ -2,6 +2,7 @@ import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
 import { getTranslations } from 'next-intl/server';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { AuthCard } from '@/components/auth/auth-card';
+import { DemoSiteNotice } from '@/components/layout/demo-site-notice';
 import { RegisterForm } from '@/components/auth/register-form';
 import { Link, redirect } from '@/i18n/navigation';
 import { getCurrentUser } from '@/lib/api/server';
@@ -40,7 +41,10 @@ export default async function RegisterPage({ params }: PageProps<'/[locale]/regi
         </>
       }
     >
-      <RegisterForm />
+      <div className="space-y-6">
+        <DemoSiteNotice />
+        <RegisterForm />
+      </div>
     </AuthCard>
   );
 }

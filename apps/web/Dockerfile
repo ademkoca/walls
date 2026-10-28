@@ -12,10 +12,11 @@ RUN npm install --global "$(node -p "require('./package.json').packageManager")"
 FROM base AS build
 COPY . .
 RUN pnpm install --frozen-lockfile --filter "@walls/web..."
-# Read at build time: compiled into the pages (site URL, map tiles) and the response headers
-# (SITE_INDEXING=off for a preview). Changing one needs a new image.
+# Read at build time: compiled into the pages (site URL, map tiles, the demo-site banner) and
+# the response headers (SITE_INDEXING=off for a preview). Changing one needs a new image.
 ARG NEXT_PUBLIC_SITE_URL
 ARG SITE_INDEXING
+ARG NEXT_PUBLIC_DEMO_SITE
 ARG NEXT_PUBLIC_MAP_TILE_URL
 ARG NEXT_PUBLIC_MAP_ATTRIBUTION
 # The API container's address on the Compose network (deploy/compose.yaml); compiled into

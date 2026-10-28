@@ -10,6 +10,11 @@
     "loading": "Učitavanje…",
     "backToHome": "Nazad na početnu"
   },
+  "demoSite": {
+    "banner": "Ovo je demo sajt za probu: oglasi su izmišljeni, a nalozi i podaci mogu biti obrisani.",
+    "signUpNotice": "Ovo je demo sajt: nalozi i prijave napravljeni ovde nisu pravi i mogu biti obrisani.",
+    "link": "Pravi {brand} je na {domain}"
+  },
   "nav": {
     "mainLabel": "Glavna navigacija",
     "properties": "Nekretnine",

@@ -3,6 +3,7 @@ import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { AgentApplicationForm } from '@/components/agents/agent-application-form';
+import { DemoSiteNotice } from '@/components/layout/demo-site-notice';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
 import { localizedAlternates } from '@/lib/seo';
@@ -66,7 +67,8 @@ export default async function ForProfessionalsPage({
         <CardHeader>
           <CardTitle>{t('formTitle')}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          <DemoSiteNotice />
           <AgentApplicationForm />
         </CardContent>
       </Card>

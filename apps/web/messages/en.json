@@ -10,6 +10,11 @@
     "loading": "Loading…",
     "backToHome": "Back to home"
   },
+  "demoSite": {
+    "banner": "This is a demo site for trying things out: the listings are made up, and accounts and data may be deleted.",
+    "signUpNotice": "This is a demo site: accounts and applications made here aren't real and may be deleted.",
+    "link": "The real {brand} is at {domain}"
+  },
   "nav": {
     "mainLabel": "Main navigation",
     "properties": "Properties",

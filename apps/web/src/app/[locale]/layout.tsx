@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { BrowserSetup } from '@/components/layout/browser-setup';
+import { DemoSiteBanner } from '@/components/layout/demo-site-banner';
 import { routing } from '@/i18n/routing';
 import { openGraph } from '@/lib/seo';
 import { fontVariables } from '../fonts';
@@ -40,6 +41,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
       <body className="min-h-dvh">
         <NextIntlClientProvider>
           <BrowserSetup />
+          <DemoSiteBanner />
           {children}
           <Toaster position="top-center" />
         </NextIntlClientProvider>
