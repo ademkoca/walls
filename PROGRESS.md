@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono; on branch `redesign-tlocrt`, not merged. preview.walls.rs is deployed from that branch by hand (Actions → Deploy (VPS) → Run workflow on the branch) until the owner approves the design; a push to `main` deploys `main` over it, so redeploy the branch after one). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Next: split into two environments, walls.rs on a fresh production database and preview.walls.rs as a staging site with demo data, and decide how production is deployed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -719,8 +719,8 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
 - **Deactivation:** Admins deactivate sellers and agents; Super Admins also deactivate Admins
   (my addition, user hasn't objected). Reason required, audit-logged, user emailed. Nobody
   deactivates themselves or Super Admins.
-- **Visual identity "Tlocrt" (2026-10-26, replaces Beton below; uncommitted, awaiting the
-  user's review):** the user found Beton still generic (portal template layout, a borrowed
+- **Visual identity "Tlocrt" (2026-10-26, replaces Beton below; approved and merged into `main`
+  2026-10-28; the old design is on `archive/design-orange-cream`):** the user found Beton still generic (portal template layout, a borrowed
   retail look from the yellow and dark header, no signature moment) and wanted it "sharp and
   modern"; only the name and walls.rs were kept. Chosen from two rounds of directions (the first
   bold round was declined in favour of a safer one) with the impeccable skill. Decisions:
