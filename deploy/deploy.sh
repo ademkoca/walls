@@ -14,17 +14,18 @@ registry_user=${3:?registry user}
 [[ $environment == production || $environment == staging ]] ||
   { echo "Unknown environment: $environment" >&2; exit 1; }
 
+# First, while the registry token is still unread on stdin.
+docker login ghcr.io --username "$registry_user" --password-stdin > /dev/null
+trap 'docker logout ghcr.io > /dev/null' EXIT
+
 # Caddy serves every environment; a configuration change is applied without dropping
 # connections, and the container is recreated only when caddy/compose.yaml changed.
 cd /opt/walls/caddy
 docker compose up --detach --wait --wait-timeout 60
-docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
+docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile < /dev/null
 
 cd "/opt/walls/$environment"
 cp ../compose.yaml compose.yaml
-
-docker login ghcr.io --username "$registry_user" --password-stdin > /dev/null
-trap 'docker logout ghcr.io > /dev/null' EXIT
 
 previous=$(sed -n 's/^WALLS_VERSION=//p' .env)
 export WALLS_VERSION=$version
