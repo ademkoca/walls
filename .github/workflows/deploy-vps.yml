@@ -1,46 +1,81 @@
 name: Deploy (VPS)
 
-# Builds the web and API images of a commit that passed CI on main, pushes them to GitHub's
-# container registry and deploys them to the VPS (deploy/README.md). Can also be started by
-# hand for the head of main.
+# Deploys a commit to one environment on the VPS (deploy/README.md): staging
+# (preview.walls.rs) after CI passes on main, production (walls.rs) only when started by hand
+# (Actions → Deploy (VPS) → Run workflow) and approved. Builds the API image and the
+# environment's web image, pushes them to GitHub's container registry and runs deploy.sh.
 on:
   workflow_run:
     workflows: [CI]
     types: [completed]
     branches: [main]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy the chosen branch's head to (production only from main)
+        type: choice
+        options: [staging, production]
+        default: staging
 
-# One deploy at a time, in order; a newer commit waits instead of cancelling a running deploy.
+# One deploy per environment at a time, in order; a newer commit waits instead of cancelling a
+# running deploy.
 concurrency:
-  group: deploy-vps
+  group: deploy-vps-${{ inputs.environment || 'staging' }}
   cancel-in-progress: false
 
 permissions:
   contents: read
   packages: write
+  # Reading CI's runs, to check a commit passed before it goes to production.
+  actions: read
 
 env:
   SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+  ENVIRONMENT: ${{ inputs.environment || 'staging' }}
   IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
 
 jobs:
-  images:
+  deploy:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - app: api
-            build-args: ''
-          # Compiled into the web app (apps/web/Dockerfile); set under Settings → Secrets and
-          # variables → Actions → Variables.
-          - app: web
-            build-args: |
-              NEXT_PUBLIC_SITE_URL=${{ vars.SITE_URL }}
-              SITE_INDEXING=${{ vars.SITE_INDEXING }}
-              NEXT_PUBLIC_MAP_TILE_URL=${{ vars.MAP_TILE_URL }}
-              NEXT_PUBLIC_MAP_ATTRIBUTION=${{ vars.MAP_ATTRIBUTION }}
+    # GitHub environments `staging` and `production` hold the variables compiled into the web
+    # image and the VPS secrets; `production` requires approval and allows only main.
+    environment:
+      name: ${{ inputs.environment || 'staging' }}
+      url: ${{ vars.SITE_URL }}
     steps:
+      - name: Check the commit is on main and passed CI
+        if: env.ENVIRONMENT == 'production'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ $GITHUB_REF != refs/heads/main ]]; then
+            echo "::error::Production deploys only from main, not $GITHUB_REF."
+            exit 1
+          fi
+          passed=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$SHA&status=success" --jq .total_count)
+          if [[ $passed == 0 ]]; then
+            echo "::error::CI has not passed for $SHA."
+            exit 1
+          fi
+
+      # A safety net for the environment variables: production never shows the demo-site
+      # banner, and staging is never indexed by search engines.
+      - name: Check the environment's settings
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+          SITE_INDEXING: ${{ vars.SITE_INDEXING }}
+          DEMO_SITE: ${{ vars.DEMO_SITE }}
+        run: |
+          fail() { echo "::error::$1"; exit 1; }
+          [[ -n $SITE_URL ]] || fail "SITE_URL is not set for $ENVIRONMENT."
+          if [[ $ENVIRONMENT == production ]]; then
+            [[ $DEMO_SITE != on ]] || fail 'DEMO_SITE must not be "on" in production.'
+          else
+            [[ $DEMO_SITE == on ]] || fail 'DEMO_SITE must be "on" in staging.'
+            [[ $SITE_INDEXING == off ]] || fail 'SITE_INDEXING must be "off" in staging.'
+          fi
+
       - uses: actions/checkout@v7
         with:
           ref: ${{ env.SHA }}
@@ -50,27 +85,35 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - name: Build the API image
+        uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/${{ matrix.app }}/Dockerfile
-          build-args: ${{ matrix.build-args }}
+          file: apps/api/Dockerfile
           push: true
-          tags: ${{ env.IMAGE_PREFIX }}/walls-${{ matrix.app }}:${{ env.SHA }}
+          tags: ${{ env.IMAGE_PREFIX }}/walls-api:${{ env.SHA }}
           labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
-          cache-from: type=gha,scope=${{ matrix.app }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
-
-  deploy:
-    needs: images
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: ${{ vars.SITE_URL }}
-    steps:
-      - uses: actions/checkout@v7
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+      # Compiled into the web app (apps/web/Dockerfile), so each environment has its own image;
+      # set per environment under Settings → Environments.
+      - name: Build the web image
+        uses: docker/build-push-action@v6
         with:
-          ref: ${{ env.SHA }}
+          context: .
+          file: apps/web/Dockerfile
+          build-args: |
+            NEXT_PUBLIC_SITE_URL=${{ vars.SITE_URL }}
+            SITE_INDEXING=${{ vars.SITE_INDEXING }}
+            NEXT_PUBLIC_DEMO_SITE=${{ vars.DEMO_SITE }}
+            NEXT_PUBLIC_MAP_TILE_URL=${{ vars.MAP_TILE_URL }}
+            NEXT_PUBLIC_MAP_ATTRIBUTION=${{ vars.MAP_ATTRIBUTION }}
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/walls-web:${{ env.SHA }}-${{ env.ENVIRONMENT }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=web-${{ env.ENVIRONMENT }}
+          cache-to: type=gha,mode=max,scope=web-${{ env.ENVIRONMENT }}
+
       # VPS_SSH_KEY: the private half of the deploy user's key. VPS_KNOWN_HOSTS: the server's
       # host keys (`ssh-keyscan <host>`), so the connection fails if the server changes.
       - name: Configure SSH
@@ -85,7 +128,9 @@ jobs:
       - name: Copy the stack configuration
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
-        run: scp deploy/compose.yaml deploy/Caddyfile deploy/deploy.sh deploy/backup.sh "deploy@$VPS_HOST:/opt/walls/"
+        run: |
+          scp deploy/compose.yaml deploy/deploy.sh deploy/backup.sh "deploy@$VPS_HOST:/opt/walls/"
+          scp deploy/caddy/compose.yaml deploy/caddy/Caddyfile "deploy@$VPS_HOST:/opt/walls/caddy/"
       # The registry token is valid only while this job runs; deploy.sh logs out afterwards.
       - name: Deploy
         env:
@@ -93,4 +138,4 @@ jobs:
           REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           printf '%s' "$REGISTRY_TOKEN" |
-            ssh "deploy@$VPS_HOST" "bash /opt/walls/deploy.sh '$SHA' '${{ github.actor }}'"
+            ssh "deploy@$VPS_HOST" "bash /opt/walls/deploy.sh '$ENVIRONMENT' '$SHA' '${{ github.actor }}'"

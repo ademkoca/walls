@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Nightly database backup with a restore test (deploy/README.md, "Backups"). Runs as the deploy
 # user from the walls-backup systemd timer.
-#  1. Dumps the Walls schemas (public, drizzle) from DATABASE_URL in api.env.
+#  1. Dumps the Walls schemas (public, drizzle) from production's DATABASE_URL
+#     (production/api.env). Staging's data is disposable and not backed up.
 #  2. Encrypts the dump with age and stores it (daily/, and monthly/ on the 1st): in the
 #     Cloudflare R2 bucket when backup.env has R2 settings, otherwise in archive/ on this server.
 #  3. Reads the stored copy back, decrypts it and restores it into a throwaway Postgres
@@ -21,8 +22,8 @@ ARCHIVE_DIR=$BACKUP_DIR/archive
 DAILY_KEEP_DAYS=30
 MONTHLY_KEEP_DAYS=365
 
-# Only DATABASE_URL is needed from the API's settings.
-database_url=$(bash -c "set -a; . $APP_DIR/api.env; printf '%s' \"\$DATABASE_URL\"")
+# Only DATABASE_URL is needed from production's API settings.
+database_url=$(bash -c "set -a; . $APP_DIR/production/api.env; printf '%s' \"\$DATABASE_URL\"")
 set -a
 # shellcheck source=/dev/null
 . "$BACKUP_DIR/backup.env"

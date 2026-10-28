@@ -1,34 +1,19 @@
-# The Walls stack on the VPS: Caddy (HTTPS) in front of the web app and the API.
-# Lives in /opt/walls next to Caddyfile, deploy.sh, .env (Compose variables) and api.env
-# (the API's secrets). See deploy/README.md.
-name: walls
+# One Walls environment on the VPS: the web app and the API. Production and staging each run
+# their own copy from /opt/walls/<environment>, next to .env (Compose variables) and api.env
+# (the API's secrets); Caddy (caddy/compose.yaml) sends their traffic here. See deploy/README.md.
+name: walls-${WALLS_ENVIRONMENT:?}
 
 x-api-image: &api-image ${IMAGE_PREFIX:?}/walls-api:${WALLS_VERSION:?}
 
 services:
-  caddy:
-    image: caddy:2.10.2-alpine
-    restart: unless-stopped
-    # On the host's network, so Caddy sees every visitor's real IPv4 or IPv6 address (Docker's
-    # port publishing would replace IPv6 visitors' addresses with its own). It reaches the web
-    # app and the API on 127.0.0.1.
-    network_mode: host
-    environment:
-      SITE_HOST: ${SITE_HOST:?}
-      ACME_EMAIL: ${ACME_EMAIL:?}
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    mem_limit: 256m
-
   web:
-    image: ${IMAGE_PREFIX:?}/walls-web:${WALLS_VERSION:?}
+    # The web image has the environment's site address compiled in, so each has its own.
+    image: ${IMAGE_PREFIX:?}/walls-web:${WALLS_VERSION:?}-${WALLS_ENVIRONMENT:?}
     restart: unless-stopped
     environment:
       API_INTERNAL_URL: http://api:4000
     ports:
-      - '127.0.0.1:3000:3000'
+      - '127.0.0.1:${WEB_PORT:?}:3000'
     healthcheck:
       test:
         - CMD
@@ -39,7 +24,7 @@ services:
       timeout: 5s
       start_period: 30s
       retries: 3
-    mem_limit: 1g
+    mem_limit: ${WEB_MEMORY:?}
 
   api:
     image: *api-image
@@ -52,7 +37,7 @@ services:
       # a visitor sends, so the last entry is the visitor's address.
       TRUST_PROXY_HOPS: '1'
     ports:
-      - '127.0.0.1:4000:4000'
+      - '127.0.0.1:${API_PORT:?}:4000'
     healthcheck:
       test:
         - CMD
@@ -63,7 +48,7 @@ services:
       timeout: 5s
       start_period: 20s
       retries: 3
-    mem_limit: 768m
+    mem_limit: ${API_MEMORY:?}
 
   # One-off: `docker compose run --rm migrate` (deploy.sh runs it before every start).
   migrate:
@@ -73,8 +58,3 @@ services:
     environment:
       NODE_ENV: production
     command: ['node', 'dist/migrate.mjs']
-
-volumes:
-  # Certificates and ACME account; keep them, or Let's Encrypt rate limits may apply.
-  caddy-data:
-  caddy-config:

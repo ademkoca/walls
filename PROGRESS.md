@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Next: split into two environments, walls.rs on a fresh production database and preview.walls.rs as a staging site with demo data, and decide how production is deployed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -31,6 +31,34 @@ Resend delivers from walls.rs). The user sets `TRUST_PROXY_HOPS=3` on Render (de
 Then: smoke-test the live site (see "Phase 10 starting notes"), and continue the rest of
 Phase 10. `/about` and `/contact` were built on 2026-10-16 (see "About, contact and legal
 pages" below).
+
+**Two environments (user's decision 2026-10-28; code ready, uncommitted, awaiting review):** the
+user will invite Novi Pazar agencies to register on **walls.rs** (production, a fresh database)
+and show them **preview.walls.rs** (staging: today's database with the demo data) as a demo.
+Staging is also the safe place to test new features. Decisions:
+
+- **Same VPS** for both (the user doesn't want to pay more until needed); all containers used
+  ~200 MB of 4 GB on 2026-10-28. Caddy in its own Compose project (`/opt/walls/caddy`); one app
+  Compose file run as `walls-production` (ports 3000/4000) and `walls-staging` (3001/4001,
+  lower memory limits). Backups cover production only.
+- Production gets a **new Supabase project and a new Cloudinary account** (the code has no
+  Cloudinary folder setting); today's become staging's. Separate `SESSION_SECRET`s; shared
+  Resend key (one daily limit), staging sends as "Walls Preview".
+- **Deploys:** staging automatically after CI on `main` (and by hand for a branch);
+  production only by hand ("Run workflow", `production`), approved in GitHub (environment
+  protection), only commits on `main` that passed CI. Per-environment GitHub variables; the
+  API image is shared, the web image is per environment (`<sha>-<environment>`).
+- **Staging banner plus notice** (user's choice over closing sign-ups or a password):
+  `NEXT_PUBLIC_DEMO_SITE=on` (`lib/demo-site.ts`, build time, strict on/off) shows a bar on
+  every page and a note on `/register` and `/for-professionals` linking to walls.rs; the forms
+  keep working for testing. **Never in production** (user's requirement): the deploy workflow
+  fails a production run with `DEMO_SITE=on` (and a staging run without it or with indexing
+  on), and an E2E test checks the production-like build has no banner.
+- walls.rs goes live (replacing the GitHub Pages "coming soon" page) with `SITE_INDEXING=off`
+  until the public launch.
+- Next: the user reviews and says commit; then the one-time move in `deploy/README.md`
+  ("Moving to two environments"): Supabase, Cloudinary and GitHub environments first, then
+  split the server, deploy both, create production's Super Admin, switch DNS, test a backup.
 
 **VPS trial (user bought it 2026-10-19; 1-month netcup term, decide within ~2 weeks):** the web
 app and API move from Netlify + Render to one **netcup VPS 500 G12.5** (Debian 13, 2 shared

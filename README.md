@@ -156,16 +156,17 @@ Demo accounts sign in with `DEMO_PASSWORD` and use Resend's test mailbox
 (`delivered+walls-demo-…@resend.dev`), so mail the site sends them never bounces.
 `pnpm demo:seed --remove` deletes the demo accounts, their listings, photos and anything that
 refers to them. Both commands show the target database and photo storage and ask for
-confirmation. Never run it against the live site's database.
+confirmation. Run it only against staging (preview.walls.rs), never against production
+(walls.rs).
 
-To seed the preview site, enter the production values at prompts (zsh) instead of pasting
-them into a command, so they stay out of the shell history:
+To seed the staging site, enter staging's values at prompts (zsh) instead of pasting them
+into a command, so they stay out of the shell history:
 
 ``` text
-read -rs "DATABASE_URL?Production DATABASE_URL: "; echo; export DATABASE_URL
-read -r "CLOUDINARY_CLOUD_NAME?Production Cloudinary cloud name: "; export CLOUDINARY_CLOUD_NAME
-read -r "CLOUDINARY_API_KEY?Production Cloudinary API key: "; export CLOUDINARY_API_KEY
-read -rs "CLOUDINARY_API_SECRET?Production Cloudinary API secret: "; echo; export CLOUDINARY_API_SECRET
+read -rs "DATABASE_URL?Staging DATABASE_URL: "; echo; export DATABASE_URL
+read -r "CLOUDINARY_CLOUD_NAME?Staging Cloudinary cloud name: "; export CLOUDINARY_CLOUD_NAME
+read -r "CLOUDINARY_API_KEY?Staging Cloudinary API key: "; export CLOUDINARY_API_KEY
+read -rs "CLOUDINARY_API_SECRET?Staging Cloudinary API secret: "; echo; export CLOUDINARY_API_SECRET
 read -rs "DEMO_PASSWORD?Password for every demo account: "; echo; export DEMO_PASSWORD
 pnpm demo:seed
 ```
@@ -367,7 +368,10 @@ scripts/            Repository maintenance scripts
 ## Deployment
 
 **Moving to a VPS (trial from 2026-10-19):** the web app and the API are moving to one netcup
-VPS with Docker Compose and Caddy, deployed by GitHub Actions after CI passes. See
+VPS with Docker Compose and Caddy, deployed by GitHub Actions. It runs two environments, each
+with its own database, photo storage and secrets: **production** at walls.rs, deployed by hand
+with approval, and **staging** at preview.walls.rs, the demo and test site (made-up listings, a
+banner on every page), deployed automatically after CI passes on `main`. See
 [`deploy/README.md`](./deploy/README.md). Netlify and Render below stay set up until the trial
 ends.
 

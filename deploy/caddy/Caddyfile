@@ -1,10 +1,13 @@
-# Caddy for the Walls stack (deploy/compose.yaml). SITE_HOST and ACME_EMAIL come from
-# /opt/walls/.env. Caddy obtains and renews the HTTPS certificate itself.
+# Caddy for every Walls environment (caddy/compose.yaml). PRODUCTION_HOST, STAGING_HOST and
+# ACME_EMAIL come from /opt/walls/caddy/.env. Caddy obtains and renews the HTTPS certificates
+# itself, once a host's DNS points at this server.
 {
 	email {$ACME_EMAIL}
 }
 
-{$SITE_HOST} {
+# One environment: its web app on port {args[0]}, its API on {args[1]} (the WEB_PORT and
+# API_PORT in that environment's .env).
+(walls) {
 	encode zstd gzip
 	header Strict-Transport-Security "max-age=31536000"
 
@@ -14,10 +17,22 @@
 		request_body {
 			max_size 60MB
 		}
-		reverse_proxy 127.0.0.1:4000
+		reverse_proxy 127.0.0.1:{args[1]}
 	}
 
 	handle {
-		reverse_proxy 127.0.0.1:3000
+		reverse_proxy 127.0.0.1:{args[0]}
 	}
+}
+
+{$PRODUCTION_HOST} {
+	import walls 3000 4000
+}
+
+www.{$PRODUCTION_HOST} {
+	redir https://{$PRODUCTION_HOST}{uri} permanent
+}
+
+{$STAGING_HOST} {
+	import walls 3001 4001
 }

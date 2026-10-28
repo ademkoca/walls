@@ -87,8 +87,11 @@ Unattended-Upgrade::Automatic-Reboot-Time "$REBOOT_TIME";
 EOF
 
 echo "== $APP_DIR"
-install -d -m 750 -o deploy -g deploy "$APP_DIR"
-for file in .env api.env; do
+# Caddy, and one folder per environment (deploy/README.md, "Server layout").
+for dir in "$APP_DIR" "$APP_DIR/caddy" "$APP_DIR/production" "$APP_DIR/staging"; do
+  install -d -m 750 -o deploy -g deploy "$dir"
+done
+for file in caddy/.env production/.env production/api.env staging/.env staging/api.env; do
   [[ -f $APP_DIR/$file ]] || install -m 600 -o deploy -g deploy /dev/null "$APP_DIR/$file"
 done
 
