@@ -9,7 +9,6 @@ import { describe, expect, it } from 'vitest';
 import {
   VISIBLE_ATTRIBUTES,
   editorContent,
-  remainingImageCount,
   formPathFor,
   formSubmissionSnapshot,
   parseNumber,
@@ -171,12 +170,11 @@ describe('editing a published listing', () => {
     id: 'revision-1',
     status: 'PENDING' as const,
     content: { ...published, ...content },
-    removedImageIds: ['image-1'],
     rejectionReason: null,
     updatedAt: published.updatedAt,
   });
 
-  it('starts from the proposal, keeping the live price that changes immediately', () => {
+  it('starts from the live listing with the proposed title and description', () => {
     const listing = {
       ...published,
       revision: revision({
@@ -186,18 +184,5 @@ describe('editing a published listing', () => {
     };
     expect(editorContent(listing).texts[0]?.title).toBe('Predlog');
     expect(editorContent(listing).price).toEqual(published.price);
-    expect(remainingImageCount(listing, 4)).toBe(3);
-  });
-
-  it('takes the proposed price when the revision changes the transaction type', () => {
-    const rent = {
-      mode: 'FIXED' as const,
-      amount: 700,
-      currency: 'EUR' as const,
-      period: 'MONTH' as const,
-      negotiable: false,
-    };
-    const listing = { ...published, revision: revision({ transactionType: 'RENT', price: rent }) };
-    expect(editorContent(listing).price).toEqual(rent);
   });
 });

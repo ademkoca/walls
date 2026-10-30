@@ -370,7 +370,6 @@ export async function savePendingRevision(
   revision: {
     listingId: string;
     content: ListingContent;
-    removedMediaIds: string[];
     updatedById: string;
   },
 ): Promise<void> {
@@ -380,7 +379,6 @@ export async function savePendingRevision(
       .update(listingRevisions)
       .set({
         content: revision.content,
-        removedMediaIds: revision.removedMediaIds,
         updatedById: revision.updatedById,
       })
       .where(eq(listingRevisions.id, pending.id));

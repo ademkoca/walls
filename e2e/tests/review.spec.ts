@@ -96,9 +96,20 @@ test('an admin rejects a listing, the seller resubmits, and the admin publishes 
   await expect(admin.getByText('Listing published.')).toBeVisible();
   await expect(admin.getByText('dvosoban-stan-na-dorcolu-beograd')).toBeVisible();
 
-  // The seller changes the title of the published listing: that goes to review.
+  // On the published listing, other changes apply at once, without review.
   await seller.reload();
   await expect(seller.getByText('This listing is published.')).toBeVisible();
+  await seller.getByLabel('Floor area (m²) *').fill('61');
+  await seller.getByRole('button', { name: 'Save changes' }).click();
+  await expect(seller.getByText('Changes saved.')).toBeVisible();
+  await expect(seller.getByText('Changes are waiting for review.')).toHaveCount(0);
+  // It has the minimum of approved photos, so none can be removed.
+  await expect(
+    seller.getByText('A published listing keeps at least 3 approved images.'),
+  ).toBeVisible();
+  await expect(seller.getByRole('button', { name: 'Remove image' }).first()).toBeDisabled();
+
+  // The seller changes the title of the published listing: that goes to review.
   await seller.getByLabel('Title *').fill('Dvosoban stan na Dorćolu, renoviran');
   await seller.getByRole('button', { name: 'Save changes' }).click();
   await expect(seller.getByText('Saved. Your changes were sent for review.')).toBeVisible();

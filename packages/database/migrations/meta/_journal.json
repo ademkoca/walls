@@ -120,6 +120,13 @@
       "when": 1793355989502,
       "tag": "0016_archived_by_reviewer",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793357383394,
+      "tag": "0017_revisions_review_text_and_new_images",
+      "breakpoints": true
     }
   ]
 }

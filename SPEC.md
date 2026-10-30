@@ -322,15 +322,16 @@ role/state.
 
 ## Editing published listings
 
-A creator (or other user authorized to edit the listing) may edit a `PUBLISHED` listing. Edits are split into two groups:
+The creator may edit a `PUBLISHED` listing. Edits are split into two groups (decision 2026-10-30):
 
-**Minor edits — applied immediately and audited:**
+**Edits that need Admin/Super Admin review:**
 
--   price amount, currency, rental period, and `priceNegotiable`
--   `isExactAddressPublic`
--   reordering media or changing the primary/cover image among already-approved images
+-   the title and description, in any language
+-   adding images
 
-**Major edits — require Admin/Super Admin review:** every other change, including title, description, property type, property attributes, location, amenities, and adding or removing media. Major edits are saved as a pending revision. The currently published version stays public, unchanged, until an Admin/Super Admin approves the revision; a rejected revision includes a rejection reason and the live listing is unaffected. A listing has at most one open revision at a time. Until it is reviewed, further major edits update that same pending revision, so the reviewer always sees the latest version.
+These are saved as a pending revision. Until an Admin/Super Admin approves it, the published listing keeps its current title, description and images, and added images are not public; a rejected revision includes a rejection reason and the live listing is unaffected. A listing has at most one open revision at a time. Until it is reviewed, further edits update that same pending revision, so the reviewer always sees the latest version.
+
+**Every other edit applies immediately and is audited**, including the property type, listing type (sale or rent), price, location, property attributes, amenities, `isExactAddressPublic`, removing images, reordering them and choosing the cover among approved images. A published listing keeps at least the minimum number of approved images (§15), and its cover is always an approved image. Every edit must leave the listing complete enough to be published (§39).
 
 Admins and Super Admins do not edit listing content themselves; they approve, or reject with a reason, and the creator makes the changes.
 

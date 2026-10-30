@@ -87,9 +87,6 @@ export function ReviewPanel({
                 {changes.addedImages > 0 && (
                   <li>{tRevision('imagesAdded', { count: changes.addedImages })}</li>
                 )}
-                {changes.removedImages > 0 && (
-                  <li>{tRevision('imagesRemoved', { count: changes.removedImages })}</li>
-                )}
               </ul>
             </div>
             <Button

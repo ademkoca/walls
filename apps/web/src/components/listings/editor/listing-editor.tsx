@@ -42,7 +42,6 @@ import {
   editorContent,
   formSubmissionSnapshot,
   proposedContent,
-  remainingImageCount,
   toFormValues,
   toListingInput,
 } from './listing-form-model';
@@ -104,7 +103,7 @@ export function ListingEditor({
   const managesStatus = !viewerIsReviewer && CREATOR_STATUS_CHANGES.includes(listing.status);
   // `values` (useWatch) re-renders on every change, so the checklist stays current.
   const issues = checkSubmissionRequirements(
-    formSubmissionSnapshot(form.getValues(), remainingImageCount(listing, images.length)),
+    formSubmissionSnapshot(form.getValues(), images.length),
   );
 
   // Warn before leaving with unsaved changes.
@@ -217,8 +216,6 @@ export function ListingEditor({
     });
 
   const title = values.texts?.sr?.title?.trim() || t('untitled');
-  const pendingRevision = listing.revision?.status === ReviewStatus.PENDING;
-  const removedImageIds = pendingRevision ? (listing.revision?.removedImageIds ?? []) : [];
 
   return (
     <FormProvider {...form}>
@@ -302,7 +299,6 @@ export function ListingEditor({
                 onImagesChange={(next) => void onImagesChange(next)}
                 editable={editable}
                 published={listing.publishedAt !== null}
-                removedImageIds={removedImageIds}
               />
             </Section>
           </form>

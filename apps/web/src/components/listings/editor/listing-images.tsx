@@ -50,16 +50,16 @@ export function ListingImages({
   onImagesChange,
   editable,
   published = false,
-  removedImageIds = [],
 }: {
   listingId: string;
   images: ListingImage[];
   onImagesChange: (images: ListingImage[]) => void;
   editable: boolean;
-  /** Published listings: new images await approval and only approved ones can be the cover. */
+  /**
+   * Published listings: new images await approval, only approved ones can be the cover, and
+   * the minimum number of approved images stays.
+   */
   published?: boolean;
-  /** Approved images a pending revision removes. */
-  removedImageIds?: readonly string[];
 }) {
   const t = useTranslations('listings.editor.images');
   const errorMessage = useErrorMessage();
@@ -134,14 +134,17 @@ export function ListingImages({
   async function remove(image: ListingImage) {
     try {
       onImagesChange(await listingsApi.removeImage(listingId, image.id));
-      // An approved image of a published listing goes only once the changes are approved.
-      toast.success(t(published && image.approved ? 'removalProposed' : 'removed'));
+      toast.success(t('removed'));
     } catch (error) {
       toast.error(errorMessage(error));
     }
   }
 
   const full = images.length >= LISTING_IMAGE_RULES.maxImagesPerListing;
+  // A published listing keeps the minimum number of approved (public) images.
+  const atMinimum =
+    published &&
+    images.filter((image) => image.approved).length <= LISTING_IMAGE_RULES.minImagesForSubmission;
 
   return (
     <div className="space-y-4">
@@ -225,6 +228,11 @@ export function ListingImages({
         </span>
         {editable && images.length > 1 && <span>{t('moveHint')}</span>}
       </div>
+      {editable && atMinimum && (
+        <p className="text-sm text-muted-foreground">
+          {t('keepMinimum', { min: LISTING_IMAGE_RULES.minImagesForSubmission })}
+        </p>
+      )}
 
       {images.length === 0 ? (
         <p className="rounded-lg bg-muted px-4 py-6 text-center text-sm text-muted-foreground">
@@ -241,7 +249,7 @@ export function ListingImages({
                   position={index + 1}
                   editable={editable}
                   awaitingApproval={published && !image.approved}
-                  toBeRemoved={removedImageIds.includes(image.id)}
+                  removable={!(atMinimum && image.approved)}
                   onMakeCover={() => void save(images, image.id)}
                   onRemove={() => void remove(image)}
                   onOpen={() => setViewing(index)}
@@ -269,7 +277,7 @@ function SortableImage({
   position,
   editable,
   awaitingApproval,
-  toBeRemoved,
+  removable,
   onMakeCover,
   onRemove,
   onOpen,
@@ -278,7 +286,8 @@ function SortableImage({
   position: number;
   editable: boolean;
   awaitingApproval: boolean;
-  toBeRemoved: boolean;
+  /** False when removing it would leave a published listing too few approved images. */
+  removable: boolean;
   onMakeCover: () => void;
   onRemove: () => void;
   onOpen: () => void;
@@ -299,7 +308,6 @@ function SortableImage({
       className={cn(
         'group relative overflow-hidden rounded-lg border bg-muted',
         isDragging && 'z-10 shadow-lg ring-2 ring-ring',
-        toBeRemoved && 'opacity-60',
       )}
     >
       <div className="aspect-[4/3]">
@@ -335,7 +343,6 @@ function SortableImage({
           </Badge>
         )}
         {awaitingApproval && <Badge variant="secondary">{tPublished('pendingApproval')}</Badge>}
-        {toBeRemoved && <Badge variant="destructive">{tPublished('toBeRemoved')}</Badge>}
       </div>
       {editable && (
         <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-card/90 p-1">
@@ -351,7 +358,7 @@ function SortableImage({
             <GripVerticalIcon />
           </Button>
           <div className="flex gap-1">
-            {!image.isPrimary && !awaitingApproval && !toBeRemoved && (
+            {!image.isPrimary && !awaitingApproval && (
               <Button
                 type="button"
                 variant="ghost"
@@ -363,18 +370,21 @@ function SortableImage({
                 <StarIcon />
               </Button>
             )}
-            {!toBeRemoved && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                aria-label={t('remove')}
-                title={t('remove')}
-                onClick={onRemove}
-              >
-                <Trash2Icon />
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t('remove')}
+              title={
+                removable
+                  ? t('remove')
+                  : t('keepMinimum', { min: LISTING_IMAGE_RULES.minImagesForSubmission })
+              }
+              disabled={!removable}
+              onClick={onRemove}
+            >
+              <Trash2Icon />
+            </Button>
           </div>
         </div>
       )}

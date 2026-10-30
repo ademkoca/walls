@@ -388,10 +388,10 @@
         "imageAlt": "Image {position}",
         "empty": "No images yet.",
         "savedInstantly": "Image changes are saved straight away, so you don't need to save the draft for them.",
-        "savedInstantlyPublished": "Image changes are saved straight away. Added and removed images are sent for review; order and cover change immediately.",
+        "savedInstantlyPublished": "Image changes are saved straight away. New images are sent for review; removing images, the order and the cover change immediately.",
         "added": "{count, plural, one {# image added.} other {# images added.}}",
         "removed": "Image removed.",
-        "removalProposed": "The image will be removed once your changes are approved.",
+        "keepMinimum": "A published listing keeps at least {min, plural, one {# approved image} other {# approved images}}.",
         "orderSaved": "Image order saved.",
         "coverSaved": "Cover image changed.",
         "issues": {
@@ -432,14 +432,13 @@
         "floorAboveTotal": "the floor can't be above the total number of floors"
       },
       "published": {
-        "notice": "This listing is published. Price, address visibility and image order change immediately. Other changes are sent for review; the published version stays as it is until they're approved.",
+        "notice": "This listing is published. A new title or description and new images are sent for review; until they're approved, the published listing keeps the current ones. Every other change, including removing images, applies immediately.",
         "saveChanges": "Save changes",
         "saved": "Changes saved.",
         "sentForReview": "Saved. Your changes were sent for review.",
         "revisionPending": "Changes are waiting for review. The published version stays as it is until they're approved; you can keep editing until then.",
         "revisionRejected": "Your last changes were not approved. The published version stayed as it was.",
         "pendingApproval": "Awaiting approval",
-        "toBeRemoved": "Will be removed",
         "coverMustBeApproved": "Only an approved image can be the cover."
       }
     }
@@ -525,22 +524,14 @@
   },
   "revision": {
     "title": "Changes to review",
-    "description": "The advertiser changed this published listing. Approve to publish the changes, or reject them with a reason; the published version stays as it is.",
+    "description": "The advertiser changed the title or description of this published listing, or added images. Approve to publish the changes, or reject them with a reason; the published version stays as it is.",
     "changed": "Changed",
     "showProposed": "Show proposed changes",
     "showLive": "Show published version",
     "groups": {
-      "propertyType": "Property type",
-      "transactionType": "Listing type",
-      "texts": "Title and description",
-      "location": "Location",
-      "attributes": "Property details",
-      "amenityCodes": "Features",
-      "price": "Price",
-      "images": "Images"
+      "texts": "Title and description"
     },
     "imagesAdded": "{count, plural, one {# new image} other {# new images}}",
-    "imagesRemoved": "{count, plural, one {# image to remove} other {# images to remove}}",
     "approve": "Approve changes",
     "approveTitle": "Publish these changes?",
     "approveDescription": "The changes become public right away, and the advertiser will be notified by email.",
@@ -645,6 +636,7 @@
       "LISTING_PERMANENTLY_DELETED": "Deleted permanently",
       "LISTING_UPDATED_LIVE": "Price or address visibility changed",
       "LISTING_IMAGES_REORDERED": "Images reordered",
+      "LISTING_IMAGE_REMOVED": "Image removed",
       "LISTING_REVISION_SAVED": "Changes sent for review",
       "LISTING_REVISION_WITHDRAWN": "Changes withdrawn",
       "LISTING_REVISION_APPROVED": "Changes approved",

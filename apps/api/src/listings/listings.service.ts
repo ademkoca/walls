@@ -37,7 +37,7 @@ import {
   pendingRevision,
   toListingDetail,
   toListingSummary,
-  workingImageCount,
+  workingContent,
 } from './listing-view';
 import {
   type ListingAggregate,
@@ -80,12 +80,6 @@ export const ALL_CONTENT_FIELDS: ReadonlySet<ListingField> = new Set([
   ListingField.EXACT_ADDRESS_VISIBILITY,
 ]);
 
-/** Minor edits of a published listing that the PATCH body can carry (SPEC §6). */
-const IMMEDIATE_CONTENT_FIELDS: ReadonlySet<ListingField> = new Set([
-  ListingField.PRICE,
-  ListingField.EXACT_ADDRESS_VISIBILITY,
-]);
-
 /** Locks a listing the actor may edit now, and tells whether it is a draft or published. */
 export async function lockEditable(db: DbExecutor, actor: Actor, id: string) {
   const listing = await lockListing(db, id);
@@ -95,31 +89,26 @@ export async function lockEditable(db: DbExecutor, actor: Actor, id: string) {
   return { listing, mode: decision.allowed ? decision.mode : ListingEditMode.DRAFT };
 }
 
-/**
- * The base an edit of a published listing applies to: the pending revision's proposal,
- * with the live values of the fields that change immediately (price follows the revision
- * only when the revision changes the transaction type).
- */
-function publishedEditBase(aggregate: ListingAggregate): ListingContent {
-  const live = liveContent(aggregate);
-  const pending = pendingRevision(aggregate);
-  if (!pending) return live;
-  const priceInReview = pending.content.transactionType !== live.transactionType;
-  return {
-    ...pending.content,
-    price: priceInReview ? pending.content.price : live.price,
-    isExactAddressPublic: live.isExactAddressPublic,
-  };
-}
+/** Which part of the content each field group is, for audit entries. */
+const CONTENT_KEYS: Partial<Record<ListingField, keyof ListingContent>> = {
+  [ListingField.PROPERTY_TYPE]: 'propertyType',
+  [ListingField.TRANSACTION_TYPE]: 'transactionType',
+  [ListingField.TEXT]: 'texts',
+  [ListingField.LOCATION]: 'location',
+  [ListingField.ATTRIBUTES]: 'attributes',
+  [ListingField.AMENITIES]: 'amenityCodes',
+  [ListingField.PRICE]: 'price',
+  [ListingField.EXACT_ADDRESS_VISIBILITY]: 'isExactAddressPublic',
+};
 
 /** The content values of the given groups, for audit entries. */
 function pickFields(content: ListingContent, fields: ReadonlySet<ListingField>) {
-  return {
-    ...(fields.has(ListingField.PRICE) ? { price: content.price } : {}),
-    ...(fields.has(ListingField.EXACT_ADDRESS_VISIBILITY)
-      ? { isExactAddressPublic: content.isExactAddressPublic }
-      : {}),
-  };
+  const picked: Partial<Record<keyof ListingContent, unknown>> = {};
+  for (const field of fields) {
+    const key = CONTENT_KEYS[field];
+    if (key) picked[key] = content[key];
+  }
+  return picked;
 }
 
 export class ListingsService {
@@ -185,7 +174,7 @@ export class ListingsService {
       const { listing, mode } = await lockEditable(tx, actor, id);
       const aggregate = (await findListingAggregate(tx, id))!;
       const base =
-        mode === ListingEditMode.PUBLISHED ? publishedEditBase(aggregate) : liveContent(aggregate);
+        mode === ListingEditMode.PUBLISHED ? workingContent(aggregate) : liveContent(aggregate);
       const merged = mergeListingContent(base, input);
       if (!merged.ok) throw validationFailed(merged.path, merged.message);
 
@@ -199,17 +188,18 @@ export class ListingsService {
   }
 
   /**
-   * Re-plans a published listing's edits after its images changed: images added or removed
-   * by an editor need review, so the pending revision is created or kept up to date.
+   * Re-plans a published listing's edits after its images changed: added images need
+   * review, so the pending revision is created, kept, or dropped when none are left.
    */
   async syncPublishedEdit(tx: DbExecutor, actor: Actor, id: string): Promise<void> {
     const aggregate = (await findListingAggregate(tx, id))!;
-    await this.savePublishedEdit(tx, actor, aggregate, publishedEditBase(aggregate));
+    await this.savePublishedEdit(tx, actor, aggregate, workingContent(aggregate));
   }
 
   /**
-   * Applies an edit of a published listing: minor changes now (audited), major ones into the
-   * pending revision. The proposed version must stay complete enough to be published.
+   * Applies an edit of a published listing (SPEC §6): a new title or description goes into
+   * the pending revision with any added images; every other change applies now and is
+   * audited. The proposed version must stay complete enough to be published.
    */
   private async savePublishedEdit(
     tx: DbExecutor,
@@ -220,22 +210,19 @@ export class ListingsService {
     const { listing } = aggregate;
     const live = liveContent(aggregate);
     const pending = pendingRevision(aggregate);
-    const removedMediaIds = pending?.removedMediaIds ?? [];
-    const imagesChanged =
-      removedMediaIds.length > 0 || aggregate.images.some((image) => image.approvedAt === null);
 
     const issues = checkSubmissionRequirements(
-      contentSubmissionSnapshot(proposed, workingImageCount(aggregate)),
+      contentSubmissionSnapshot(proposed, aggregate.images.length),
     );
     if (issues.length > 0) throw submissionIncomplete(issues);
 
     const changed = diffListingContent(live, proposed);
-    if (imagesChanged) changed.push(ListingField.MEDIA_SET);
+    if (aggregate.images.some((image) => image.approvedAt === null)) {
+      changed.push(ListingField.IMAGES_ADDED);
+    }
     const plan = planPublishedEdit(changed);
 
-    const immediate = new Set(
-      plan.immediate.filter((field) => IMMEDIATE_CONTENT_FIELDS.has(field)),
-    );
+    const immediate = new Set(plan.immediate.filter((field) => ALL_CONTENT_FIELDS.has(field)));
     if (immediate.size > 0) {
       await writeContent(tx, listing, proposed, immediate);
       await recordAudit(tx, {
@@ -252,7 +239,6 @@ export class ListingsService {
       await savePendingRevision(tx, {
         listingId: listing.id,
         content: proposed,
-        removedMediaIds,
         updatedById: actor.id,
       });
       await recordAudit(tx, {
@@ -263,7 +249,7 @@ export class ListingsService {
         after: { fields: plan.requiresReview },
       });
     } else if (pending) {
-      // Every major change was undone: nothing is left to review.
+      // The new text was undone and no added image is left: nothing to review.
       await deleteRevision(tx, pending.id);
       await recordAudit(tx, {
         actorId: actor.id,

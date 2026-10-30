@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-30 (launch test fixes: Phase 1 committed as `8544c68`, not pushed; Phase 2 (decision A, no more assignment) committed as `8b24610`, not pushed; Phase 3 (decision B, creators end and restore listings) committed, not pushed; Phase 4 (decision D) in progress; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-30 (launch test fixes: Phase 1 committed as `8544c68`, not pushed; Phase 2 (decision A, no more assignment) committed as `8b24610`, not pushed; Phase 3 (decision B, creators end and restore listings) committed as `db6ff55`, not pushed; Phase 4 (decision D, only text and new images reviewed) committed, not pushed; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -51,7 +51,7 @@ results in its `results` collection). Triaged together; the user's decisions:
   inbox email stays Serbian by design). AUTH-03 and AUTH-09 count as passed.
 
 Plan: **Phase 1** (committed `8544c68`) bug fixes and small changes; **Phase 2** (committed
-`8b24610`) decision A; **Phase 3** (committed) decision B; **Phase 4** decision D. SPEC.md is updated in each phase
+`8b24610`) decision A; **Phase 3** (committed `db6ff55`) decision B; **Phase 4** (committed) decision D. SPEC.md is updated in each phase
 as it is built, so it never describes behavior the code doesn't have.
 
 Phase 1 contents:
@@ -112,6 +112,22 @@ Phase 3 contents (decision B):
 - Web: `ListingStatusActions` (shared by the creator's editor and the review panel) with a
   confirmation per action; messages moved from `review.*` to `listingStatus.*`. A creator
   whose listing an Admin archived sees "Our team archived this listing…".
+
+Phase 4 contents (decision D):
+
+- `planPublishedEdit`: only `TEXT` and `IMAGES_ADDED` (was `MEDIA_SET`) go to review;
+  property type, transaction type, price, location, attributes, amenities and address
+  visibility apply immediately (one `LISTING_UPDATED_LIVE` audit entry with before/after).
+- A pending revision proposes only texts: the working version is the live content with the
+  revision's texts (`workingContent`, mirrored by the web's `editorContent`), the API returns
+  revisions that way, and approval writes only the texts and approves added images.
+- Removing an approved image is immediate (`LISTING_IMAGE_REMOVED`), refused (422
+  SUBMISSION_INCOMPLETE) when fewer than 3 approved images would remain; images awaiting
+  review don't count. The cover moves to an approved image. The editor disables the remove
+  button at the minimum and says why.
+- Migration 0017 drops `listing_revisions.removed_media_ids`: removals pending in revisions
+  (staging only) are dropped and those images stay public. Non-text changes in revisions
+  saved before this are no longer approved (only the text is); staging only.
 
 **Immediate next step (2026-10-14):** the user is signed in to `https://preview.walls.rs` as the
 production Super Admin (created with `pnpm admin:create` using their personal email; HTTPS works,

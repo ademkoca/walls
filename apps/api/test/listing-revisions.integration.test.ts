@@ -49,7 +49,7 @@ async function auditActions(id: string) {
   return rows.map((row) => row.action);
 }
 
-describe('minor edits of a published listing (SPEC §6)', () => {
+describe('edits of a published listing that apply immediately (SPEC §6)', () => {
   it('apply the price and address visibility immediately, audited, without review', async () => {
     const { id, seller } = await published();
     const response = await seller.client.patch(`${LISTINGS}/${id}`, {
@@ -65,6 +65,33 @@ describe('minor edits of a published listing (SPEC §6)', () => {
       revision: null,
     });
     expect(await auditActions(id)).toContain('LISTING_UPDATED_LIVE');
+  });
+
+  it('apply type, location, details and features immediately, audited, without review', async () => {
+    const { id, seller } = await published();
+    const response = await seller.client.patch(`${LISTINGS}/${id}`, {
+      ...completeApartment,
+      transactionType: 'RENT',
+      price: { mode: 'FIXED', amount: 700, currency: 'EUR', period: 'MONTH', negotiable: false },
+      location: { ...completeApartment.location, street: 'Kneza Miloša' },
+      attributes: { ...completeApartment.attributes, bathrooms: 2 },
+      amenityCodes: ['ELEVATOR'],
+    });
+    expect(response.status).toBe(200);
+    expect(detailOf(response)).toMatchObject({
+      transactionType: 'RENT',
+      price: { amount: 700, period: 'MONTH' },
+      location: { street: 'Kneza Miloša' },
+      attributes: { bathrooms: 2 },
+      amenityCodes: ['ELEVATOR'],
+      revision: null,
+    });
+    const [entry] = await ctx.db
+      .select()
+      .from(auditLogs)
+      .where(eq(auditLogs.entityId, id))
+      .then((rows) => rows.filter((row) => row.action === 'LISTING_UPDATED_LIVE'));
+    expect(entry?.after).toMatchObject({ transactionType: 'RENT', amenityCodes: ['ELEVATOR'] });
   });
 
   it('apply image order and cover changes among approved images immediately', async () => {
@@ -83,7 +110,7 @@ describe('minor edits of a published listing (SPEC §6)', () => {
   });
 });
 
-describe('major edits of a published listing (SPEC §6)', () => {
+describe('a new title or description of a published listing (SPEC §6)', () => {
   it('go into a pending revision while the live listing stays unchanged', async () => {
     const { id, seller, admin } = await published();
     const response = await seller.client.patch(`${LISTINGS}/${id}`, withTitle('Novi naslov'));
@@ -127,19 +154,19 @@ describe('major edits of a published listing (SPEC §6)', () => {
     expect(detailOf(await seller.client.get(`${LISTINGS}/${id}`)).revision).toBeNull();
   });
 
-  it('send a new price to review together with a new transaction type', async () => {
+  it('waits for review while the other changes of the same edit apply now', async () => {
     const { id, seller } = await published();
     const listing = detailOf(
       await seller.client.patch(`${LISTINGS}/${id}`, {
-        ...completeApartment,
-        transactionType: 'RENT',
-        price: { mode: 'FIXED', amount: 700, currency: 'EUR', period: 'MONTH', negotiable: false },
+        ...withTitle('Novi naslov'),
+        location: { ...completeApartment.location, street: 'Kneza Miloša' },
       }),
     );
-    expect(listing).toMatchObject({ transactionType: 'SALE', price: { amount: 189000 } });
+    expect(listing.texts[0]?.title).toBe('Trosoban stan na Vračaru');
+    expect(listing.location.street).toBe('Kneza Miloša');
     expect(listing.revision?.content).toMatchObject({
-      transactionType: 'RENT',
-      price: { amount: 700, period: 'MONTH' },
+      texts: [{ title: 'Novi naslov' }],
+      location: { street: 'Kneza Miloša' },
     });
   });
 });
@@ -159,43 +186,52 @@ describe('images of a published listing (SPEC §6)', () => {
     expect(response.status).toBe(400);
   });
 
-  it('records removals in the revision and keeps the minimum number of images', async () => {
-    const { id, seller } = await published();
-    const [first] = detailOf(await seller.client.get(`${LISTINGS}/${id}`)).images;
-    const tooFew = await seller.client.delete(`${LISTINGS}/${id}/images/${first!.id}`);
-    expect(tooFew.status).toBe(422);
+  it('removes an approved image immediately, keeping the minimum of approved images', async () => {
+    const { id, seller } = await published(4);
+    const [cover] = detailOf(await seller.client.get(`${LISTINGS}/${id}`)).images;
+    const [coverRow] = await ctx.db
+      .select()
+      .from(listingMedia)
+      .where(eq(listingMedia.id, cover!.id));
 
+    const images = imagesOf(await seller.client.delete(`${LISTINGS}/${id}/images/${cover!.id}`));
+    expect(images.map((item) => item.id)).not.toContain(cover!.id);
+    expect(images.filter((item) => item.isPrimary && item.approved)).toHaveLength(1);
+    expect(detailOf(await seller.client.get(`${LISTINGS}/${id}`)).revision).toBeNull();
+    await expect.poll(() => ctx.media.files.has(coverRow!.storageKey)).toBe(false);
+    expect(await auditActions(id)).toContain('LISTING_IMAGE_REMOVED');
+
+    // Three approved images are left: an added image awaiting review does not count.
     await addImages(seller.client, id, 1);
-    const response = await seller.client.delete(`${LISTINGS}/${id}/images/${first!.id}`);
-    expect(response.status).toBe(200);
-    const listing = detailOf(await seller.client.get(`${LISTINGS}/${id}`));
-    expect(listing.images.map((item) => item.id)).toContain(first!.id);
-    expect(listing.revision?.removedImageIds).toEqual([first!.id]);
+    const tooFew = await seller.client.delete(`${LISTINGS}/${id}/images/${images[0]!.id}`);
+    expect(tooFew.status).toBe(422);
+    expect(errorOf(tooFew).code).toBe('SUBMISSION_INCOMPLETE');
+  });
+
+  it('drops the revision when the only added image is removed again', async () => {
+    const { id, seller } = await published();
+    const added = imagesOf(
+      await seller.client.upload(`${LISTINGS}/${id}/images`, await image()),
+    ).find((item) => !item.approved)!;
+    await seller.client.delete(`${LISTINGS}/${id}/images/${added.id}`);
+    expect(detailOf(await seller.client.get(`${LISTINGS}/${id}`)).revision).toBeNull();
   });
 });
 
 describe('reviewing revisions (SPEC §6)', () => {
-  it('approval publishes the proposed content and image changes, and emails the creator', async () => {
+  it('approval publishes the new text and added images, and emails the creator', async () => {
     const { id, seller, admin } = await published();
-    const [removed] = detailOf(await seller.client.get(`${LISTINGS}/${id}`)).images;
-    const [removedRow] = await ctx.db
-      .select()
-      .from(listingMedia)
-      .where(eq(listingMedia.id, removed!.id));
     await seller.client.patch(`${LISTINGS}/${id}`, withTitle('Odobreni naslov'));
     await addImages(seller.client, id, 1);
-    await seller.client.delete(`${LISTINGS}/${id}/images/${removed!.id}`);
 
     const response = await admin.client.post(`${LISTINGS}/${id}/revision/approve`);
     expect(response.status).toBe(200);
     const listing = detailOf(response);
     expect(listing.texts[0]?.title).toBe('Odobreni naslov');
     expect(listing.revision).toBeNull();
-    expect(listing.images).toHaveLength(3);
+    expect(listing.images).toHaveLength(4);
     expect(listing.images.every((item) => item.approved)).toBe(true);
     expect(listing.images.filter((item) => item.isPrimary)).toHaveLength(1);
-    expect(listing.images.map((item) => item.id)).not.toContain(removed!.id);
-    await expect.poll(() => ctx.media.files.has(removedRow!.storageKey)).toBe(false);
 
     const email = await ctx.lastEmailTo(seller.user.email);
     expect(email?.subject).toContain('Izmene oglasa su objavljene');

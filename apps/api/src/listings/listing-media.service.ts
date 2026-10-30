@@ -8,21 +8,28 @@ import {
   MediaType,
   canAddListingImage,
   checkListingImage,
+  checkSubmissionRequirements,
+  contentSubmissionSnapshot,
 } from '@walls/shared';
 import type { MediaOrderInput } from '@walls/validation';
 import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
-import { imageLimitReached, invalidImage, notFound, validationFailed } from '../http/errors';
+import {
+  imageLimitReached,
+  invalidImage,
+  notFound,
+  submissionIncomplete,
+  validationFailed,
+} from '../http/errors';
 import type { Logger } from '../logger';
 import { inspectImage } from '../media/image-inspection';
 import type { MediaStorage } from '../media/media-storage';
 import { liveContent } from './listing-content';
-import { pendingRevision, toListingImage } from './listing-view';
+import { toListingImage } from './listing-view';
 import {
   deleteMedia,
   findImages,
   findListingAggregate,
   insertMedia,
-  savePendingRevision,
   updateListing,
   writeImageOrder,
 } from './listings.repository';
@@ -33,9 +40,9 @@ import { lockEditable } from './listings.service';
  * Listing images (SPEC §15). Files are validated from their content, stored through the
  * `MediaStorage` abstraction, and recorded as first-class media rows.
  *
- * On a published listing, adding or removing images is a major edit: added images stay
- * unapproved (not public) and removals are recorded in the pending revision until an Admin
- * approves it. Reordering and changing the cover among approved images apply immediately.
+ * On a published listing, added images stay unapproved (not public) until an Admin approves
+ * the pending revision. Removing an approved image, reordering and changing the cover among
+ * approved images apply immediately (SPEC §6).
  */
 export class ListingMediaService {
   constructor(
@@ -86,6 +93,10 @@ export class ListingMediaService {
     }
   }
 
+  /**
+   * Removes an image right away. A published listing keeps the minimum number of approved
+   * images, and its cover stays an approved image.
+   */
   async removeImage(actor: Actor, listingId: string, mediaId: string): Promise<ListingImage[]> {
     let removedKey: string | undefined;
     const result = await this.db.transaction(async (tx) => {
@@ -93,25 +104,43 @@ export class ListingMediaService {
       const images = await findImages(tx, listingId);
       const image = images.find((candidate) => candidate.id === mediaId);
       if (!image) throw notFound();
+      const remaining = images.filter((candidate) => candidate.id !== mediaId);
+      const removesLiveImage = mode === ListingEditMode.PUBLISHED && image.approvedAt !== null;
 
-      if (mode === ListingEditMode.PUBLISHED && image.approvedAt !== null) {
-        await this.proposeRemoval(tx, actor, listingId, mediaId);
-      } else {
-        // Drafts, and images a pending revision added, are removed right away.
-        await deleteMedia(tx, mediaId);
-        removedKey = image.storageKey;
-        const remaining = images.filter((candidate) => candidate.id !== mediaId);
-        const primary = remaining.find((candidate) => candidate.isPrimary) ?? remaining[0];
-        if (primary) {
-          await writeImageOrder(
-            tx,
-            listingId,
-            remaining.map((candidate) => candidate.id),
-            primary.id,
-          );
-        }
-        await this.afterImagesChanged(tx, actor, listingId, mode);
+      if (removesLiveImage) {
+        const approvedLeft = remaining.filter((candidate) => candidate.approvedAt !== null);
+        const live = liveContent((await findListingAggregate(tx, listingId))!);
+        const issues = checkSubmissionRequirements(
+          contentSubmissionSnapshot(live, approvedLeft.length),
+        );
+        if (issues.length > 0) throw submissionIncomplete(issues);
       }
+
+      await deleteMedia(tx, mediaId);
+      removedKey = image.storageKey;
+      const primary =
+        remaining.find((candidate) => candidate.isPrimary) ??
+        remaining.find(
+          (candidate) => mode === ListingEditMode.DRAFT || candidate.approvedAt !== null,
+        );
+      if (primary) {
+        await writeImageOrder(
+          tx,
+          listingId,
+          remaining.map((candidate) => candidate.id),
+          primary.id,
+        );
+      }
+      if (removesLiveImage) {
+        await recordAudit(tx, {
+          actorId: actor.id,
+          action: AuditAction.LISTING_IMAGE_REMOVED,
+          entityType: AuditEntity.LISTING,
+          entityId: listingId,
+          before: { mediaId, url: image.url },
+        });
+      }
+      await this.afterImagesChanged(tx, actor, listingId, mode);
       return (await findImages(tx, listingId)).map(toListingImage);
     });
     if (removedKey) this.deleteStored(removedKey);
@@ -152,23 +181,6 @@ export class ListingMediaService {
       }
       return (await findImages(tx, listingId)).map(toListingImage);
     });
-  }
-
-  /**
-   * Records that the pending revision removes an approved image. The sync then validates
-   * the proposed version (which must keep at least the minimum number of images).
-   */
-  private async proposeRemoval(tx: DbExecutor, actor: Actor, listingId: string, mediaId: string) {
-    const aggregate = (await findListingAggregate(tx, listingId))!;
-    const pending = pendingRevision(aggregate);
-    if (pending?.removedMediaIds.includes(mediaId)) return;
-    await savePendingRevision(tx, {
-      listingId,
-      content: pending?.content ?? liveContent(aggregate),
-      removedMediaIds: [...(pending?.removedMediaIds ?? []), mediaId],
-      updatedById: actor.id,
-    });
-    await this.listings.syncPublishedEdit(tx, actor, listingId);
   }
 
   private async afterImagesChanged(

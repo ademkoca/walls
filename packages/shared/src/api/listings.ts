@@ -117,15 +117,15 @@ export interface ListingContentView {
 }
 
 /**
- * Major edits of a published listing (SPEC §6): pending review, or the latest rejected one
- * so its creator can see the reason.
+ * Edits of a published listing that wait for review (SPEC §6): a new title or description
+ * and added images (those with `approved: false`). Pending, or the latest rejected one so its
+ * creator can see the reason.
  */
 export interface ListingRevisionView {
   id: string;
   status: typeof ReviewStatus.PENDING | typeof ReviewStatus.REJECTED;
+  /** The proposed version: the live content with the new title and description. */
   content: ListingContentView;
-  /** Approved images the revision removes. Added images are those with `approved: false`. */
-  removedImageIds: string[];
   rejectionReason: string | null;
   updatedAt: string;
 }

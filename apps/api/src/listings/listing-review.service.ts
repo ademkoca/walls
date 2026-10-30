@@ -66,15 +66,8 @@ type ReviewOutcomeTemplate =
   | typeof EmailTemplate.LISTING_CHANGES_APPROVED
   | typeof EmailTemplate.LISTING_CHANGES_REJECTED;
 
-/** Revision content written to the live listing on approval (price only with a new transaction type). */
-const REVISION_FIELDS: readonly ListingField[] = [
-  ListingField.PROPERTY_TYPE,
-  ListingField.TRANSACTION_TYPE,
-  ListingField.TEXT,
-  ListingField.LOCATION,
-  ListingField.ATTRIBUTES,
-  ListingField.AMENITIES,
-];
+/** Revision content written to the live listing on approval: only the text is reviewed. */
+const REVISION_FIELDS: ReadonlySet<ListingField> = new Set([ListingField.TEXT]);
 
 /**
  * What Admins and Super Admins do with listings (SPEC §2.1, §6, §22, §24): review
@@ -254,18 +247,15 @@ export class ListingReviewService {
   }
 
   /**
-   * Approves the pending major edits of a published listing: the proposed content goes
-   * live, added images become public and removed ones are deleted (SPEC §6).
+   * Approves the pending edits of a published listing: the proposed title and description go
+   * live and added images become public (SPEC §6).
    */
   async approveRevision(actor: Actor, id: string): Promise<ListingDetail> {
-    const keys = await this.db.transaction(async (tx) => {
+    await this.db.transaction(async (tx) => {
       const { listing, revision } = await this.lockForRevisionReview(tx, actor, id);
       const live = liveContent((await findListingAggregate(tx, id))!);
-      const fields = new Set(REVISION_FIELDS);
-      if (revision.content.transactionType !== live.transactionType) fields.add(ListingField.PRICE);
 
-      await writeContent(tx, listing, revision.content, fields);
-      const removedKeys = await deleteMediaRows(tx, id, revision.removedMediaIds);
+      await writeContent(tx, listing, revision.content, REVISION_FIELDS);
       await approvePendingImages(tx, id);
       const images = await findImages(tx, id);
       const cover = images.find((image) => image.isPrimary) ?? images[0];
@@ -286,13 +276,11 @@ export class ListingReviewService {
         action: AuditAction.LISTING_REVISION_APPROVED,
         entityType: AuditEntity.LISTING,
         entityId: id,
-        before: { ...live },
-        after: { ...revision.content, removedMediaIds: revision.removedMediaIds },
+        before: { texts: live.texts },
+        after: { texts: revision.content.texts },
       });
       await this.notifyCreator(tx, listing, EmailTemplate.LISTING_CHANGES_APPROVED);
-      return removedKeys;
     });
-    this.deleteStored(keys);
     return this.listings.get(actor, id);
   }
 

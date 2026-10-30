@@ -28,7 +28,7 @@ describe('revisionChanges', () => {
     expect(revisionChanges({ ...live, revision: null })).toBeNull();
   });
 
-  it('lists changed groups, ignoring key order, and counts image changes', () => {
+  it('lists a changed title or description and counts added images', () => {
     const listing = {
       ...live,
       revision: {
@@ -37,9 +37,7 @@ describe('revisionChanges', () => {
         content: {
           ...live,
           texts: [{ locale: 'sr', title: 'Novi stan', description: 'Opis' }],
-          location: { street: 'Njegoševa', city: 'Beograd' },
         },
-        removedImageIds: ['b'],
         rejectionReason: null,
         updatedAt: '2026-10-12T00:00:00.000Z',
       },
@@ -47,7 +45,6 @@ describe('revisionChanges', () => {
     expect(revisionChanges(listing)).toEqual({
       groups: ['texts'],
       addedImages: 1,
-      removedImages: 1,
     });
   });
 });

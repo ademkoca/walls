@@ -242,11 +242,10 @@ export const listingViewVisitors = pgTable(
 );
 
 /**
- * Major edits of a published listing awaiting review (SPEC §6). The live listing stays
- * relational and unchanged; `content` is the complete proposed version (validated by the
- * API with the shared schemas) and is written into the relational tables on approval.
- * Images added by the revision are `listing_media` rows without `approved_at`; images it
- * removes are listed in `removed_media_ids` and deleted on approval.
+ * Edits of a published listing awaiting review (SPEC §6): a new title or description, and
+ * added images. The live listing stays relational and unchanged; `content` is the proposed
+ * version (validated by the API with the shared schemas), whose texts are written into the
+ * relational tables on approval. Added images are `listing_media` rows without `approved_at`.
  */
 export const listingRevisions = pgTable(
   'listing_revisions',
@@ -257,10 +256,6 @@ export const listingRevisions = pgTable(
       .references(() => listings.id, { onDelete: 'cascade' }),
     status: reviewStatusEnum().notNull().default('PENDING'),
     content: jsonb().$type<ListingContent>().notNull(),
-    removedMediaIds: uuid()
-      .array()
-      .notNull()
-      .default(sql`'{}'::uuid[]`),
     /** The editor who last changed the revision. */
     updatedById: uuid()
       .notNull()

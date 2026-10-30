@@ -388,10 +388,10 @@
         "imageAlt": "Slika {position}",
         "empty": "Još nema slika.",
         "savedInstantly": "Izmene slika čuvaju se odmah, pa zbog njih ne morate da čuvate nacrt.",
-        "savedInstantlyPublished": "Izmene slika čuvaju se odmah. Dodate i uklonjene slike šaljemo na proveru; redosled i naslovna menjaju se odmah.",
+        "savedInstantlyPublished": "Izmene slika čuvaju se odmah. Nove slike šaljemo na proveru; uklanjanje slika, redosled i naslovna menjaju se odmah.",
         "added": "{count, plural, one {Dodata je # slika.} few {Dodate su # slike.} other {Dodato je # slika.}}",
         "removed": "Slika je uklonjena.",
-        "removalProposed": "Slika će biti uklonjena kada vaše izmene budu odobrene.",
+        "keepMinimum": "Objavljen oglas mora da ima najmanje {min, plural, one {# odobrenu sliku} few {# odobrene slike} other {# odobrenih slika}}.",
         "orderSaved": "Redosled slika je sačuvan.",
         "coverSaved": "Naslovna slika je promenjena.",
         "issues": {
@@ -432,14 +432,13 @@
         "floorAboveTotal": "sprat ne može biti veći od ukupnog broja spratova"
       },
       "published": {
-        "notice": "Oglas je objavljen. Cena, vidljivost adrese i redosled slika menjaju se odmah. Ostale izmene šaljemo na proveru; objavljena verzija ostaje ista dok ih ne odobrimo.",
+        "notice": "Oglas je objavljen. Novi naslov ili opis i nove slike šaljemo na proveru; dok ih ne odobrimo, objavljeni oglas zadržava postojeće. Sve ostale izmene, uključujući uklanjanje slika, primenjuju se odmah.",
         "saveChanges": "Sačuvaj izmene",
         "saved": "Izmene su sačuvane.",
         "sentForReview": "Sačuvano. Izmene su poslate na proveru.",
         "revisionPending": "Izmene čekaju proveru. Objavljena verzija ostaje nepromenjena dok ih ne odobrimo; do tada možete nastaviti sa izmenama.",
         "revisionRejected": "Poslednje izmene nisu odobrene. Objavljena verzija je ostala ista.",
         "pendingApproval": "Čeka odobrenje",
-        "toBeRemoved": "Biće uklonjena",
         "coverMustBeApproved": "Naslovna može biti samo odobrena slika."
       }
     }
@@ -525,22 +524,14 @@
   },
   "revision": {
     "title": "Izmene za proveru",
-    "description": "Oglašivač je izmenio objavljeni oglas. Odobrite da izmene budu objavljene ili ih odbijte uz razlog; objavljena verzija ostaje ista.",
+    "description": "Oglašivač je promenio naslov ili opis objavljenog oglasa ili dodao slike. Odobrite da izmene budu objavljene ili ih odbijte uz razlog; objavljena verzija ostaje ista.",
     "changed": "Izmenjeno",
     "showProposed": "Prikaži predložene izmene",
     "showLive": "Prikaži objavljenu verziju",
     "groups": {
-      "propertyType": "Vrsta nekretnine",
-      "transactionType": "Vrsta oglasa",
-      "texts": "Naslov i opis",
-      "location": "Lokacija",
-      "attributes": "Karakteristike",
-      "amenityCodes": "Dodatno",
-      "price": "Cena",
-      "images": "Slike"
+      "texts": "Naslov i opis"
     },
     "imagesAdded": "{count, plural, one {# nova slika} few {# nove slike} other {# novih slika}}",
-    "imagesRemoved": "{count, plural, one {# slika za uklanjanje} few {# slike za uklanjanje} other {# slika za uklanjanje}}",
     "approve": "Odobri izmene",
     "approveTitle": "Objaviti izmene?",
     "approveDescription": "Izmene će odmah postati javno vidljive, a oglašivač će dobiti obaveštenje emailom.",
@@ -645,6 +636,7 @@
       "LISTING_PERMANENTLY_DELETED": "Trajno brisanje",
       "LISTING_UPDATED_LIVE": "Izmena cene ili vidljivosti adrese",
       "LISTING_IMAGES_REORDERED": "Promena redosleda slika",
+      "LISTING_IMAGE_REMOVED": "Uklonjena slika",
       "LISTING_REVISION_SAVED": "Izmene poslate na proveru",
       "LISTING_REVISION_WITHDRAWN": "Izmene povučene",
       "LISTING_REVISION_APPROVED": "Odobrenje izmena",

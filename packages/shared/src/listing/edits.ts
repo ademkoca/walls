@@ -7,8 +7,8 @@ export const ListingField = {
   LOCATION: 'LOCATION',
   ATTRIBUTES: 'ATTRIBUTES',
   AMENITIES: 'AMENITIES',
-  /** Adding or removing media. */
-  MEDIA_SET: 'MEDIA_SET',
+  /** Adding images. Removing approved ones applies immediately. */
+  IMAGES_ADDED: 'IMAGES_ADDED',
   /** Reordering already-approved media or changing the cover image. */
   MEDIA_ORDER: 'MEDIA_ORDER',
   /** Amount, currency, rental period, negotiable flag, or switching to/from "on request". */
@@ -17,11 +17,13 @@ export const ListingField = {
 } as const;
 export type ListingField = (typeof ListingField)[keyof typeof ListingField];
 
-/** Changes to a published listing that apply immediately, without review (SPEC §6). */
-const MINOR_FIELDS: ReadonlySet<ListingField> = new Set([
-  ListingField.PRICE,
-  ListingField.EXACT_ADDRESS_VISIBILITY,
-  ListingField.MEDIA_ORDER,
+/**
+ * Changes to a published listing that wait for Admin/Super Admin review: the title and
+ * description, and new images (SPEC §6, decision 2026-10-30). Everything else applies at once.
+ */
+const REVIEWED_FIELDS: ReadonlySet<ListingField> = new Set([
+  ListingField.TEXT,
+  ListingField.IMAGES_ADDED,
 ]);
 
 export interface PublishedEditPlan {
@@ -31,22 +33,11 @@ export interface PublishedEditPlan {
   requiresReview: ListingField[];
 }
 
-/**
- * Splits an edit to a published listing into changes that apply now and changes that need review.
- *
- * A price change travels with a transaction-type change into review, because the valid
- * price shape (rental period or not) depends on the transaction type.
- */
+/** Splits an edit to a published listing into changes that apply now and changes that need review. */
 export function planPublishedEdit(changedFields: readonly ListingField[]): PublishedEditPlan {
   const fields = [...new Set(changedFields)];
-  const requiresReview = fields.filter((field) => !MINOR_FIELDS.has(field));
-  const priceFollowsTransactionType =
-    requiresReview.includes(ListingField.TRANSACTION_TYPE) && fields.includes(ListingField.PRICE);
-
-  if (priceFollowsTransactionType) requiresReview.push(ListingField.PRICE);
-
   return {
-    immediate: fields.filter((field) => !requiresReview.includes(field)),
-    requiresReview,
+    immediate: fields.filter((field) => !REVIEWED_FIELDS.has(field)),
+    requiresReview: fields.filter((field) => REVIEWED_FIELDS.has(field)),
   };
 }

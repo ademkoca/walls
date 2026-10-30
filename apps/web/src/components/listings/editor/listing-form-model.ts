@@ -187,27 +187,14 @@ export function proposedContent(listing: ListingDetail): ListingContentView | nu
 }
 
 /**
- * The content an editor works on. For a published listing with a pending revision that is
- * the proposal, with the live price and address visibility (those change immediately)
- * unless the revision changes the transaction type, which takes the price with it.
+ * The content the creator works on: for a published listing with a pending revision, the
+ * live content with the proposed title and description (only those wait for review).
  * Mirrors the API's rule.
  */
 export function editorContent(listing: ListingDetail): ListingContentView {
   const proposed = proposedContent(listing);
   if (listing.permissions.editMode !== ListingEditMode.PUBLISHED || !proposed) return listing;
-  const priceInReview = proposed.transactionType !== listing.transactionType;
-  return {
-    ...proposed,
-    price: priceInReview ? proposed.price : listing.price,
-    isExactAddressPublic: listing.isExactAddressPublic,
-  };
-}
-
-/** Images that will remain: all except those a pending revision removes. */
-export function remainingImageCount(listing: Pick<ListingDetail, 'revision'>, imageCount: number) {
-  const removed =
-    listing.revision?.status === ReviewStatus.PENDING ? listing.revision.removedImageIds.length : 0;
-  return imageCount - removed;
+  return { ...listing, texts: proposed.texts };
 }
 
 /** Parses typed numbers, accepting a decimal comma. Empty → null; garbage → NaN (rejected). */

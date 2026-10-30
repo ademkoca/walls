@@ -52,26 +52,23 @@ export function pendingRevision(aggregate: ListingAggregate): RevisionRow | null
 }
 
 /**
- * The content the creator is working on: the pending revision's proposal for a published
- * listing, otherwise the live content.
+ * The content the creator is working on: the live content, with the title and description a
+ * pending revision proposes (only those wait for review, SPEC §6).
  */
 export function workingContent(aggregate: ListingAggregate): ListingContent {
-  return pendingRevision(aggregate)?.content ?? liveContent(aggregate);
+  const live = liveContent(aggregate);
+  const pending = pendingRevision(aggregate);
+  return pending ? { ...live, texts: pending.content.texts } : live;
 }
 
-/** Images of the working version: everything except images a pending revision removes. */
-export function workingImageCount(aggregate: ListingAggregate): number {
-  const removed = new Set(pendingRevision(aggregate)?.removedMediaIds ?? []);
-  return aggregate.images.filter((image) => !removed.has(image.id)).length;
-}
-
-function revisionView(revision: RevisionRow | null): ListingRevisionView | null {
+/** The revision as the live content with its proposed title and description. */
+function revisionView(aggregate: ListingAggregate): ListingRevisionView | null {
+  const { revision } = aggregate;
   if (!revision || revision.status === ReviewStatus.APPROVED) return null;
   return {
     id: revision.id,
     status: revision.status,
-    content: contentView(revision.content),
-    removedImageIds: revision.removedMediaIds,
+    content: contentView({ ...liveContent(aggregate), texts: revision.content.texts }),
     rejectionReason: revision.rejectionReason,
     updatedAt: revision.updatedAt.toISOString(),
   };
@@ -107,7 +104,7 @@ export function toListingDetail(aggregate: ListingAggregate, actor: Actor): List
     isExactAddressPublic: live.isExactAddressPublic,
     rejectionReason: listing.rejectionReason,
     images: aggregate.images.map(toListingImage),
-    revision: revisionView(aggregate.revision),
+    revision: revisionView(aggregate),
     permissions: {
       editMode: edit.allowed ? edit.mode : null,
       canDelete: canDeleteDraft(actor, context).allowed,
@@ -116,7 +113,7 @@ export function toListingDetail(aggregate: ListingAggregate, actor: Actor): List
       canPermanentlyDelete: canPermanentlyDeleteListing(actor, context).allowed,
     },
     submissionIssues: checkSubmissionRequirements(
-      contentSubmissionSnapshot(checked, workingImageCount(aggregate)),
+      contentSubmissionSnapshot(checked, aggregate.images.length),
     ),
     createdAt: listing.createdAt.toISOString(),
     updatedAt: listing.updatedAt.toISOString(),

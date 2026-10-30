@@ -54,7 +54,7 @@ design should make that review visible and credible rather than decorative.
   Serbian copy is the reference and is often longer; dates use the genitive month ("15. oktobra
   2026."). The URL alone decides the language.
 - The listing lifecycle (draft, pending review, published, rejected, sold/rented, archived),
-  the minor/major edit split on published listings, and inquiry routing are defined in
+  which edits of a published listing need review, and inquiry routing are defined in
   `SPEC.md` §6 and §20; the UI never offers an action invalid for the role and state.
 - Prices are stored in their original currency and shown in EUR by default, with an
   approximate (≈) converted value at the National Bank of Serbia middle rate on request.
