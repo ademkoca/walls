@@ -19,6 +19,9 @@ describe('listing lifecycle (SPEC §6)', () => {
     [ListingAction.ARCHIVE, PUBLISHED, ARCHIVED],
     [ListingAction.ARCHIVE, SOLD, ARCHIVED],
     [ListingAction.ARCHIVE, RENTED, ARCHIVED],
+    [ListingAction.REOPEN, SOLD, PUBLISHED],
+    [ListingAction.REOPEN, RENTED, PUBLISHED],
+    [ListingAction.UNARCHIVE, ARCHIVED, PUBLISHED],
   ])('%s moves %s to %s', (action, from, to) => {
     expect(isTransitionValid(action, from, SALE)).toBe(true);
     expect(nextStatus(action)).toBe(to);
@@ -42,6 +45,10 @@ describe('listing lifecycle (SPEC §6)', () => {
     [ListingAction.ARCHIVE, PENDING_REVIEW],
     [ListingAction.ARCHIVE, ARCHIVED],
     [ListingAction.MARK_SOLD, SOLD],
+    [ListingAction.REOPEN, PUBLISHED],
+    [ListingAction.REOPEN, ARCHIVED],
+    [ListingAction.UNARCHIVE, PUBLISHED],
+    [ListingAction.UNARCHIVE, SOLD],
   ])('rejects %s from %s', (action, from) => {
     expect(isTransitionValid(action, from, SALE)).toBe(false);
   });

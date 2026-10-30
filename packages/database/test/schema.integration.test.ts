@@ -90,6 +90,19 @@ describe('listings', () => {
     });
   });
 
+  it('records an Admin archiving only on archived listings', async () => {
+    await expectDbError(insertListing(db, { archivedByReviewer: true }), {
+      constraint: 'listings_archived_by_reviewer_only_when_archived',
+    });
+    const archived = await insertListing(db, {
+      status: 'ARCHIVED',
+      slug: `arhiviran-${Date.now()}`,
+      publishedAt: new Date(),
+      archivedByReviewer: true,
+    });
+    expect(archived.archivedByReviewer).toBe(true);
+  });
+
   it('rejects a fixed price without an amount', async () => {
     await expectDbError(insertListing(db, { priceMode: 'FIXED', priceCurrency: 'EUR' }), {
       constraint: 'listings_price_shape',

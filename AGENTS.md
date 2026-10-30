@@ -211,7 +211,7 @@ DRAFT
 → ARCHIVED
 ```
 
-Rejected listings return to Draft with a rejection reason.
+Rejected listings return to Draft with a rejection reason. Sold, rented and archived listings can go back to Published without another review; the creator and Admins share these status changes, but only an Admin can unarchive a listing an Admin archived (`SPEC.md` §6). The rules live in `packages/shared/src/listing/lifecycle.ts`.
 
 Both private sellers and approved professionals (agents, agencies, investors) can submit listings; neither can publish directly. Admin/Super Admin review is required before publication.
 

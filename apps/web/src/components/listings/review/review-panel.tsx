@@ -13,24 +13,10 @@ import { ConfirmDialog, ReasonDialog, TypedConfirmDialog } from '@/components/da
 import { useRouter } from '@/i18n/navigation';
 import { listingsApi } from '@/lib/api/listings';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { ListingStatusActions } from '../listing-status-actions';
 import { type RevisionGroup, revisionChanges } from './revision-changes';
 
-type Dialog =
-  | 'approve'
-  | 'reject'
-  | 'approveRevision'
-  | 'rejectRevision'
-  | 'mark-sold'
-  | 'mark-rented'
-  | 'archive'
-  | 'delete'
-  | null;
-
-const STATUS_ACTIONS = [
-  { action: ListingAction.MARK_SOLD, path: 'mark-sold', label: 'markSold' },
-  { action: ListingAction.MARK_RENTED, path: 'mark-rented', label: 'markRented' },
-  { action: ListingAction.ARCHIVE, path: 'archive', label: 'archive' },
-] as const;
+type Dialog = 'approve' | 'reject' | 'approveRevision' | 'rejectRevision' | 'delete' | null;
 
 /** `YYYY-MM-DD` for a date input, from an ISO timestamp. */
 const dateInputValue = (iso: string | null) => (iso ? iso.slice(0, 10) : '');
@@ -160,22 +146,7 @@ export function ReviewPanel({
             </div>
           )}
 
-          {STATUS_ACTIONS.some(({ action }) => actions.includes(action)) && (
-            <div className="flex flex-col gap-2">
-              {STATUS_ACTIONS.filter(({ action }) => actions.includes(action)).map(
-                ({ path, label }) => (
-                  <Button
-                    key={path}
-                    type="button"
-                    variant="outline"
-                    onClick={() => setDialog(path)}
-                  >
-                    {t(label)}
-                  </Button>
-                ),
-              )}
-            </div>
-          )}
+          <ListingStatusActions listing={listing} viewerIsReviewer onChange={onChange} />
         </CardContent>
       </Card>
 
@@ -284,21 +255,6 @@ export function ReviewPanel({
           void run(() => listingsApi.rejectRevision(listing.id, reason), tRevision('rejected'))
         }
       />
-      {STATUS_ACTIONS.map(({ path, label }) => (
-        <ConfirmDialog
-          key={path}
-          {...dialogText}
-          open={dialog === path}
-          onOpenChange={(open) => setDialog(open ? path : null)}
-          title={t('statusTitle')}
-          description={t('statusDescription')}
-          confirmLabel={t(label)}
-          busy={busy}
-          onConfirm={() =>
-            void run(() => listingsApi.changeStatus(listing.id, path), t('statusChanged'))
-          }
-        />
-      ))}
       <TypedConfirmDialog
         {...dialogText}
         open={dialog === 'delete'}

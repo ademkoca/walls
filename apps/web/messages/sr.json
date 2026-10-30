@@ -444,6 +444,41 @@
       }
     }
   },
+  "listingStatus": {
+    "actions": {
+      "markSold": "Označi kao prodat",
+      "markRented": "Označi kao izdat",
+      "archive": "Arhiviraj",
+      "reopen": "Vrati u ponudu",
+      "unarchive": "Vrati iz arhive"
+    },
+    "confirm": {
+      "markSold": {
+        "title": "Označiti oglas kao prodat?",
+        "description": "Oglas više neće biti javno vidljiv. Ako prodaja propadne, možete ga vratiti u ponudu."
+      },
+      "markRented": {
+        "title": "Označiti oglas kao izdat?",
+        "description": "Oglas više neće biti javno vidljiv. Ako izdavanje propadne, možete ga vratiti u ponudu."
+      },
+      "archive": {
+        "title": "Arhivirati oglas?",
+        "description": "{by, select, reviewer {Oglas više neće biti javno vidljiv i samo administrator može da ga vrati iz arhive.} other {Oglas više neće biti javno vidljiv. Možete ga vratiti iz arhive u bilo kom trenutku.}}"
+      },
+      "reopen": {
+        "title": "Vratiti oglas u ponudu?",
+        "description": "Oglas se odmah vraća na sajt, bez ponovnog pregleda."
+      },
+      "unarchive": {
+        "title": "Vratiti oglas iz arhive?",
+        "description": "Oglas se odmah vraća na sajt, bez ponovnog pregleda."
+      }
+    },
+    "discardsRevision": "Izmene koje čekaju pregled biće odbačene.",
+    "cancel": "Otkaži",
+    "changed": "Status oglasa je promenjen.",
+    "archivedByTeam": "Ovaj oglas je arhivirao naš tim, pa samo mi možemo da ga vratimo iz arhive."
+  },
   "listingsReview": {
     "title": "Oglasi",
     "description": "Pregledajte prijave i upravljajte svim oglasima na platformi.",
@@ -476,12 +511,6 @@
     "rejectDescription": "Oglašivač vidi razlog u kontrolnoj tabli i dobija ga emailom.",
     "reason": "Razlog",
     "rejected": "Oglas je odbijen.",
-    "markSold": "Označi kao prodat",
-    "markRented": "Označi kao izdat",
-    "archive": "Arhiviraj",
-    "statusTitle": "Promeniti status oglasa?",
-    "statusDescription": "Oglas više neće biti javno vidljiv. Ova radnja se ne može poništiti.",
-    "statusChanged": "Status oglasa je promenjen.",
     "featured": "Izdvojen na početnoj strani",
     "featuredUntil": "Izdvojen do (opciono)",
     "saveFeatured": "Sačuvaj",
@@ -607,6 +636,8 @@
       "LISTING_MARKED_SOLD": "Označen kao prodat",
       "LISTING_MARKED_RENTED": "Označen kao izdat",
       "LISTING_ARCHIVED": "Arhiviranje",
+      "LISTING_REOPENED": "Vraćen u ponudu",
+      "LISTING_UNARCHIVED": "Vraćen iz arhive",
       "LISTING_FEATURED": "Izdvajanje",
       "LISTING_UNFEATURED": "Uklanjanje izdvajanja",
       "LISTING_AGENT_ASSIGNED": "Dodela agenta",

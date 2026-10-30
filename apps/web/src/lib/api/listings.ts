@@ -3,6 +3,8 @@ import type { ListingInput, MediaOrderInput, SetFeaturedInput } from '@walls/val
 import { apiFetch } from './client';
 
 type DetailResponse = { listing: ListingDetail };
+/** Status changes the creator and reviewers share (SPEC §6). */
+export type StatusChange = 'mark-sold' | 'mark-rented' | 'archive' | 'reopen' | 'unarchive';
 type ImagesResponse = { images: ListingImage[] };
 
 const base = (id: string) => `/listings/${encodeURIComponent(id)}`;
@@ -26,14 +28,14 @@ export const listingsApi = {
   reorderImages: async (id: string, order: MediaOrderInput) =>
     (await apiFetch<ImagesResponse>(`${base(id)}/images/order`, { method: 'PUT', body: order }))
       .images,
+  changeStatus: async (id: string, action: StatusChange) =>
+    (await apiFetch<DetailResponse>(`${base(id)}/${action}`, { method: 'POST' })).listing,
   // Reviewer actions (Admin / Super Admin).
   approve: async (id: string) =>
     (await apiFetch<DetailResponse>(`${base(id)}/approve`, { method: 'POST' })).listing,
   reject: async (id: string, reason: string) =>
     (await apiFetch<DetailResponse>(`${base(id)}/reject`, { method: 'POST', body: { reason } }))
       .listing,
-  changeStatus: async (id: string, action: 'mark-sold' | 'mark-rented' | 'archive') =>
-    (await apiFetch<DetailResponse>(`${base(id)}/${action}`, { method: 'POST' })).listing,
   setFeatured: async (id: string, input: SetFeaturedInput) =>
     (await apiFetch<DetailResponse>(`${base(id)}/featured`, { method: 'PUT', body: input }))
       .listing,

@@ -165,6 +165,44 @@ describe('lifecycle actions', () => {
     ).toEqual([ListingAction.MARK_RENTED, ListingAction.ARCHIVE]);
   });
 
+  it('lets the creator end a published listing: sold or rented, or archived', () => {
+    const published = listing({ status: ListingStatus.PUBLISHED });
+    expect(availableListingActions(seller, published)).toEqual([
+      ListingAction.MARK_SOLD,
+      ListingAction.ARCHIVE,
+    ]);
+    const rental = { ...published, createdById: agent.id, transactionType: TransactionType.RENT };
+    expect(availableListingActions(agent, rental)).toEqual([
+      ListingAction.MARK_RENTED,
+      ListingAction.ARCHIVE,
+    ]);
+    expect(canPerformListingAction(otherSeller, published, ListingAction.ARCHIVE)).toEqual(
+      denied(DenialReason.NOT_RESOURCE_PARTICIPANT),
+    );
+  });
+
+  it('lets the creator and reviewers put a sold or rented listing back on the market', () => {
+    const sold = listing({ status: ListingStatus.SOLD });
+    expect(availableListingActions(seller, sold)).toEqual([
+      ListingAction.ARCHIVE,
+      ListingAction.REOPEN,
+    ]);
+    expect(canPerformListingAction(admin, sold, ListingAction.REOPEN)).toEqual(allowed);
+  });
+
+  it('lets the creator unarchive a listing they archived, but not one a reviewer archived', () => {
+    const archived = listing({ status: ListingStatus.ARCHIVED });
+    expect(availableListingActions(seller, archived)).toEqual([ListingAction.UNARCHIVE]);
+    const byReviewer = { ...archived, archivedByReviewer: true };
+    expect(canPerformListingAction(seller, byReviewer, ListingAction.UNARCHIVE)).toEqual(
+      denied(DenialReason.ROLE_NOT_PERMITTED),
+    );
+    expect(canPerformListingAction(admin, byReviewer, ListingAction.UNARCHIVE)).toEqual(allowed);
+    expect(canPerformListingAction(otherSeller, archived, ListingAction.UNARCHIVE)).toEqual(
+      denied(DenialReason.NOT_RESOURCE_PARTICIPANT),
+    );
+  });
+
   it('rejects invalid transitions as a state problem', () => {
     expect(
       canPerformListingAction(

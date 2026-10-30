@@ -119,6 +119,7 @@ Can:
 -   create listings for properties they own or are authorized to advertise
 -   edit listings they created, subject to server-side authorization
 -   submit listings for review
+-   mark their published listings sold or rented, archive them, and put them back on the public site (§6)
 -   see listing status/rejection feedback
 -   manage their own profile
 -   view inquiries associated with their listings
@@ -141,6 +142,7 @@ Can:
 
 -   create and manage their own listings
 -   submit eligible listings for review
+-   mark their published listings sold or rented, archive them, and put them back on the public site (§6)
 -   see listing status and rejection feedback
 -   edit their own permitted profile/contact fields
 -   view inquiries for their own listings
@@ -284,7 +286,7 @@ Recommended state model:
 
 ## Allowed transitions
 
-### Private Seller / Real Estate Agent
+### Private Seller / Real Estate Agent (the listing's creator)
 
 ``` text
 DRAFT → PENDING_REVIEW
@@ -296,12 +298,24 @@ REJECTED → DRAFT
 ``` text
 PENDING_REVIEW → PUBLISHED
 PENDING_REVIEW → REJECTED
-PUBLISHED → SOLD
-PUBLISHED → RENTED
+```
+
+### Creator or Admin / Super Admin
+
+The end of a listing's life is managed by its creator as well as by Admins/Super Admins (decision 2026-10-30):
+
+``` text
+PUBLISHED → SOLD      (sale listings)
+PUBLISHED → RENTED    (rental listings)
 PUBLISHED → ARCHIVED
 SOLD → ARCHIVED
 RENTED → ARCHIVED
+SOLD → PUBLISHED      ("back on the market", e.g. when a sale falls through)
+RENTED → PUBLISHED
+ARCHIVED → PUBLISHED  ("unarchive")
 ```
+
+Going back to `PUBLISHED` needs no new review: the listing returns as it was approved. The creator cannot unarchive a listing that an Admin/Super Admin archived; only an Admin/Super Admin can. When a listing leaves `PUBLISHED`, its edits waiting for review are discarded.
 
 The UI MUST NOT expose actions that are invalid for the current
 role/state.
@@ -878,6 +892,8 @@ Draft deletion:
 
 -   The listing creator may delete their own listing while it is in `DRAFT`. Deletion is a soft delete: the draft disappears from the creator's dashboard but the record and its audit trail are retained.
 -   A listing in `PENDING_REVIEW` cannot be withdrawn or deleted by its creator; it stays in review until an Admin/Super Admin approves or rejects it.
+
+Archiving is how a creator takes a published, sold or rented listing off the market; they can unarchive it later, unless an Admin/Super Admin archived it (§6).
 
 ------------------------------------------------------------------------
 
@@ -1605,6 +1621,7 @@ Open decisions:
 -   Private seller can create, edit, submit, and manage their own listings.
 -   Private seller must provide at least three valid images before submission.
 -   Private seller cannot publish directly.
+-   Private seller can mark their listing sold or rented, archive it, and put it back on the public site without another review, except a listing an Admin archived.
 -   Private seller can see rejection reasons and resubmit rejected listings.
 -   Private seller has a public profile page showing their public listings.
 -   Public contact details never present an unverified phone number as verified; phone verification is not required for MVP (planned after launch, §45.1).
@@ -1620,6 +1637,7 @@ Open decisions:
 -   Agent can create and manage their own listings and cannot access other users' listings.
 -   Agent must provide at least three valid images before submission.
 -   Agent cannot publish directly.
+-   Agent can mark their listing sold or rented, archive it, and put it back on the public site without another review, except a listing an Admin archived.
 -   Agent can see rejection reasons and resubmit rejected listings.
 -   Agent can see inquiries for their listings.
 -   Public profile shows the advertiser type as a badge, with no separate "approved" label.

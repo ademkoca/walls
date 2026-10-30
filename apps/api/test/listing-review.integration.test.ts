@@ -124,15 +124,17 @@ describe('approving and rejecting (SPEC §6)', () => {
     expect(approved).toMatchObject({ status: 'PUBLISHED', rejectionReason: null });
   });
 
-  it('does not let sellers or agents approve, reject or change status', async () => {
+  it('does not let sellers or agents approve or reject', async () => {
     const seller = await ctx.signedInUser();
     const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
     const id = await submittedListing(seller.client);
     for (const client of [seller.client, agent.client]) {
       expect((await client.post(`${LISTINGS}/${id}/approve`)).status).toBe(403);
       expect((await client.post(`${LISTINGS}/${id}/reject`, { reason: 'x' })).status).toBe(403);
-      expect((await client.post(`${LISTINGS}/${id}/archive`)).status).toBe(403);
     }
+    // The creator may archive, but not while the listing is in review.
+    expect((await seller.client.post(`${LISTINGS}/${id}/archive`)).status).toBe(409);
+    expect((await agent.client.post(`${LISTINGS}/${id}/archive`)).status).toBe(403);
   });
 
   it('only approves listings that are in review', async () => {
@@ -172,6 +174,19 @@ describe('after publication (SPEC §6, §22)', () => {
     );
   });
 
+  it('puts a sold listing back on the market and unarchives one, without review', async () => {
+    const { id, admin } = await publishedListing();
+    await admin.client.post(`${LISTINGS}/${id}/mark-sold`);
+    expect(detailOf(await admin.client.post(`${LISTINGS}/${id}/reopen`)).status).toBe('PUBLISHED');
+    await admin.client.post(`${LISTINGS}/${id}/archive`);
+    expect(detailOf(await admin.client.post(`${LISTINGS}/${id}/unarchive`)).status).toBe(
+      'PUBLISHED',
+    );
+    expect(await auditActions(id)).toEqual(
+      expect.arrayContaining(['LISTING_REOPENED', 'LISTING_UNARCHIVED']),
+    );
+  });
+
   it('features a published listing until a future date', async () => {
     const { id, admin } = await publishedListing();
     const until = new Date(Date.now() + 7 * 24 * 3_600_000).toISOString();
@@ -208,6 +223,68 @@ describe('after publication (SPEC §6, §22)', () => {
       featuredUntil: null,
     });
     expect(response.status).toBe(409);
+  });
+});
+
+describe('the creator manages the end of a listing (SPEC §6, decision 2026-10-30)', () => {
+  async function publishedListing() {
+    const seller = await ctx.signedInUser();
+    const admin = await ctx.signedInUser(Role.ADMIN);
+    const id = await submittedListing(seller.client);
+    const slug = detailOf(await admin.client.post(`${LISTINGS}/${id}/approve`)).slug!;
+    return { id, slug, seller, admin };
+  }
+  const publicStatus = async (slug: string) =>
+    (await ctx.client().get(`/api/v1/public/listings/${slug}`)).status;
+
+  it('marks sold, reopens, archives and unarchives their own listing', async () => {
+    const { id, slug, seller } = await publishedListing();
+    const status = async (path: string) =>
+      detailOf(await seller.client.post(`${LISTINGS}/${id}/${path}`)).status;
+
+    expect(await status('mark-sold')).toBe('SOLD');
+    expect(await publicStatus(slug)).toBe(404);
+    expect(await status('reopen')).toBe('PUBLISHED');
+    expect(await publicStatus(slug)).toBe(200);
+    expect(await status('archive')).toBe('ARCHIVED');
+    expect(detailOf(await seller.client.get(`${LISTINGS}/${id}`)).permissions.actions).toEqual([
+      'UNARCHIVE',
+    ]);
+    expect(await status('unarchive')).toBe('PUBLISHED');
+    expect(await publicStatus(slug)).toBe(200);
+
+    const history = await ctx.db
+      .select()
+      .from(listingStatusHistory)
+      .where(eq(listingStatusHistory.listingId, id));
+    expect(history.filter((entry) => entry.actorId === seller.user.id)).toHaveLength(6);
+  });
+
+  it('cannot unarchive a listing an Admin archived; the Admin can', async () => {
+    const { id, slug, seller, admin } = await publishedListing();
+    await admin.client.post(`${LISTINGS}/${id}/archive`);
+    const [archived] = await ctx.db.select().from(listings).where(eq(listings.id, id));
+    expect(archived?.archivedByReviewer).toBe(true);
+
+    expect(detailOf(await seller.client.get(`${LISTINGS}/${id}`)).permissions.actions).toEqual([]);
+    expect((await seller.client.post(`${LISTINGS}/${id}/unarchive`)).status).toBe(403);
+    expect(detailOf(await admin.client.post(`${LISTINGS}/${id}/unarchive`)).status).toBe(
+      'PUBLISHED',
+    );
+    expect(await publicStatus(slug)).toBe(200);
+    const [restored] = await ctx.db.select().from(listings).where(eq(listings.id, id));
+    expect(restored?.archivedByReviewer).toBe(false);
+  });
+
+  it('does not let other users change the status', async () => {
+    const { id } = await publishedListing();
+    for (const other of [
+      await ctx.signedInUser(),
+      await ctx.signedInUser(Role.REAL_ESTATE_AGENT),
+    ]) {
+      expect((await other.client.post(`${LISTINGS}/${id}/mark-sold`)).status).toBe(403);
+      expect((await other.client.post(`${LISTINGS}/${id}/archive`)).status).toBe(403);
+    }
   });
 });
 

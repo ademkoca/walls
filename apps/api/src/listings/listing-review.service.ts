@@ -10,6 +10,7 @@ import {
   canPermanentlyDeleteListing,
   canReviewRevision,
   canSetFeatured,
+  isReviewer,
   listingSlugBase,
   nextFreeSlug,
   nextStatus,
@@ -46,13 +47,18 @@ import {
 } from './listings.repository';
 import { ListingsService, listingDashboardPath } from './listings.service';
 
-/** Status changes a reviewer makes without extra input, and how each is audited. */
+/**
+ * Status changes without extra input, made by the listing's creator or a reviewer, and how
+ * each is audited.
+ */
 const SIMPLE_TRANSITIONS = {
   [ListingAction.MARK_SOLD]: AuditAction.LISTING_MARKED_SOLD,
   [ListingAction.MARK_RENTED]: AuditAction.LISTING_MARKED_RENTED,
   [ListingAction.ARCHIVE]: AuditAction.LISTING_ARCHIVED,
+  [ListingAction.REOPEN]: AuditAction.LISTING_REOPENED,
+  [ListingAction.UNARCHIVE]: AuditAction.LISTING_UNARCHIVED,
 } as const;
-export type SimpleReviewerAction = keyof typeof SIMPLE_TRANSITIONS;
+export type SimpleStatusAction = keyof typeof SIMPLE_TRANSITIONS;
 
 type ReviewOutcomeTemplate =
   | typeof EmailTemplate.LISTING_APPROVED
@@ -73,6 +79,7 @@ const REVISION_FIELDS: readonly ListingField[] = [
 /**
  * What Admins and Super Admins do with listings (SPEC §2.1, §6, §22, §24): review
  * submissions, change the status of published listings, feature and permanently delete.
+ * Status changes (sold, rented, archived and back) are shared with the listing's creator.
  * Content itself is only ever edited by the listing's creator.
  */
 export class ListingReviewService {
@@ -201,15 +208,18 @@ export class ListingReviewService {
     return this.listings.get(actor, id);
   }
 
-  /** Sold, rented or archived (SPEC §6). */
-  async changeStatus(
-    actor: Actor,
-    id: string,
-    action: SimpleReviewerAction,
-  ): Promise<ListingDetail> {
+  /**
+   * Sold, rented, archived, or back to published (SPEC §6), by the creator or a reviewer.
+   * The listing records whether a reviewer archived it, since then only a reviewer may
+   * unarchive it.
+   */
+  async changeStatus(actor: Actor, id: string, action: SimpleStatusAction): Promise<ListingDetail> {
     const keys = await this.db.transaction(async (tx) => {
       const listing = await this.lockForAction(tx, actor, id, action);
-      await this.transition(tx, actor, listing, action, SIMPLE_TRANSITIONS[action]);
+      const archivedByReviewer = action === ListingAction.ARCHIVE && isReviewer(actor);
+      const changes =
+        archivedByReviewer === listing.archivedByReviewer ? {} : { archivedByReviewer };
+      await this.transition(tx, actor, listing, action, SIMPLE_TRANSITIONS[action], changes);
       return this.discardPendingRevision(tx, actor, id);
     });
     this.deleteStored(keys);

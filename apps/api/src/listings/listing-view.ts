@@ -31,6 +31,7 @@ export function accessContext(listing: ListingRow): ListingAccessContext {
     status: listing.status,
     transactionType: listing.transactionType,
     deletedAt: listing.deletedAt,
+    archivedByReviewer: listing.archivedByReviewer,
   };
 }
 

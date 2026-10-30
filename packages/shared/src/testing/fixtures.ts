@@ -43,6 +43,7 @@ export function listing(overrides: Partial<ListingAccessContext> = {}): ListingA
     status: ListingStatus.DRAFT,
     transactionType: TransactionType.SALE,
     deletedAt: null,
+    archivedByReviewer: false,
     ...overrides,
   };
 }

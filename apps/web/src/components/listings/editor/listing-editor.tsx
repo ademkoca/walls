@@ -26,6 +26,7 @@ import { Link, useRouter } from '@/i18n/navigation';
 import { ApiError } from '@/lib/api/errors';
 import { listingsApi } from '@/lib/api/listings';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { ListingStatusActions } from '../listing-status-actions';
 import { ListingStatusBadge } from '../listing-status-badge';
 import { ReviewPanel } from '../review/review-panel';
 import { ListingImages } from './listing-images';
@@ -50,6 +51,14 @@ import { useListingForm } from './use-listing-form';
 import { QuotedText } from '@/components/dashboard/quoted-text';
 
 type Busy = 'save' | 'submit' | 'revise' | 'delete' | null;
+
+/** Statuses in which the creator manages the end of the listing's life (SPEC §6). */
+const CREATOR_STATUS_CHANGES: readonly ListingStatus[] = [
+  ListingStatus.PUBLISHED,
+  ListingStatus.SOLD,
+  ListingStatus.RENTED,
+  ListingStatus.ARCHIVED,
+];
 
 /**
  * The dashboard listing page. Editors edit drafts and published listings (SPEC §6) and
@@ -92,6 +101,7 @@ export function ListingEditor({
   const values = useWatch({ control: form.control });
   const canSubmit = listing.permissions.actions.includes(ListingAction.SUBMIT);
   const canRevise = listing.permissions.actions.includes(ListingAction.REVISE);
+  const managesStatus = !viewerIsReviewer && CREATOR_STATUS_CHANGES.includes(listing.status);
   // `values` (useWatch) re-renders on every change, so the checklist stays current.
   const issues = checkSubmissionRequirements(
     formSubmissionSnapshot(form.getValues(), remainingImageCount(listing, images.length)),
@@ -309,7 +319,11 @@ export function ListingEditor({
                 }}
               />
             )}
-            {(editable || canSubmit || canRevise || listing.permissions.canDelete) && (
+            {(editable ||
+              canSubmit ||
+              canRevise ||
+              managesStatus ||
+              listing.permissions.canDelete) && (
               <Card>
                 <CardContent className="flex flex-col gap-2">
                   {editable && (
@@ -338,6 +352,13 @@ export function ListingEditor({
                       {busy === 'revise' && <Spinner data-icon="inline-start" />}
                       {t('editor.revise')}
                     </Button>
+                  )}
+                  {managesStatus && (
+                    <ListingStatusActions
+                      listing={listing}
+                      viewerIsReviewer={false}
+                      onChange={applyListing}
+                    />
                   )}
                   {listing.permissions.canDelete && (
                     <Button

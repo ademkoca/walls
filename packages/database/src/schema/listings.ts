@@ -69,6 +69,8 @@ export const listings = pgTable(
     publishedAt: timestamptz(),
     /** Soft delete of a draft by its creator (SPEC §24). */
     deletedAt: timestamptz(),
+    /** An Admin or Super Admin archived it; then only they may unarchive it. */
+    archivedByReviewer: boolean().notNull().default(false),
     ...timestamps(),
   },
   (table) => [
@@ -91,6 +93,10 @@ export const listings = pgTable(
           OR (${table.priceMode} = 'FIXED'
             AND ${table.priceAmountMinor} IS NOT NULL AND ${table.priceAmountMinor} > 0
             AND ${table.priceCurrency} IS NOT NULL)`,
+    ),
+    check(
+      'listings_archived_by_reviewer_only_when_archived',
+      sql`NOT ${table.archivedByReviewer} OR ${table.status} = 'ARCHIVED'`,
     ),
     check(
       'listings_rental_period_only_for_rent',

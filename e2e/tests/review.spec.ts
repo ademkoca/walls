@@ -1,5 +1,11 @@
 import type { Browser, Page } from '@playwright/test';
-import { LISTING_TITLE, signInAsSuperAdmin, submitListingViaApi } from '../support/accounts';
+import {
+  LISTING_TITLE,
+  approveListingViaApi,
+  signInAsSuperAdmin,
+  submitListingViaApi,
+} from '../support/accounts';
+import { WEB_ORIGIN } from '../support/environment';
 import { expect, logIn, newTestUser, registerAndVerify, test } from '../support/fixtures';
 import { listingPhotos } from '../support/images';
 
@@ -146,4 +152,58 @@ test('an admin deactivates a seller with a reason, which blocks their login', as
   await logIn(seller, user);
   await expect(seller.getByText('This account has been deactivated.')).toBeVisible();
   expect(errors, 'uncaught browser errors (admin)').toEqual([]);
+});
+
+test('a seller marks their listing sold, puts it back on the market, archives and unarchives it', async ({
+  page: seller,
+  browser,
+}) => {
+  test.slow();
+  const user = newTestUser();
+  await registerAndVerify(seller, user);
+  await logIn(seller, user);
+  await expect(seller).toHaveURL(/\/en\/dashboard$/);
+  const title = 'Stan za prodaju na Vračaru';
+  const id = await submitListingViaApi(seller, title);
+  const { page: admin, errors } = await openPage(browser);
+  await signInAsSuperAdmin(admin);
+  const slug = await approveListingViaApi(admin, id);
+
+  const { page: visitor, errors: visitorErrors } = await openPage(browser);
+  const isPublic = async (expected: boolean) => {
+    await visitor.goto(`/en/properties/${slug}`);
+    const heading = visitor.getByRole('heading', { name: title, level: 1 });
+    if (expected) await expect(heading).toBeVisible();
+    else await expect(visitor.getByText('Page not found')).toBeVisible();
+  };
+  const change = async (button: string, status: string) => {
+    await seller.getByRole('button', { name: button }).click();
+    await seller.getByRole('alertdialog').getByRole('button', { name: button }).click();
+    await expect(seller.getByText('Listing status changed.').first()).toBeVisible();
+    await expect(seller.getByRole('heading', { level: 1 }).locator('..')).toContainText(status);
+  };
+
+  await seller.goto(`/en/dashboard/listings/${id}`);
+  await change('Mark as sold', 'Sold');
+  await isPublic(false);
+  await change('Back on the market', 'Published');
+  await isPublic(true);
+  await change('Archive', 'Archived');
+  await isPublic(false);
+  await change('Unarchive', 'Published');
+  await isPublic(true);
+
+  // A listing the team archived stays archived until the team restores it.
+  const archived = await admin.request.post(`/api/v1/listings/${id}/archive`, {
+    headers: { Origin: WEB_ORIGIN },
+  });
+  expect(archived.status()).toBe(200);
+  await seller.reload();
+  await expect(
+    seller.getByText('Our team archived this listing, so only we can unarchive it.'),
+  ).toBeVisible();
+  await expect(seller.getByRole('button', { name: 'Unarchive' })).toHaveCount(0);
+
+  expect(errors, 'uncaught browser errors (admin)').toEqual([]);
+  expect(visitorErrors, 'uncaught browser errors (visitor)').toEqual([]);
 });

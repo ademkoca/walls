@@ -24,6 +24,8 @@ export interface ListingAccessContext {
   transactionType: TransactionType | null;
   /** Set when the creator deleted the draft (soft delete). */
   deletedAt: Date | null;
+  /** An Admin or Super Admin archived it, so only they may unarchive it (decision 2026-10-30). */
+  archivedByReviewer: boolean;
 }
 
 export function isListingCreator(actor: Actor, listing: ListingAccessContext): boolean {
@@ -105,8 +107,22 @@ export function canEditListing(actor: Actor, listing: ListingAccessContext): Edi
 }
 
 /**
+ * Whether the actor is someone the action is for: a reviewer, when reviewers may perform it,
+ * otherwise the listing's creator.
+ */
+const performerOf =
+  (actor: Actor, listing: ListingAccessContext, kinds: readonly ListingActorKind[]) =>
+  (): Decision => {
+    if (isReviewer(actor) && kinds.includes(ListingActorKind.REVIEWER)) return allow();
+    return kinds.includes(ListingActorKind.CREATOR)
+      ? creatorOnly(actor, listing)()
+      : reviewerOnly(actor)();
+  };
+
+/**
  * Performing a lifecycle action. Submitting also requires a verified email (SPEC §39);
  * the listing's content requirements are checked separately by `checkSubmissionRequirements`.
+ * A listing a reviewer archived stays archived until a reviewer unarchives it.
  */
 export function canPerformListingAction(
   actor: Actor,
@@ -116,12 +132,14 @@ export function canPerformListingAction(
   const rule = LISTING_TRANSITIONS[action];
   return firstDenial(
     () => requireActive(actor),
-    rule.performedBy === ListingActorKind.REVIEWER
-      ? reviewerOnly(actor)
-      : creatorOnly(actor, listing),
+    performerOf(actor, listing, rule.performedBy),
     () =>
       action === ListingAction.SUBMIT && !actor.emailVerified
         ? deny(DenialReason.EMAIL_NOT_VERIFIED)
+        : allow(),
+    () =>
+      action === ListingAction.UNARCHIVE && listing.archivedByReviewer && !isReviewer(actor)
+        ? deny(DenialReason.ROLE_NOT_PERMITTED)
         : allow(),
     notDeleted(listing),
     () =>

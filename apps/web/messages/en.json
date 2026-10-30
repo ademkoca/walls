@@ -444,6 +444,41 @@
       }
     }
   },
+  "listingStatus": {
+    "actions": {
+      "markSold": "Mark as sold",
+      "markRented": "Mark as rented",
+      "archive": "Archive",
+      "reopen": "Back on the market",
+      "unarchive": "Unarchive"
+    },
+    "confirm": {
+      "markSold": {
+        "title": "Mark this listing as sold?",
+        "description": "It will no longer be public. If the sale falls through, you can put it back on the market."
+      },
+      "markRented": {
+        "title": "Mark this listing as rented?",
+        "description": "It will no longer be public. If the rental falls through, you can put it back on the market."
+      },
+      "archive": {
+        "title": "Archive this listing?",
+        "description": "{by, select, reviewer {It will no longer be public, and only an Admin can unarchive it.} other {It will no longer be public. You can unarchive it at any time.}}"
+      },
+      "reopen": {
+        "title": "Put this listing back on the market?",
+        "description": "It goes back on the public site straight away, without another review."
+      },
+      "unarchive": {
+        "title": "Unarchive this listing?",
+        "description": "It goes back on the public site straight away, without another review."
+      }
+    },
+    "discardsRevision": "The edits waiting for review will be discarded.",
+    "cancel": "Cancel",
+    "changed": "Listing status changed.",
+    "archivedByTeam": "Our team archived this listing, so only we can unarchive it."
+  },
   "listingsReview": {
     "title": "Listings",
     "description": "Review submissions and manage every listing on the platform.",
@@ -476,12 +511,6 @@
     "rejectDescription": "The advertiser sees the reason in their dashboard and receives it by email.",
     "reason": "Reason",
     "rejected": "Listing rejected.",
-    "markSold": "Mark as sold",
-    "markRented": "Mark as rented",
-    "archive": "Archive",
-    "statusTitle": "Change the listing's status?",
-    "statusDescription": "The listing will no longer be public. This can't be undone.",
-    "statusChanged": "Listing status changed.",
     "featured": "Featured on the home page",
     "featuredUntil": "Featured until (optional)",
     "saveFeatured": "Save",
@@ -607,6 +636,8 @@
       "LISTING_MARKED_SOLD": "Marked as sold",
       "LISTING_MARKED_RENTED": "Marked as rented",
       "LISTING_ARCHIVED": "Archived",
+      "LISTING_REOPENED": "Back on the market",
+      "LISTING_UNARCHIVED": "Unarchived",
       "LISTING_FEATURED": "Featured",
       "LISTING_UNFEATURED": "No longer featured",
       "LISTING_AGENT_ASSIGNED": "Agent assigned",

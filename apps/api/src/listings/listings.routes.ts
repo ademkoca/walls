@@ -14,7 +14,7 @@ import { type RateLimitRule, limitByIp } from '../http/security';
 import { UPLOAD_FIELD, singleImageUpload } from '../http/uploads';
 import { parseBody } from '../http/validate';
 import type { ListingMediaService } from './listing-media.service';
-import type { ListingReviewService, SimpleReviewerAction } from './listing-review.service';
+import type { ListingReviewService, SimpleStatusAction } from './listing-review.service';
 import type { ListingsService } from './listings.service';
 
 const STATUS_CREATED = 201;
@@ -106,10 +106,12 @@ export function listingsRoutes(deps: {
     });
   });
 
-  const statusRoutes: Record<string, SimpleReviewerAction> = {
+  const statusRoutes: Record<string, SimpleStatusAction> = {
     'mark-sold': ListingAction.MARK_SOLD,
     'mark-rented': ListingAction.MARK_RENTED,
     archive: ListingAction.ARCHIVE,
+    reopen: ListingAction.REOPEN,
+    unarchive: ListingAction.UNARCHIVE,
   };
   for (const [path, action] of Object.entries(statusRoutes)) {
     router.post(`/:id/${path}`, async (req, res) => {
