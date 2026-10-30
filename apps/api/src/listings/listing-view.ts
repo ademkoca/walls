@@ -9,7 +9,6 @@ import {
   type ListingSummary,
   ReviewStatus,
   availableListingActions,
-  canAssignAgent,
   canDeleteDraft,
   canEditListing,
   canPermanentlyDeleteListing,
@@ -29,7 +28,6 @@ import type {
 export function accessContext(listing: ListingRow): ListingAccessContext {
   return {
     createdById: listing.createdById,
-    assignedAgentId: listing.assignedAgentId,
     status: listing.status,
     transactionType: listing.transactionType,
     deletedAt: listing.deletedAt,
@@ -53,7 +51,7 @@ export function pendingRevision(aggregate: ListingAggregate): RevisionRow | null
 }
 
 /**
- * The content editors are working on: the pending revision's proposal for a published
+ * The content the creator is working on: the pending revision's proposal for a published
  * listing, otherwise the live content.
  */
 export function workingContent(aggregate: ListingAggregate): ListingContent {
@@ -83,7 +81,7 @@ export function toListingDetail(aggregate: ListingAggregate, actor: Actor): List
   const context = accessContext(listing);
   const edit = canEditListing(actor, context);
   const live = contentView(liveContent(aggregate));
-  // Editors of a published listing see what blocks their proposed version.
+  // The creator of a published listing sees what blocks their proposed version.
   const checked =
     edit.allowed && edit.mode === ListingEditMode.PUBLISHED
       ? workingContent(aggregate)
@@ -94,7 +92,6 @@ export function toListingDetail(aggregate: ListingAggregate, actor: Actor): List
     status: listing.status,
     sellerType: listing.sellerType,
     creator: aggregate.creator,
-    assignedAgent: aggregate.assignedAgent,
     slug: listing.slug,
     publishedAt: listing.publishedAt?.toISOString() ?? null,
     isFeatured: listing.isFeatured,
@@ -114,7 +111,6 @@ export function toListingDetail(aggregate: ListingAggregate, actor: Actor): List
       editMode: edit.allowed ? edit.mode : null,
       canDelete: canDeleteDraft(actor, context).allowed,
       actions: availableListingActions(actor, context),
-      canAssignAgent: canAssignAgent(actor, context).allowed,
       canSetFeatured: canSetFeatured(actor, context).allowed,
       canPermanentlyDelete: canPermanentlyDeleteListing(actor, context).allowed,
     },

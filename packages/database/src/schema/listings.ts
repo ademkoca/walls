@@ -45,7 +45,6 @@ export const listings = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'restrict' }),
     sellerType: sellerTypeEnum().notNull(),
-    assignedAgentId: uuid().references(() => users.id, { onDelete: 'restrict' }),
     /** Nullable while the listing is a draft. */
     transactionType: transactionTypeEnum(),
     status: listingStatusEnum().notNull().default('DRAFT'),
@@ -76,7 +75,6 @@ export const listings = pgTable(
     index().on(table.status, table.transactionType),
     index().on(table.propertyId),
     index().on(table.createdById),
-    index().on(table.assignedAgentId),
     index('listings_published_at_idx')
       .on(table.publishedAt.desc())
       .where(sql`${table.status} = 'PUBLISHED'`),
@@ -195,24 +193,6 @@ export const listingStatusHistory = pgTable(
       .references(() => users.id, { onDelete: 'restrict' }),
     /** Rejection reason, when the transition is a rejection. */
     reason: text(),
-    createdAt: timestamptz().notNull().defaultNow(),
-  },
-  (table) => [index().on(table.listingId, table.createdAt)],
-);
-
-/** History of agent assignments; the current value is `listings.assignedAgentId`. */
-export const listingAssignments = pgTable(
-  'listing_assignments',
-  {
-    id: id(),
-    listingId: uuid()
-      .notNull()
-      .references(() => listings.id, { onDelete: 'cascade' }),
-    /** Null when the agent was unassigned. */
-    agentId: uuid().references(() => users.id, { onDelete: 'restrict' }),
-    assignedById: uuid()
-      .notNull()
-      .references(() => users.id, { onDelete: 'restrict' }),
     createdAt: timestamptz().notNull().defaultNow(),
   },
   (table) => [index().on(table.listingId, table.createdAt)],

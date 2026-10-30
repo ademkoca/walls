@@ -216,9 +216,9 @@ PRIVATE_SELLER
 
 Private sellers register with email/password and can create an active seller account after verifying their email. Ordinary public registration does not allow users to choose the real-estate-agent role.
 
-Prospective real-estate agents, agencies and investors use the separate **“For professionals”** application flow (`/for-professionals`) and submit their advertiser type, professional details and supporting proof. An Admin or Super Admin must approve the application before an active account and public profile (`/partners/:slug`) are created. All three have the `REAL_ESTATE_AGENT` role; their kind is the account's seller type, shown as a badge ("Agent", "Agency", "Investor", or "Private seller") on listings and profiles. Listings can be assigned to agents and agencies.
+Prospective real-estate agents, agencies and investors use the separate **“For professionals”** application flow (`/for-professionals`) and submit their advertiser type, professional details and supporting proof. An Admin or Super Admin must approve the application before an active account and public profile (`/partners/:slug`) are created. All three have the `REAL_ESTATE_AGENT` role; their kind is the account's seller type, shown as a badge ("Agent", "Agency", "Investor", or "Private seller") on listings and profiles.
 
-Private sellers can manage their own listings and have public seller profile pages. Agents can manage listings they are authorized to advertise, subject to server-side access rules and optional admin assignment. `createdBy`, seller/advertiser type, and `assignedAgent` are separate concepts.
+Private sellers and professionals manage the listings they create, and nobody else's; private sellers have public seller profile pages. `createdBy` and the seller/advertiser type are separate concepts.
 
 Both private sellers and approved professionals submit listings for review. Admins/Super Admins must approve listings before they appear publicly.
 
@@ -455,7 +455,6 @@ The MVP includes:
 -   agent, agency and investor profiles
 -   listing creation/editing
 -   listing review and approval
--   listing assignment
 -   agent management
 -   authentication
 -   approved-agent account setup/invitation email

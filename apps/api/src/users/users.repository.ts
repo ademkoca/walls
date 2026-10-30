@@ -1,14 +1,12 @@
 import { type DbExecutor, auditLogs, listings, users } from '@walls/database';
-import { ASSIGNABLE_SELLER_TYPES, type Role, type UserStatus } from '@walls/shared';
-import { type SQL, and, count, desc, eq, ilike, inArray, isNull, or } from 'drizzle-orm';
+import type { Role, UserStatus } from '@walls/shared';
+import { type SQL, and, count, desc, eq, ilike, isNull, or } from 'drizzle-orm';
 
 import { ADMIN_PAGE_SIZE } from '../http/paging';
 
 export interface UserFilter {
   role?: Role;
   status?: UserStatus;
-  /** Only agents and agencies, whom listings can be assigned to. */
-  assignable?: boolean;
   q?: string;
   page: number;
 }
@@ -20,7 +18,6 @@ export async function findUsers(db: DbExecutor, filter: UserFilter) {
   const conditions: SQL[] = [];
   if (filter.role) conditions.push(eq(users.role, filter.role));
   if (filter.status) conditions.push(eq(users.status, filter.status));
-  if (filter.assignable) conditions.push(inArray(users.sellerType, ASSIGNABLE_SELLER_TYPES));
   if (filter.q) {
     const pattern = `%${escapeLike(filter.q)}%`;
     conditions.push(or(ilike(users.displayName, pattern), ilike(users.email, pattern))!);

@@ -1,7 +1,6 @@
 import {
   type DbExecutor,
   amenities,
-  listingAssignments,
   listingMedia,
   listingRevisions,
   listingStatusHistory,
@@ -35,9 +34,6 @@ import {
   or,
   sql,
 } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
-
-const assignedAgents = alias(users, 'assigned_agent');
 
 export type ListingRow = typeof listings.$inferSelect;
 export type NewListing = typeof listings.$inferInsert;
@@ -56,7 +52,6 @@ export interface ListingAggregate {
   listing: ListingRow;
   property: PropertyRow;
   creator: UserReference;
-  assignedAgent: UserReference | null;
   location: LocationRow | null;
   texts: ListingTextRow[];
   amenityCodes: string[];
@@ -96,12 +91,10 @@ export async function findListingAggregate(
       property: properties,
       location: propertyLocations,
       creator: { id: users.id, displayName: users.displayName },
-      assignedAgent: { id: assignedAgents.id, displayName: assignedAgents.displayName },
     })
     .from(listings)
     .innerJoin(properties, eq(properties.id, listings.propertyId))
     .innerJoin(users, eq(users.id, listings.createdById))
-    .leftJoin(assignedAgents, eq(assignedAgents.id, listings.assignedAgentId))
     .leftJoin(propertyLocations, eq(propertyLocations.propertyId, properties.id))
     .where(eq(listings.id, id))
     .limit(1);
@@ -140,14 +133,14 @@ export interface ListingSummaryRow {
 
 /**
  * Dashboard listing rows, newest change first. Deleted drafts are always excluded.
- * `editorId` limits the rows to listings that user created or is assigned to.
+ * `creatorId` limits the rows to listings that user created.
  */
 const pendingRevisionExists = exists(
   sql`(select 1 from ${listingRevisions} where ${listingRevisions.listingId} = ${listings.id} and ${listingRevisions.status} = ${ReviewStatus.PENDING})`,
 );
 
 export interface SummaryFilter {
-  editorId?: string;
+  creatorId?: string;
   status?: ListingStatus;
   pendingRevision?: boolean;
 }
@@ -155,11 +148,7 @@ export interface SummaryFilter {
 function summaryConditions(filter: SummaryFilter): SQL[] {
   const conditions: SQL[] = [isNull(listings.deletedAt)];
   if (filter.pendingRevision) conditions.push(pendingRevisionExists);
-  if (filter.editorId) {
-    conditions.push(
-      or(eq(listings.createdById, filter.editorId), eq(listings.assignedAgentId, filter.editorId))!,
-    );
-  }
+  if (filter.creatorId) conditions.push(eq(listings.createdById, filter.creatorId));
   if (filter.status) conditions.push(eq(listings.status, filter.status));
   return conditions;
 }
@@ -316,13 +305,6 @@ export async function approvePendingImages(db: DbExecutor, listingId: string): P
     .update(listingMedia)
     .set({ approvedAt: new Date() })
     .where(and(eq(listingMedia.listingId, listingId), isNull(listingMedia.approvedAt)));
-}
-
-export async function insertAssignment(
-  db: DbExecutor,
-  assignment: typeof listingAssignments.$inferInsert,
-): Promise<void> {
-  await db.insert(listingAssignments).values(assignment);
 }
 
 /** Storage keys of every media file of the listing, for cleanup after deletion. */

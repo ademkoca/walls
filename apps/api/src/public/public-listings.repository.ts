@@ -262,7 +262,7 @@ export async function findPublicListing(db: DbExecutor, slug: string) {
   if (!row) return undefined;
 
   const { listing, property } = row;
-  const [texts, amenityRows, images, assignedAgent] = await Promise.all([
+  const [texts, amenityRows, images] = await Promise.all([
     db
       .select({
         locale: listingTexts.locale,
@@ -298,30 +298,13 @@ export async function findPublicListing(db: DbExecutor, slug: string) {
         asc(listingMedia.sortOrder),
         asc(listingMedia.createdAt),
       ),
-    listing.assignedAgentId ? findActiveAgent(db, listing.assignedAgentId) : undefined,
   ]);
   return {
     ...row,
     texts,
     amenityCodes: amenityRows.map((amenity) => amenity.code),
     images,
-    assignedAgent,
   };
-}
-
-async function findActiveAgent(db: DbExecutor, id: string) {
-  const [agent] = await db
-    .select()
-    .from(users)
-    .where(
-      and(
-        eq(users.id, id),
-        eq(users.role, Role.REAL_ESTATE_AGENT),
-        eq(users.status, UserStatus.ACTIVE),
-      ),
-    )
-    .limit(1);
-  return agent;
 }
 
 /**

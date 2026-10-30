@@ -464,8 +464,6 @@
     "details": {
       "creator": "Advertiser",
       "sellerType": "Advertiser type",
-      "assignedAgent": "Assigned agent or agency",
-      "none": "None",
       "publishedAt": "Published",
       "slug": "Listing address"
     },
@@ -488,12 +486,6 @@
     "featuredUntil": "Featured until (optional)",
     "saveFeatured": "Save",
     "featuredSaved": "Featuring saved.",
-    "agent": "Assigned agent or agency",
-    "searchAgents": "Search agents and agencies by name or email",
-    "noAgents": "No active agents or agencies match.",
-    "assign": "Assign",
-    "unassign": "Remove assignment",
-    "agentSaved": "Assignment saved.",
     "permanentDelete": "Delete permanently",
     "permanentDeleteTitle": "Delete this listing permanently?",
     "permanentDeleteDescription": "The listing, its images and its history are deleted for good; only the audit log keeps a record. This can't be undone.",
@@ -1093,7 +1085,6 @@
     "mapLabel": "Map of the property's location",
     "approximateNote": "The advertiser keeps the exact address private. The circle shows the area the property is in.",
     "advertiser": "Advertiser",
-    "assignedAgent": "{type, select, AGENCY {Agency for this property} other {Agent for this property}}",
     "viewProfile": "View profile",
     "published": "Published {date}",
     "facts": {
@@ -1151,8 +1142,6 @@
       "message": "Message",
       "received": "Received"
     },
-    "readOnly": "Read only",
-    "readOnlyHint": "The agent or agency assigned to this listing handles this inquiry. You can read it but not change its status.",
     "untitled": "Untitled listing",
     "backToList": "All inquiries",
     "from": "From",
@@ -1163,7 +1152,6 @@
     "listing": "Listing",
     "received": "Received",
     "recipient": "Handled by",
-    "assignedAgent": "Assigned agent or agency",
     "status": "Status",
     "reply": "Reply by email",
     "replyHint": "Only the advertiser who receives this inquiry replies to the visitor.",
@@ -1330,7 +1318,7 @@
         },
         "share": {
           "title": "Who sees it",
-          "body": "Public profiles and published listings are visible to everyone. Agents', agencies' and investors' phone numbers are always shown on their profiles; private sellers choose whether to show theirs. An email address is shown only if its owner chooses so, and a property's exact address only if the advertiser chooses so.\n\nInquiries go only to the advertiser or the agent or agency assigned to the listing, and contact messages only to us. We don't sell personal data."
+          "body": "Public profiles and published listings are visible to everyone. Agents', agencies' and investors' phone numbers are always shown on their profiles; private sellers choose whether to show theirs. An email address is shown only if its owner chooses so, and a property's exact address only if the advertiser chooses so.\n\nInquiries go only to the listing's advertiser, and contact messages only to us. We don't sell personal data."
         },
         "providers": {
           "title": "Service providers",

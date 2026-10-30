@@ -25,8 +25,8 @@ Secondary audiences, in order:
   review, follow rejection feedback, manage their profile and answer inquiries. At the Novi
   Pazar launch most professional advertisers are agencies and investors.
 - **Admins and Super Admins (the Walls team).** They review listings, revisions, professional
-  applications and profile changes, assign agents, feature listings, manage accounts and read
-  analytics and the audit log, all in the dashboard.
+  applications and profile changes, feature listings, manage accounts and read analytics and
+  the audit log, all in the dashboard.
 
 ## Product Purpose
 

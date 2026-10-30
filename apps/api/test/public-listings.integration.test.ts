@@ -260,8 +260,8 @@ describe('public listing page (SPEC §13, §16)', () => {
         phone: null,
         email: null,
       },
-      assignedAgent: null,
     });
+    expect(listing).not.toHaveProperty('assignedAgent');
     expect(listing.location.approximate).toMatchObject({ radiusMeters: 250 });
     expect(JSON.stringify(listing)).not.toContain('Njegoševa');
     expect(listing.images).toHaveLength(3);
@@ -274,19 +274,13 @@ describe('public listing page (SPEC §13, §16)', () => {
     expect(listing.images[0]).not.toHaveProperty('key');
   });
 
-  it('shows the exact address and the assigned agent when there are', async () => {
+  it('shows the exact address when the advertiser made it public', async () => {
     const seller = await ctx.signedInUser();
-    const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
-    const { id, slug } = await published(seller.client, { isExactAddressPublic: true });
-    await admin.client.put(`${LISTINGS}/${id}/assignment`, { agentId: agent.user.id });
+    const { slug } = await published(seller.client, { isExactAddressPublic: true });
     const { listing } = await detail(slug);
     expect(listing.location).toMatchObject({
       exact: { street: 'Njegoševa', streetNumber: '12a', latitude: 44.8, longitude: 20.47 },
       approximate: null,
-    });
-    expect(listing.assignedAgent).toMatchObject({
-      slug: agent.user.slug,
-      sellerType: 'REAL_ESTATE_AGENT',
     });
   });
 
@@ -391,20 +385,10 @@ describe('searching by advertiser type (SPEC §17)', () => {
     }
   });
 
-  it('goes by the creator even when an agency is assigned to the listing', async () => {
-    const agency = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.AGENCY);
-    await admin.client.put(`${LISTINGS}/${ids.PRIVATE_SELLER}/assignment`, {
-      agentId: agency.user.id,
-    });
-    expect(await ordered({ sellerType: 'PRIVATE_SELLER' })).toEqual([ids.PRIVATE_SELLER]);
-    expect(await ordered({ sellerType: 'AGENCY' })).toEqual([ids.AGENCY]);
-  });
-
-  it('shows the advertiser and an assigned agency with their kinds on the listing page', async () => {
-    const card = (await search({ location: city, sellerType: 'PRIVATE_SELLER' })).items[0]!;
+  it('shows the advertiser with its kind on the listing page', async () => {
+    const card = (await search({ location: city, sellerType: 'AGENCY' })).items[0]!;
     const { listing } = await detail(card.slug);
-    expect(listing.advertiser).toMatchObject({ sellerType: 'PRIVATE_SELLER' });
-    expect(listing.assignedAgent).toMatchObject({ sellerType: 'AGENCY', agencyName: null });
+    expect(listing.advertiser).toMatchObject({ sellerType: 'AGENCY', agencyName: null });
   });
 });
 

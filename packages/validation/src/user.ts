@@ -22,17 +22,10 @@ export const ADMIN_LIST_LIMITS = {
 
 const pageSchema = z.coerce.number().int().min(1).max(ADMIN_LIST_LIMITS.maxPage).default(1);
 
-/**
- * User list filter; `q` matches name or email. `assignable=true` keeps the professionals a
- * listing can be assigned to (agents and agencies).
- */
+/** User list filter; `q` matches name or email. */
 export const userListQuerySchema = z.strictObject({
   role: z.enum(enumValues(Role)).optional(),
   status: z.enum(enumValues(UserStatus)).optional(),
-  assignable: z
-    .literal('true')
-    .transform(() => true)
-    .optional(),
   q: z.string().trim().max(ADMIN_LIST_LIMITS.searchMaxLength).optional(),
   page: pageSchema,
 });

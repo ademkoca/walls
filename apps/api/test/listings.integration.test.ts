@@ -23,7 +23,7 @@ const ctx = createTestContext();
 afterAll(ctx.close);
 
 describe('creating listings (SPEC §2.1, §5)', () => {
-  it('creates an empty draft owned by the private seller, with no assigned agent', async () => {
+  it('creates an empty draft owned by the private seller', async () => {
     const { user, client } = await ctx.signedInUser(Role.PRIVATE_SELLER);
     const id = await createListing(client);
 
@@ -36,7 +36,7 @@ describe('creating listings (SPEC §2.1, §5)', () => {
       permissions: { editMode: 'DRAFT', canDelete: true, actions: ['SUBMIT'] },
     });
     const [row] = await ctx.db.select().from(listings).where(eq(listings.id, id));
-    expect(row).toMatchObject({ createdById: user.id, assignedAgentId: null });
+    expect(row).toMatchObject({ createdById: user.id });
 
     const [history] = await ctx.db
       .select()
@@ -79,30 +79,13 @@ describe('access to listings (SPEC §26)', () => {
     }
   });
 
-  it('lets an assigned agent manage the listing alongside its creator', async () => {
-    const owner = await ctx.signedInUser();
-    const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
-    const id = await createListing(owner.client);
-    await ctx.db
-      .update(listings)
-      .set({ assignedAgentId: agent.user.id })
-      .where(eq(listings.id, id));
-
-    expect((await agent.client.get(`${LISTINGS}/${id}`)).status).toBe(200);
-    expect(
-      (await agent.client.patch(`${LISTINGS}/${id}`, { transactionType: 'RENT' })).status,
-    ).toBe(200);
-    expect((await owner.client.get(`${LISTINGS}/${id}`)).status).toBe(200);
-  });
-
-  it('rejects ownership, status and assignment fields sent by the client', async () => {
+  it('rejects ownership and status fields sent by the client', async () => {
     const { client } = await ctx.signedInUser();
     const other = await ctx.signedInUser();
     const id = await createListing(client);
 
     for (const field of [
       { createdById: other.user.id },
-      { assignedAgentId: other.user.id },
       { sellerType: 'REAL_ESTATE_AGENT' },
       { status: 'PUBLISHED' },
     ]) {

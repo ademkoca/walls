@@ -13,7 +13,6 @@ import { ConfirmDialog, ReasonDialog, TypedConfirmDialog } from '@/components/da
 import { useRouter } from '@/i18n/navigation';
 import { listingsApi } from '@/lib/api/listings';
 import { useErrorMessage } from '@/lib/use-error-message';
-import { AgentPicker } from './agent-picker';
 import { type RevisionGroup, revisionChanges } from './revision-changes';
 
 type Dialog =
@@ -38,7 +37,7 @@ const dateInputValue = (iso: string | null) => (iso ? iso.slice(0, 10) : '');
 
 /**
  * Admin / Super Admin tools for one listing: review the submission or its pending changes,
- * change status, feature, assign an agent, delete permanently. Every action is authorized
+ * change status, feature, delete permanently. Every action is authorized
  * again by the API; buttons only appear when the server says they are allowed.
  */
 export function ReviewPanel({
@@ -220,23 +219,6 @@ export function ReviewPanel({
             >
               {t('saveFeatured')}
             </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {listing.permissions.canAssignAgent && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t('agent')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AgentPicker
-              agent={listing.assignedAgent}
-              busy={busy}
-              onAssign={(agentId) =>
-                void run(() => listingsApi.assignAgent(listing.id, { agentId }), t('agentSaved'))
-              }
-            />
           </CardContent>
         </Card>
       )}

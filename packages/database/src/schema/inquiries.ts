@@ -11,12 +11,10 @@ export const inquiries = pgTable(
     listingId: uuid()
       .notNull()
       .references(() => listings.id, { onDelete: 'cascade' }),
-    /** Resolved server-side at creation: the assigned agent, otherwise the advertiser. */
+    /** The listing's creator, resolved server-side at creation (SPEC §20). */
     recipientUserId: uuid()
       .notNull()
       .references(() => users.id, { onDelete: 'restrict' }),
-    /** The listing's assigned agent when the inquiry was created, if any. */
-    assignedAgentId: uuid().references(() => users.id, { onDelete: 'restrict' }),
     /**
      * The signed-in private seller or agent who sent it, for their "Sent" history; null for
      * visitors without an account. Set by the API from the session, never from input.

@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-30 (launch test results triaged with the user: Phase 1 of the fixes built, uncommitted, awaiting review; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-30 (launch test fixes: Phase 1 committed as `8544c68`, not pushed; Phase 2 (decision A, no more assignment) committed, not pushed; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -50,8 +50,8 @@ results in its `results` collection). Triaged together; the user's decisions:
   focus), ADML-06 (admin listing search/filters, later when Walls grows), PUB-09 (contact
   inbox email stays Serbian by design). AUTH-03 and AUTH-09 count as passed.
 
-Plan: **Phase 1** (built 2026-10-30, uncommitted) bug fixes and small changes; **Phase 2**
-decision A; **Phase 3** decision B; **Phase 4** decision D. SPEC.md is updated in each phase
+Plan: **Phase 1** (committed `8544c68`) bug fixes and small changes; **Phase 2** (committed,
+uncommitted) decision A; **Phase 3** decision B; **Phase 4** decision D. SPEC.md is updated in each phase
 as it is built, so it never describes behavior the code doesn't have.
 
 Phase 1 contents:
@@ -76,6 +76,25 @@ Phase 1 contents:
   cards. "View on site" button in the editor of a published listing.
 - Proof files: 10 MB per file, photos above that reduced in the browser; listing photos and
   avatars are still reduced above 3.5 MB (`SHRINK_ABOVE_BYTES`), for upload speed and storage.
+
+Phase 2 contents (decision A):
+
+- Access is creator-only: `isListingEditor`/`isAssignedAgent`, `canAssignAgent`,
+  `canBeAssigned`/`ASSIGNABLE_SELLER_TYPES`, `resolveInquiryRecipientId` and the
+  `assignable` user filter are gone; `ListingActorKind.EDITOR` is now `CREATOR`.
+- No `PUT /listings/:id/assignment`, no agent picker in the review panel, no "Agent for this
+  property" card on the listing page. Profiles and the partner directory count only the
+  listings a professional created.
+- Inquiries always go to the listing's creator; the read-only inquiry view is gone
+  (`canViewInquiry` = `canManageInquiry`). `recipientUserId` stays on inquiries.
+- Migration `0015_remove_listing_assignment` first moves inquiries an assigned agent received
+  to the listing's creator, then drops `listing_assignments`, `listings.assigned_agent_id` and
+  `inquiries.assigned_agent_id`. Checked on a copy of the local dev data. Staging's demo
+  assignments (3 listings) simply end; production has none.
+- Old audit entries `LISTING_AGENT_ASSIGNED`/`UNASSIGNED` keep their labels in the messages so
+  the audit log still reads them; the API no longer writes them.
+- The demo seed no longer assigns listings. `hasSearchableText` (only the agent search used
+  it) removed.
 
 **Immediate next step (2026-10-14):** the user is signed in to `https://preview.walls.rs` as the
 production Super Admin (created with `pnpm admin:create` using their personal email; HTTPS works,

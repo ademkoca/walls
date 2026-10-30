@@ -16,7 +16,6 @@ import { ListingAction } from './lifecycle';
 import {
   ListingEditMode,
   availableListingActions,
-  canAssignAgent,
   canCreateListing,
   canDeleteDraft,
   canEditListing,
@@ -38,16 +37,12 @@ describe('viewing listings in the dashboard', () => {
     );
   });
 
-  it('lets an agent see listings they created or are assigned to, and no others', () => {
+  it('lets an agent see only the listings they created', () => {
     expect(canViewListing(agent, listing({ createdById: agent.id }))).toEqual(allowed);
-    expect(canViewListing(agent, listing({ assignedAgentId: agent.id }))).toEqual(allowed);
-    expect(canViewListing(otherAgent, listing({ assignedAgentId: agent.id }))).toEqual(
+    expect(canViewListing(otherAgent, listing({ createdById: agent.id }))).toEqual(
       denied(DenialReason.NOT_RESOURCE_PARTICIPANT),
     );
-  });
-
-  it('keeps the creator’s access after an agent is assigned', () => {
-    expect(canViewListing(seller, listing({ assignedAgentId: agent.id }))).toEqual(allowed);
+    expect(canViewListing(agent, listing())).toEqual(denied(DenialReason.NOT_RESOURCE_PARTICIPANT));
   });
 
   it('lets admins see every listing, including deleted drafts', () => {
@@ -79,8 +74,8 @@ describe('editing listing content', () => {
     });
   });
 
-  it('lets the assigned agent edit', () => {
-    expect(canEditListing(agent, listing({ assignedAgentId: agent.id })).allowed).toBe(true);
+  it('lets an agent edit their own listing', () => {
+    expect(canEditListing(agent, listing({ createdById: agent.id })).allowed).toBe(true);
   });
 
   it.each([
@@ -93,11 +88,11 @@ describe('editing listing content', () => {
     expect(canEditListing(seller, listing({ status }))).toEqual(denied(DenialReason.INVALID_STATE));
   });
 
-  it('does not let another seller or an unassigned agent edit', () => {
+  it('does not let another seller or agent edit', () => {
     expect(canEditListing(otherSeller, listing())).toEqual(
       denied(DenialReason.NOT_RESOURCE_PARTICIPANT),
     );
-    expect(canEditListing(otherAgent, listing({ assignedAgentId: agent.id }))).toEqual(
+    expect(canEditListing(otherAgent, listing({ createdById: agent.id }))).toEqual(
       denied(DenialReason.NOT_RESOURCE_PARTICIPANT),
     );
   });
@@ -193,20 +188,11 @@ describe('deleting drafts', () => {
     expect(canDeleteDraft(seller, listing({ status: ListingStatus.PENDING_REVIEW }))).toEqual(
       denied(DenialReason.INVALID_STATE),
     );
-    expect(canDeleteDraft(agent, listing({ assignedAgentId: agent.id }))).toEqual(
-      denied(DenialReason.NOT_RESOURCE_PARTICIPANT),
-    );
+    expect(canDeleteDraft(agent, listing())).toEqual(denied(DenialReason.NOT_RESOURCE_PARTICIPANT));
   });
 });
 
 describe('admin-only operations', () => {
-  it('lets only reviewers assign agents', () => {
-    expect(canAssignAgent(admin, listing())).toEqual(allowed);
-    expect(canAssignAgent(agent, listing({ createdById: agent.id }))).toEqual(
-      denied(DenialReason.ROLE_NOT_PERMITTED),
-    );
-  });
-
   it('features only published listings', () => {
     expect(canSetFeatured(admin, listing({ status: ListingStatus.PUBLISHED }))).toEqual(allowed);
     expect(canSetFeatured(admin, listing())).toEqual(denied(DenialReason.INVALID_STATE));

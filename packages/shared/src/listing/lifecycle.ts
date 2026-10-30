@@ -2,9 +2,9 @@ import { ListingStatus, TransactionType, UserStatus } from '../enums';
 
 /** Status-changing actions on a listing (SPEC §6). */
 export const ListingAction = {
-  /** Creator/editor sends a draft for review. */
+  /** The creator sends a draft for review. */
   SUBMIT: 'SUBMIT',
-  /** Creator/editor reopens a rejected listing as a draft to revise it. */
+  /** The creator reopens a rejected listing as a draft to revise it. */
   REVISE: 'REVISE',
   APPROVE: 'APPROVE',
   /** Requires a rejection reason. */
@@ -17,8 +17,8 @@ export type ListingAction = (typeof ListingAction)[keyof typeof ListingAction];
 
 /** Who may perform an action, relative to the listing. */
 export const ListingActorKind = {
-  /** The listing's creator or assigned agent. */
-  EDITOR: 'EDITOR',
+  /** The listing's creator. */
+  CREATOR: 'CREATOR',
   /** An Admin or Super Admin. */
   REVIEWER: 'REVIEWER',
 } as const;
@@ -35,8 +35,8 @@ interface TransitionRule {
 const { DRAFT, PENDING_REVIEW, PUBLISHED, REJECTED, SOLD, RENTED, ARCHIVED } = ListingStatus;
 
 export const LISTING_TRANSITIONS: Readonly<Record<ListingAction, TransitionRule>> = {
-  SUBMIT: { from: [DRAFT], to: PENDING_REVIEW, performedBy: ListingActorKind.EDITOR },
-  REVISE: { from: [REJECTED], to: DRAFT, performedBy: ListingActorKind.EDITOR },
+  SUBMIT: { from: [DRAFT], to: PENDING_REVIEW, performedBy: ListingActorKind.CREATOR },
+  REVISE: { from: [REJECTED], to: DRAFT, performedBy: ListingActorKind.CREATOR },
   APPROVE: { from: [PENDING_REVIEW], to: PUBLISHED, performedBy: ListingActorKind.REVIEWER },
   REJECT: { from: [PENDING_REVIEW], to: REJECTED, performedBy: ListingActorKind.REVIEWER },
   // A sale listing can only be sold and a rental listing can only be rented.

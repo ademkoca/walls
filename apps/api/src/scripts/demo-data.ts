@@ -743,8 +743,6 @@ export interface DemoListing {
   } | null;
   exact?: boolean;
   featured?: boolean;
-  /** An agent or agency the admin assigned to this (private seller's) listing. */
-  assign?: string;
 }
 
 const { APARTMENT, HOUSE, VILLA, OFFICE, RETAIL, WAREHOUSE, LAND, GARAGE, OTHER } = PropertyType;
@@ -879,7 +877,6 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     furnished: SEMI_FURNISHED,
     features: [ELEVATOR, BALCONY, PARKING],
     price: { amount: 172000, negotiable: true },
-    assign: 'ana',
   },
   {
     by: 'marko',
@@ -1241,7 +1238,6 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     features: [GARDEN, GARAGE_FEATURE, PETS_ALLOWED, SEWAGE, GAS_CONNECTION],
     price: { amount: 189000, negotiable: true },
     exact: true,
-    assign: 'agencija',
   },
   {
     by: 'jelena',
@@ -1522,7 +1518,6 @@ export const DEMO_LISTINGS: readonly DemoListing[] = [
     heating: DISTRICT,
     features: [ELEVATOR, AIR_CONDITIONING, INTERNET],
     price: { amount: 165000 },
-    assign: 'agencija',
   },
   {
     by: 'agencija',

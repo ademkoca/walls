@@ -9,9 +9,8 @@ import { ProfileAvatar } from '../profiles/profile-avatar';
 import { SellerTypeBadge } from '../profiles/seller-type-badge';
 
 /**
- * Who advertises the listing, or the agent or agency assigned to it, with the contact details
- * they made public (SPEC §19). A badge names the kind of advertiser; phone numbers always
- * carry their verification status.
+ * Who advertises the listing, with the contact details they made public (SPEC §19). A badge
+ * names the kind of advertiser; phone numbers always carry their verification status.
  */
 export function AdvertiserCard({ title, profile }: { title: string; profile: PublicProfile }) {
   const t = useTranslations('listing');

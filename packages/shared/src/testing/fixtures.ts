@@ -40,7 +40,6 @@ export const investor = actor(Role.REAL_ESTATE_AGENT, {
 export function listing(overrides: Partial<ListingAccessContext> = {}): ListingAccessContext {
   return {
     createdById: seller.id,
-    assignedAgentId: null,
     status: ListingStatus.DRAFT,
     transactionType: TransactionType.SALE,
     deletedAt: null,

@@ -16,7 +16,6 @@ import {
   isReviewer,
   keepsSentInquiries,
   requireActive,
-  resolveInquiryRecipientId,
 } from '@walls/shared';
 import type { InquiryData, InquiryListQuery } from '@walls/validation';
 import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
@@ -58,10 +57,7 @@ function preview(message: string): string {
 }
 
 function accessOf(row: InquiryViewRow) {
-  return {
-    recipientUserId: row.inquiry.recipientUserId,
-    listingCreatedById: row.listing.createdById,
-  };
+  return { recipientUserId: row.inquiry.recipientUserId };
 }
 
 function toSummary(row: InquiryViewRow, actor: Actor): InquirySummary {
@@ -87,7 +83,6 @@ function toDetail(row: InquiryViewRow, actor: Actor): InquiryDetail {
     message: inquiry.message,
     fromRegisteredUser: inquiry.senderUserId !== null,
     recipient: row.recipient,
-    assignedAgent: row.agent?.id ? { id: row.agent.id, displayName: row.agent.displayName } : null,
     updatedAt: inquiry.updatedAt.toISOString(),
   };
 }
@@ -143,17 +138,13 @@ export class InquiriesService {
       );
     }
 
-    const recipientId = resolveInquiryRecipientId({
-      createdById: listing.createdById,
-      assignedAgent: target.assignedAgent,
-    });
-    const recipient = recipientId === target.creator.id ? target.creator : target.assignedAgent!;
+    // Listings belong to their creators, who receive their inquiries (SPEC §20).
+    const recipient = target.creator;
 
     await this.db.transaction(async (tx) => {
       const inquiry = await insertInquiry(tx, {
         listingId: listing.id,
         recipientUserId: recipient.id,
-        assignedAgentId: listing.assignedAgentId,
         senderUserId: account?.id ?? null,
         visitorName: name,
         visitorEmail: email,

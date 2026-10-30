@@ -132,9 +132,9 @@ export type PriceInput = z.infer<typeof priceInputSchema>;
 export const amenityCodeSchema = z.string().regex(/^[A-Z][A-Z0-9_]*$/, 'Invalid amenity code');
 
 /**
- * Creating or updating a listing as an editor. Every field is optional so drafts can be
- * saved incomplete. Ownership, seller type, status and agent assignment are deliberately
- * absent: they are derived server-side, and strict parsing rejects them if sent.
+ * Creating or updating a listing as its creator. Every field is optional so drafts can be
+ * saved incomplete. Ownership, seller type and status are deliberately absent: they are
+ * derived server-side, and strict parsing rejects them if sent.
  */
 export const listingInputSchema = z
   .strictObject({
@@ -225,9 +225,3 @@ export const setFeaturedInputSchema = z
     path: ['featuredUntil'],
   });
 export type SetFeaturedInput = z.infer<typeof setFeaturedInputSchema>;
-
-/** Assigning an agent to a listing, or removing the assignment with null (SPEC §5). */
-export const assignAgentInputSchema = z.strictObject({
-  agentId: z.uuid().nullable(),
-});
-export type AssignAgentInput = z.infer<typeof assignAgentInputSchema>;

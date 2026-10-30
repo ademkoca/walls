@@ -8,26 +8,11 @@ import {
   isReviewer,
   requireActive,
 } from '../access/decision';
-import { Role, UserStatus } from '../enums';
-
-/**
- * The user who receives and manages a new inquiry: the assigned agent if the listing has
- * one, otherwise the listing's creator/advertiser (SPEC §20). Resolved when the inquiry is
- * created and stored on it. A deactivated assigned agent cannot sign in, so their
- * inquiries go to the creator instead (decision, Phase 9).
- */
-export function resolveInquiryRecipientId(listing: {
-  createdById: string;
-  assignedAgent: { id: string; status: UserStatus } | null;
-}): string {
-  const agent = listing.assignedAgent;
-  return agent && agent.status !== UserStatus.DEACTIVATED ? agent.id : listing.createdById;
-}
+import { Role } from '../enums';
 
 export interface InquiryAccessContext {
+  /** The listing's creator when the inquiry arrived (SPEC §20). */
   recipientUserId: string;
-  /** Creator of the listing the inquiry is about. */
-  listingCreatedById: string;
 }
 
 /** Updating an inquiry's status: its recipient, or any Admin/Super Admin. */
@@ -44,7 +29,7 @@ export function canManageInquiry(actor: Actor, inquiry: InquiryAccessContext): D
 /**
  * Writing back to the visitor (the "Reply by email" button and the visitor's contact links):
  * only the recipient does. Admins manage inquiries (status) and can read them, but do not
- * reply (decision, 2026-10-14: privacy); a creator with read-only access does not either.
+ * reply (decision, 2026-10-14: privacy).
  */
 export function canReplyToInquiry(actor: Actor, inquiry: InquiryAccessContext): Decision {
   return firstDenial(
@@ -54,11 +39,9 @@ export function canReplyToInquiry(actor: Actor, inquiry: InquiryAccessContext): 
   );
 }
 
-/** Reading an inquiry: anyone who can manage it, plus the listing creator (read-only). */
+/** Reading an inquiry: whoever may manage it. */
 export function canViewInquiry(actor: Actor, inquiry: InquiryAccessContext): Decision {
-  const manage = canManageInquiry(actor, inquiry);
-  if (manage.allowed || manage.reason === DenialReason.ACCOUNT_INACTIVE) return manage;
-  return inquiry.listingCreatedById === actor.id ? allow() : manage;
+  return canManageInquiry(actor, inquiry);
 }
 
 /**
@@ -69,10 +52,7 @@ export function keepsSentInquiries(role: Role): boolean {
   return role === Role.PRIVATE_SELLER || role === Role.REAL_ESTATE_AGENT;
 }
 
-/** The listing's creator and assigned agent receive its inquiries; they cannot send one. */
-export function isOwnListing(
-  userId: string,
-  listing: { createdById: string; assignedAgentId: string | null },
-): boolean {
-  return listing.createdById === userId || listing.assignedAgentId === userId;
+/** The listing's creator receives its inquiries; they cannot send one. */
+export function isOwnListing(userId: string, listing: { createdById: string }): boolean {
+  return listing.createdById === userId;
 }

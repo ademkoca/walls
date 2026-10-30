@@ -72,7 +72,6 @@ describe('listings', () => {
       priceMode: 'ON_REQUEST',
       priceAmountMinor: null,
       isExactAddressPublic: false,
-      assignedAgentId: null,
     });
   });
 

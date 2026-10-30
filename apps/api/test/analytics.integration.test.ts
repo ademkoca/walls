@@ -90,14 +90,14 @@ describe('listing views and analytics (SPEC §23)', () => {
     expect((await analyticsOf(seller, id)).totalViews).toBe(2);
   });
 
-  it('shows listing numbers to its editors and admins only', async () => {
+  it('shows listing numbers to its creator and admins only', async () => {
     const seller = await ctx.signedInUser();
     const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
     const { id } = await publishedListing(seller);
-    await admin.client.put(`${LISTINGS}/${id}/assignment`, { agentId: agent.user.id });
     const path = `/api/v1/analytics/listings/${id}`;
-    expect((await agent.client.get(path)).status).toBe(200);
+    expect((await seller.client.get(path)).status).toBe(200);
     expect((await admin.client.get(path)).status).toBe(200);
+    expect((await agent.client.get(path)).status).toBe(403);
     expect((await (await ctx.signedInUser()).client.get(path)).status).toBe(403);
     expect((await ctx.client().get(path)).status).toBe(401);
   });

@@ -9,14 +9,10 @@ import { InquiryStatus } from '@walls/shared';
 import { and, count, eq, gte, isNull, lt, sql, sum } from 'drizzle-orm';
 import { creator, publiclyVisible } from '../public/listing-cards';
 
-/** A public listing's id and the people whose own views are not counted. */
+/** A public listing's id and its creator, whose own views are not counted. */
 export async function findViewableListing(db: DbExecutor, slug: string) {
   const [row] = await db
-    .select({
-      id: listings.id,
-      createdById: listings.createdById,
-      assignedAgentId: listings.assignedAgentId,
-    })
+    .select({ id: listings.id, createdById: listings.createdById })
     .from(listings)
     .innerJoin(creator, eq(creator.id, listings.createdById))
     .where(and(publiclyVisible, eq(listings.slug, slug)))

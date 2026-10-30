@@ -75,7 +75,6 @@ describe('sending an inquiry (SPEC §20)', () => {
       visitorPhone: '+381 64 111 2222',
       message: body.message,
       recipient: { id: seller.user.id },
-      assignedAgent: null,
       canReply: true,
     });
 
@@ -87,52 +86,27 @@ describe('sending an inquiry (SPEC §20)', () => {
     expect(asAdmin.inquiry.visitorEmail).toBe(body.email);
   });
 
-  it('routes to the assigned agent only; the creator can read it but not change it', async () => {
-    const seller = await ctx.signedInUser();
+  it('goes to the agent who created the listing, and nobody else sees it', async () => {
     const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
-    const { id, slug } = await publishedListing(seller);
-    await admin.client.put(`${LISTINGS}/${id}/assignment`, { agentId: agent.user.id });
+    const { slug } = await publishedListing(agent);
     expect((await send(slug, inquiry())).status).toBe(201);
 
     expect((await ctx.lastEmailTo(agent.user.email))?.subject).toContain('Trosoban');
-    expect((await ctx.lastEmailTo(seller.user.email))?.subject ?? '').not.toContain('inquiry');
-    expect((await ctx.lastEmailTo(seller.user.email))?.subject ?? '').not.toContain('upit');
-
-    const [forAgent] = (await listOf(agent)).items;
-    expect(forAgent?.canManage).toBe(true);
-    expect(await countsOf(agent)).toEqual({ new: 1 });
-    const [forSeller] = (await listOf(seller)).items;
-    expect(forSeller).toMatchObject({ id: forAgent!.id, canManage: false });
-    expect(await countsOf(seller)).toEqual({ new: 0 });
-
-    const path = `/api/v1/inquiries/${forAgent!.id}`;
-    expect((await seller.client.put(`${path}/status`, { status: 'CLOSED' })).status).toBe(403);
-    const detail = (await seller.client.get(path)).body as { inquiry: InquiryDetail };
-    expect(detail.inquiry).toMatchObject({
-      recipient: { id: agent.user.id },
-      assignedAgent: { id: agent.user.id },
-      canManage: false,
-      canReply: false,
-    });
-    const asAgent = (await agent.client.get(path)).body as { inquiry: InquiryDetail };
-    expect(asAgent.inquiry.canReply).toBe(true);
-    const stranger = await ctx.signedInUser();
-    expect((await stranger.client.get(path)).status).toBe(403);
-    expect((await listOf(stranger)).items).toEqual([]);
-  });
-
-  it('goes to the creator when the assigned agent was deactivated (decision, Phase 9)', async () => {
-    const seller = await ctx.signedInUser();
-    const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
-    const { id, slug } = await publishedListing(seller);
-    await admin.client.put(`${LISTINGS}/${id}/assignment`, { agentId: agent.user.id });
-    await admin.client.post(`/api/v1/users/${agent.user.id}/deactivate`, { reason: 'Prevara.' });
-    expect((await send(slug, inquiry())).status).toBe(201);
-
-    const [item] = (await listOf(seller)).items;
+    const [item] = (await listOf(agent)).items;
     expect(item?.canManage).toBe(true);
-    const [row] = await ctx.db.select().from(inquiries).where(eq(inquiries.listingId, id));
-    expect(row).toMatchObject({ recipientUserId: seller.user.id, assignedAgentId: agent.user.id });
+    expect(await countsOf(agent)).toEqual({ new: 1 });
+
+    const path = `/api/v1/inquiries/${item!.id}`;
+    const detail = (await agent.client.get(path)).body as { inquiry: InquiryDetail };
+    expect(detail.inquiry).toMatchObject({ recipient: { id: agent.user.id }, canReply: true });
+    for (const stranger of [
+      await ctx.signedInUser(),
+      await ctx.signedInUser(Role.REAL_ESTATE_AGENT),
+    ]) {
+      expect((await stranger.client.get(path)).status).toBe(403);
+      expect((await stranger.client.put(`${path}/status`, { status: 'CLOSED' })).status).toBe(403);
+      expect((await listOf(stranger)).items).toEqual([]);
+    }
   });
 
   it('silently drops inquiries with the trap field filled in', async () => {
@@ -288,14 +262,13 @@ describe('inquiries from signed-in sellers and agents (decision, Phase 9)', () =
     expect(row).toMatchObject({ senderUserId: null, visitorName: body.name });
   });
 
-  it('refuses inquiries about your own listing, as creator or assigned agent', async () => {
+  it('refuses inquiries about your own listing', async () => {
     const seller = await ctx.signedInUser();
     const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
-    const { id, slug } = await publishedListing(seller);
-    await admin.client.put(`${LISTINGS}/${id}/assignment`, { agentId: agent.user.id });
-    const path = `/api/v1/public/listings/${slug}/inquiries`;
-    expect((await seller.client.post(path, inquiry())).status).toBe(403);
-    expect((await agent.client.post(path, inquiry())).status).toBe(403);
+    const path = async (owner: User) =>
+      `/api/v1/public/listings/${(await publishedListing(owner)).slug}/inquiries`;
+    expect((await seller.client.post(await path(seller), inquiry())).status).toBe(403);
+    expect((await agent.client.post(await path(agent), inquiry())).status).toBe(403);
   });
 
   it('leaves anonymous inquiries unlinked', async () => {

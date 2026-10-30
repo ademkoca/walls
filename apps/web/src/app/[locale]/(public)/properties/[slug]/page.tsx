@@ -266,23 +266,14 @@ export default async function ListingPage({ params }: PageProps<'/[locale]/prope
               <CardTitle className="text-base">{tInquiry('title')}</CardTitle>
             </CardHeader>
             <CardContent>
-              {/* An inquiry goes to the assigned agent, or else the advertiser (SPEC §20). */}
               <InquiryForm
                 slug={listing.slug}
-                recipientName={(listing.assignedAgent ?? listing.advertiser).displayName}
-                ownerSlugs={[listing.advertiser.slug, listing.assignedAgent?.slug].filter(
-                  (value) => value !== undefined,
-                )}
+                recipientName={listing.advertiser.displayName}
+                advertiserSlug={listing.advertiser.slug}
               />
             </CardContent>
           </Card>
           <AdvertiserCard title={t('advertiser')} profile={listing.advertiser} />
-          {listing.assignedAgent && (
-            <AdvertiserCard
-              title={t('assignedAgent', { type: listing.assignedAgent.sellerType })}
-              profile={listing.assignedAgent}
-            />
-          )}
           <p className="text-sm text-muted-foreground">{t('published', { date: publishedOn })}</p>
         </aside>
       </div>

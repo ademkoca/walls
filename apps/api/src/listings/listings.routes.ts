@@ -1,6 +1,5 @@
 import { LISTING_IMAGE_RULES, ListingAction } from '@walls/shared';
 import {
-  assignAgentInputSchema,
   idParamSchema,
   listingInputSchema,
   listingListQuerySchema,
@@ -124,13 +123,6 @@ export function listingsRoutes(deps: {
     const input = parseBody(setFeaturedInputSchema, req);
     res.json({
       listing: await review.setFeatured(requireAuth(req).actor, listingId(req.params), input),
-    });
-  });
-
-  router.put('/:id/assignment', async (req, res) => {
-    const input = parseBody(assignAgentInputSchema, req);
-    res.json({
-      listing: await review.assignAgent(requireAuth(req).actor, listingId(req.params), input),
     });
   });
 

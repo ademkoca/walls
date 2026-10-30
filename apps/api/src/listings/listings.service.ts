@@ -159,12 +159,12 @@ export class ListingsService {
 
   /**
    * Dashboard listings: every listing for reviewers (they manage all listings), otherwise
-   * the listings the user created or is assigned to.
+   * the listings the user created.
    */
   async list(actor: Actor, query: ListingListQuery): Promise<ListingSummary[]> {
     assertAllowed(requireActive(actor));
     const rows = await findListingSummaries(this.db, {
-      ...(isReviewer(actor) ? {} : { editorId: actor.id }),
+      ...(isReviewer(actor) ? {} : { creatorId: actor.id }),
       ...(query.status ? { status: query.status } : {}),
       ...(query.pendingRevision ? { pendingRevision: true } : {}),
     });

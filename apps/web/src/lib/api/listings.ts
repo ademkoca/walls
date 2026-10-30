@@ -1,10 +1,5 @@
 import type { ListingDetail, ListingImage } from '@walls/shared';
-import type {
-  AssignAgentInput,
-  ListingInput,
-  MediaOrderInput,
-  SetFeaturedInput,
-} from '@walls/validation';
+import type { ListingInput, MediaOrderInput, SetFeaturedInput } from '@walls/validation';
 import { apiFetch } from './client';
 
 type DetailResponse = { listing: ListingDetail };
@@ -41,9 +36,6 @@ export const listingsApi = {
     (await apiFetch<DetailResponse>(`${base(id)}/${action}`, { method: 'POST' })).listing,
   setFeatured: async (id: string, input: SetFeaturedInput) =>
     (await apiFetch<DetailResponse>(`${base(id)}/featured`, { method: 'PUT', body: input }))
-      .listing,
-  assignAgent: async (id: string, input: AssignAgentInput) =>
-    (await apiFetch<DetailResponse>(`${base(id)}/assignment`, { method: 'PUT', body: input }))
       .listing,
   permanentlyDelete: (id: string) => apiFetch(`${base(id)}/permanent`, { method: 'DELETE' }),
   approveRevision: async (id: string) =>

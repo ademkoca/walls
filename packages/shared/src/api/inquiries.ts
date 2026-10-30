@@ -32,10 +32,8 @@ export interface InquiryDetail extends InquirySummary {
   /** Only the recipient may write back to the visitor; admins read and set the status. */
   canReply: boolean;
   message: string;
-  /** Who received and manages the inquiry. */
+  /** Who received and manages the inquiry: the listing's creator. */
   recipient: UserReference;
-  /** The listing's assigned agent when the inquiry arrived. */
-  assignedAgent: UserReference | null;
   updatedAt: string;
 }
 
@@ -46,7 +44,7 @@ export interface InquiryDetail extends InquirySummary {
 export interface SentInquiry {
   id: string;
   listing: InquiryListingReference;
-  /** Who received it: the assigned agent, or the advertiser. */
+  /** Who received it: the listing's advertiser. */
   recipientName: string;
   message: string;
   createdAt: string;

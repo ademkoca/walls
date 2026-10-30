@@ -4,12 +4,8 @@ import {
   DEFAULT_LOCALE,
   ListingAction,
   type ListingDetail,
-  Role,
-  UserStatus,
   ListingField,
   ReviewStatus,
-  canAssignAgent,
-  canBeAssigned,
   canPerformListingAction,
   canPermanentlyDeleteListing,
   canReviewRevision,
@@ -18,7 +14,7 @@ import {
   nextFreeSlug,
   nextStatus,
 } from '@walls/shared';
-import type { AssignAgentInput, SetFeaturedInput } from '@walls/validation';
+import type { SetFeaturedInput } from '@walls/validation';
 import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
 import { findUserById } from '../auth/auth.repository';
 import type { Config } from '../config';
@@ -42,7 +38,6 @@ import {
   findPendingRevision,
   findListingSlugsLike,
   findMediaStorageKeys,
-  insertAssignment,
   insertStatusHistory,
   lockListing,
   unapprovedImageIds,
@@ -77,8 +72,8 @@ const REVISION_FIELDS: readonly ListingField[] = [
 
 /**
  * What Admins and Super Admins do with listings (SPEC §2.1, §6, §22, §24): review
- * submissions, change the status of published listings, feature, assign agents and
- * permanently delete. Content itself is only ever edited by the listing's editors.
+ * submissions, change the status of published listings, feature and permanently delete.
+ * Content itself is only ever edited by the listing's creator.
  */
 export class ListingReviewService {
   private readonly listings: ListingsService;
@@ -343,45 +338,6 @@ export class ListingReviewService {
         entityId: id,
         before: { isFeatured: listing.isFeatured, featuredUntil: listing.featuredUntil },
         after: { isFeatured: input.featured, featuredUntil },
-      });
-    });
-    return this.listings.get(actor, id);
-  }
-
-  /**
-   * Assigns an active agent or agency to the listing, or removes the assignment. Investors
-   * advertise only their own projects and cannot be assigned. The creator keeps access
-   * either way (SPEC §5).
-   */
-  async assignAgent(actor: Actor, id: string, input: AssignAgentInput): Promise<ListingDetail> {
-    await this.db.transaction(async (tx) => {
-      const listing = await lockListing(tx, id);
-      if (!listing) throw notFound();
-      assertAllowed(canAssignAgent(actor, accessContext(listing)));
-
-      if (input.agentId) {
-        const agent = await findUserById(tx, input.agentId);
-        if (
-          agent?.role !== Role.REAL_ESTATE_AGENT ||
-          !canBeAssigned(agent.sellerType) ||
-          agent.status !== UserStatus.ACTIVE
-        ) {
-          throw validationFailed(['agentId'], 'Choose an active agent or agency');
-        }
-      }
-      if (input.agentId === listing.assignedAgentId) return;
-
-      await updateListing(tx, id, { assignedAgentId: input.agentId });
-      await insertAssignment(tx, { listingId: id, agentId: input.agentId, assignedById: actor.id });
-      await recordAudit(tx, {
-        actorId: actor.id,
-        action: input.agentId
-          ? AuditAction.LISTING_AGENT_ASSIGNED
-          : AuditAction.LISTING_AGENT_UNASSIGNED,
-        entityType: AuditEntity.LISTING,
-        entityId: id,
-        before: { assignedAgentId: listing.assignedAgentId },
-        after: { assignedAgentId: input.agentId },
       });
     });
     return this.listings.get(actor, id);

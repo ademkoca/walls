@@ -69,7 +69,7 @@ export interface ListingImage {
   height: number | null;
 }
 
-/** A user shown next to a listing (creator, assigned agent). */
+/** A user shown next to a listing or an inquiry. */
 export interface UserReference {
   id: string;
   displayName: string;
@@ -81,9 +81,8 @@ export interface ListingPermissions {
   editMode: ListingEditMode | null;
   /** Soft-deleting a draft (creator only). */
   canDelete: boolean;
-  /** Lifecycle actions: SUBMIT/REVISE for editors, APPROVE/REJECT/… for reviewers. */
+  /** Lifecycle actions: SUBMIT/REVISE for the creator, APPROVE/REJECT/… for reviewers. */
   actions: ListingAction[];
-  canAssignAgent: boolean;
   canSetFeatured: boolean;
   canPermanentlyDelete: boolean;
 }
@@ -119,7 +118,7 @@ export interface ListingContentView {
 
 /**
  * Major edits of a published listing (SPEC §6): pending review, or the latest rejected one
- * so its editors can see the reason.
+ * so its creator can see the reason.
  */
 export interface ListingRevisionView {
   id: string;
@@ -136,7 +135,6 @@ export interface ListingDetail {
   status: ListingStatus;
   sellerType: SellerType;
   creator: UserReference;
-  assignedAgent: UserReference | null;
   /** Assigned at first publication; null before. */
   slug: string | null;
   publishedAt: string | null;

@@ -464,8 +464,6 @@
     "details": {
       "creator": "Oglašivač",
       "sellerType": "Vrsta oglašivača",
-      "assignedAgent": "Dodeljeni agent ili agencija",
-      "none": "Nema",
       "publishedAt": "Objavljen",
       "slug": "Adresa oglasa"
     },
@@ -488,12 +486,6 @@
     "featuredUntil": "Izdvojen do (opciono)",
     "saveFeatured": "Sačuvaj",
     "featuredSaved": "Izdvajanje je sačuvano.",
-    "agent": "Dodeljeni agent ili agencija",
-    "searchAgents": "Pretražite agente i agencije po imenu ili emailu",
-    "noAgents": "Nema aktivnih agenata ni agencija koji odgovaraju pretrazi.",
-    "assign": "Dodeli",
-    "unassign": "Ukloni dodelu",
-    "agentSaved": "Dodela je sačuvana.",
     "permanentDelete": "Trajno obriši",
     "permanentDeleteTitle": "Trajno obrisati oglas?",
     "permanentDeleteDescription": "Oglas, njegove slike i istorija biće trajno obrisani; ostaje samo zapis u dnevniku izmena. Ova radnja se ne može poništiti.",
@@ -1093,7 +1085,6 @@
     "mapLabel": "Mapa sa lokacijom nekretnine",
     "approximateNote": "Oglašivač ne prikazuje tačnu adresu. Krug prikazuje oblast u kojoj se nekretnina nalazi.",
     "advertiser": "Oglašivač",
-    "assignedAgent": "{type, select, AGENCY {Agencija za ovu nekretninu} other {Agent za ovu nekretninu}}",
     "viewProfile": "Pogledaj profil",
     "published": "Objavljeno {date}",
     "facts": {
@@ -1151,8 +1142,6 @@
       "message": "Poruka",
       "received": "Primljeno"
     },
-    "readOnly": "Samo čitanje",
-    "readOnlyHint": "Ovaj upit vodi agent ili agencija dodeljena oglasu. Možete ga čitati, ali ne i menjati njegov status.",
     "untitled": "Oglas bez naslova",
     "backToList": "Svi upiti",
     "from": "Od",
@@ -1163,7 +1152,6 @@
     "listing": "Oglas",
     "received": "Primljeno",
     "recipient": "Vodi ga",
-    "assignedAgent": "Dodeljeni agent ili agencija",
     "status": "Status",
     "reply": "Odgovori emailom",
     "replyHint": "Samo oglašivač koji prima ovaj upit odgovara posetiocu.",
@@ -1330,7 +1318,7 @@
         },
         "share": {
           "title": "Ko ih vidi",
-          "body": "Javni profili i objavljeni oglasi vidljivi su svima. Broj telefona agenata, agencija i investitora uvek je prikazan na profilu; privatni prodavci biraju da li će prikazati svoj. Email adresa prikazuje se samo ako to vlasnik izabere, a tačna adresa nekretnine samo ako to izabere oglašivač.\n\nUpiti stižu samo oglašivaču ili agentu ili agenciji dodeljenoj oglasu, a poruke sa kontakt forme samo nama. Lične podatke ne prodajemo."
+          "body": "Javni profili i objavljeni oglasi vidljivi su svima. Broj telefona agenata, agencija i investitora uvek je prikazan na profilu; privatni prodavci biraju da li će prikazati svoj. Email adresa prikazuje se samo ako to vlasnik izabere, a tačna adresa nekretnine samo ako to izabere oglašivač.\n\nUpiti stižu samo oglašivaču, a poruke sa kontakt forme samo nama. Lične podatke ne prodajemo."
         },
         "providers": {
           "title": "Pružaoci usluga",

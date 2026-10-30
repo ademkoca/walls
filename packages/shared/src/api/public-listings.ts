@@ -58,8 +58,6 @@ export interface PublicListingDetail {
   linkPreviewImage: LinkPreviewImage | null;
   /** The listing's creator (SPEC §5). */
   advertiser: PublicProfile;
-  /** The agent an Admin assigned to the listing, if any (SPEC §46). */
-  assignedAgent: PublicProfile | null;
   publishedAt: string;
   updatedAt: string;
 }

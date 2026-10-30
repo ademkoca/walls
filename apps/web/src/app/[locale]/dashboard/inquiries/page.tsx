@@ -1,5 +1,4 @@
 import { isReviewer, keepsSentInquiries } from '@walls/shared';
-import { Badge } from '@walls/ui/components/badge';
 import {
   Table,
   TableBody,
@@ -79,11 +78,6 @@ export default async function InquiriesPage({
                     >
                       {inquiry.visitorName}
                     </Link>
-                    {!inquiry.canManage && (
-                      <Badge variant="outline" className="ml-2">
-                        {t('readOnly')}
-                      </Badge>
-                    )}
                   </TableCell>
                   <TableCell className="max-w-56 truncate">
                     {inquiry.listing.title ?? t('untitled')}

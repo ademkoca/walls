@@ -143,7 +143,6 @@ function toPublicListingDetail(
     ),
     images: row.images.map(({ url, width, height }) => ({ url, width, height })),
     advertiser: toPublicProfile(row.creator),
-    assignedAgent: row.assignedAgent ? toPublicProfile(row.assignedAgent) : null,
     publishedAt: listing.publishedAt!.toISOString(),
     updatedAt: listing.updatedAt.toISOString(),
   };

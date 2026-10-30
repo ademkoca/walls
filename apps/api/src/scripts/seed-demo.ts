@@ -26,7 +26,6 @@ import {
   createDatabase,
   emailOutbox,
   inquiries,
-  listingAssignments,
   listingMedia,
   listingRevisions,
   listingStatusHistory,
@@ -45,7 +44,6 @@ import {
   Role,
   SellerType,
   UserStatus,
-  canBeAssigned,
   checkListingImage,
   checkSubmissionRequirements,
   contentSubmissionSnapshot,
@@ -366,7 +364,6 @@ async function createDemoListing(
     index: number;
     photos: readonly Buffer[];
     creator: DemoCreator;
-    assignedAgentId: string | null;
     reviewerId: string;
   },
 ): Promise<string[]> {
@@ -430,7 +427,6 @@ async function createDemoListing(
         slug: nextFreeSlug(slugBase, new Set(await findListingSlugsLike(tx, slugBase))),
         publishedAt,
         isFeatured: listing.featured ?? false,
-        assignedAgentId: context.assignedAgentId,
       });
 
       const history = [
@@ -450,14 +446,6 @@ async function createDemoListing(
       ];
       for (const entry of history) await insertStatusHistory(tx, { listingId, ...entry });
 
-      if (context.assignedAgentId) {
-        await tx.insert(listingAssignments).values({
-          listingId,
-          agentId: context.assignedAgentId,
-          assignedById: reviewerId,
-          createdAt: publishedAt,
-        });
-      }
       const views = viewRows(listingId, listing, publishedAt, index);
       if (views.length > 0) await tx.insert(listingViewsDaily).values(views);
     });
@@ -507,19 +495,12 @@ async function seed(db: Database, env: Env, skipConfirmation: boolean): Promise<
 
   for (const [index, listing] of DEMO_LISTINGS.entries()) {
     const creator = created.get(listing.by);
-    const agent = listing.assign ? created.get(listing.assign) : undefined;
-    if (!creator || (listing.assign && !agent)) {
-      throw new Error(`${listing.title[0]}: unknown demo user`);
-    }
-    if (agent && !canBeAssigned(agent.sellerType)) {
-      throw new Error(`${listing.title[0]}: only agents and agencies can be assigned`);
-    }
+    if (!creator) throw new Error(`${listing.title[0]}: unknown demo user`);
     await createDemoListing(db, storage, {
       listing,
       index,
       photos: plans[index]!.map((id) => photos.get(id)!),
       creator,
-      assignedAgentId: agent?.id ?? null,
       reviewerId: reviewer.id,
     });
     console.info(`  ${index + 1}/${DEMO_LISTINGS.length} ${listing.title[0]}`);
@@ -536,8 +517,8 @@ async function seed(db: Database, env: Env, skipConfirmation: boolean): Promise<
 
 /**
  * Deletes the demo users and everything that refers to them: their listings (with photos,
- * inquiries and statistics), applications, sessions, audit entries and unsent emails, and
- * their assignments to other listings. Real users' own records are kept.
+ * inquiries and statistics), applications, sessions, audit entries and unsent emails. Real
+ * users' own records are kept.
  */
 async function remove(db: Database, env: Env, skipConfirmation: boolean): Promise<void> {
   const demoUsers = await findDemoUsers(db);
@@ -577,22 +558,7 @@ async function remove(db: Database, env: Env, skipConfirmation: boolean): Promis
     await tx.delete(auditLogs).where(inArray(auditLogs.actorId, ids));
     await tx
       .delete(inquiries)
-      .where(
-        or(
-          inArray(inquiries.recipientUserId, ids),
-          inArray(inquiries.assignedAgentId, ids),
-          inArray(inquiries.senderUserId, ids),
-        ),
-      );
-    await tx
-      .delete(listingAssignments)
-      .where(
-        or(inArray(listingAssignments.agentId, ids), inArray(listingAssignments.assignedById, ids)),
-      );
-    await tx
-      .update(listings)
-      .set({ assignedAgentId: null })
-      .where(inArray(listings.assignedAgentId, ids));
+      .where(or(inArray(inquiries.recipientUserId, ids), inArray(inquiries.senderUserId, ids)));
     await tx.delete(listingStatusHistory).where(inArray(listingStatusHistory.actorId, ids));
     await tx
       .delete(listingRevisions)

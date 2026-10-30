@@ -1,15 +1,14 @@
 import {
   auditLogs,
-  listingAssignments,
   listingMedia,
   listingStatusHistory,
   listings,
   properties,
 } from '@walls/database';
-import { type ListingSummary, Role, SellerType } from '@walls/shared';
+import { type ListingSummary, Role } from '@walls/shared';
 import { and, eq } from 'drizzle-orm';
 import { afterAll, describe, expect, it } from 'vitest';
-import { createTestContext, errorOf } from './helpers';
+import { createTestContext } from './helpers';
 import { LISTINGS, detailOf, submittedListing } from './listing-fixtures';
 
 const ctx = createTestContext();
@@ -40,7 +39,6 @@ describe('the review queue (SPEC §2.1)', () => {
     expect(listing.permissions).toMatchObject({
       editMode: null,
       actions: ['APPROVE', 'REJECT'],
-      canAssignAgent: true,
       canSetFeatured: false,
       canPermanentlyDelete: false,
     });
@@ -213,91 +211,17 @@ describe('after publication (SPEC §6, §22)', () => {
   });
 });
 
-describe('assigning agents (SPEC §5)', () => {
-  it('assigns an active agent, who can then manage the listing; the creator keeps access', async () => {
+describe('listing ownership (SPEC §5)', () => {
+  it('keeps a listing with its creator: an admin cannot hand it to an agent', async () => {
     const seller = await ctx.signedInUser();
     const admin = await ctx.signedInUser(Role.ADMIN);
     const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
     const id = await submittedListing(seller.client);
-
-    const assigned = detailOf(
-      await admin.client.put(`${LISTINGS}/${id}/assignment`, { agentId: agent.user.id }),
-    );
-    expect(assigned.assignedAgent).toEqual({
-      id: agent.user.id,
-      displayName: agent.user.displayName,
-    });
-    expect((await agent.client.get(`${LISTINGS}/${id}`)).status).toBe(200);
-    expect((await seller.client.get(`${LISTINGS}/${id}`)).status).toBe(200);
-
-    const unassigned = detailOf(
-      await admin.client.put(`${LISTINGS}/${id}/assignment`, { agentId: null }),
-    );
-    expect(unassigned.assignedAgent).toBeNull();
-    expect((await agent.client.get(`${LISTINGS}/${id}`)).status).toBe(403);
-
-    const history = await ctx.db
-      .select()
-      .from(listingAssignments)
-      .where(eq(listingAssignments.listingId, id));
-    expect(history.map((entry) => entry.agentId)).toEqual([agent.user.id, null]);
-    expect(await auditActions(id)).toEqual(
-      expect.arrayContaining(['LISTING_AGENT_ASSIGNED', 'LISTING_AGENT_UNASSIGNED']),
-    );
-  });
-
-  it('assigns an agency like an agent', async () => {
-    const seller = await ctx.signedInUser();
-    const admin = await ctx.signedInUser(Role.ADMIN);
-    const agency = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.AGENCY);
-    const id = await submittedListing(seller.client);
-
     const response = await admin.client.put(`${LISTINGS}/${id}/assignment`, {
-      agentId: agency.user.id,
-    });
-    expect(response.status).toBe(200);
-    expect(detailOf(response).assignedAgent?.id).toBe(agency.user.id);
-    expect((await agency.client.get(`${LISTINGS}/${id}`)).status).toBe(200);
-  });
-
-  it('only assigns active agents and agencies: never sellers or investors', async () => {
-    const seller = await ctx.signedInUser();
-    const admin = await ctx.signedInUser(Role.ADMIN);
-    const investor = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.INVESTOR);
-    const id = await submittedListing(seller.client);
-    for (const candidate of [seller, investor]) {
-      const response = await admin.client.put(`${LISTINGS}/${id}/assignment`, {
-        agentId: candidate.user.id,
-      });
-      expect(response.status).toBe(400);
-      expect(errorOf(response).code).toBe('VALIDATION_FAILED');
-    }
-  });
-
-  it('offers agents and agencies, not investors, when searching whom to assign', async () => {
-    const admin = await ctx.signedInUser(Role.ADMIN);
-    const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
-    const agency = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.AGENCY);
-    const investor = await ctx.signedInUser(Role.REAL_ESTATE_AGENT, SellerType.INVESTOR);
-    const found = async (user: { email: string }) => {
-      const query = new URLSearchParams({ status: 'ACTIVE', assignable: 'true', q: user.email });
-      const response = await admin.client.get(`/api/v1/users?${query.toString()}`);
-      expect(response.status).toBe(200);
-      return (response.body as { items: { id: string; sellerType: string }[] }).items;
-    };
-    expect(await found(agent.user)).toMatchObject([{ sellerType: 'REAL_ESTATE_AGENT' }]);
-    expect(await found(agency.user)).toMatchObject([{ sellerType: 'AGENCY' }]);
-    expect(await found(investor.user)).toEqual([]);
-  });
-
-  it('does not let agents assign themselves', async () => {
-    const seller = await ctx.signedInUser();
-    const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
-    const id = await submittedListing(seller.client);
-    const response = await agent.client.put(`${LISTINGS}/${id}/assignment`, {
       agentId: agent.user.id,
     });
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(404);
+    expect((await agent.client.get(`${LISTINGS}/${id}`)).status).toBe(403);
   });
 });
 

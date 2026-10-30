@@ -60,7 +60,6 @@ export class UsersService {
     const rows = await findUsers(this.db, {
       ...(query.role ? { role: query.role } : {}),
       ...(query.status ? { status: query.status } : {}),
-      ...(query.assignable ? { assignable: true } : {}),
       ...(query.q ? { q: query.q } : {}),
       page: query.page,
     });

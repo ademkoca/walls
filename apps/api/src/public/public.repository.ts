@@ -1,7 +1,7 @@
 import { type DbExecutor, listings, properties, propertyLocations, users } from '@walls/database';
 import { Role, UserStatus } from '@walls/shared';
 import type { PartnerDirectoryQuery } from '@walls/validation';
-import { type SQL, and, asc, count, desc, eq, or } from 'drizzle-orm';
+import { type SQL, and, asc, count, desc, eq } from 'drizzle-orm';
 import { pageBounds } from '../http/paging';
 import { type CardRow, cardColumns, creator, publiclyVisible } from './listing-cards';
 
@@ -15,10 +15,7 @@ export async function findPublicUser(db: DbExecutor, slug: string, role: Role) {
   return user;
 }
 
-/**
- * Public listings advertised by a user, or assigned to them as the agent or agency; newest
- * first.
- */
+/** Public listings advertised by a user, newest first. */
 export async function findPublicListingsOf(
   db: DbExecutor,
   userId: string,
@@ -32,12 +29,7 @@ export async function findPublicListingsOf(
     .innerJoin(creator, eq(creator.id, listings.createdById))
     .innerJoin(properties, eq(properties.id, listings.propertyId))
     .leftJoin(propertyLocations, eq(propertyLocations.propertyId, listings.propertyId))
-    .where(
-      and(
-        publiclyVisible,
-        or(eq(listings.createdById, userId), eq(listings.assignedAgentId, userId)),
-      ),
-    )
+    .where(and(publiclyVisible, eq(listings.createdById, userId)))
     .orderBy(desc(listings.publishedAt), asc(listings.id))
     .limit(limit)
     .offset(offset);
@@ -56,10 +48,7 @@ export async function findPublicPartners(
   const listingCount = db
     .select({ agentId: users.id, total: count(listings.id).as('total') })
     .from(users)
-    .innerJoin(
-      listings,
-      or(eq(listings.createdById, users.id), eq(listings.assignedAgentId, users.id)),
-    )
+    .innerJoin(listings, eq(listings.createdById, users.id))
     .innerJoin(creator, eq(creator.id, listings.createdById))
     .where(and(eq(users.role, Role.REAL_ESTATE_AGENT), publiclyVisible))
     .groupBy(users.id)

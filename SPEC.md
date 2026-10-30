@@ -69,7 +69,7 @@ Every account that advertises has an advertiser type (`sellerType`), shown as a 
 -   `AGENCY`: a real-estate agency, as one account under the agency's own name (no member agents or team features)
 -   `INVESTOR`: an investor or developer advertising its own properties
 
-Agents, agencies and investors are approved professionals ("partners"). All three have the `REAL_ESTATE_AGENT` role and the same rights and rules; wherever this specification says "agent" about permissions, profiles, inquiries or applications, it applies to all three, except where it names a type. Only agents and agencies can be assigned to a listing (§5). An agent may name the agency they work for (free text); agencies and investors are named by their display name. The type is chosen in the application and never changes. Admins have no advertiser type.
+Agents, agencies and investors are approved professionals ("partners"). All three have the `REAL_ESTATE_AGENT` role and the same rights and rules; wherever this specification says "agent" about permissions, profiles, inquiries or applications, it applies to all three, except where it names a type. An agent may name the agency they work for (free text); agencies and investors are named by their display name. The type is chosen in the application and never changes. Admins have no advertiser type.
 
 Every professional is approved before their account exists, so the public site shows no separate "approved" or "verified" label: the badge names the type only.
 
@@ -81,7 +81,6 @@ Can:
 -   manage agents
 -   manage all listings
 -   approve/reject listings
--   assign listings to agents
 -   manage inquiries
 -   manage featured listings
 -   view platform analytics
@@ -96,7 +95,6 @@ Can:
 -   manage agents
 -   manage all listings
 -   approve/reject listings
--   assign listings to agents
 -   manage inquiries
 -   manage featured listings
 -   view platform analytics
@@ -117,9 +115,9 @@ Professional accounts and public profiles are created only after an Admin or Sup
 
 Can:
 
--   view listings they created and listings assigned to them
+-   view listings they created
 -   create listings for properties they own or are authorized to advertise
--   edit listings they created or that are assigned to them, subject to server-side authorization
+-   edit listings they created, subject to server-side authorization
 -   submit listings for review
 -   see listing status/rejection feedback
 -   manage their own profile
@@ -129,8 +127,7 @@ Agents cannot:
 
 -   publish listings directly
 -   approve/reject listings
--   assign listings
--   view listings assigned exclusively to other agents in the dashboard unless they are also the recorded creator and the permissions explicitly allow access
+-   view or manage listings created by other users
 -   manage other agents
 -   permanently delete listings
 -   change their own role or verification status
@@ -155,7 +152,6 @@ Private sellers cannot:
 -   publish listings directly
 -   approve/reject listings
 -   manage other users' listings
--   assign listings to agents
 -   manage their role or verification status
 
 ### Agent Applicant
@@ -239,26 +235,22 @@ All important profile changes should be auditable.
 
 ------------------------------------------------------------------------
 
-# 5. Listing Ownership and Assignment
+# 5. Listing Ownership
 
-Keep these concepts separate:
+A listing belongs to the user who created it (decision 2026-10-30: listings are not assigned to agents). Keep these concepts separate:
 
 -   `createdBy`: the authenticated user who created the listing; immutable for audit/history purposes
--   `sellerType`: who advertises the listing: `PRIVATE_SELLER`, `REAL_ESTATE_AGENT`, `AGENCY` or `INVESTOR`; it is the creator's advertiser type when the listing is created and does not change with an assignment
--   `assignedAgent`: optional assignment of an agent or agency, managed by Admin/Super Admin; it is not a substitute for the seller or creator. Investors cannot be assigned.
+-   `sellerType`: who advertises the listing: `PRIVATE_SELLER`, `REAL_ESTATE_AGENT`, `AGENCY` or `INVESTOR`; it is the creator's advertiser type when the listing is created
 
-The creator/advertiser is responsible for managing their own listing, subject to role-based authorization. A private seller's listing has no assigned agent by default. An admin may assign an agent when appropriate. Agent assignment must not silently remove the creator's access to their own listing, and a listing may only be managed by users explicitly authorized by the server-side policy.
+The creator manages their own listing and receives its inquiries, subject to role-based authorization; Admins and Super Admins review and manage listings as this specification describes. No other private seller or agent can manage it. When the creator's account is deactivated, their listings disappear from the public site and reappear when the account is reactivated (§2.1).
 
 Example:
 
 ``` text
 Private Seller A creates Listing X
-Listing X has sellerType = PRIVATE_SELLER and assignedAgent = null
-Admin may later assign Agent B to assist with Listing X
-createdBy remains Private Seller A
+Listing X has createdBy = Private Seller A and sellerType = PRIVATE_SELLER
+Only Private Seller A manages Listing X; Admins review it
 ```
-
-For an agent-created listing, `createdBy` identifies the agent and `sellerType = REAL_ESTATE_AGENT`; `assignedAgent` can identify the agent responsible for ongoing management. Keep these fields distinct to support later reassignment and auditing.
 
 ------------------------------------------------------------------------
 
@@ -718,7 +710,7 @@ How the filters behave:
 -   **Area** is the floor area, or the plot area for land.
 -   **Furnished status** is one of furnished, semi-furnished or unfurnished and matches exactly; listings that don't state it never match. It is offered when no property type is chosen or the chosen type has the field (apartment, house, villa, office).
 -   **Negotiable price** (decision 2026-10-30) keeps only fixed prices the advertiser marked as negotiable; "price on request" listings never match. Result cards say when a price is negotiable.
--   **Advertiser type** (private seller, agent, agency or investor) matches the listing's `sellerType`, its creator's type; an assigned agency does not change it.
+-   **Advertiser type** (private seller, agent, agency or investor) matches the listing's `sellerType`, its creator's type.
 -   **Features** offered are those of the chosen property type (all without one); a listing must have every chosen feature.
 -   Sorting by price compares prices in EUR at the current rate; rental prices are compared as stated, whatever their period. Listings without a price or area sort last.
 
@@ -751,7 +743,7 @@ Public private-seller pages show:
 -   contact information the seller has chosen to make public
 -   all currently public listings attributed to that seller
 
-Contact details on public profiles: a professional's phone number is always shown; a private seller chooses whether to show theirs. An email address is shown only when its owner opts in (for agents, that choice is part of the reviewed profile change). A professional's page lists the public listings they created and those assigned to them.
+Contact details on public profiles: a professional's phone number is always shown; a private seller chooses whether to show theirs. An email address is shown only when its owner opts in (for agents, that choice is part of the reviewed profile change). A professional's page lists the public listings they created.
 
 A public profile must not expose internal/admin-only information, email addresses unless explicitly configured for public display, agent application documents, identity evidence, or other verification evidence. Every professional account exists only after an Admin/Super Admin approved its application, so the public site names the advertiser type (private seller, agent, agency, investor) and shows no separate "approved" or "verified" label for professionals. A phone number is labelled "Verified" only when its status is `VERIFIED` (§3); this is separate from professional approval.
 
@@ -765,7 +757,6 @@ An inquiry should contain:
 
 -   listing
 -   recipient/advertiser user
--   optional assigned agent, where applicable
 -   visitor name
 -   visitor email
 -   visitor phone (optional if appropriate)
@@ -786,20 +777,14 @@ Agents can manage inquiries belonging to their listings.
 
 Admins/Super Admins can manage all inquiries (read them and set their status); they do not reply to visitors: only the inquiry's recipient is offered the "reply by email" action and the visitor's contact links (decision, 2026-10-14).
 
-Inquiry routing:
-
--   If the listing has an `assignedAgent` (an agent or agency), the inquiry is routed to the assigned agent only. The assigned agent receives the email notification and manages the inquiry status. The listing creator/advertiser can view the inquiry read-only.
--   If the listing has no `assignedAgent`, the inquiry is routed to the listing creator/advertiser, who receives the notification and manages it.
-
-The recipient is always determined server-side from the listing at the time the inquiry is created.
+Inquiry routing: the inquiry is routed to the listing's creator/advertiser, who receives the email notification and manages it. The recipient is always determined server-side from the listing at the time the inquiry is created.
 
 Inquiry decisions:
 
--   If the assigned agent's account is deactivated, the inquiry goes to the listing creator/advertiser instead, as if no agent were assigned. The assignment itself stays on the listing.
 -   The recipient's email contains the message and the visitor's contact details; replying to it writes to the visitor directly. The visitor gets no confirmation email.
 -   Spam protection: a hidden trap field that people never see (inquiries with it filled in are dropped silently, with the normal answer), at most 5 inquiries per IP address per hour, and at most 3 per email address per listing per 24 hours. No captcha.
 -   The recipient and Admins/Super Admins can move an inquiry between `NEW`, `CONTACTED` and `CLOSED` in any direction; every change is audited.
--   Anyone can send an inquiry without an account. A signed-in private seller or agent sends it under their account's name and email, and sees it afterwards under "Sent" in the dashboard: the listing, the recipient's name, the message and the time, but not the recipient's status. Replies still arrive by email. Nobody can send an inquiry about a listing they created or are assigned to. Signed-in Admins send inquiries like visitors without an account. A two-way inbox (replies inside Walls) is deferred until after the MVP (§44: no messaging between users).
+-   Anyone can send an inquiry without an account. A signed-in private seller or agent sends it under their account's name and email, and sees it afterwards under "Sent" in the dashboard: the listing, the recipient's name, the message and the time, but not the recipient's status. Replies still arrive by email. Nobody can send an inquiry about a listing they created. Signed-in Admins send inquiries like visitors without an account. A two-way inbox (replies inside Walls) is deferred until after the MVP (§44: no messaging between users).
 
 ------------------------------------------------------------------------
 
@@ -871,9 +856,9 @@ analytics logic inside UI components.
 
 Analytics decisions:
 
--   A view counts **once per visitor per day**. Visitors are told apart by a fingerprint of IP address and browser, keyed with a secret that changes daily, so nothing identifying is stored and visitors cannot be followed across days. Views are reported by the browser (server renders and link prefetches never count), and crawlers, link previews, the listing's own creator and assigned agent, and Admins are not counted. Days follow Serbian time.
+-   A view counts **once per visitor per day**. Visitors are told apart by a fingerprint of IP address and browser, keyed with a secret that changes daily, so nothing identifying is stored and visitors cannot be followed across days. Views are reported by the browser (server renders and link prefetches never count), and crawlers, link previews, the listing's own creator, and Admins are not counted. Days follow Serbian time.
 -   "Views over time" shows views per day for the last 30 days.
--   Admins/Super Admins see the platform totals and every listing's numbers. Private sellers and agents see the numbers of the listings they may open in the dashboard (created by them or assigned to them).
+-   Admins/Super Admins see the platform totals and every listing's numbers. Private sellers and agents see the numbers of the listings they may open in the dashboard (the listings they created).
 
 ------------------------------------------------------------------------
 
@@ -913,7 +898,6 @@ Examples:
 
 ``` text
 Admin changed listing price
-Admin assigned listing to Agent X
 Agent submitted listing
 Admin approved listing
 Admin rejected listing
@@ -934,7 +918,7 @@ Every protected API operation must validate:
 
 1.  authentication
 2.  role
-3.  resource ownership/assignment
+3.  resource ownership
 4.  allowed state transition
 5.  input validation
 
@@ -945,14 +929,12 @@ Agent requests GET /listings/:id
 
 → authenticated?
 → role = REAL_ESTATE_AGENT?
-→ listing.assignedAgent = currentUser?
+→ listing.createdBy = currentUser?
 → yes → return
 → no → forbidden
 ```
 
 Never rely on a frontend-provided agent ID to establish ownership.
-
-Note: the example above is simplified. For agents, the full access rule in §2.1 applies: an agent may access a listing they created **or** a listing assigned to them.
 
 ------------------------------------------------------------------------
 
@@ -1089,7 +1071,6 @@ listing_media
 amenities
 property_amenities
 property_locations
-listing_assignments
 inquiries
 audit_logs
 exchange_rates
@@ -1103,7 +1084,6 @@ Important relationships include:
 
 ``` text
 User 1 ─── N Listings (createdBy)
-User 0..1 ─── N Listings (assignedAgent)
 AgentApplication ─── reviewed by Admin/Super Admin; approved application creates/activates an agent account
 
 Property 1 ─── N Listings
@@ -1357,7 +1337,6 @@ For:
 -   authentication
 -   authorization
 -   listing CRUD
--   agent assignment
 -   approval workflow
 -   inquiries
 -   profile change approval
@@ -1379,8 +1358,7 @@ Cover critical flows:
 12. Visitor opens listing.
 13. Visitor submits inquiry.
 14. Agent sees inquiry.
-15. Admin can assign listing to an agent or agency, never an investor.
-16. Agent cannot access another agent's listing.
+15. Agent cannot access another agent's listing.
 
 ------------------------------------------------------------------------
 
@@ -1394,7 +1372,7 @@ At minimum, publication/review submission requires:
 
 -   authenticated active account
 -   verified email address
--   advertiser is the listing creator or otherwise explicitly authorized
+-   advertiser is the listing creator
 -   valid property type
 -   valid transaction type
 -   valid location
@@ -1402,7 +1380,6 @@ At minimum, publication/review submission requires:
 -   minimum 3 valid images meeting configured file type, size, and dimension limits
 -   required property attributes
 -   valid advertiser contact information
--   assigned agent only when explicitly required by an approved business rule; private-seller listings do not require an assigned agent
 
 The exact set of required attributes may depend on property type.
 
@@ -1496,7 +1473,6 @@ The MVP includes:
 -   listing creation
 -   listing editing
 -   listing approval workflow
--   agent assignment
 -   admin management
 -   super-admin management
 -   authentication
@@ -1612,7 +1588,7 @@ Open decisions:
 -   Visitor can search and filter listings.
 -   Visitor can sort results.
 -   Visitor can open a property detail page.
--   Visitor can see the listing advertiser (private seller, agent, agency or investor, named by a badge) and any assigned agent or agency, where applicable.
+-   Visitor can see the listing advertiser (private seller, agent, agency or investor, named by a badge).
 -   Visitor can open public profile pages for both private sellers and approved professionals.
 -   Visitor can contact the listing advertiser.
 -   Visitor can see the exact map location only when permitted.
@@ -1641,7 +1617,7 @@ Open decisions:
 -   Agent account/profile is not active until Admin/Super Admin approval.
 -   Agent can authenticate after completing approved account setup.
 -   Agent can edit permitted profile fields.
--   Agent can create and manage listings they are authorized to advertise, subject to assignment/authorization rules.
+-   Agent can create and manage their own listings and cannot access other users' listings.
 -   Agent must provide at least three valid images before submission.
 -   Agent cannot publish directly.
 -   Agent can see rejection reasons and resubmit rejected listings.
@@ -1653,7 +1629,6 @@ Open decisions:
 -   Admin can authenticate.
 -   Admin can review, approve, or reject agent applications and supporting proof.
 -   Admin can manage approved agents.
--   Admin can assign listings to agents and agencies.
 -   Admin can review listings.
 -   Admin can approve/reject listings.
 -   Admin can provide rejection reasons.

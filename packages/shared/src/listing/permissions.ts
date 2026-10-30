@@ -20,7 +20,6 @@ import {
 /** The listing fields that access rules depend on, loaded server-side. */
 export interface ListingAccessContext {
   createdById: string;
-  assignedAgentId: string | null;
   status: ListingStatus;
   transactionType: TransactionType | null;
   /** Set when the creator deleted the draft (soft delete). */
@@ -31,26 +30,15 @@ export function isListingCreator(actor: Actor, listing: ListingAccessContext): b
   return listing.createdById === actor.id;
 }
 
-export function isAssignedAgent(actor: Actor, listing: ListingAccessContext): boolean {
-  return actor.role === Role.REAL_ESTATE_AGENT && listing.assignedAgentId === actor.id;
-}
-
-/**
- * Editors manage a listing's content and submit it for review: the creator, plus the
- * assigned agent if there is one. Assignment never removes the creator's access (SPEC §5).
- */
-export function isListingEditor(actor: Actor, listing: ListingAccessContext): boolean {
-  return isListingCreator(actor, listing) || isAssignedAgent(actor, listing);
-}
-
 const notDeleted = (listing: ListingAccessContext) => (): Decision =>
   listing.deletedAt === null ? allow() : deny(DenialReason.RESOURCE_DELETED);
 
 const reviewerOnly = (actor: Actor) => (): Decision =>
   isReviewer(actor) ? allow() : deny(DenialReason.ROLE_NOT_PERMITTED);
 
-const editorOnly = (actor: Actor, listing: ListingAccessContext) => (): Decision =>
-  isListingEditor(actor, listing) ? allow() : deny(DenialReason.NOT_RESOURCE_PARTICIPANT);
+/** A listing belongs to its creator, who manages it and submits it for review (SPEC §5). */
+const creatorOnly = (actor: Actor, listing: ListingAccessContext) => (): Decision =>
+  isListingCreator(actor, listing) ? allow() : deny(DenialReason.NOT_RESOURCE_PARTICIPANT);
 
 const inStatus =
   (listing: ListingAccessContext, statuses: readonly ListingStatus[]) => (): Decision =>
@@ -80,7 +68,7 @@ export function canCreateListing(actor: Actor): Decision {
 /** Viewing a listing in the dashboard (public visibility is a separate rule). */
 export function canViewListing(actor: Actor, listing: ListingAccessContext): Decision {
   if (isReviewer(actor)) return requireActive(actor);
-  return firstDenial(() => requireActive(actor), editorOnly(actor, listing), notDeleted(listing));
+  return firstDenial(() => requireActive(actor), creatorOnly(actor, listing), notDeleted(listing));
 }
 
 export const ListingEditMode = {
@@ -104,7 +92,7 @@ export type EditDecision =
 export function canEditListing(actor: Actor, listing: ListingAccessContext): EditDecision {
   const decision = firstDenial(
     () => requireActive(actor),
-    editorOnly(actor, listing),
+    creatorOnly(actor, listing),
     notDeleted(listing),
     inStatus(listing, [ListingStatus.DRAFT, ListingStatus.PUBLISHED]),
   );
@@ -130,7 +118,7 @@ export function canPerformListingAction(
     () => requireActive(actor),
     rule.performedBy === ListingActorKind.REVIEWER
       ? reviewerOnly(actor)
-      : editorOnly(actor, listing),
+      : creatorOnly(actor, listing),
     () =>
       action === ListingAction.SUBMIT && !actor.emailVerified
         ? deny(DenialReason.EMAIL_NOT_VERIFIED)
@@ -157,16 +145,10 @@ export function availableListingActions(
 export function canDeleteDraft(actor: Actor, listing: ListingAccessContext): Decision {
   return firstDenial(
     () => requireActive(actor),
-    () =>
-      isListingCreator(actor, listing) ? allow() : deny(DenialReason.NOT_RESOURCE_PARTICIPANT),
+    creatorOnly(actor, listing),
     notDeleted(listing),
     inStatus(listing, [ListingStatus.DRAFT]),
   );
-}
-
-/** Assigning or unassigning an agent (SPEC §5). The target must be an active agent (checked by the service). */
-export function canAssignAgent(actor: Actor, listing: ListingAccessContext): Decision {
-  return firstDenial(() => requireActive(actor), reviewerOnly(actor), notDeleted(listing));
 }
 
 /** Approving or rejecting the pending major edits of a published listing (SPEC §6). */

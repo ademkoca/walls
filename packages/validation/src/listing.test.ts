@@ -44,7 +44,6 @@ describe('listing input', () => {
   it.each([
     ['createdBy', { createdBy: 'user-1' }],
     ['sellerType', { sellerType: 'REAL_ESTATE_AGENT' }],
-    ['assignedAgentId', { assignedAgentId: 'agent-1' }],
     ['status', { status: 'PUBLISHED' }],
   ])('rejects the server-controlled field %s', (_field, input) => {
     expect(listingInputSchema.safeParse(input).success).toBe(false);

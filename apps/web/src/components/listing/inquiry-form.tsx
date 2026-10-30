@@ -26,17 +26,17 @@ const EMPTY: InquiryData = { name: '', email: '', phone: '', message: '', websit
  *
  * Signed-in private sellers and agents send under their account (the API uses the
  * account's name and email) and find the inquiry under "Sent" in their dashboard. The
- * listing's own seller or agent sees a note instead of the form.
+ * listing's own advertiser sees a note instead of the form.
  */
 export function InquiryForm({
   slug,
   recipientName,
-  ownerSlugs,
+  advertiserSlug,
 }: {
   slug: string;
   recipientName: string;
-  /** Public profile slugs of the advertiser and the assigned agent. */
-  ownerSlugs: string[];
+  /** The advertiser's public profile slug, to recognise their own listing. */
+  advertiserSlug: string;
 }) {
   const t = useTranslations('inquiry');
   const errorMessage = useErrorMessage();
@@ -55,7 +55,7 @@ export function InquiryForm({
     form.setValue('email', account.email);
   }, [account, form]);
 
-  if (user && ownerSlugs.includes(user.slug)) {
+  if (user?.slug === advertiserSlug) {
     return (
       <div className="space-y-3">
         <p className="text-sm text-muted-foreground">{t('ownListing')}</p>

@@ -1,7 +1,7 @@
 import { type DbExecutor, inquiries, listingTexts, listings, users } from '@walls/database';
 import { InquiryStatus, Locale } from '@walls/shared';
 import type { InquiryListQuery } from '@walls/validation';
-import { type SQL, and, count, desc, eq, gt, or } from 'drizzle-orm';
+import { type SQL, and, count, desc, eq, gt } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { pageBounds } from '../http/paging';
 import { creator, publiclyVisible } from '../public/listing-cards';
@@ -9,10 +9,9 @@ import { creator, publiclyVisible } from '../public/listing-cards';
 export type InquiryRow = typeof inquiries.$inferSelect;
 
 const recipient = alias(users, 'recipient');
-const agent = alias(users, 'agent');
 const serbianText = alias(listingTexts, 'sr_text');
 
-/** A public listing that can receive inquiries, with its creator and assigned agent. */
+/** A public listing that can receive inquiries, with its creator. */
 export async function findInquirableListing(db: DbExecutor, slug: string) {
   const [row] = await db
     .select({ listing: listings, creator, title: serbianText.title })
@@ -24,11 +23,7 @@ export async function findInquirableListing(db: DbExecutor, slug: string) {
     )
     .where(and(publiclyVisible, eq(listings.slug, slug)))
     .limit(1);
-  if (!row) return undefined;
-  const assignedAgent = row.listing.assignedAgentId
-    ? (await db.select().from(users).where(eq(users.id, row.listing.assignedAgentId)).limit(1))[0]
-    : undefined;
-  return { ...row, assignedAgent: assignedAgent ?? null };
+  return row;
 }
 
 /** Inquiries from one email address about one listing since `since`. */
@@ -66,11 +61,9 @@ const viewColumns = {
     id: listings.id,
     slug: listings.slug,
     status: listings.status,
-    createdById: listings.createdById,
   },
   title: serbianText.title,
   recipient: { id: recipient.id, displayName: recipient.displayName },
-  agent: { id: agent.id, displayName: agent.displayName },
 };
 
 function viewQuery(db: DbExecutor) {
@@ -79,7 +72,6 @@ function viewQuery(db: DbExecutor) {
     .from(inquiries)
     .innerJoin(listings, eq(listings.id, inquiries.listingId))
     .innerJoin(recipient, eq(recipient.id, inquiries.recipientUserId))
-    .leftJoin(agent, eq(agent.id, inquiries.assignedAgentId))
     .leftJoin(
       serbianText,
       and(eq(serbianText.listingId, listings.id), eq(serbianText.locale, Locale.SR)),
@@ -93,13 +85,9 @@ export async function findInquiry(db: DbExecutor, id: string) {
   return row;
 }
 
-/**
- * Inquiries a user can see: those they received, and those about listings they created
- * (read-only when an agent handles them). `null` means every inquiry (Admins).
- */
+/** Inquiries a user can see: those they received. `null` means every inquiry (Admins). */
 function visibleTo(userId: string | null): SQL | undefined {
-  if (userId === null) return undefined;
-  return or(eq(inquiries.recipientUserId, userId), eq(listings.createdById, userId));
+  return userId === null ? undefined : eq(inquiries.recipientUserId, userId);
 }
 
 export async function findInquiries(

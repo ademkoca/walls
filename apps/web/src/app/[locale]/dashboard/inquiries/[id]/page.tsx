@@ -1,9 +1,8 @@
 import { publicListingPath } from '@walls/shared';
-import { Alert, AlertDescription } from '@walls/ui/components/alert';
 import { Badge } from '@walls/ui/components/badge';
 import { buttonVariants } from '@walls/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
-import { ChevronLeftIcon, ExternalLinkIcon, InfoIcon, MailIcon } from 'lucide-react';
+import { ChevronLeftIcon, ExternalLinkIcon, MailIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { InquiryStatusActions } from '@/components/inquiries/inquiry-status-actions';
@@ -68,9 +67,6 @@ export default async function InquiryPage({
       formatDate(locale, inquiry.createdAt, { dateStyle: 'long', timeStyle: 'short' }),
     ],
     [t('recipient'), inquiry.recipient.displayName],
-    ...(inquiry.assignedAgent
-      ? ([[t('assignedAgent'), inquiry.assignedAgent.displayName]] as [string, string][])
-      : []),
   ];
 
   return (
@@ -96,13 +92,6 @@ export default async function InquiryPage({
         </div>
         <InquiryStatusBadge status={inquiry.status} />
       </div>
-
-      {!inquiry.canManage && (
-        <Alert>
-          <InfoIcon />
-          <AlertDescription>{t('readOnlyHint')}</AlertDescription>
-        </Alert>
-      )}
 
       <Card>
         <CardHeader>

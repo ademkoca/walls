@@ -128,33 +128,14 @@ describe('public professional profiles (SPEC §19)', () => {
     });
   });
 
-  it('lists listings the agent created and listings assigned to them', async () => {
+  it('lists only the listings the agent created', async () => {
     const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
     const own = await publishedListing(agent);
-    const seller = await ctx.signedInUser();
-    const assigned = await publishedListing(seller);
-    await assigned.admin.client.put(`${LISTINGS}/${assigned.id}/assignment`, {
-      agentId: agent.user.id,
-    });
+    await publishedListing(await ctx.signedInUser());
 
     const page = pageOf(await ctx.client().get(`/api/v1/public/partners/${agent.user.slug}`));
-    expect(page.listings.map((listing) => listing.id).sort()).toEqual([own.id, assigned.id].sort());
-
-    expect((await directoryEntry(agent.user.slug))?.listingCount).toBe(2);
-  });
-
-  it('hides listings of a deactivated creator even when assigned to the agent', async () => {
-    const agent = await ctx.signedInUser(Role.REAL_ESTATE_AGENT);
-    const seller = await ctx.signedInUser();
-    const assigned = await publishedListing(seller);
-    await assigned.admin.client.put(`${LISTINGS}/${assigned.id}/assignment`, {
-      agentId: agent.user.id,
-    });
-    await assigned.admin.client.post(`/api/v1/users/${seller.user.id}/deactivate`, {
-      reason: 'Prevara.',
-    });
-    const page = pageOf(await ctx.client().get(`/api/v1/public/partners/${agent.user.slug}`));
-    expect(page.listings).toEqual([]);
+    expect(page.listings.map((listing) => listing.id)).toEqual([own.id]);
+    expect((await directoryEntry(agent.user.slug))?.listingCount).toBe(1);
   });
 
   it('shows agencies and investors with their kind, without an agency name', async () => {

@@ -81,7 +81,6 @@ Examples:
 -   listing state transitions
 -   role permissions
 -   listing creator/advertiser access
--   optional agent assignment
 -   private-seller email verification
 -   agent application review and approval
 -   publication requirements
@@ -99,9 +98,9 @@ Never rely on the frontend for authorization.
 
 Always verify permissions server-side.
 
-For private sellers, resource access must be based on the authenticated user and listings they created/are authorized to manage. For agents, enforce listing access using the authenticated identity plus explicit listing assignment/authorization rules. An optional `assignedAgent` (an agent or agency, never an investor) is not a replacement for `createdBy` or the advertiser identity.
+A listing belongs to its creator: private sellers and agents may access only the listings they created (`createdBy`), checked against the authenticated identity. Listings are never assigned to other users.
 
-Agents, agencies and investors all have the `REAL_ESTATE_AGENT` role; their kind is the account's `sellerType` (`REAL_ESTATE_AGENT`, `AGENCY`, `INVESTOR`; `PRIVATE_SELLER` for private sellers, none for admins). Decide permissions by role and use the seller type only where a rule names a kind (assignment, agency name, badges). The shared rules live in `packages/shared/src/user/seller-type.ts`; the database checks that role and type match.
+Agents, agencies and investors all have the `REAL_ESTATE_AGENT` role; their kind is the account's `sellerType` (`REAL_ESTATE_AGENT`, `AGENCY`, `INVESTOR`; `PRIVATE_SELLER` for private sellers, none for admins). Decide permissions by role and use the seller type only where a rule names a kind (agency name, badges). The shared rules live in `packages/shared/src/user/seller-type.ts`; the database checks that role and type match.
 
 Private seller accounts become active after email verification. Public registration must never allow users to select or self-assign the agent role. Applications from agents, agencies and investors require supporting proof and Admin/Super Admin approval before an active account/profile is created.
 
@@ -113,7 +112,6 @@ role
 agentId
 createdBy
 sellerType
-assignedAgent
 listing ownership
 phone verification status
 ```
@@ -217,7 +215,7 @@ Rejected listings return to Draft with a rejection reason.
 
 Both private sellers and approved professionals (agents, agencies, investors) can submit listings; neither can publish directly. Admin/Super Admin review is required before publication.
 
-Keep `createdBy`, advertiser/seller type, and optional `assignedAgent` separate. Private sellers manage their own listings by default and do not need an assigned agent. Enforce all access rules server-side.
+Keep `createdBy` and the advertiser/seller type separate. Every advertiser manages their own listings. Enforce all access rules server-side.
 
 ------------------------------------------------------------------------
 
@@ -363,7 +361,7 @@ Prioritize:
 3.  agent application approval
 4.  listing lifecycle
 5.  publication requirements and media validation
-6.  creator/advertiser/assignment access rules
+6.  creator/advertiser access rules
 7.  phone verification-status integrity
 8.  profile-change approval
 9.  price conversion

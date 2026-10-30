@@ -30,7 +30,7 @@ export interface Viewer {
 
 /**
  * Listing views (SPEC §23), counted once per visitor per day. Views by the listing's own
- * creator or assigned agent and by Admins are not counted, nor are automated clients.
+ * creator and by Admins are not counted, nor are automated clients.
  */
 export class ListingViewsService {
   private cleanedDay: string | null = null;
@@ -45,14 +45,7 @@ export class ListingViewsService {
     const listing = await findViewableListing(this.db, slug);
     if (!listing) return false;
     const { actor } = viewer;
-    if (
-      actor &&
-      (isReviewer(actor) ||
-        actor.id === listing.createdById ||
-        actor.id === listing.assignedAgentId)
-    ) {
-      return false;
-    }
+    if (actor && (isReviewer(actor) || actor.id === listing.createdById)) return false;
 
     const day = analyticsDay(now);
     if (this.cleanedDay !== day) {
