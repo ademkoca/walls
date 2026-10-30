@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-30 (launch test results triaged with the user: Phase 1 of the fixes built, uncommitted, awaiting review; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -24,6 +24,58 @@ user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (
 | 8      | Public site: home, search, listing page, EUR/RSD, SEO                                 | Done, pushed (`6732a82`), CI green                  |
 | 9      | Inquiries, notifications, analytics                                                   | Done, pushed (`e53b0d8`)                            |
 | **10** | Hardening and deployment                                                              | **In progress:** deployed to preview.walls.rs       |
+
+**Launch test fixes (2026-10-30):** the user ran the launch test plan (artifact in memory,
+results in its `results` collection). Triaged together; the user's decisions:
+
+- **A. No more agent assignment.** Listings belong to their creators; nobody can assign or
+  reassign a listing (Admins included). A deactivated creator's listings disappear from the
+  public site and come back on reactivation (already how deactivation works). The public
+  listing page shows only the advertiser. Removes `assignedAgent`, assignment endpoints, the
+  read-only inquiry case and inquiry routing to an assigned agent. Retest INQ-05/07/09,
+  SACC-03, PRO-08, ADML-08 afterwards.
+- **B. Creators manage the end of a listing.** Creators (private sellers and professionals)
+  may mark their published listing sold or rented, archive it, and unarchive it unless an
+  Admin archived it. Admins may also unarchive. Unarchiving returns the listing straight to
+  Published (no review). Sold/rented may go back to Published (e.g. a sale falls through).
+- **C. No per-field approval.** Revisions and profile change requests stay approve-all or
+  reject-all; the reviewer says in the reason which changes need work.
+- **D. Fewer edits need review.** On a published listing only the title, description and
+  newly added photos need Admin review; everything else (price, type, location, attributes,
+  features, address visibility, photo order/cover, removing photos) applies immediately and
+  is audited.
+- **E. Netlify is gone for good**, so proof files use the API's real limit (10 MB per file,
+  5 files); Caddy allows 60 MB per request.
+- No change: ADMO-05/SA-04 (demo applications simply have no proof files), PUB-17 (card
+  focus), ADML-06 (admin listing search/filters, later when Walls grows), PUB-09 (contact
+  inbox email stays Serbian by design). AUTH-03 and AUTH-09 count as passed.
+
+Plan: **Phase 1** (built 2026-10-30, uncommitted) bug fixes and small changes; **Phase 2**
+decision A; **Phase 3** decision B; **Phase 4** decision D. SPEC.md is updated in each phase
+as it is built, so it never describes behavior the code doesn't have.
+
+Phase 1 contents:
+
+- Dashboard pages load data through `dashboardData` (`apps/web/src/lib/api/dashboard-data.ts`):
+  signed out → login with `next`, 403/404 → Walls 404. Fixes the generic error on admin pages
+  for sellers (ACC-03) and the blank page after logging out in another tab (ACC-06: Next keeps
+  the dashboard layout on client navigation, so its session check doesn't run again).
+  `[locale]/error.tsx` is a branded fallback for unexpected failures.
+- Dashboard below `lg`: no sidebar; a menu drawer (`DashboardMobileNav`) with the sections
+  and Log out. "View site" opens in a new tab. The public phone menu has Log out too. The
+  public header shows the full menu and log-in buttons only from `lg` (overflowed at 768 px).
+- Gallery, photo viewer and show-password buttons were centred with `-translate-y-1/2`,
+  which the button's `active:translate-y-px` replaced on press: the button jumped half its
+  height and the click was lost. Now centred with `inset-y-0 my-auto`; gallery arrows larger.
+- Profile pages page their listings (24 per page, `?page=`; `listingsPage`/`hasMoreListings`
+  in `PublicProfilePage`, tolerated when missing).
+- Rejection reasons (UI: `QuotedText`; emails: `{ quote }` paragraphs) and inquiry/contact
+  messages in emails are quoted and in italics. Serbian emails use the formal capital
+  Vi/Vas/Vam/Vaš (the website keeps lowercase for now) and „…“ quotation marks.
+- Search filter "Negotiable prices only" (`negotiable=true`) and a "Negotiable" line on result
+  cards. "View on site" button in the editor of a published listing.
+- Proof files: 10 MB per file, photos above that reduced in the browser; listing photos and
+  avatars are still reduced above 3.5 MB (`SHRINK_ABOVE_BYTES`), for upload speed and storage.
 
 **Immediate next step (2026-10-14):** the user is signed in to `https://preview.walls.rs` as the
 production Super Admin (created with `pnpm admin:create` using their personal email; HTTPS works,

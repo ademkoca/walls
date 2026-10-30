@@ -176,6 +176,11 @@ describe('public property search (SPEC §17)', () => {
     expect(await ordered({ furnishedStatus: 'UNFURNISHED' })).toEqual([]);
   });
 
+  it('filters negotiable prices; a price on request is never negotiable', async () => {
+    // Only the fixture apartment's fixed price is marked negotiable.
+    expect(await ordered({ negotiable: 'true' })).toEqual([ids.apartment]);
+  });
+
   it('marks every card with its advertiser type, the creator’s', async () => {
     const result = await search({ location: city });
     expect(result.items.map((item) => item.sellerType)).toEqual(Array(4).fill('PRIVATE_SELLER'));

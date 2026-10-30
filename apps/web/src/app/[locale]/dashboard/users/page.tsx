@@ -15,6 +15,7 @@ import { UserFilters } from '@/components/admin/user-filters';
 import { UserStatusBadge } from '@/components/admin/user-status-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
+import { dashboardData } from '@/lib/api/dashboard-data';
 import { getCurrentUser, getUsers } from '@/lib/api/server';
 
 export async function generateMetadata({
@@ -43,8 +44,10 @@ export default async function UsersPage({
     status: oneOf(enumValues(UserStatus), param(search.status)),
   };
   const page = pageParam(search.page);
-  const [result, viewer] = await Promise.all([getUsers({ ...filters, page }), getCurrentUser()]);
-  if (!result || !viewer) return null;
+  const [result, viewer] = await Promise.all([
+    dashboardData(getUsers({ ...filters, page }), '/dashboard/users'),
+    dashboardData(getCurrentUser(), '/dashboard/users'),
+  ]);
 
   const query = Object.fromEntries(
     Object.entries(filters).filter((entry): entry is [string, string] => Boolean(entry[1])),

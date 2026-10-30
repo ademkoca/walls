@@ -71,7 +71,7 @@ describe('submitting an agent application (SPEC §2.1)', () => {
       sellerType: 'REAL_ESTATE_AGENT',
       agencyName: 'Kvadrat nekretnine',
     });
-    expect((await ctx.lastEmailTo(email))?.subject).toContain('Primili smo vašu prijavu');
+    expect((await ctx.lastEmailTo(email))?.subject).toContain('Primili smo Vašu prijavu');
 
     const admin = await ctx.signedInUser(Role.ADMIN);
     const detail = applicationOf(await admin.client.get(`${APPLICATIONS}/${stored!.id}`));

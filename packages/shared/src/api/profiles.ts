@@ -154,7 +154,10 @@ export interface PublicProfile {
 
 export interface PublicProfilePage {
   profile: PublicProfile;
+  /** One page of the profile's public listings, newest first. */
   listings: PublicListingCard[];
+  listingsPage: number;
+  hasMoreListings: boolean;
   /** The profile picture, cropped for link previews; null without a picture. */
   linkPreviewImage: LinkPreviewImage | null;
 }

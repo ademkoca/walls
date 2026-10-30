@@ -129,6 +129,16 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await filters.getByRole('button', { name: 'Show results' }).click();
   await expect(visitor.getByRole('heading', { name: '1 property' })).toBeVisible();
 
+  // Only negotiable prices: this listing's price is fixed.
+  const negotiable = filters.getByRole('checkbox', { name: 'Negotiable prices only' });
+  await negotiable.click();
+  await filters.getByRole('button', { name: 'Show results' }).click();
+  await expect(visitor).toHaveURL(/negotiable=true/);
+  await expect(visitor.getByText('No properties match your search')).toBeVisible();
+  await negotiable.click();
+  await filters.getByRole('button', { name: 'Show results' }).click();
+  await expect(visitor.getByRole('heading', { name: '1 property' })).toBeVisible();
+
   // The advertiser filter: a private seller's listing is not an agency's.
   const advertiser = filters.getByRole('combobox', { name: 'Advertiser' });
   await advertiser.click();

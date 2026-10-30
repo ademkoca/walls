@@ -5,13 +5,13 @@ import { buttonVariants } from '@walls/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
 import { ChevronLeftIcon, ExternalLinkIcon, InfoIcon, MailIcon } from 'lucide-react';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { InquiryStatusActions } from '@/components/inquiries/inquiry-status-actions';
 import { InquiryStatusBadge } from '@/components/inquiries/inquiry-status-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
-import { NotAccessibleError, getInquiry } from '@/lib/api/server';
+import { dashboardData } from '@/lib/api/dashboard-data';
+import { getInquiry } from '@/lib/api/server';
 import { formatDate } from '@/lib/intl-locale';
 
 export async function generateMetadata({
@@ -21,23 +21,16 @@ export async function generateMetadata({
   return { title: t('title') };
 }
 
-async function loadInquiry(id: string) {
-  try {
-    return await getInquiry(id);
-  } catch (error) {
-    if (error instanceof NotAccessibleError) notFound();
-    throw error;
-  }
-}
-
 /** One inquiry: the visitor's message and contact details, and its status (SPEC §20). */
 export default async function InquiryPage({
   params,
 }: PageProps<'/[locale]/dashboard/inquiries/[id]'>) {
   const locale = await resolveLocale(params);
   const { id } = await params;
-  const [t, inquiry] = await Promise.all([getTranslations('inquiries'), loadInquiry(id)]);
-  if (!inquiry) return null;
+  const [t, inquiry] = await Promise.all([
+    getTranslations('inquiries'),
+    dashboardData(getInquiry(id), `/dashboard/inquiries/${id}`),
+  ]);
   const title = inquiry.listing.title ?? t('untitled');
 
   const details: [string, React.ReactNode][] = [

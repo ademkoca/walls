@@ -3,11 +3,11 @@ import { AVATAR_IMAGE_RULES, LISTING_IMAGE_RULES } from '@walls/shared';
 const BYTES_PER_MB = 1024 * 1024;
 
 /**
- * Largest file sent as is. Netlify refuses request bodies above about 4.5 MB on the /api
- * proxy (HTTP 413 before the API sees them), so files stay clear of that with room for the
- * multipart framing and any other fields in the request.
+ * Largest listing photo or profile picture sent as is. Bigger ones are reduced first, which
+ * keeps uploads quick on mobile connections and stored photos small; the reduced size is
+ * still plenty for display.
  */
-export const MAX_UPLOAD_BYTES = 3.5 * BYTES_PER_MB;
+export const SHRINK_ABOVE_BYTES = 3.5 * BYTES_PER_MB;
 
 /** Profile pictures are shown small. */
 export const AVATAR_SHRINK = {
@@ -68,14 +68,14 @@ function draw(bitmap: ImageBitmap, size: { width: number; height: number }) {
 
 /**
  * Makes a large photo small enough to upload: files up to `maxBytes` (by default
- * `MAX_UPLOAD_BYTES`) are returned untouched; bigger ones are scaled down and re-saved as JPEG (which also drops hidden
+ * `SHRINK_ABOVE_BYTES`) are returned untouched; bigger ones are scaled down and re-saved as JPEG (which also drops hidden
  * metadata such as GPS positions). When the browser cannot read the file (for example HEIC
  * outside Safari) the original is returned and the server decides.
  */
 export async function prepareImageForUpload(
   file: File,
   options: ShrinkOptions = LISTING_PHOTO_SHRINK,
-  maxBytes: number = MAX_UPLOAD_BYTES,
+  maxBytes: number = SHRINK_ABOVE_BYTES,
 ): Promise<File> {
   if (file.size <= maxBytes) return file;
   let bitmap: ImageBitmap;

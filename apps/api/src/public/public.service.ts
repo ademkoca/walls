@@ -2,6 +2,7 @@ import type { Database } from '@walls/database';
 import {
   type Page,
   type PublicPartnerSummary,
+  LISTING_SEARCH_PAGE_SIZE,
   type PublicProfilePage,
   type Role,
   isProfessionalSellerType,
@@ -17,6 +18,9 @@ import { findPublicListingsOf, findPublicPartners, findPublicUser } from './publ
 /** Professionals per page in the public directory. */
 export const PARTNERS_PAGE_SIZE = 24;
 
+/** Listings per page on a public profile, as many as a page of search results. */
+export const PROFILE_LISTINGS_PAGE_SIZE = LISTING_SEARCH_PAGE_SIZE;
+
 /** Public private-seller and professional profiles (SPEC §19). */
 export class PublicService {
   constructor(
@@ -24,14 +28,16 @@ export class PublicService {
     private readonly media: MediaStorage,
   ) {}
 
-  async profile(role: Role, slug: string): Promise<PublicProfilePage> {
+  async profile(role: Role, slug: string, page: number): Promise<PublicProfilePage> {
     const user = await findPublicUser(this.db, slug, role);
     if (!user) throw notFound();
-    const listings = await toCards(this.db, await findPublicListingsOf(this.db, user.id));
+    const rows = await findPublicListingsOf(this.db, user.id, page, PROFILE_LISTINGS_PAGE_SIZE);
     const { avatarStorageKey, avatarUrl } = user;
     return {
       profile: toPublicProfile(user),
-      listings,
+      listings: await toCards(this.db, rows.slice(0, PROFILE_LISTINGS_PAGE_SIZE)),
+      listingsPage: page,
+      hasMoreListings: rows.length > PROFILE_LISTINGS_PAGE_SIZE,
       linkPreviewImage:
         avatarStorageKey && avatarUrl
           ? this.media.linkPreviewImage({ key: avatarStorageKey, url: avatarUrl }, 'square')

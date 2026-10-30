@@ -98,14 +98,23 @@ const DASHBOARD_NAV: readonly {
   },
 ];
 
-export function DashboardNav({ role, counts }: { role: Role; counts: NavCounts }) {
+/** The sections a role can use; `onNavigate` lets the phone menu close itself. */
+export function DashboardNav({
+  role,
+  counts,
+  onNavigate,
+}: {
+  role: Role;
+  counts: NavCounts;
+  onNavigate?: () => void;
+}) {
   const t = useTranslations('dashboard.nav');
   const pathname = usePathname();
   const itemClass =
     'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:ring-3 focus-visible:ring-sidebar-ring/60 focus-visible:outline-none [&_svg]:size-4';
 
   return (
-    <nav aria-label={t('label')} className="flex flex-row gap-1 lg:flex-col">
+    <nav aria-label={t('label')} className="flex flex-col gap-1">
       {DASHBOARD_NAV.filter((item) => item.show(role)).map(
         ({ href, labelKey, icon: Icon, waiting }) => {
           const active =
@@ -118,6 +127,7 @@ export function DashboardNav({ role, counts }: { role: Role; counts: NavCounts }
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
+              onClick={onNavigate}
               className={cn(
                 itemClass,
                 active
@@ -146,10 +156,13 @@ export function DashboardNav({ role, counts }: { role: Role; counts: NavCounts }
       )}
       <Link
         href="/"
-        className={cn(itemClass, 'text-sidebar-foreground/80 hover:bg-sidebar-accent lg:mt-4')}
+        target="_blank"
+        rel="noopener"
+        className={cn(itemClass, 'mt-4 text-sidebar-foreground/80 hover:bg-sidebar-accent')}
       >
         <ExternalLinkIcon />
         {t('viewSite')}
+        <span className="sr-only"> ({t('newTab')})</span>
       </Link>
     </nav>
   );

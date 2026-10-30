@@ -4,6 +4,7 @@ import {
   inquiryInputSchema,
   listingSearchQuerySchema,
   partnerDirectoryQuerySchema,
+  publicPageQuerySchema,
   slugParamSchema,
 } from '@walls/validation';
 import { Router } from 'express';
@@ -93,13 +94,17 @@ export function publicRoutes({
   });
 
   router.get('/partners/:slug', async (req, res) => {
+    const { page } = publicPageQuerySchema.parse(req.query);
     res.json(
-      await profiles.profile(Role.REAL_ESTATE_AGENT, slugParamSchema.parse(req.params.slug)),
+      await profiles.profile(Role.REAL_ESTATE_AGENT, slugParamSchema.parse(req.params.slug), page),
     );
   });
 
   router.get('/sellers/:slug', async (req, res) => {
-    res.json(await profiles.profile(Role.PRIVATE_SELLER, slugParamSchema.parse(req.params.slug)));
+    const { page } = publicPageQuerySchema.parse(req.query);
+    res.json(
+      await profiles.profile(Role.PRIVATE_SELLER, slugParamSchema.parse(req.params.slug), page),
+    );
   });
 
   return router;

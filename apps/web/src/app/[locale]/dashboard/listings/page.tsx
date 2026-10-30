@@ -7,6 +7,7 @@ import { ListingsTable } from '@/components/listings/listings-table';
 import { NewListingButton } from '@/components/listings/new-listing-button';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
+import { dashboardData } from '@/lib/api/dashboard-data';
 import { getCurrentUser, getListings } from '@/lib/api/server';
 
 export async function generateMetadata({
@@ -29,8 +30,7 @@ export default async function ListingsPage({
   searchParams,
 }: PageProps<'/[locale]/dashboard/listings'>) {
   await resolveLocale(params);
-  const user = await getCurrentUser();
-  if (!user) return null;
+  const user = await dashboardData(getCurrentUser(), '/dashboard/listings');
   return isReviewer(user) ? <ReviewListings tab={(await searchParams).tab} /> : <MyListings />;
 }
 

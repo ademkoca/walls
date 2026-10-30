@@ -14,6 +14,7 @@ import { Pager, pageParam } from '@/components/admin/pager';
 import { InquiryStatusTabs, inquiryStatusParam } from '@/components/inquiries/inquiry-status-tabs';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
+import { dashboardData } from '@/lib/api/dashboard-data';
 import { getCurrentUser, getInquiries } from '@/lib/api/server';
 
 export async function generateMetadata({
@@ -35,10 +36,9 @@ export default async function InquiriesPage({
   const [t, format, user, result] = await Promise.all([
     getTranslations('inquiries'),
     getFormatter(),
-    getCurrentUser(),
-    getInquiries({ status, page }),
+    dashboardData(getCurrentUser(), '/dashboard/inquiries'),
+    dashboardData(getInquiries({ status, page }), '/dashboard/inquiries'),
   ]);
-  if (!result || !user) return null;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

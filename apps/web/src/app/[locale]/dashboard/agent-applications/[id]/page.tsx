@@ -9,7 +9,6 @@ import {
 } from '@walls/ui/components/card';
 import { ArrowLeftIcon, CircleAlertIcon } from 'lucide-react';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { AgentApplicationActions } from '@/components/admin/agent-application-actions';
@@ -18,7 +17,9 @@ import { ReviewStatusBadge } from '@/components/admin/review-status-badge';
 import { SellerTypeBadge } from '@/components/profiles/seller-type-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
-import { NotAccessibleError, getAgentApplication } from '@/lib/api/server';
+import { dashboardData } from '@/lib/api/dashboard-data';
+import { getAgentApplication } from '@/lib/api/server';
+import { QuotedText } from '@/components/dashboard/quoted-text';
 
 export async function generateMetadata({
   params,
@@ -30,15 +31,6 @@ export async function generateMetadata({
   return { title: t('title') };
 }
 
-async function loadApplication(id: string) {
-  try {
-    return await getAgentApplication(id);
-  } catch (error) {
-    if (error instanceof NotAccessibleError) notFound();
-    throw error;
-  }
-}
-
 /** One application: details, private proof files, and the review decision (SPEC §2.1). */
 export default async function AgentApplicationPage({
   params,
@@ -48,8 +40,10 @@ export default async function AgentApplicationPage({
   const t = await getTranslations('agentApplications');
   const tEnums = await getTranslations('enums');
   const format = await getFormatter();
-  const application = await loadApplication(id);
-  if (!application) return null;
+  const application = await dashboardData(
+    getAgentApplication(id),
+    `/dashboard/agent-applications/${id}`,
+  );
   const date = (iso: string) =>
     format.dateTime(new Date(iso), { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -83,8 +77,8 @@ export default async function AgentApplicationPage({
         <Alert variant="destructive">
           <CircleAlertIcon />
           <AlertTitle>{t('rejectionReason')}</AlertTitle>
-          <AlertDescription className="whitespace-pre-line">
-            {application.rejectionReason}
+          <AlertDescription>
+            <QuotedText text={application.rejectionReason} />
           </AlertDescription>
         </Alert>
       )}

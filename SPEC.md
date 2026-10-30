@@ -694,6 +694,7 @@ Filters should include:
 -   bedrooms
 -   bathrooms
 -   furnished status
+-   negotiable price
 -   advertiser type
 -   relevant amenities/features
 
@@ -716,6 +717,7 @@ How the filters behave:
 -   **Price bounds** are entered in a currency (the visitor's, kept in the URL with the bounds) and compared with every listing's price converted at the current rate. "Price on request" listings never match a price bound.
 -   **Area** is the floor area, or the plot area for land.
 -   **Furnished status** is one of furnished, semi-furnished or unfurnished and matches exactly; listings that don't state it never match. It is offered when no property type is chosen or the chosen type has the field (apartment, house, villa, office).
+-   **Negotiable price** (decision 2026-10-30) keeps only fixed prices the advertiser marked as negotiable; "price on request" listings never match. Result cards say when a price is negotiable.
 -   **Advertiser type** (private seller, agent, agency or investor) matches the listing's `sellerType`, its creator's type; an assigned agency does not change it.
 -   **Features** offered are those of the chosen property type (all without one); a listing must have every chosen feature.
 -   Sorting by price compares prices in EUR at the current rate; rental prices are compared as stated, whatever their period. Listings without a price or area sort last.

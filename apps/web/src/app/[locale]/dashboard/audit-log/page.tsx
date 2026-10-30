@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { AuditTable } from '@/components/admin/audit-table';
 import { Pager, pageParam, param } from '@/components/admin/pager';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
+import { dashboardData } from '@/lib/api/dashboard-data';
 import { getAuditLog } from '@/lib/api/server';
 
 export async function generateMetadata({
@@ -22,8 +23,7 @@ export default async function AuditLogPage({
   const t = await getTranslations('auditLog');
   const filters = { entityType: param(search.entityType), entityId: param(search.entityId) };
   const page = pageParam(search.page);
-  const result = await getAuditLog({ ...filters, page });
-  if (!result) return null;
+  const result = await dashboardData(getAuditLog({ ...filters, page }), '/dashboard/audit-log');
   const query = Object.fromEntries(
     Object.entries(filters).filter((entry): entry is [string, string] => Boolean(entry[1])),
   );

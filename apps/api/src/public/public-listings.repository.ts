@@ -124,6 +124,8 @@ function searchConditions(search: ListingSearch, rate: string | null): SQL {
     search.transactionType ? eq(listings.transactionType, search.transactionType) : undefined,
     search.propertyType ? eq(properties.propertyType, search.propertyType) : undefined,
     ...priceConditions(search, rate),
+    // A price on request is never negotiable (the database enforces it).
+    search.negotiable ? eq(listings.priceNegotiable, true) : undefined,
     search.minArea === undefined ? undefined : sql`${listingArea} >= ${search.minArea}`,
     search.maxArea === undefined ? undefined : sql`${listingArea} <= ${search.maxArea}`,
     search.bedrooms === undefined ? undefined : gte(properties.bedrooms, search.bedrooms),

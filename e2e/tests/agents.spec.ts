@@ -209,7 +209,6 @@ test('a private seller edits their profile, which is public immediately', async 
   expect(errors, 'uncaught browser errors (visitor)').toEqual([]);
 });
 
-// Netlify refuses request bodies above about 4.5 MB, so the browser keeps proof files small.
 test('an application with a large photo as proof is reduced and accepted, a large PDF is refused', async ({
   page,
 }) => {
@@ -222,13 +221,13 @@ test('an application with a large photo as proof is reduced and accepted, a larg
   await page.getByLabel('Phone number', { exact: true }).fill(PHONE);
 
   // A PDF cannot be reduced: over the limit, it is refused right away.
-  const bigPdf = Buffer.concat([PROOF_PDF, Buffer.alloc(5 * 1024 * 1024)]);
+  const bigPdf = Buffer.concat([PROOF_PDF, Buffer.alloc(10 * 1024 * 1024)]);
   await page
     .getByLabel('Proof')
     .setInputFiles({ name: 'veliki-sken.pdf', mimeType: 'application/pdf', buffer: bigPdf });
-  await expect(page.getByText('veliki-sken.pdf is larger than 3.5 MB.')).toBeVisible();
+  await expect(page.getByText('veliki-sken.pdf is larger than 10 MB.')).toBeVisible();
 
-  // A large photo is reduced on sending.
+  // A photo above the per-file limit is reduced on sending.
   const photo = await largePhoto();
   await page.getByLabel('Proof').setInputFiles(photo.path);
   await expect(page.getByText(/large-[0-9a-f]{8}\.jpg/)).toBeVisible();
@@ -237,6 +236,6 @@ test('an application with a large photo as proof is reduced and accepted, a larg
   );
   await page.getByRole('button', { name: 'Send application' }).click();
   const sentBytes = Number((await (await upload).allHeaders())['content-length']);
-  expect(sentBytes, 'bytes sent to the API').toBeLessThan(4 * 1024 * 1024);
+  expect(sentBytes, 'bytes sent to the API').toBeLessThan(10 * 1024 * 1024);
   await expect(page.getByRole('heading', { name: 'Thank you for applying' })).toBeVisible();
 });

@@ -51,6 +51,11 @@ const listingSearchShape = {
   bedrooms: rooms.optional(),
   bathrooms: rooms.optional(),
   furnishedStatus: z.enum(enumValues(FurnishedStatus)).optional(),
+  /** Only fixed prices the advertiser marked as negotiable ("true"; absent for all). */
+  negotiable: z
+    .literal('true')
+    .transform(() => true)
+    .optional(),
   amenities: amenities.optional(),
   /** Who advertises the listing: private seller, agent, agency or investor. */
   sellerType: z.enum(enumValues(SellerType)).optional(),

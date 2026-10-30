@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { pageParam } from '@/components/admin/pager';
 import { PublicProfileView } from '@/components/public/public-profile-view';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { getPublicProfile } from '@/lib/api/public';
@@ -34,12 +35,16 @@ export async function generateMetadata({
 }
 
 /** Public private-seller profile (SPEC §19). */
-export default async function SellerProfilePage({ params }: PageProps<'/[locale]/sellers/[slug]'>) {
+export default async function SellerProfilePage({
+  params,
+  searchParams,
+}: PageProps<'/[locale]/sellers/[slug]'>) {
   await resolveLocale(params);
+  const { slug } = await params;
   const [page, pricing] = await Promise.all([
-    getPublicProfile('sellers', (await params).slug),
+    getPublicProfile('sellers', slug, pageParam((await searchParams).page)),
     getPricing(),
   ]);
   if (!page) notFound();
-  return <PublicProfileView page={page} pricing={pricing} />;
+  return <PublicProfileView page={page} pricing={pricing} path={`/sellers/${slug}`} />;
 }

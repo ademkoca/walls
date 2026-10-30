@@ -1,4 +1,4 @@
-import type { PublicListingCard } from '@walls/shared';
+import { PriceMode, type PublicListingCard } from '@walls/shared';
 import { Badge } from '@walls/ui/components/badge';
 import { ImageIcon, MapPinIcon } from 'lucide-react';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
@@ -72,6 +72,9 @@ export function ListingCard({
           </p>
           <div className="mt-auto pt-1">
             <PriceTag price={listing.price} pricing={pricing} className="text-lg font-semibold" />
+            {listing.price.mode === PriceMode.FIXED && listing.price.negotiable && (
+              <p className="text-sm text-muted-foreground">{t('negotiable')}</p>
+            )}
           </div>
         </div>
       </Link>

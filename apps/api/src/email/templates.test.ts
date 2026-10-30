@@ -29,6 +29,20 @@ describe('email layout', () => {
     expect(html).toContain('Stan &lt;b&gt;na&lt;/b&gt; Vračaru');
   });
 
+  it('quotes words someone else wrote, in italics, with the language’s quotation marks', () => {
+    const { html, text } = inquiry();
+    expect(text).toContain('„Zdravo,\nda li je stan dostupan?“');
+    expect(html).toMatch(/<p style="[^"]*font-style:italic[^"]*">„Zdravo,<br>/);
+    const rejected = renderEmail(
+      'LISTING_REJECTED',
+      'en',
+      { displayName: 'Ana', listingTitle: 'Flat', reason: 'Add photos.', link: `${ORIGIN}/l` },
+      ORIGIN,
+    );
+    expect(rejected.text).toContain('“Add photos.”');
+    expect(rejected.html).toMatch(/font-style:italic[^>]*>“Add photos\.”<\/p>/);
+  });
+
   it('keeps line breaks in messages and escapes links', () => {
     const { html } = inquiry();
     expect(html).toContain('Zdravo,<br>da li je stan dostupan?');

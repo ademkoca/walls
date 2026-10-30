@@ -47,10 +47,28 @@ export const escapeHtml = (value: string) =>
 const textToHtml = (value: string) => escapeHtml(value).replace(/\r?\n/g, '<br>');
 
 /**
+ * A paragraph of an email: Walls' own text, or words someone else wrote (a rejection reason,
+ * a visitor's message), which are quoted and set in italics so they stand apart.
+ */
+export type EmailParagraph = string | { quote: string };
+
+const QUOTE_MARKS: Record<Locale, [open: string, close: string]> = {
+  sr: ['„', '“'],
+  en: ['“', '”'],
+};
+
+/** The paragraph as plain text, with quotation marks around a quote. */
+export function paragraphText(locale: Locale, paragraph: EmailParagraph): string {
+  if (typeof paragraph === 'string') return paragraph;
+  const [open, close] = QUOTE_MARKS[locale];
+  return `${open}${paragraph.quote}${close}`;
+}
+
+/**
  * Inbox preview text. Without it, clients preview the logo's alt text and the greeting; this
  * uses the first paragraph after a greeting ("Hello Ana,") instead.
  */
-function previewText(paragraphs: string[]): string {
+function previewText(paragraphs: readonly string[]): string {
   const [first = '', second] = paragraphs;
   return second !== undefined && first.trimEnd().endsWith(',') ? second : first;
 }
@@ -62,7 +80,7 @@ export interface EmailLayoutInput {
   locale: Locale;
   /** Shown as the heading and the document title. */
   title: string;
-  paragraphs: string[];
+  paragraphs: EmailParagraph[];
   action?: { label: string; url: string };
   /** The web app's origin, which serves the logo and is linked from it. */
   webOrigin: string;
@@ -90,10 +108,13 @@ export function renderEmailLayout({
   const year = new Date().getFullYear();
 
   const body = paragraphs
-    .map(
-      (paragraph) =>
-        `<p style="margin:0 0 16px;font-family:${FONT};font-size:16px;line-height:24px;color:${COLOR.ink}">${textToHtml(paragraph)}</p>`,
-    )
+    .map((paragraph) => {
+      const quote =
+        typeof paragraph === 'string'
+          ? ''
+          : `font-style:italic;padding-left:16px;border-left:4px solid ${COLOR.stone};`;
+      return `<p style="margin:0 0 16px;${quote}font-family:${FONT};font-size:16px;line-height:24px;color:${COLOR.ink}">${textToHtml(paragraphText(locale, paragraph))}</p>`;
+    })
     .join('\n');
 
   const actionBlock = action
@@ -124,7 +145,7 @@ a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !im
 </style>
 </head>
 <body style="margin:0;padding:0;background:${COLOR.stone}">
-<div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:${COLOR.stone}">${escapeHtml(previewText(paragraphs))}${PREVIEW_FILLER}</div>
+<div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:${COLOR.stone}">${escapeHtml(previewText(paragraphs.map((paragraph) => paragraphText(locale, paragraph))))}${PREVIEW_FILLER}</div>
 <table role="presentation" width="100%" border="0" cellpadding="0" cellspacing="0" bgcolor="${COLOR.stone}" style="background:${COLOR.stone}">
 <tr><td align="center" style="padding:24px 12px">
 <!--[if mso]><table role="presentation" width="${CONTENT_WIDTH}" border="0" cellpadding="0" cellspacing="0"><tr><td><![endif]-->

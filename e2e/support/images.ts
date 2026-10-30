@@ -34,8 +34,8 @@ export async function listingPhotos(count: number): Promise<string[]> {
 }
 
 /**
- * A photo straight from a modern phone or camera: about 12 MB, far above what the hosting
- * platform lets through in one request (see MAX_UPLOAD_BYTES in the web app).
+ * A photo straight from a modern phone or camera: about 12 MB, above the size the web app
+ * sends as is (see SHRINK_ABOVE_BYTES and the proof files' 10 MB limit).
  */
 export async function largePhoto(): Promise<{ path: string; bytes: number }> {
   mkdirSync(FIXTURE_DIR, { recursive: true });

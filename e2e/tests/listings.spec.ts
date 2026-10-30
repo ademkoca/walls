@@ -141,7 +141,7 @@ test('offers only the features that apply to the property type', async ({ page }
   await expect(page.getByRole('checkbox', { name: 'Elevator' })).not.toBeChecked();
 });
 
-// Netlify refuses request bodies above about 4.5 MB, so large photos are reduced in the browser.
+// Large photos are reduced in the browser, so uploads stay quick on mobile connections.
 test('a large photo is reduced in the browser before it is uploaded', async ({ page }) => {
   test.slow();
   await openNewDraft(page);

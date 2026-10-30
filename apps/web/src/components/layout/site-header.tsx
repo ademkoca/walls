@@ -32,7 +32,7 @@ export async function SiteHeader() {
           <Suspense>
             <LanguageSwitcher className="hidden sm:flex" />
           </Suspense>
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <HeaderAuth />
           </div>
           <MobileNav />

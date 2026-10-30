@@ -49,12 +49,16 @@ export function getPublicPartners(query: {
   return publicGet<Page<PublicPartnerSummary>>(`/partners?${search.toString()}`);
 }
 
-/** A public professional or private-seller profile with its listings, or null when not found. */
+/**
+ * A public professional or private-seller profile with one page of its listings, or null
+ * when not found.
+ */
 export function getPublicProfile(
   kind: 'partners' | 'sellers',
   slug: string,
+  page = 1,
 ): Promise<PublicProfilePage | null> {
-  return publicGet<PublicProfilePage>(`/${kind}/${encodeURIComponent(slug)}`);
+  return publicGet<PublicProfilePage>(`/${kind}/${encodeURIComponent(slug)}?page=${page}`);
 }
 
 export function searchListings(search: ListingSearch): Promise<ListingSearchResult> {

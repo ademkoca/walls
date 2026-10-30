@@ -74,21 +74,21 @@ export function ImageViewer({
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white hover:bg-white/25 hover:text-white"
+                className="absolute inset-y-0 left-2 my-auto size-12 bg-black/50 text-white hover:bg-white/25 hover:text-white"
                 aria-label={t('previous')}
                 onClick={() => index !== null && go(index - 1)}
               >
-                <ChevronLeftIcon />
+                <ChevronLeftIcon className="size-6" />
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white hover:bg-white/25 hover:text-white"
+                className="absolute inset-y-0 right-2 my-auto size-12 bg-black/50 text-white hover:bg-white/25 hover:text-white"
                 aria-label={t('next')}
                 onClick={() => index !== null && go(index + 1)}
               >
-                <ChevronRightIcon />
+                <ChevronRightIcon className="size-6" />
               </Button>
             </>
           )}

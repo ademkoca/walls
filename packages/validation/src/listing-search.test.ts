@@ -46,6 +46,7 @@ describe('listing search query (SPEC §17)', () => {
       { bedrooms: '0' },
       { amenities: 'ELEVATOR,JACUZZI' },
       { sellerType: 'ADMIN' },
+      { negotiable: 'false' },
       { sort: 'RANDOM' },
       { page: '0' },
       { utm_source: 'x' },
@@ -77,9 +78,11 @@ describe('listing search query (SPEC §17)', () => {
       currency: 'EUR',
       amenities: 'PETS_ALLOWED',
       furnishedStatus: 'FURNISHED',
+      negotiable: 'true',
       sort: 'NEWEST',
       page: '2',
     });
+    expect(search.negotiable).toBe(true);
     const query = listingSearchToQuery(search);
     expect(query).toEqual({
       transactionType: 'RENT',
@@ -87,6 +90,7 @@ describe('listing search query (SPEC §17)', () => {
       currency: 'EUR',
       amenities: 'PETS_ALLOWED',
       furnishedStatus: 'FURNISHED',
+      negotiable: 'true',
       page: '2',
     });
     expect(parseListingSearch(query)).toEqual(search);

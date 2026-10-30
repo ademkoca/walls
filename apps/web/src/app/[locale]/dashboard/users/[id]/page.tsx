@@ -9,7 +9,6 @@ import {
 } from '@walls/ui/components/card';
 import { ArrowLeftIcon } from 'lucide-react';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { getFormatter, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { AuditTable } from '@/components/admin/audit-table';
@@ -18,7 +17,8 @@ import { UserAccountActions } from '@/components/admin/user-account-actions';
 import { UserStatusBadge } from '@/components/admin/user-status-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
-import { NotAccessibleError, getAuditLog, getUser } from '@/lib/api/server';
+import { dashboardData } from '@/lib/api/dashboard-data';
+import { getAuditLog, getUser } from '@/lib/api/server';
 
 export async function generateMetadata({
   params,
@@ -27,26 +27,17 @@ export async function generateMetadata({
   return { title: t('title') };
 }
 
-async function loadUser(id: string) {
-  try {
-    return await getUser(id);
-  } catch (error) {
-    if (error instanceof NotAccessibleError) notFound();
-    throw error;
-  }
-}
-
 export default async function UserPage({ params }: PageProps<'/[locale]/dashboard/users/[id]'>) {
   await resolveLocale(params);
   const { id } = await params;
   const t = await getTranslations('users');
   const tEnums = await getTranslations('enums');
   const format = await getFormatter();
+  const page = `/dashboard/users/${id}`;
   const [user, history] = await Promise.all([
-    loadUser(id),
-    getAuditLog({ entityType: 'USER', entityId: id }),
+    dashboardData(getUser(id), page),
+    dashboardData(getAuditLog({ entityType: 'USER', entityId: id }), page),
   ]);
-  if (!user) return null;
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -123,7 +114,7 @@ export default async function UserPage({ params }: PageProps<'/[locale]/dashboar
         </Card>
       )}
 
-      {history && history.items.length > 0 && (
+      {history.items.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{t('history')}</CardTitle>

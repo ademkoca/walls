@@ -8,7 +8,8 @@
   "common": {
     "skipToContent": "Preskoči na sadržaj",
     "loading": "Učitavanje…",
-    "backToHome": "Nazad na početnu"
+    "backToHome": "Nazad na početnu",
+    "quoted": "„{text}“"
   },
   "demoSite": {
     "banner": "Ovo je demo sajt za probu: oglasi su izmišljeni, a nalozi i podaci mogu biti obrisani.",
@@ -165,6 +166,11 @@
     "title": "Stranica nije pronađena",
     "description": "Stranica koju tražite ne postoji ili je premeštena."
   },
+  "pageError": {
+    "title": "Stranica trenutno ne može da se učita",
+    "description": "Došlo je do greške na našoj strani. Pokušajte ponovo za nekoliko trenutaka.",
+    "retry": "Pokušaj ponovo"
+  },
   "auth": {
     "fields": {
       "displayName": "Ime i prezime",
@@ -251,6 +257,7 @@
       "overview": "Pregled",
       "listings": "Moji oglasi",
       "viewSite": "Pogledaj sajt",
+      "newTab": "otvara se u novoj kartici",
       "reviewListings": "Oglasi",
       "users": "Korisnici",
       "auditLog": "Dnevnik izmena",
@@ -281,6 +288,7 @@
     "loadFailed": "Oglasi trenutno ne mogu da se učitaju.",
     "notFound": "Oglas ne postoji ili mu nemate pristup.",
     "backToList": "Nazad na oglase",
+    "viewOnSite": "Pogledaj na sajtu",
     "editor": {
       "save": "Sačuvaj nacrt",
       "saved": "Nacrt je sačuvan.",
@@ -331,7 +339,7 @@
         "streetNumber": "Broj",
         "postalCode": "Poštanski broj",
         "mapLocation": "Tačna lokacija na mapi",
-        "mapHint": "Kliknite na mapu, prevucite oznaku ili iskoristite svoju trenutnu lokaciju ako ste kod nekretnine.",
+        "mapHint": "Kliknite na mapu, prevucite oznaku ili iskoristite svoju trenutnu lokaciju ako ste na licu mesta.",
         "findOnMap": "Pronađi adresu na mapi",
         "addressNotFound": "Adresa nije pronađena. Postavite oznaku ručno.",
         "useMyLocation": "Koristi moju lokaciju",
@@ -813,14 +821,13 @@
       "files": "Dokaz",
       "sellerType": "Vrsta naloga"
     },
-    "filesHint": "PDF, JPG ili PNG, najviše {max} datoteka i 3,5 MB ukupno. Fotografije se automatski smanjuju, PDF datoteke ne. Vidi ih samo naš tim.",
+    "filesHint": "PDF, JPG ili PNG, najviše {max} datoteka, do {maxMb} MB svaka. Veće fotografije se automatski smanjuju, PDF datoteke ne. Vidi ih samo naš tim.",
     "proofHint": "{type, select, REAL_ESTATE_AGENT {Na primer licenca ili potvrda o zaposlenju u agenciji.} other {Na primer izvod iz APR-a (Agencija za privredne registre).}}",
     "chooseFiles": "Izaberi datoteke",
     "removeFile": "Ukloni {name}",
     "noFiles": "Dodajte bar jednu datoteku.",
     "tooManyFiles": "Možete poslati najviše {max} datoteka.",
     "fileTooLarge": "{name} je veća od {maxMb} MB.",
-    "filesTooLargeTogether": "Datoteke su prevelike za slanje (zajedno preko {maxMb} MB). Uklonite datoteku ili koristite manje skenove; fotografije se automatski smanjuju, PDF datoteke ne.",
     "fileWrongType": "{name} nije PDF, JPG ili PNG datoteka.",
     "fileIssues": {
       "UNSUPPORTED_TYPE": "nije PDF, JPG ili PNG datoteka",
@@ -1013,7 +1020,8 @@
     "bedrooms": "{count, plural, one {# spavaća soba} few {# spavaće sobe} other {# spavaćih soba}}",
     "noImage": "Nema slike",
     "approximately": "≈ {price}",
-    "original": "Cena u oglasu: {price}"
+    "original": "Cena u oglasu: {price}",
+    "negotiable": "Moguć dogovor"
   },
   "currency": {
     "label": "Valuta",
@@ -1038,6 +1046,7 @@
     "max": "Do",
     "minPrice": "Najniža cena",
     "maxPrice": "Najviša cena",
+    "negotiable": "Samo cene uz moguć dogovor",
     "minArea": "Najmanja površina",
     "maxArea": "Najveća površina",
     "bedrooms": "Spavaće sobe",

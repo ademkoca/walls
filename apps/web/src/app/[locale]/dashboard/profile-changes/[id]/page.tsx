@@ -2,14 +2,15 @@ import { Alert, AlertDescription, AlertTitle } from '@walls/ui/components/alert'
 import { buttonVariants } from '@walls/ui/components/button';
 import { ArrowLeftIcon, CircleAlertIcon } from 'lucide-react';
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { ProfileChangeActions } from '@/components/admin/profile-change-actions';
 import { ProfileComparison } from '@/components/admin/profile-comparison';
 import { ReviewStatusBadge } from '@/components/admin/review-status-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
-import { NotAccessibleError, getProfileChange } from '@/lib/api/server';
+import { dashboardData } from '@/lib/api/dashboard-data';
+import { getProfileChange } from '@/lib/api/server';
+import { QuotedText } from '@/components/dashboard/quoted-text';
 
 export async function generateMetadata({
   params,
@@ -21,15 +22,6 @@ export async function generateMetadata({
   return { title: t('title') };
 }
 
-async function loadRequest(id: string) {
-  try {
-    return await getProfileChange(id);
-  } catch (error) {
-    if (error instanceof NotAccessibleError) notFound();
-    throw error;
-  }
-}
-
 /** One agent's proposed profile next to the live one, with approve / reject (SPEC §4). */
 export default async function ProfileChangePage({
   params,
@@ -37,8 +29,7 @@ export default async function ProfileChangePage({
   await resolveLocale(params);
   const { id } = await params;
   const t = await getTranslations('profileChanges');
-  const request = await loadRequest(id);
-  if (!request) return null;
+  const request = await dashboardData(getProfileChange(id), `/dashboard/profile-changes/${id}`);
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
@@ -78,8 +69,8 @@ export default async function ProfileChangePage({
         <Alert variant="destructive">
           <CircleAlertIcon />
           <AlertTitle>{t('rejectionReason')}</AlertTitle>
-          <AlertDescription className="whitespace-pre-line">
-            {request.rejectionReason}
+          <AlertDescription>
+            <QuotedText text={request.rejectionReason} />
           </AlertDescription>
         </Alert>
       )}

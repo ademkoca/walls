@@ -10,12 +10,13 @@ import {
   ListingStatus,
   ReviewStatus,
   checkSubmissionRequirements,
+  publicListingPath,
 } from '@walls/shared';
 import { Alert, AlertDescription, AlertTitle } from '@walls/ui/components/alert';
-import { Button } from '@walls/ui/components/button';
+import { Button, buttonVariants } from '@walls/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
 import { Spinner } from '@walls/ui/components/spinner';
-import { ArrowLeftIcon, CircleAlertIcon, InfoIcon } from 'lucide-react';
+import { ArrowLeftIcon, CircleAlertIcon, ExternalLinkIcon, InfoIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { type ReactNode, useEffect, useState } from 'react';
 import { FormProvider, useWatch } from 'react-hook-form';
@@ -46,6 +47,7 @@ import {
 } from './listing-form-model';
 import { SubmissionChecklist } from './submission-checklist';
 import { useListingForm } from './use-listing-form';
+import { QuotedText } from '@/components/dashboard/quoted-text';
 
 type Busy = 'save' | 'submit' | 'revise' | 'delete' | null;
 
@@ -65,6 +67,7 @@ export function ListingEditor({
 }) {
   const t = useTranslations('listings');
   const tPublished = useTranslations('listings.editor.published');
+  const tNav = useTranslations('dashboard.nav');
   const errorMessage = useErrorMessage();
   const router = useRouter();
   const [listing, setListing] = useState(initialListing);
@@ -223,11 +226,25 @@ export function ListingEditor({
               <h1 className="truncate text-2xl font-semibold tracking-tight">{title}</h1>
               <ListingStatusBadge status={listing.status} />
             </div>
-            {isDirty && editable && (
-              <p className="text-sm text-muted-foreground" role="status">
-                {t('editor.unsaved')}
-              </p>
-            )}
+            <div className="flex flex-wrap items-center gap-4">
+              {isDirty && editable && (
+                <p className="text-sm text-muted-foreground" role="status">
+                  {t('editor.unsaved')}
+                </p>
+              )}
+              {listing.status === ListingStatus.PUBLISHED && listing.slug && (
+                <Link
+                  href={publicListingPath(listing.slug)}
+                  target="_blank"
+                  rel="noopener"
+                  className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                >
+                  <ExternalLinkIcon data-icon="inline-start" />
+                  {t('viewOnSite')}
+                  <span className="sr-only"> ({tNav('newTab')})</span>
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 
@@ -427,7 +444,7 @@ function StatusNotice({
           <AlertTitle>{t('rejectionReason')}</AlertTitle>
           <AlertDescription>
             <p>{t('published.revisionRejected')}</p>
-            <p className="whitespace-pre-line">{revision.rejectionReason}</p>
+            {revision.rejectionReason && <QuotedText text={revision.rejectionReason} />}
           </AlertDescription>
         </Alert>
       )}
@@ -439,7 +456,7 @@ function StatusNotice({
             {listing.status === ListingStatus.REJECTED && !viewerIsReviewer && (
               <p>{t('rejectedNotice')}</p>
             )}
-            <p className="whitespace-pre-line">{listing.rejectionReason}</p>
+            {listing.rejectionReason && <QuotedText text={listing.rejectionReason} />}
           </AlertDescription>
         </Alert>
       )}

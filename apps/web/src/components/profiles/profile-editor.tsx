@@ -30,6 +30,7 @@ import { FormField, fieldAria } from '../forms/form-field';
 import { useSchemaForm } from '../forms/use-schema-form';
 import { AvatarField } from './avatar-field';
 import { EmailChangeCard } from './email-change-card';
+import { QuotedText } from '@/components/dashboard/quoted-text';
 
 /** The version the form edits: the pending proposal when there is one, else the live profile. */
 function editedVersion(profile: MyProfile): ProfileView {
@@ -143,8 +144,8 @@ export function ProfileEditor({ initialProfile }: { initialProfile: MyProfile })
         <Alert variant="destructive">
           <CircleAlertIcon />
           <AlertTitle>{t('rejectedNotice')}</AlertTitle>
-          <AlertDescription className="whitespace-pre-line">
-            {request.rejectionReason}
+          <AlertDescription>
+            {request.rejectionReason && <QuotedText text={request.rejectionReason} />}
           </AlertDescription>
         </Alert>
       )}

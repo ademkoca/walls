@@ -39,6 +39,7 @@ interface FilterValues {
   propertyType: PropertyType | '';
   minPrice: string;
   maxPrice: string;
+  negotiable: boolean;
   minArea: string;
   maxArea: string;
   bedrooms: string;
@@ -56,6 +57,7 @@ function initialValues(search: ListingSearch): FilterValues {
     propertyType: search.propertyType ?? '',
     minPrice: text(search.minPrice),
     maxPrice: text(search.maxPrice),
+    negotiable: search.negotiable ?? false,
     minArea: text(search.minArea),
     maxArea: text(search.maxArea),
     bedrooms: text(search.bedrooms),
@@ -104,6 +106,7 @@ export function SearchFilters({
     const next = parseListingSearch({
       ...values,
       furnishedStatus: showFurnished ? values.furnishedStatus : '',
+      negotiable: values.negotiable ? 'true' : '',
       amenities: amenities.join(','),
       currency: priceCurrency,
       sort: search.sort,
@@ -181,6 +184,13 @@ export function SearchFilters({
         onMin={(value) => set('minPrice', value)}
         onMax={(value) => set('maxPrice', value)}
       />
+      <Label className="flex items-center gap-2 font-normal">
+        <Checkbox
+          checked={values.negotiable}
+          onCheckedChange={(checked) => set('negotiable', checked)}
+        />
+        {t('negotiable')}
+      </Label>
       <RangeFields
         legend={t('area')}
         min={{ id: field('minArea'), label: t('minArea'), value: values.minArea }}

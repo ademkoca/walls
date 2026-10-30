@@ -1,7 +1,9 @@
 import type { PublicProfilePage } from '@walls/shared';
+import { buttonVariants } from '@walls/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
-import { Building2Icon, MailIcon } from 'lucide-react';
+import { Building2Icon, ChevronLeftIcon, ChevronRightIcon, MailIcon } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/navigation';
 import { formatDate } from '@/lib/intl-locale';
 import { PhoneContact } from '../profiles/phone-contact';
 import { ProfileAvatar } from '../profiles/profile-avatar';
@@ -11,18 +13,26 @@ import { ListingGrid } from './listing-card';
 
 /**
  * A public page of a professional (agent, agency, investor) or private seller (SPEC §19):
- * profile, contact and listings.
+ * profile, contact and a page of listings. `path` is the profile's own URL, for paging.
  */
 export async function PublicProfileView({
   page,
   pricing,
+  path,
 }: {
   page: PublicProfilePage;
   pricing: Pricing;
+  path: string;
 }) {
   const t = await getTranslations('publicProfile');
   const locale = await getLocale();
   const { profile, listings } = page;
+  // An API from before profile paging sends every listing and no page fields.
+  const listingsPage = page.listingsPage ?? 1;
+  const pageHref = (target: number) => ({
+    pathname: path,
+    query: target > 1 ? { page: String(target) } : {},
+  });
   const hasContact = profile.phone !== null || profile.email !== null;
 
   return (
@@ -89,6 +99,30 @@ export async function PublicProfileView({
           </p>
         ) : (
           <ListingGrid listings={listings} pricing={pricing} />
+        )}
+        {(listingsPage > 1 || page.hasMoreListings) && (
+          <nav className="flex justify-between gap-2" aria-label={t('listingsTitle')}>
+            {listingsPage > 1 ? (
+              <Link
+                href={pageHref(listingsPage - 1)}
+                className={buttonVariants({ variant: 'outline', size: 'sm' })}
+              >
+                <ChevronLeftIcon data-icon="inline-start" />
+                {t('previous')}
+              </Link>
+            ) : (
+              <span />
+            )}
+            {page.hasMoreListings && (
+              <Link
+                href={pageHref(listingsPage + 1)}
+                className={buttonVariants({ variant: 'outline', size: 'sm' })}
+              >
+                {t('next')}
+                <ChevronRightIcon data-icon="inline-end" />
+              </Link>
+            )}
+          </nav>
         )}
       </section>
     </div>

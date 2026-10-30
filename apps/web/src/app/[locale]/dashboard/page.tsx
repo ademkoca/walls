@@ -11,14 +11,13 @@ import { getTranslations } from 'next-intl/server';
 import { PlatformStats } from '@/components/analytics/platform-stats';
 import { resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
+import { dashboardData } from '@/lib/api/dashboard-data';
 import { getCurrentUser, getInquiryCounts, getPlatformAnalytics } from '@/lib/api/server';
 
 export default async function DashboardPage({ params }: PageProps<'/[locale]/dashboard'>) {
   await resolveLocale(params);
   const t = await getTranslations();
-  // The layout has already redirected anonymous visitors; this read is deduplicated.
-  const user = await getCurrentUser();
-  if (!user) return null;
+  const user = await dashboardData(getCurrentUser(), '/dashboard');
   const advertises = advertisesListings(user);
   const [inquiries, platform] = await Promise.all([
     getInquiryCounts(),

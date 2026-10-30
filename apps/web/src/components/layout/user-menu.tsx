@@ -13,28 +13,14 @@ import {
 } from '@walls/ui/components/dropdown-menu';
 import { LayoutDashboardIcon, LogOutIcon, UserRoundIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
-import { Link, useRouter } from '@/i18n/navigation';
-import { authApi } from '@/lib/api/auth';
+import { Link } from '@/i18n/navigation';
 import { initials } from '@/lib/initials';
-import { useErrorMessage } from '@/lib/use-error-message';
+import { useLogout } from './use-logout';
 
 /** Account menu for a signed-in user: dashboard and profile links, and logout. */
 export function UserMenu({ user, onLoggedOut }: { user: CurrentUser; onLoggedOut?: () => void }) {
   const t = useTranslations('nav');
-  const router = useRouter();
-  const errorMessage = useErrorMessage();
-
-  async function logout() {
-    try {
-      await authApi.logout();
-      onLoggedOut?.();
-      router.push('/');
-      router.refresh();
-    } catch (error) {
-      toast.error(errorMessage(error));
-    }
-  }
+  const logout = useLogout(onLoggedOut);
 
   return (
     <DropdownMenu>

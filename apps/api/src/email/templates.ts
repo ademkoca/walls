@@ -1,7 +1,7 @@
 import type { Locale } from '@walls/shared';
 import { brand } from '@walls/ui/brand';
 import { TOKEN_TTL_HOURS } from '../auth/token-policy';
-import { renderEmailLayout } from './layout';
+import { type EmailParagraph, paragraphText, renderEmailLayout } from './layout';
 
 export const EmailTemplate = {
   EMAIL_VERIFICATION: 'EMAIL_VERIFICATION',
@@ -79,7 +79,7 @@ export interface EmailPayloads {
 
 interface EmailContent {
   subject: string;
-  paragraphs: string[];
+  paragraphs: EmailParagraph[];
   action?: { label: string; url: string };
   replyTo?: string;
 }
@@ -95,7 +95,7 @@ const COPY: Record<Locale, Copy> = {
       paragraphs: [
         `Zdravo ${displayName},`,
         `hvala što ste se registrovali na ${brand.name}. Potvrdite email adresu da biste aktivirali nalog i počeli da objavljujete oglase.`,
-        `Link važi ${TOKEN_TTL_HOURS.EMAIL_VERIFICATION} sata. Ako niste vi napravili nalog, zanemarite ovu poruku.`,
+        `Link važi ${TOKEN_TTL_HOURS.EMAIL_VERIFICATION} sata. Ako niste Vi napravili nalog, zanemarite ovu poruku.`,
       ],
       action: { label: 'Potvrdi email adresu', url: link },
     }),
@@ -103,31 +103,31 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Već imate nalog',
       paragraphs: [
         `Neko je pokušao da napravi nalog na ${brand.name} sa ovom email adresom, ali nalog već postoji.`,
-        `Ako ste to bili vi, prijavite se: ${loginLink}`,
+        `Ako ste to bili Vi, prijavite se: ${loginLink}`,
         `Ako ste zaboravili lozinku, možete je resetovati: ${resetLink}`,
-        'Ako niste vi, zanemarite ovu poruku — vaš nalog nije promenjen.',
+        'Ako niste Vi, zanemarite ovu poruku — Vaš nalog nije promenjen.',
       ],
     }),
     PASSWORD_RESET: ({ link }) => ({
       subject: 'Resetovanje lozinke',
       paragraphs: [
-        `Primili smo zahtev za resetovanje lozinke za vaš ${brand.name} nalog.`,
-        `Link važi ${TOKEN_TTL_HOURS.PASSWORD_RESET} sat. Ako niste vi poslali zahtev, zanemarite ovu poruku — lozinka ostaje ista.`,
+        `Primili smo zahtev za resetovanje lozinke za Vaš ${brand.name} nalog.`,
+        `Link važi ${TOKEN_TTL_HOURS.PASSWORD_RESET} sat. Ako niste Vi poslali zahtev, zanemarite ovu poruku — lozinka ostaje ista.`,
       ],
       action: { label: 'Postavi novu lozinku', url: link },
     }),
     PASSWORD_CHANGED: ({ resetLink }) => ({
       subject: 'Lozinka je promenjena',
       paragraphs: [
-        `Lozinka vašeg ${brand.name} naloga je upravo promenjena i odjavljeni ste sa svih uređaja.`,
-        `Ako to niste bili vi, odmah resetujte lozinku: ${resetLink}`,
+        `Lozinka Vašeg ${brand.name} naloga je upravo promenjena i odjavljeni ste sa svih uređaja.`,
+        `Ako to niste bili Vi, odmah resetujte lozinku: ${resetLink}`,
       ],
     }),
     ACCOUNT_SETUP: ({ displayName, link }) => ({
       subject: 'Podesite svoj nalog',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `za vas je otvoren nalog na ${brand.name}. Postavite lozinku da biste ga aktivirali.`,
+        `za Vas je otvoren nalog na ${brand.name}. Postavite lozinku da biste ga aktivirali.`,
         `Link važi ${setupDays} dana.`,
       ],
       action: { label: 'Podesi nalog', url: link },
@@ -136,7 +136,7 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Oglas je poslat na proveru',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `oglas „${listingTitle}" je poslat na proveru. Naš tim će ga pregledati i javiti vam kada bude objavljen ili ako je potrebno nešto da izmenite.`,
+        `oglas „${listingTitle}“ je poslat na proveru. Naš tim će ga pregledati i javiti Vam kada bude objavljen ili ako je potrebno nešto da izmenite.`,
         'Dok je oglas na proveri, ne može se menjati.',
       ],
       action: { label: 'Pogledaj oglas', url: link },
@@ -145,7 +145,7 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Oglas je objavljen',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `oglas „${listingTitle}" je odobren i sada je javno objavljen.`,
+        `oglas „${listingTitle}“ je odobren i sada je javno objavljen.`,
       ],
       action: { label: 'Pogledaj oglas', url: link },
     }),
@@ -153,8 +153,8 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Oglas nije odobren',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `oglas „${listingTitle}" nije odobren. Razlog:`,
-        reason,
+        `oglas „${listingTitle}“ nije odobren. Razlog:`,
+        { quote: reason },
         'Vratite oglas u nacrt, izmenite ga i pošaljite ponovo na proveru.',
       ],
       action: { label: 'Izmeni oglas', url: link },
@@ -163,7 +163,7 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Izmene oglasa su objavljene',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `izmene oglasa „${listingTitle}" su odobrene i sada su javno vidljive.`,
+        `izmene oglasa „${listingTitle}“ su odobrene i sada su javno vidljive.`,
       ],
       action: { label: 'Pogledaj oglas', url: link },
     }),
@@ -171,8 +171,8 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Izmene oglasa nisu odobrene',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `izmene oglasa „${listingTitle}" nisu odobrene. Objavljena verzija oglasa ostaje nepromenjena. Razlog:`,
-        reason,
+        `izmene oglasa „${listingTitle}“ nisu odobrene. Objavljena verzija oglasa ostaje nepromenjena. Razlog:`,
+        { quote: reason },
       ],
       action: { label: 'Izmeni oglas', url: link },
     }),
@@ -180,8 +180,8 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Vaš nalog je deaktiviran',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `vaš ${brand.name} nalog je deaktiviran. Razlog:`,
-        reason,
+        `Vaš ${brand.name} nalog je deaktiviran. Razlog:`,
+        { quote: reason },
         'Dok je nalog deaktiviran, ne možete se prijaviti, a vaši oglasi nisu javno vidljivi. Ako mislite da je došlo do greške, odgovorite na ovu poruku.',
       ],
     }),
@@ -189,24 +189,24 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Vaš nalog je ponovo aktivan',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `vaš ${brand.name} nalog je ponovo aktiviran. Napomena:`,
-        reason,
+        `Vaš ${brand.name} nalog je ponovo aktiviran. Napomena:`,
+        { quote: reason },
       ],
       action: { label: 'Prijavite se', url: loginLink },
     }),
     AGENT_APPLICATION_RECEIVED: ({ fullName }) => ({
-      subject: 'Primili smo vašu prijavu za profesionalni nalog',
+      subject: 'Primili smo Vašu prijavu za profesionalni nalog',
       paragraphs: [
         `Zdravo ${fullName},`,
-        `hvala na prijavi za profesionalni nalog na ${brand.name}. Naš tim će pregledati vaše podatke i dokaze i javiti vam ishod emailom.`,
+        `hvala na prijavi za profesionalni nalog na ${brand.name}. Naš tim će pregledati Vaše podatke i dokaze i javiti Vam ishod emailom.`,
       ],
     }),
     AGENT_APPLICATION_EMAIL_IN_USE: ({ fullName, loginLink, applyLink }) => ({
       subject: 'Prijava za profesionalni nalog nije primljena',
       paragraphs: [
         `Zdravo ${fullName},`,
-        `primili smo prijavu za profesionalni nalog sa ove email adrese, ali ona već pripada nalogu na ${brand.name}. Profesionalni nalog mora imati svoju email adresu, pa vas molimo da se prijavite ponovo sa drugom adresom.`,
-        `Ako niste vi poslali prijavu, zanemarite ovu poruku. Svom postojećem nalogu možete pristupiti ovde: ${loginLink}`,
+        `primili smo prijavu za profesionalni nalog sa ove email adrese, ali ona već pripada nalogu na ${brand.name}. Profesionalni nalog mora imati svoju email adresu, pa Vas molimo da se prijavite ponovo sa drugom adresom.`,
+        `Ako niste Vi poslali prijavu, zanemarite ovu poruku. Svom postojećem nalogu možete pristupiti ovde: ${loginLink}`,
       ],
       action: { label: 'Pošalji novu prijavu', url: applyLink },
     }),
@@ -214,14 +214,14 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Vaša prijava za profesionalni nalog je već u obradi',
       paragraphs: [
         `Zdravo ${fullName},`,
-        'sa ove email adrese već imamo prijavu za profesionalni nalog koja čeka proveru, pa novu prijavu nismo sačuvali. Javićemo vam ishod emailom.',
+        'sa ove email adrese već imamo prijavu za profesionalni nalog koja čeka proveru, pa novu prijavu nismo sačuvali. Javićemo Vam ishod emailom.',
       ],
     }),
     AGENT_APPLICATION_APPROVED: ({ displayName, link }) => ({
       subject: 'Vaša prijava za profesionalni nalog je odobrena',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `vaša prijava za profesionalni nalog na ${brand.name} je odobrena. Postavite lozinku da biste aktivirali nalog i počeli da objavljujete oglase.`,
+        `Vaša prijava za profesionalni nalog na ${brand.name} je odobrena. Postavite lozinku da biste aktivirali nalog i počeli da objavljujete oglase.`,
         `Link važi ${setupDays} dana.`,
       ],
       action: { label: 'Podesi nalog', url: link },
@@ -230,16 +230,16 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Vaša prijava za profesionalni nalog nije odobrena',
       paragraphs: [
         `Zdravo ${fullName},`,
-        'vaša prijava za profesionalni nalog nije odobrena. Razlog:',
-        reason,
+        'Vaša prijava za profesionalni nalog nije odobrena. Razlog:',
+        { quote: reason },
       ],
     }),
     EMAIL_CHANGE_VERIFICATION: ({ displayName, newEmail, link }) => ({
       subject: 'Potvrdite novu email adresu',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `potvrdite da želite da ${newEmail} bude nova email adresa vašeg naloga na ${brand.name}.`,
-        `Link važi ${TOKEN_TTL_HOURS.EMAIL_CHANGE} sata. Ako niste vi zatražili promenu, zanemarite ovu poruku.`,
+        `potvrdite da želite da ${newEmail} bude nova email adresa Vašeg naloga na ${brand.name}.`,
+        `Link važi ${TOKEN_TTL_HOURS.EMAIL_CHANGE} sata. Ako niste Vi zatražili promenu, zanemarite ovu poruku.`,
       ],
       action: { label: 'Potvrdi adresu', url: link },
     }),
@@ -247,21 +247,21 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Email adresa naloga je promenjena',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `email adresa vašeg naloga na ${brand.name} je promenjena u ${newEmail}. Od sada se prijavljujete tom adresom.`,
-        'Ako niste vi napravili ovu promenu, odmah nam odgovorite na ovaj email.',
+        `email adresa Vašeg naloga na ${brand.name} je promenjena u ${newEmail}. Od sada se prijavljujete tom adresom.`,
+        'Ako niste Vi napravili ovu promenu, odmah nam odgovorite na ovaj email.',
       ],
     }),
     PROFILE_CHANGES_APPROVED: ({ displayName, link }) => ({
       subject: 'Izmene profila su odobrene',
-      paragraphs: [`Zdravo ${displayName},`, 'izmene vašeg profila su odobrene i sada su javne.'],
+      paragraphs: [`Zdravo ${displayName},`, 'izmene Vašeg profila su odobrene i sada su javne.'],
       action: { label: 'Pogledaj profil', url: link },
     }),
     PROFILE_CHANGES_REJECTED: ({ displayName, reason, link }) => ({
       subject: 'Izmene profila nisu odobrene',
       paragraphs: [
         `Zdravo ${displayName},`,
-        'izmene vašeg profila nisu odobrene; javni profil je ostao isti. Razlog:',
-        reason,
+        'izmene Vašeg profila nisu odobrene; javni profil je ostao isti. Razlog:',
+        { quote: reason },
       ],
       action: { label: 'Uredi profil', url: link },
     }),
@@ -277,8 +277,8 @@ const COPY: Record<Locale, Copy> = {
       subject: `Novi upit za oglas: ${listingTitle}`,
       paragraphs: [
         `Zdravo ${displayName},`,
-        `${visitorName} vam je poslao/la upit za oglas „${listingTitle}”:`,
-        message,
+        `${visitorName} Vam je poslao/la upit za oglas „${listingTitle}“:`,
+        { quote: message },
         `Email: ${visitorEmail}` + (visitorPhone ? ` · Telefon: ${visitorPhone}` : ''),
         'Odgovorom na ovu poruku pišete direktno pošiljaocu. Status upita menjate na kontrolnoj tabli.',
       ],
@@ -289,7 +289,7 @@ const COPY: Record<Locale, Copy> = {
       subject: `Kontakt forma: ${subject}`,
       paragraphs: [
         `${name} (${email}) je poslao/la poruku preko kontakt stranice:`,
-        message,
+        { quote: message },
         `Poslato sa ${pageLocale === 'en' ? 'engleske' : 'srpske'} verzije sajta. Odgovorom na ovu poruku pišete direktno pošiljaocu.`,
       ],
       replyTo: email,
@@ -360,7 +360,7 @@ const COPY: Record<Locale, Copy> = {
       paragraphs: [
         `Hello ${displayName},`,
         `your listing "${listingTitle}" was not approved. Reason:`,
-        reason,
+        { quote: reason },
         'Turn the listing back into a draft, update it and submit it for review again.',
       ],
       action: { label: 'Edit listing', url: link },
@@ -378,7 +378,7 @@ const COPY: Record<Locale, Copy> = {
       paragraphs: [
         `Hello ${displayName},`,
         `the changes to your listing "${listingTitle}" were not approved. The published version stays as it was. Reason:`,
-        reason,
+        { quote: reason },
       ],
       action: { label: 'Edit listing', url: link },
     }),
@@ -387,7 +387,7 @@ const COPY: Record<Locale, Copy> = {
       paragraphs: [
         `Hello ${displayName},`,
         `your ${brand.name} account has been deactivated. Reason:`,
-        reason,
+        { quote: reason },
         "While the account is deactivated you can't sign in and your listings aren't publicly visible. If you think this is a mistake, reply to this email.",
       ],
     }),
@@ -396,7 +396,7 @@ const COPY: Record<Locale, Copy> = {
       paragraphs: [
         `Hello ${displayName},`,
         `your ${brand.name} account has been reactivated. Note:`,
-        reason,
+        { quote: reason },
       ],
       action: { label: 'Log in', url: loginLink },
     }),
@@ -437,7 +437,7 @@ const COPY: Record<Locale, Copy> = {
       paragraphs: [
         `Hello ${fullName},`,
         'your application for a professional account was not approved. Reason:',
-        reason,
+        { quote: reason },
       ],
     }),
     EMAIL_CHANGE_VERIFICATION: ({ displayName, newEmail, link }) => ({
@@ -470,7 +470,7 @@ const COPY: Record<Locale, Copy> = {
       paragraphs: [
         `Hello ${displayName},`,
         'your profile changes were not approved; your public profile stays as it was. Reason:',
-        reason,
+        { quote: reason },
       ],
       action: { label: 'Edit profile', url: link },
     }),
@@ -487,7 +487,7 @@ const COPY: Record<Locale, Copy> = {
       paragraphs: [
         `Hello ${displayName},`,
         `${visitorName} sent you an inquiry about your listing "${listingTitle}":`,
-        message,
+        { quote: message },
         `Email: ${visitorEmail}` + (visitorPhone ? ` · Phone: ${visitorPhone}` : ''),
         'Reply to this email to write to the sender directly. Change the inquiry status in your dashboard.',
       ],
@@ -498,7 +498,7 @@ const COPY: Record<Locale, Copy> = {
       subject: `Contact form: ${subject}`,
       paragraphs: [
         `${name} (${email}) sent a message through the contact page:`,
-        message,
+        { quote: message },
         `Sent from the ${pageLocale === 'en' ? 'English' : 'Serbian'} site. Reply to this email to write to the sender directly.`,
       ],
       replyTo: email,
@@ -520,7 +520,7 @@ export function renderEmail<T extends EmailTemplate>(
   const subject = `${content.subject} – ${brand.name}`;
 
   const text = [
-    ...content.paragraphs,
+    ...content.paragraphs.map((paragraph) => paragraphText(locale, paragraph)),
     ...(content.action ? [`${content.action.label}: ${content.action.url}`] : []),
     `— ${brand.name} · ${brand.domain}`,
   ].join('\n\n');

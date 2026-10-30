@@ -13,6 +13,7 @@ import { ReviewStatusTabs, reviewStatusParam } from '@/components/admin/review-s
 import { SellerTypeBadge } from '@/components/profiles/seller-type-badge';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
+import { dashboardData } from '@/lib/api/dashboard-data';
 import { getAgentApplications } from '@/lib/api/server';
 
 export async function generateMetadata({
@@ -36,8 +37,10 @@ export default async function AgentApplicationsPage({
   const format = await getFormatter();
   const status = reviewStatusParam(search.status);
   const page = pageParam(search.page);
-  const result = await getAgentApplications({ status, page });
-  if (!result) return null;
+  const result = await dashboardData(
+    getAgentApplications({ status, page }),
+    '/dashboard/agent-applications',
+  );
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

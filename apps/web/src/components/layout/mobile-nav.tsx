@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@walls/ui/components/sheet';
-import { MenuIcon } from 'lucide-react';
+import { LogOutIcon, MenuIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Suspense, useState } from 'react';
 import { Link } from '@/i18n/navigation';
@@ -18,18 +18,23 @@ import { useSession } from '../session/session-provider';
 import { CurrencySwitcher } from './currency-switcher';
 import { LanguageSwitcher } from './language-switcher';
 import { MAIN_NAV } from './nav-items';
+import { useLogout } from './use-logout';
 
 /** Navigation drawer for small screens. */
 export function MobileNav() {
   const t = useTranslations('nav');
-  const { session } = useSession();
+  const { session, refresh } = useSession();
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+  const logout = useLogout(() => {
+    close();
+    void refresh();
+  });
   const linkClass = 'block rounded-md px-3 py-2.5 text-base font-medium hover:bg-muted';
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger render={<Button variant="ghost" size="icon" className="md:hidden" />}>
+      <SheetTrigger render={<Button variant="ghost" size="icon" className="lg:hidden" />}>
         <MenuIcon />
         <span className="sr-only">{t('openMenu')}</span>
       </SheetTrigger>
@@ -50,9 +55,15 @@ export function MobileNav() {
         <Separator className="my-2" />
         <div className="flex flex-col gap-2 px-4">
           {session.status === 'authenticated' ? (
-            <Link href="/dashboard" className={buttonVariants()} onClick={close}>
-              {t('dashboard')}
-            </Link>
+            <>
+              <Link href="/dashboard" className={buttonVariants()} onClick={close}>
+                {t('dashboard')}
+              </Link>
+              <Button variant="outline" onClick={() => void logout()}>
+                <LogOutIcon />
+                {t('logout')}
+              </Button>
+            </>
           ) : (
             <>
               <Link

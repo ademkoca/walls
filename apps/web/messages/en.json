@@ -8,7 +8,8 @@
   "common": {
     "skipToContent": "Skip to content",
     "loading": "Loading…",
-    "backToHome": "Back to home"
+    "backToHome": "Back to home",
+    "quoted": "“{text}”"
   },
   "demoSite": {
     "banner": "This is a demo site for trying things out: the listings are made up, and accounts and data may be deleted.",
@@ -165,6 +166,11 @@
     "title": "Page not found",
     "description": "The page you're looking for doesn't exist or has moved."
   },
+  "pageError": {
+    "title": "This page can't be loaded right now",
+    "description": "Something went wrong on our side. Try again in a moment.",
+    "retry": "Try again"
+  },
   "auth": {
     "fields": {
       "displayName": "Full name",
@@ -251,6 +257,7 @@
       "overview": "Overview",
       "listings": "My listings",
       "viewSite": "View site",
+      "newTab": "opens in a new tab",
       "reviewListings": "Listings",
       "users": "Users",
       "auditLog": "Audit log",
@@ -281,6 +288,7 @@
     "loadFailed": "Your listings can't be loaded right now.",
     "notFound": "This listing doesn't exist or you don't have access to it.",
     "backToList": "Back to listings",
+    "viewOnSite": "View on site",
     "editor": {
       "save": "Save draft",
       "saved": "Draft saved.",
@@ -813,14 +821,13 @@
       "files": "Proof",
       "sellerType": "Account type"
     },
-    "filesHint": "PDF, JPG or PNG, at most {max} files and 3.5 MB in total. Photos are reduced automatically, PDF files are not. Only our team can see them.",
+    "filesHint": "PDF, JPG or PNG, at most {max} files of up to {maxMb} MB each. Larger photos are reduced automatically, PDF files are not. Only our team can see them.",
     "proofHint": "{type, select, REAL_ESTATE_AGENT {For example a licence or an employment confirmation from your agency.} other {For example an extract from the Business Registers Agency (APR).}}",
     "chooseFiles": "Choose files",
     "removeFile": "Remove {name}",
     "noFiles": "Add at least one file.",
     "tooManyFiles": "You can send at most {max} files.",
     "fileTooLarge": "{name} is larger than {maxMb} MB.",
-    "filesTooLargeTogether": "Your files are too large to send together (over {maxMb} MB in total). Remove a file or use smaller scans; photos are reduced automatically, PDF files are not.",
     "fileWrongType": "{name} isn't a PDF, JPG or PNG file.",
     "fileIssues": {
       "UNSUPPORTED_TYPE": "not a PDF, JPG or PNG file",
@@ -1013,7 +1020,8 @@
     "bedrooms": "{count, plural, one {# bedroom} other {# bedrooms}}",
     "noImage": "No image",
     "approximately": "≈ {price}",
-    "original": "Listed at {price}"
+    "original": "Listed at {price}",
+    "negotiable": "Negotiable"
   },
   "currency": {
     "label": "Currency",
@@ -1038,6 +1046,7 @@
     "max": "Max",
     "minPrice": "Minimum price",
     "maxPrice": "Maximum price",
+    "negotiable": "Negotiable prices only",
     "minArea": "Minimum area",
     "maxArea": "Maximum area",
     "bedrooms": "Bedrooms",

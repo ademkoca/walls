@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_UPLOAD_BYTES, fitWithin, prepareImageForUpload } from './shrink-image';
+import { fitWithin, prepareImageForUpload } from './shrink-image';
 
 const photo = { maxEdgePx: 3000, minShortSidePx: 768 };
 
@@ -28,6 +28,5 @@ describe('prepareImageForUpload', () => {
   it('returns a file within the safe size untouched', async () => {
     const file = new File([new Uint8Array(1024)], 'small.jpg', { type: 'image/jpeg' });
     expect(await prepareImageForUpload(file)).toBe(file);
-    expect(MAX_UPLOAD_BYTES).toBeLessThan(4.5 * 1024 * 1024);
   });
 });

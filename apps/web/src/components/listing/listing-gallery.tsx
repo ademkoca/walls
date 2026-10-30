@@ -48,21 +48,21 @@ export function ListingGallery({ images, title }: { images: PublicListingImage[]
               type="button"
               variant="secondary"
               size="icon"
-              className="absolute top-1/2 left-3 -translate-y-1/2"
+              className="absolute inset-y-0 left-3 my-auto size-12"
               aria-label={t('previous')}
               onClick={() => go(index - 1)}
             >
-              <ChevronLeftIcon />
+              <ChevronLeftIcon className="size-6" />
             </Button>
             <Button
               type="button"
               variant="secondary"
               size="icon"
-              className="absolute top-1/2 right-3 -translate-y-1/2"
+              className="absolute inset-y-0 right-3 my-auto size-12"
               aria-label={t('next')}
               onClick={() => go(index + 1)}
             >
-              <ChevronRightIcon />
+              <ChevronRightIcon className="size-6" />
             </Button>
             <p
               className="absolute right-3 bottom-3 rounded-md bg-foreground/80 px-2 py-1 text-xs font-medium text-background"

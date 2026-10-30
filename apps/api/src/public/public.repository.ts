@@ -19,7 +19,13 @@ export async function findPublicUser(db: DbExecutor, slug: string, role: Role) {
  * Public listings advertised by a user, or assigned to them as the agent or agency; newest
  * first.
  */
-export async function findPublicListingsOf(db: DbExecutor, userId: string): Promise<CardRow[]> {
+export async function findPublicListingsOf(
+  db: DbExecutor,
+  userId: string,
+  page: number,
+  pageSize: number,
+): Promise<CardRow[]> {
+  const { limit, offset } = pageBounds(page, pageSize);
   return db
     .select(cardColumns)
     .from(listings)
@@ -32,7 +38,9 @@ export async function findPublicListingsOf(db: DbExecutor, userId: string): Prom
         or(eq(listings.createdById, userId), eq(listings.assignedAgentId, userId)),
       ),
     )
-    .orderBy(desc(listings.publishedAt), asc(listings.id));
+    .orderBy(desc(listings.publishedAt), asc(listings.id))
+    .limit(limit)
+    .offset(offset);
 }
 
 /**

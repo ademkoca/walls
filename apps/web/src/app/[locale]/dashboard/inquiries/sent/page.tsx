@@ -6,6 +6,7 @@ import { Pager, pageParam } from '@/components/admin/pager';
 import { InquiryStatusTabs, SENT_TAB } from '@/components/inquiries/inquiry-status-tabs';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
+import { dashboardData } from '@/lib/api/dashboard-data';
 import { getCurrentUser, getSentInquiries } from '@/lib/api/server';
 
 export async function generateMetadata({
@@ -25,15 +26,13 @@ export default async function SentInquiriesPage({
 }: PageProps<'/[locale]/dashboard/inquiries/sent'>) {
   await resolveLocale(params);
   const page = pageParam((await searchParams).page);
-  const user = await getCurrentUser();
-  if (!user) return null;
+  const user = await dashboardData(getCurrentUser(), '/dashboard/inquiries/sent');
   if (!keepsSentInquiries(user.role)) notFound();
   const [t, format, result] = await Promise.all([
     getTranslations('inquiries'),
     getFormatter(),
-    getSentInquiries(page),
+    dashboardData(getSentInquiries(page), '/dashboard/inquiries/sent'),
   ]);
-  if (!result) return null;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">

@@ -14,7 +14,7 @@ export function MainNav() {
   const t = useTranslations('nav');
   const pathname = usePathname();
   return (
-    <nav aria-label={t('mainLabel')} className="hidden items-center gap-1 md:flex">
+    <nav aria-label={t('mainLabel')} className="hidden items-center gap-1 lg:flex">
       {MAIN_NAV.map((item) => {
         const active = isActive(pathname, item.href);
         return (
