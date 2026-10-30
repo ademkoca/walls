@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-30 (launch test fixes: Phase 1 committed as `8544c68`, not pushed; Phase 2 (decision A, no more assignment) committed as `8b24610`, not pushed; Phase 3 (decision B, creators end and restore listings) committed as `db6ff55`, not pushed; Phase 4 (decision D, only text and new images reviewed) committed, not pushed; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-10-30 (launch test fixes, Phases 1–4 (`8544c68`, `8b24610`, `db6ff55`, `f6cec68`) pushed, CI green, deployed to staging; the user retested every failed scenario and all pass; next: deploy production and finish the move to walls.rs, see "Next steps to launch"; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -50,9 +50,30 @@ results in its `results` collection). Triaged together; the user's decisions:
   focus), ADML-06 (admin listing search/filters, later when Walls grows), PUB-09 (contact
   inbox email stays Serbian by design). AUTH-03 and AUTH-09 count as passed.
 
-Plan: **Phase 1** (committed `8544c68`) bug fixes and small changes; **Phase 2** (committed
-`8b24610`) decision A; **Phase 3** (committed `db6ff55`) decision B; **Phase 4** (committed) decision D. SPEC.md is updated in each phase
-as it is built, so it never describes behavior the code doesn't have.
+Plan: **Phase 1** (`8544c68`) bug fixes and small changes; **Phase 2** (`8b24610`) decision A;
+**Phase 3** (`db6ff55`) decision B; **Phase 4** (`f6cec68`) decision D. All pushed on
+2026-10-30; CI and the staging deploy passed, and the user retested every failed scenario on
+preview.walls.rs: all pass. SPEC.md is updated in each phase as it is built, so it never
+describes behavior the code doesn't have.
+
+**Next steps to launch (2026-10-30):**
+
+1. Deploy `f6cec68` to production (Deploy (VPS), `production`, approved by the user; the user
+   is running it). Migrations 0015–0017 run in the deploy; production's database has no
+   assignments, archived listings or revisions, so their data effects don't apply. Production
+   was last deployed on 2026-10-28 (`0ff6634`), steps 1–9 of "Moving to two environments" in
+   `deploy/README.md`.
+2. Step 10: production's first Super Admin (`pnpm admin:create` with production's values).
+   Not created yet: the user first sets up sending and receiving mail for the address the
+   Super Admin will use.
+3. Step 11: point walls.rs and www.walls.rs at the VPS in Cloudflare, remove the GitHub Pages
+   custom domain, restart Caddy. On 2026-10-30 walls.rs still served GitHub Pages and the
+   server had no walls.rs certificate.
+4. Step 12: run a backup and check it.
+5. Smoke test walls.rs (sign-in, photo upload, inquiry email); it stays unindexed.
+6. Invite the Novi Pazar agencies to register on walls.rs; preview.walls.rs is the demo.
+7. Public launch, when the user decides: empty production's `SITE_INDEXING` in GitHub and
+   deploy production again.
 
 Phase 1 contents:
 
@@ -136,7 +157,7 @@ Then: smoke-test the live site (see "Phase 10 starting notes"), and continue the
 Phase 10. `/about` and `/contact` were built on 2026-10-16 (see "About, contact and legal
 pages" below).
 
-**Two environments (user's decision 2026-10-28; code ready, uncommitted, awaiting review):** the
+**Two environments (user's decision 2026-10-28; pushed as `ab581e9`, `be2fb8b`, `0ff6634`):** the
 user will invite Novi Pazar agencies to register on **walls.rs** (production, a fresh database)
 and show them **preview.walls.rs** (staging: today's database with the demo data) as a demo.
 Staging is also the safe place to test new features. Decisions:
@@ -160,9 +181,9 @@ Staging is also the safe place to test new features. Decisions:
   on), and an E2E test checks the production-like build has no banner.
 - walls.rs goes live (replacing the GitHub Pages "coming soon" page) with `SITE_INDEXING=off`
   until the public launch.
-- Next: the user reviews and says commit; then the one-time move in `deploy/README.md`
-  ("Moving to two environments"): Supabase, Cloudinary and GitHub environments first, then
-  split the server, deploy both, create production's Super Admin, switch DNS, test a backup.
+- The one-time move in `deploy/README.md` ("Moving to two environments"): steps 1–9 done on
+  2026-10-28 (staging and production deployed from `0ff6634`); steps 10–12 (production's
+  Super Admin, DNS switch, backup check) are under "Next steps to launch" above.
 
 **VPS trial (user bought it 2026-10-19; 1-month netcup term, decide within ~2 weeks):** the web
 app and API move from Netlify + Render to one **netcup VPS 500 G12.5** (Debian 13, 2 shared
