@@ -1,6 +1,6 @@
 ---
 name: Walls
-description: Tlocrt — a floor plan on white paper: ink wall lines, one green for the action, mint for the selected room. "Znate šta dobijate."
+description: Tlocrt — a floor plan on white paper: ink wall lines, one green for the action, mint for the selected room. "Više od četiri zida."
 colors:
   paper: '#FFFFFF'
   stone: '#E4E6E3'
@@ -28,11 +28,6 @@ typography:
     fontWeight: 800
     lineHeight: 1.04
     letterSpacing: '-0.03em'
-  tagline:
-    fontFamily: 'Hanken Grotesk, ui-sans-serif, system-ui, sans-serif'
-    fontSize: '1.5rem'
-    fontWeight: 700
-    lineHeight: 1.33
   title:
     fontFamily: 'Hanken Grotesk, ui-sans-serif, system-ui, sans-serif'
     fontSize: '1rem'
@@ -152,7 +147,7 @@ components:
 
 **Creative North Star: "Tlocrt: the floor plan"**
 
-Walls is drawn the way a Serbian buyer first reads a property: as a plan on white paper. Ink wall lines divide the page into rooms, square at every junction; a door swings open when you approach a room; a dimension line measures the platform in live figures. The tagline the plan carries is "Znate šta dobijate." (You know what you're getting.) The world is quiet and exact rather than glossy: paper, ink and one green, with measured figures set in a mono face as if written on a drawing.
+Walls is drawn the way a Serbian buyer first reads a property: as a plan on white paper. Ink wall lines divide the page into rooms, square at every junction; a door swings open when you approach a room; a dimension line measures the platform in live figures. The tagline the plan carries is "Više od četiri zida." (More than four walls.) The world is quiet and exact rather than glossy: paper, ink and one green, with measured figures set in a mono face as if written on a drawing.
 
 Density follows the surface. The public site gives the plan room to breathe in a single 80rem column; listings are inventory and sit in plain 1px-walled cards beneath it. The dashboard keeps the same tokens with tighter controls and a paper sidebar behind a heavy ink wall. Everything is flat at rest: depth is said with wall weight and a mint floor, never with shadows, gradients or glass. Light theme only.
 
@@ -173,7 +168,7 @@ A drafting palette: white paper, near-black ink, a deep plan green and its pale 
 
 ### Primary
 
-- **Plan Green** (#17775F): the primary action (filled buttons, the hallway's "Pretraži"), the selected item (active dashboard section, the active main-nav underline, a selected room's label and door arc), the home headline "Znate šta dobijate." and the logo's two green panels. White text on it measures 5.47:1; green text on paper 5.47:1 and on mint 4.70:1.
+- **Plan Green** (#17775F): the primary action (filled buttons, the hallway's "Pretraži"), the selected item (active dashboard section, the active main-nav underline, a selected room's label and door arc), the home headline "Više od četiri zida." and the logo's two green panels. White text on it measures 5.47:1; green text on paper 5.47:1 and on mint 4.70:1.
 
 ### Secondary
 
@@ -205,9 +200,8 @@ A drafting palette: white paper, near-black ink, a deep plan green and its pale 
 
 ### Hierarchy
 
-- **Display** (800, 3rem on phones → 3.75rem → 4.5rem, 1.04, -0.03em): the home page h1 in the plan's living room, the tagline "Znate šta dobijate." in green, balanced, max ~36rem wide; the one place green is text at size.
+- **Display** (800, 3rem on phones → 3.75rem → 4.5rem, 1.04, -0.03em): the home page h1 in the plan's living room, the tagline "Više od četiri zida." in green, balanced, max ~36rem wide; the one place green is text at size.
 - **Headline** (800, 2.25rem, 1.04, -0.03em): section headings (h2) on public pages. Every h1 and h2 gets 800 / -0.03em / 1.04 from the base styles.
-- **Tagline** (700, 1.25rem → 1.5rem, ink, balanced, max 30ch): the review promise "Svaki oglas pregledamo pre nego što ga vidite." under the home h1, the reason behind the headline.
 - **Title** (600, 1rem, 1.5): listing card titles and step titles; card titles in panels are 800 at 1.125rem.
 - **Body** (400, 0.875rem–1rem, ~1.43–1.5): UI text; ledes 1rem–1.125rem in graphite, max 46ch.
 - **Room label** (700, 0.75rem, 0.12em, uppercase): the property-type name of a room on the plan, as rooms are lettered on a drawing (0.68rem / 0.1em in small rooms).

@@ -45,8 +45,7 @@
     "terms": "Uslovi korišćenja"
   },
   "home": {
-    "title": "Znate šta dobijate.",
-    "promise": "Svaki oglas pregledamo pre nego što ga vidite.",
+    "title": "Više od četiri zida.",
     "roomListings": "{count, plural, one {oglas} few {oglasa} other {oglasa}}",
     "subtitle": "Stanovi, kuće i poslovni prostori za prodaju i izdavanje širom Srbije — od privatnih prodavaca, agenata, agencija i investitora.",
     "advertise": "Oglasite nekretninu",

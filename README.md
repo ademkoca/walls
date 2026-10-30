@@ -15,7 +15,7 @@ The authoritative product and technical requirements are defined in:
 
 - **Brand:** Walls
 - **Domain:** [walls.rs](https://walls.rs)
-- **Identity "Tlocrt" (floor plan):** the site is drawn as a plan: ink wall lines on white paper, one green door. Tagline "Znate šta dobijate."
+- **Identity "Tlocrt" (floor plan):** the site is drawn as a plan: ink wall lines on white paper, one green door. Tagline "Više od četiri zida."
 - **Logo:** four wall panels folded into a `W` like a folding screen, alternating ink and green, above the lowercase `walls` wordmark; SVG sources in [`packages/ui/brand/`](./packages/ui/brand/README.md).
 - **Palette:** paper `#FFFFFF`, stone `#E4E6E3`, ink `#15181C`, green `#17775F`, mint `#E3F1EC`, graphite `#5E636A`
 - **Typefaces:** Hanken Grotesk (text, and headings at weight 800), Red Hat Mono (prices, areas and other figures)

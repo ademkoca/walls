@@ -6,7 +6,7 @@ test('the home page looks the same with the OS in dark mode', async ({ browser }
     const page = await browser.newPage({ colorScheme });
     await page.goto('/en');
     const style = await page
-      .getByRole('region', { name: "You know what you're getting." })
+      .getByRole('region', { name: 'More than four walls.' })
       .getByRole('group', { name: 'Buy or rent' })
       .evaluate((element) => {
         const computed = getComputedStyle(element);

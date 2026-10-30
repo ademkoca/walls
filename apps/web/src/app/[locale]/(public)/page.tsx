@@ -83,9 +83,6 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
               >
                 {t('title')}
               </h1>
-              <p className="max-w-[30ch] text-xl font-bold text-balance sm:text-2xl">
-                {t('promise')}
-              </p>
               <p className="max-w-[46ch] text-base text-muted-foreground sm:text-lg">
                 {t('subtitle')}
               </p>

@@ -31,7 +31,7 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
   await visitor.goto('/en');
   // Built like production: the demo site's banner (NEXT_PUBLIC_DEMO_SITE) is not shown.
   await expect(visitor.getByText(/demo site/i)).toHaveCount(0);
-  const hero = visitor.getByRole('region', { name: "You know what you're getting." });
+  const hero = visitor.getByRole('region', { name: 'More than four walls.' });
   await expect(hero.getByRole('link', { name: 'List a property' })).toHaveAttribute(
     'href',
     '/en/register',

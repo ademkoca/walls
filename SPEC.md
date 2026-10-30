@@ -1197,7 +1197,7 @@ Use the approved Walls logo (decision 2026-10-26, "Folding screen"): four wall p
 
 ### Visual identity "Tlocrt" (decision 2026-10-26)
 
-The owner replaced "Beton" (concrete, ink and road-sign yellow, 2026-10-23) because it still felt generic: a portal template with a borrowed retail look and no moment of its own. "Tlocrt" (floor plan) draws Walls the way Serbian buyers first read a property: as a plan. The home page is an apartment plan whose rooms lead into the search by property type and whose hallway holds the search. Tagline: "Znate šta dobijate." ("You know what you're getting.")
+The owner replaced "Beton" (concrete, ink and road-sign yellow, 2026-10-23) because it still felt generic: a portal template with a borrowed retail look and no moment of its own. "Tlocrt" (floor plan) draws Walls the way Serbian buyers first read a property: as a plan. The home page is an apartment plan whose rooms lead into the search by property type and whose hallway holds the search. Tagline (decision 2026-10-30): "Više od četiri zida." ("More than four walls.")
 
 Palette:
 

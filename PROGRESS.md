@@ -1023,6 +1023,11 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   legal pages' "Poslednja izmena" and the dashboard inquiry's "Primljeno" (next-intl's
   formatter uses plain `sr`), and a double period after Serbian dates in `rateNote` and
   `approvedOn`. Serbian plurals already follow CLDR (53 objavljena / 58 objavljenih oglasa).
+- **Tagline (2026-10-30, user's decision):** "Više od četiri zida." / "More than four walls."
+  replaces "Znate šta dobijate." / "You know what you're getting." as the home headline
+  (`home.title`). English drops "just" to mirror the Serbian and keep the play on the name.
+  The review promise under it ("Svaki oglas pregledamo pre nego što ga vidite.",
+  `home.promise`) was removed the same day; it was the reason behind the old headline.
 
 ## Technical decisions
 

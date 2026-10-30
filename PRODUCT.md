@@ -86,8 +86,8 @@ design should make that review visible and credible rather than decorative.
   `REAL ESTATE` descriptor) in `packages/ui/brand/`; its generated variants are the only
   versions used.
 - The visual identity is fixed by the owner in `SPEC.md` §33 (the "Tlocrt" floor-plan
-  decision of 2026-10-26, replacing "Beton", which the owner found generic). Tagline: "Znate
-  šta dobijate." Visual rules live there and in `packages/ui/brand/README.md`, not here.
+  decision of 2026-10-26, replacing "Beton", which the owner found generic). Tagline (2026-10-30):
+  "Više od četiri zida." Visual rules live there and in `packages/ui/brand/README.md`, not here.
 - Voice: plain, direct and honest, addressing the reader as "you". Say what Walls does and
   what it does not ("Walls isn't part of the sale or rental"); describe only rules the platform
   actually enforces. No hype, no invented promises.
