@@ -19,6 +19,7 @@ The authoritative product and technical requirements are defined in:
 - **Logo:** four wall panels folded into a `W` like a folding screen, alternating ink and green, above the lowercase `walls` wordmark; SVG sources in [`packages/ui/brand/`](./packages/ui/brand/README.md).
 - **Palette:** paper `#FFFFFF`, stone `#E4E6E3`, ink `#15181C`, green `#17775F`, mint `#E3F1EC`, graphite `#5E636A`
 - **Typefaces:** Hanken Grotesk (text, and headings at weight 800), Red Hat Mono (prices, areas and other figures)
+- **Social media:** [Instagram](https://www.instagram.com/walls.rs), [Facebook](https://www.facebook.com/walls.rs), [LinkedIn](https://www.linkedin.com/company/walls-rs), set in `brand.social` and linked from the site footer, the contact page and every email
 
 Keep branding values centralized in theme/branding configuration rather than scattering them across components. The brand configuration lives in [`packages/ui/src/brand/brand.ts`](./packages/ui/src/brand/brand.ts). Green is for the primary action and the selected item only (white on green 5.47:1). Contrast table: [`packages/ui/brand/README.md`](./packages/ui/brand/README.md).
 

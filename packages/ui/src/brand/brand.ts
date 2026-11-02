@@ -26,6 +26,38 @@ const COMPANY: CompanyDetails = {
   taxId: null,
 };
 
+/** Social networks the brand can link to, in display order. */
+export const SOCIAL_NETWORKS = ['instagram', 'facebook', 'linkedin'] as const;
+export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number];
+
+/** The brand's profile on each network; `null` hides that network everywhere. */
+const SOCIAL: Record<SocialNetwork, string | null> = {
+  instagram: 'https://www.instagram.com/walls.rs',
+  facebook: 'https://www.facebook.com/walls.rs',
+  linkedin: 'https://www.linkedin.com/company/walls-rs',
+};
+
+/** Network names as the networks write them (not translated). */
+const SOCIAL_NETWORK_NAMES: Record<SocialNetwork, string> = {
+  instagram: 'Instagram',
+  facebook: 'Facebook',
+  linkedin: 'LinkedIn',
+};
+
+export interface SocialProfile {
+  network: SocialNetwork;
+  name: string;
+  url: string;
+}
+
+/** The brand's social profiles that are set, in display order. */
+export function socialProfiles(): SocialProfile[] {
+  return SOCIAL_NETWORKS.flatMap((network) => {
+    const url = SOCIAL[network];
+    return url ? [{ network, name: SOCIAL_NETWORK_NAMES[network], url }] : [];
+  });
+}
+
 export const brand = {
   name: 'Walls',
   descriptor: 'Real Estate',
@@ -92,6 +124,12 @@ export const brand = {
    * 2026-10-21); fill them in once it is.
    */
   company: COMPANY,
+
+  /**
+   * Profiles on social networks, linked from the site footer, the contact page and emails, and
+   * named in the home page's structured data. Read them through `socialProfiles()`.
+   */
+  social: SOCIAL,
 
   typography: {
     /** Typeface for UI text and headings (headings in its heaviest weight). */

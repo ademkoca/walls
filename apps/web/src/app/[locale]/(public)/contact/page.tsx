@@ -1,9 +1,10 @@
 import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
-import { brand } from '@walls/ui/brand';
+import { brand, socialProfiles } from '@walls/ui/brand';
 import { Card, CardContent, CardHeader, CardTitle } from '@walls/ui/components/card';
-import { ArrowRightIcon, MailIcon, MapPinIcon } from 'lucide-react';
+import { ArrowRightIcon, AtSignIcon, MailIcon, MapPinIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { SocialIcon } from '@/components/brand/social-icon';
 import { ContactForm } from '@/components/contact/contact-form';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { Link } from '@/i18n/navigation';
@@ -30,8 +31,9 @@ const SHORTCUTS = [
 /** Contact page: where to write, shortcuts for common questions, company details once known, the form. */
 export default async function ContactPage({ params }: PageProps<'/[locale]/contact'>) {
   await resolveLocale(params);
-  const t = await getTranslations('contact');
+  const [t, tCommon] = await Promise.all([getTranslations('contact'), getTranslations('common')]);
   const { company } = brand;
+  const social = socialProfiles();
   // Only the details that are known; none until the company is registered (decision 2026-10-21).
   const legalDetails = [
     { label: t('company.legalName'), value: company.legalName },
@@ -78,6 +80,32 @@ export default async function ContactPage({ params }: PageProps<'/[locale]/conta
                 <dd className="font-medium">{t('location')}</dd>
               </div>
             </div>
+            {social.length > 0 && (
+              <div className="flex items-start gap-3">
+                <AtSignIcon className="mt-0.5 size-5 shrink-0 text-emphasis" aria-hidden />
+                <div>
+                  <dt className="text-sm text-muted-foreground">{t('socialLabel')}</dt>
+                  <dd>
+                    <ul className="flex flex-wrap gap-x-5 gap-y-1">
+                      {social.map(({ network, name, url }) => (
+                        <li key={network}>
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 font-medium underline-offset-4 hover:underline"
+                          >
+                            <SocialIcon network={network} className="size-4 text-emphasis" />
+                            {name}
+                            <span className="sr-only"> ({tCommon('newTab')})</span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              </div>
+            )}
           </dl>
         </section>
 

@@ -178,6 +178,24 @@ test('a visitor searches, filters, opens a listing and switches currency and lan
     new RegExp(`/en/properties/${slug}$`),
   );
 
+  // Sharing: the menu copies the page's address and opens WhatsApp or Facebook with it.
+  await visitor.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+  const listingUrl = new RegExp(`/en/properties/${slug}$`);
+  await visitor.getByRole('button', { name: 'Share' }).click();
+  await expect(visitor.getByRole('menuitem', { name: 'WhatsApp' })).toHaveAttribute(
+    'href',
+    new RegExp(`^https://wa\\.me/\\?text=.+%2Fen%2Fproperties%2F${slug}$`),
+  );
+  await expect(visitor.getByRole('menuitem', { name: 'Facebook' })).toHaveAttribute(
+    'href',
+    new RegExp(
+      `^https://www\\.facebook\\.com/sharer/sharer\\.php\\?u=.+%2Fen%2Fproperties%2F${slug}$`,
+    ),
+  );
+  await visitor.getByRole('menuitem', { name: 'Copy link' }).click();
+  await expect(visitor.getByText('Link copied.')).toBeVisible();
+  expect(await visitor.evaluate(() => navigator.clipboard.readText())).toMatch(listingUrl);
+
   // The seller has no profile picture, so their profile's preview is the logo card.
   const profilePath = await visitor
     .getByRole('link', { name: 'View profile' })

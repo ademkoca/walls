@@ -1,4 +1,4 @@
-import { brand } from '@walls/ui/brand';
+import { brand, socialProfiles } from '@walls/ui/brand';
 import { describe, expect, it } from 'vitest';
 import { renderEmail } from './templates';
 
@@ -73,6 +73,15 @@ describe('email layout', () => {
     expect(en).toContain('Questions? Write to us at');
     expect(sr).toContain('Pitanja? Pišite nam na');
     expect(sr).toContain(`mailto:${brand.company.email}`);
+  });
+
+  it('links the brand’s social profiles in the footer, by name', () => {
+    const { html } = inquiry();
+    expect(html).toContain('Pratite nas:');
+    expect(socialProfiles()).not.toHaveLength(0);
+    for (const { name, url } of socialProfiles()) {
+      expect(html).toMatch(new RegExp(`<a href="${url}"[^>]*>${name}</a>`));
+    }
   });
 
   it('adds a plain link under the button for clients that break it, and leaves the text version unchanged', () => {

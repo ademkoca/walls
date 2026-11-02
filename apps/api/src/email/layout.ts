@@ -1,5 +1,5 @@
 import type { Locale } from '@walls/shared';
-import { brand } from '@walls/ui/brand';
+import { brand, socialProfiles } from '@walls/ui/brand';
 
 /**
  * The HTML frame shared by every email: ink header with the logo, a green rule, the message
@@ -16,18 +16,26 @@ const CONTENT_WIDTH = 600;
 
 const CHROME: Record<
   Locale,
-  { tagline: string; questions: string; buttonFallback: string; logoAlt: string }
+  {
+    tagline: string;
+    questions: string;
+    follow: string;
+    buttonFallback: string;
+    logoAlt: string;
+  }
 > = {
   sr: {
     tagline:
       'Pronađite stanove, kuće, poslovne prostore i placeve za prodaju i izdavanje širom Srbije.',
     questions: 'Pitanja? Pišite nam na',
+    follow: 'Pratite nas:',
     buttonFallback: 'Ako dugme ne radi, otvorite ovu adresu:',
     logoAlt: `${brand.name} ${brand.descriptor}`,
   },
   en: {
     tagline: 'Find apartments, houses, commercial spaces and land for sale and rent across Serbia.',
     questions: 'Questions? Write to us at',
+    follow: 'Follow us:',
     buttonFallback: "If the button doesn't work, open this link:",
     logoAlt: `${brand.name} ${brand.descriptor}`,
   },
@@ -92,6 +100,22 @@ function button(action: { label: string; url: string }): string {
 <tr><td bgcolor="${COLOR.green}" style="background:${COLOR.green};mso-padding-alt:14px 28px">
 <a href="${url}" target="_blank" style="display:inline-block;padding:14px 28px;font-family:${FONT};font-size:16px;font-weight:bold;line-height:20px;color:${COLOR.paper};text-decoration:none">${escapeHtml(action.label)}</a>
 </td></tr></table>`;
+}
+
+/**
+ * The brand's social profiles as text links: images are blocked by default in many clients,
+ * and a name reads well without them.
+ */
+function socialLine(label: string): string {
+  const links = socialProfiles()
+    .map(
+      ({ name, url }) =>
+        `<a href="${escapeHtml(url)}" target="_blank" style="color:${COLOR.ink};text-decoration:underline">${escapeHtml(name)}</a>`,
+    )
+    .join(' · ');
+  return links
+    ? `<p style="margin:0 0 12px;font-family:${FONT};font-size:13px;line-height:19px;color:${COLOR.graphite}">${escapeHtml(label)} ${links}</p>\n`
+    : '';
 }
 
 export function renderEmailLayout({
@@ -162,7 +186,7 @@ ${actionBlock}
 <tr><td class="px" style="padding:28px 40px 8px">
 <p style="margin:0 0 12px;font-family:${FONT};font-size:13px;line-height:19px;color:${COLOR.graphite}">${escapeHtml(chrome.tagline)}</p>
 <p style="margin:0 0 12px;font-family:${FONT};font-size:13px;line-height:19px;color:${COLOR.graphite}">${escapeHtml(chrome.questions)} <a href="mailto:${contact}" style="color:${COLOR.ink};text-decoration:underline">${contact}</a></p>
-<p style="margin:0;font-family:${FONT};font-size:13px;line-height:19px;color:${COLOR.graphite}">© ${year} ${escapeHtml(brand.name)} · <a href="${site}" target="_blank" style="color:${COLOR.ink};text-decoration:underline">${escapeHtml(new URL(webOrigin).host)}</a></p>
+${socialLine(chrome.follow)}<p style="margin:0;font-family:${FONT};font-size:13px;line-height:19px;color:${COLOR.graphite}">© ${year} ${escapeHtml(brand.name)} · <a href="${site}" target="_blank" style="color:${COLOR.ink};text-decoration:underline">${escapeHtml(new URL(webOrigin).host)}</a></p>
 </td></tr>
 </table>
 <!--[if mso]></td></tr></table><![endif]-->

@@ -9,7 +9,8 @@
     "skipToContent": "Preskoči na sadržaj",
     "loading": "Učitavanje…",
     "backToHome": "Nazad na početnu",
-    "quoted": "„{text}“"
+    "quoted": "„{text}“",
+    "newTab": "otvara se u novoj kartici"
   },
   "demoSite": {
     "banner": "Ovo je demo sajt za probu: oglasi su izmišljeni, a nalozi i podaci mogu biti obrisani.",
@@ -43,6 +44,9 @@
     "legal": "Pravne informacije",
     "privacy": "Politika privatnosti",
     "terms": "Uslovi korišćenja"
+  },
+  "social": {
+    "label": "{brand} na društvenim mrežama"
   },
   "home": {
     "title": "Više od četiri zida.",
@@ -1109,6 +1113,12 @@
     "advertiser": "Oglašivač",
     "viewProfile": "Pogledaj profil",
     "published": "Objavljeno {date}",
+    "share": {
+      "action": "Podelite",
+      "copyLink": "Kopirajte link",
+      "copied": "Link je kopiran.",
+      "copyFailed": "Link nije kopiran. Kopirajte ga iz adresne trake pregledača."
+    },
     "facts": {
       "propertyType": "Vrsta nekretnine",
       "transactionType": "Vrsta oglasa",
@@ -1291,6 +1301,7 @@
     "emailLabel": "Email",
     "locationLabel": "Lokacija",
     "location": "Novi Pazar, Srbija",
+    "socialLabel": "Društvene mreže",
     "company": {
       "title": "Podaci o firmi",
       "name": "Naziv",
@@ -1344,7 +1355,7 @@
         },
         "providers": {
           "title": "Pružaoci usluga",
-          "body": "Za rad sajta {brand} koristimo pouzdane pružaoce usluga: Supabase (baza podataka), Render (aplikacioni server), Netlify (hosting sajta), Cloudinary (slike i dokumenti) i Resend (email). Mape se prikazuju preko servisa OpenStreetMap, koji prima zahteve vašeg pregledača za slike mape. Neki pružaoci mogu obrađivati podatke van Srbije; mere zaštite za to biće opisane ovde nakon pravne provere."
+          "body": "Za rad sajta {brand} koristimo pouzdane pružaoce usluga: Supabase (baza podataka), Render (aplikacioni server), Netlify (hosting sajta), Cloudinary (slike i dokumenti) i Resend (email). Mape se prikazuju preko servisa OpenStreetMap, koji prima zahteve vašeg pregledača za slike mape. Neki pružaoci mogu obrađivati podatke van Srbije; mere zaštite za to biće opisane ovde nakon pravne provere.\n\nLinkovi ka našim profilima na društvenim mrežama (Instagram, Facebook, LinkedIn) i dugmad za deljenje oglasa (WhatsApp, Facebook) obični su linkovi: ti servisi ne dobijaju ništa dok neki od njih sami ne otvorite."
         },
         "cookies": {
           "title": "Kolačići",

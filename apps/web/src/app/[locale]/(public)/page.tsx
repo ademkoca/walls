@@ -1,4 +1,5 @@
 import { FOR_PROFESSIONALS_PATH, type PublicListingCard } from '@walls/shared';
+import { brand, socialProfiles } from '@walls/ui/brand';
 import { buttonVariants } from '@walls/ui/components/button';
 import { ArrowRightIcon } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -15,12 +16,29 @@ import { Link } from '@/i18n/navigation';
 import { getPublicHome } from '@/lib/api/public';
 import type { Pricing } from '@/lib/currency';
 import { getPricing } from '@/lib/pricing';
-import { localizedAlternates, openGraph } from '@/lib/seo';
+import { absoluteUrl, jsonLd, localizedAlternates, openGraph } from '@/lib/seo';
 
 export async function generateMetadata({ params }: PageProps<'/[locale]'>): Promise<Metadata> {
   const locale = await metadataLocale(params);
   const alternates = localizedAlternates(locale, '/');
   return { alternates, openGraph: await openGraph(locale, { url: alternates.canonical }) };
+}
+
+/**
+ * schema.org data naming Walls and its social profiles, so search engines connect them (SPEC §32).
+ * The logo is the mark on white, the app icon.
+ */
+function organizationData() {
+  const social = socialProfiles();
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: brand.name,
+    url: absoluteUrl('/'),
+    logo: absoluteUrl('/icons/icon-512.png'),
+    email: brand.company.email,
+    ...(social.length > 0 ? { sameAs: social.map(({ url }) => url) } : {}),
+  };
 }
 
 async function ListingSection({
@@ -69,6 +87,11 @@ export default async function HomePage({ params }: PageProps<'/[locale]'>) {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        // JSON-LD, escaped by jsonLd() so the text cannot close the script tag.
+        dangerouslySetInnerHTML={{ __html: jsonLd(organizationData()) }}
+      />
       <section
         aria-labelledby="home-title"
         className="mx-auto max-w-7xl px-4 pt-6 pb-16 sm:px-6 sm:pt-8 lg:px-8"

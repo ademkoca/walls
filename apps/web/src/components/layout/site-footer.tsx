@@ -1,20 +1,41 @@
 import { FOR_PROFESSIONALS_PATH, PARTNERS_PATH } from '@walls/shared';
-import { brand } from '@walls/ui/brand';
+import { brand, socialProfiles } from '@walls/ui/brand';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/navigation';
 import { Logo } from '../brand/logo';
+import { SocialIcon } from '../brand/social-icon';
 
 const linkClass = 'text-sm text-muted-foreground hover:text-foreground';
 
 export async function SiteFooter() {
   const t = await getTranslations();
   const year = new Date().getFullYear();
+  const social = socialProfiles();
   return (
     <footer className="surface-ink">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[2fr_1fr_1fr] lg:px-8">
         <div className="space-y-4">
           <Logo tone="inverse" className="w-40" />
           <p className="max-w-sm text-sm text-muted-foreground">{t('metadata.description')}</p>
+          {social.length > 0 && (
+            <ul aria-label={t('social.label', { brand: brand.name })} className="-ml-2.5 flex">
+              {social.map(({ network, name, url }) => (
+                <li key={network}>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex size-10 items-center justify-center text-foreground hover:text-emphasis"
+                  >
+                    <SocialIcon network={network} className="size-5" />
+                    <span className="sr-only">
+                      {name} ({t('common.newTab')})
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <nav aria-label={t('footer.explore')} className="space-y-3">
           <h2 className="text-sm font-semibold">{t('footer.explore')}</h2>

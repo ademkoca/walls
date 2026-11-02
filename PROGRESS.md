@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-10-30 (launch test fixes, Phases 1–4 (`8544c68`, `8b24610`, `db6ff55`, `f6cec68`) pushed, CI green, deployed to staging; the user retested every failed scenario and all pass; next: deploy production and finish the move to walls.rs, see "Next steps to launch"; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-11-02 (social media links and listing sharing, pushed, see "Social media and sharing"). Earlier: 2026-10-30 (launch test fixes, Phases 1–4 (`8544c68`, `8b24610`, `db6ff55`, `f6cec68`) pushed, CI green, deployed to staging; the user retested every failed scenario and all pass; next: deploy production and finish the move to walls.rs, see "Next steps to launch"; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -74,6 +74,23 @@ describes behavior the code doesn't have.
 6. Invite the Novi Pazar agencies to register on walls.rs; preview.walls.rs is the demo.
 7. Public launch, when the user decides: empty production's `SITE_INDEXING` in GitHub and
    deploy production again.
+
+**Social media and sharing (2026-11-02, pushed):** the user's request.
+
+- Profiles (Instagram `walls.rs`, Facebook `walls.rs`, LinkedIn `company/walls-rs`) live in
+  `brand.social` (`packages/ui/src/brand/brand.ts`), read through `socialProfiles()`; `null` hides
+  a network everywhere. Glyphs are Simple Icons paths (CC0) in
+  `apps/web/src/components/brand/social-icon.tsx` (lucide has no brand icons).
+- Shown in the site footer (icons, white turning mint), on the contact page (icon and name), and
+  in every email's footer as text links ("Pratite nas: Instagram · Facebook · LinkedIn"; text, not
+  images, since many clients block images).
+- The home page has `Organization` JSON-LD with `sameAs` (SPEC §32).
+- Listing page "Share" button (`share-listing.tsx`): the system share sheet on touch devices
+  (`pointer: coarse` and `navigator.share`), otherwise a menu: copy link, WhatsApp, Facebook. It
+  shares the canonical URL (`NEXT_PUBLIC_SITE_URL`).
+- Plain links only, no widgets or third-party scripts; the privacy policy draft says so. SPEC
+  §16, §32, §33 and README updated. E2E: `company-pages` (footer, contact, JSON-LD) and
+  `public-site` (share menu, clipboard).
 
 Phase 1 contents:
 

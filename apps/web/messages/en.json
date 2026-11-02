@@ -9,7 +9,8 @@
     "skipToContent": "Skip to content",
     "loading": "Loading…",
     "backToHome": "Back to home",
-    "quoted": "“{text}”"
+    "quoted": "“{text}”",
+    "newTab": "opens in a new tab"
   },
   "demoSite": {
     "banner": "This is a demo site for trying things out: the listings are made up, and accounts and data may be deleted.",
@@ -43,6 +44,9 @@
     "legal": "Legal",
     "privacy": "Privacy policy",
     "terms": "Terms of use"
+  },
+  "social": {
+    "label": "{brand} on social media"
   },
   "home": {
     "title": "More than four walls.",
@@ -1109,6 +1113,12 @@
     "advertiser": "Advertiser",
     "viewProfile": "View profile",
     "published": "Published {date}",
+    "share": {
+      "action": "Share",
+      "copyLink": "Copy link",
+      "copied": "Link copied.",
+      "copyFailed": "The link couldn't be copied. Copy it from the browser's address bar."
+    },
     "facts": {
       "propertyType": "Property type",
       "transactionType": "Listing type",
@@ -1291,6 +1301,7 @@
     "emailLabel": "Email",
     "locationLabel": "Location",
     "location": "Novi Pazar, Serbia",
+    "socialLabel": "Social media",
     "company": {
       "title": "Company details",
       "name": "Name",
@@ -1344,7 +1355,7 @@
         },
         "providers": {
           "title": "Service providers",
-          "body": "We use trusted providers to run {brand}: Supabase (database), Render (application server), Netlify (website hosting), Cloudinary (photos and documents) and Resend (email). Maps are shown with OpenStreetMap, which receives your browser's requests for map images. Some providers may process data outside Serbia; the safeguards for that will be described here after legal review."
+          "body": "We use trusted providers to run {brand}: Supabase (database), Render (application server), Netlify (website hosting), Cloudinary (photos and documents) and Resend (email). Maps are shown with OpenStreetMap, which receives your browser's requests for map images. Some providers may process data outside Serbia; the safeguards for that will be described here after legal review.\n\nThe links to our social media profiles (Instagram, Facebook, LinkedIn) and the buttons for sharing a listing (WhatsApp, Facebook) are plain links: those services receive nothing until you open one."
         },
         "cookies": {
           "title": "Cookies",

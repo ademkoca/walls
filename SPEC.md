@@ -676,8 +676,11 @@ Property details should include:
 -   location
 -   agent information
 -   inquiry/contact action
+-   share action (decision 2026-11-02): on phones and tablets the system share sheet; elsewhere a menu to copy the link or share it on WhatsApp or Facebook
 -   optional map
 -   optional additional media
+
+Social media (decision 2026-11-02): the footer of every page, the contact page and every email link to Walls' Instagram, Facebook and LinkedIn profiles, set in the branding configuration. They and the share links are plain links: no embedded feeds, widgets or third-party scripts, so the networks receive nothing until a visitor follows one.
 
 ------------------------------------------------------------------------
 
@@ -1185,7 +1188,7 @@ rather than:
 /property?id=123
 ```
 
-The sitemap lists the public pages, every public listing, every active agent, and the private sellers who have at least one public listing, each with its Serbian and English URL. Search result pages with filters are not indexed (`noindex, follow`); every public page names its canonical URL and its language alternates.
+The sitemap lists the public pages, every public listing, every active agent, and the private sellers who have at least one public listing, each with its Serbian and English URL. Search result pages with filters are not indexed (`noindex, follow`); every public page names its canonical URL and its language alternates. The home page names Walls, its logo, contact email and social profiles as an `Organization` in structured data.
 
 ------------------------------------------------------------------------
 
@@ -1222,7 +1225,7 @@ The approved artwork sets the wordmark as live text; production logo files are g
 
 Corners are square throughout, like wall junctions on a plan. Containers are drawn as walls: ink borders, 4–8px where a section is a room of the plan and 1px on cards and fields; no shadows on resting surfaces. Green is reserved for the primary action and the selected item (white on green 5.47:1, green on white 5.47:1); there is one green action per region. Ink on paper is 17.81:1, graphite on paper 6.05:1 and on stone 4.82:1. On ink surfaces, text is white and marks and focus rings are mint. See `packages/ui/brand/README.md`.
 
-The branding must remain easy to replace. Do NOT scatter branding values through components. Centralize the brand name, domain, logo asset, favicon, colors, typography, and theme tokens in one clearly documented branding/theme configuration.
+The branding must remain easy to replace. Do NOT scatter branding values through components. Centralize the brand name, domain, logo asset, favicon, colors, typography, social profiles, and theme tokens in one clearly documented branding/theme configuration.
 
 The design should use a modern, professional, flat visual language.
 
