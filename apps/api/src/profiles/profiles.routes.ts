@@ -56,7 +56,8 @@ export function myProfileRoutes(deps: {
   // Checks the password and sends email, so it is rate-limited like login.
   router.post('/email-change', limitByIp(deps.sensitiveRateLimit), async (req, res) => {
     const input = parseBody(emailChangeInputSchema, req);
-    res.json({ profile: await profiles.requestEmailChange(requireAuth(req).actor, input) });
+    const { actor, sessionId } = requireAuth(req);
+    res.json({ profile: await profiles.requestEmailChange(actor, sessionId, input) });
   });
 
   router.delete('/email-change', async (req, res) => {

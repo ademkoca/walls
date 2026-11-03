@@ -1,6 +1,7 @@
-import type { CurrentUser } from '@walls/shared';
+import type { CurrentUser, GooglePendingSignup } from '@walls/shared';
 import type {
   EmailRequestInput,
+  GoogleSignupInput,
   LoginInput,
   RegisterInput,
   SetPasswordInput,
@@ -25,4 +26,11 @@ export const authApi = {
     apiFetch('/auth/reset-password', { method: 'POST', body: input }),
   setupAccount: (input: SetPasswordInput) =>
     apiFetch('/auth/setup-account', { method: 'POST', body: input }),
+  /** The Google account waiting on the choice page, if any (SPEC §3.1). */
+  googlePending: async () =>
+    (await apiFetch<{ pending: GooglePendingSignup | null }>('/auth/google/pending')).pending,
+  googleRegister: (input: GoogleSignupInput) =>
+    apiFetch<{ user: CurrentUser }>('/auth/google/register', { method: 'POST', body: input }),
+  confirmGoogleLink: (token: string) =>
+    apiFetch('/auth/google/confirm-link', { method: 'POST', body: { token } }),
 };

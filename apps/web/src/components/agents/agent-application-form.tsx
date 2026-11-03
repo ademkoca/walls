@@ -22,9 +22,10 @@ import { RadioGroup, RadioGroupItem } from '@walls/ui/components/radio-group';
 import { Spinner } from '@walls/ui/components/spinner';
 import { FileTextIcon, PaperclipIcon, XIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Controller, useWatch } from 'react-hook-form';
 import { agentApplicationsApi } from '@/lib/api/agent-applications';
+import { authApi } from '@/lib/api/auth';
 import { ApiError } from '@/lib/api/errors';
 import { PROOF_IMAGE_SHRINK, prepareImageForUpload } from '@/lib/shrink-image';
 import { useErrorMessage } from '@/lib/use-error-message';
@@ -33,6 +34,8 @@ import { FormField, fieldAria } from '../forms/form-field';
 import { useSchemaForm } from '../forms/use-schema-form';
 
 const BYTES_PER_MB = 1024 * 1024;
+/** `?from=google`: opened from the choice page after "Continue with Google". */
+const GOOGLE_PREFILL_PARAM = 'from';
 const ACCEPT = '.pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png';
 const ALLOWED_EXTENSIONS = /\.(pdf|jpe?g|png)$/i;
 
@@ -85,6 +88,25 @@ export function AgentApplicationForm() {
   const sellerType = useWatch({ control: form.control, name: 'sellerType' });
   // Placeholders for messages that depend on the kind of account; "other" before a choice.
   const typeArgs = { type: sellerType ?? 'other' };
+
+  // Arriving from "Continue with Google" (SPEC §3.1): start from the Google account's name and
+  // address. Read from the URL in the browser, so the page itself stays static.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get(GOOGLE_PREFILL_PARAM) !== 'google') return;
+    let active = true;
+    authApi.googlePending().then(
+      (pending) => {
+        if (!active || !pending) return;
+        form.setValue('email', pending.email);
+        if (pending.name) form.setValue('fullName', pending.name);
+      },
+      // Prefilling is a convenience; the form works the same without it.
+      () => undefined,
+    );
+    return () => {
+      active = false;
+    };
+  }, [form]);
 
   function addFiles(selected: File[]) {
     const problems: string[] = [];

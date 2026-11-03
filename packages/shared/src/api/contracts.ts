@@ -31,6 +31,8 @@ export const ApiErrorCode = {
   INVALID_FILE: 'INVALID_FILE',
   /** 409: the email address already belongs to an account. */
   EMAIL_IN_USE: 'EMAIL_IN_USE',
+  /** 403: confirm with Google again (accounts without a password) before this change. */
+  REAUTHENTICATION_REQUIRED: 'REAUTHENTICATION_REQUIRED',
   RATE_LIMITED: 'RATE_LIMITED',
   EXTERNAL_SERVICE_FAILED: 'EXTERNAL_SERVICE_FAILED',
   INTERNAL_ERROR: 'INTERNAL_ERROR',
@@ -52,4 +54,19 @@ export interface CurrentUser {
   slug: string;
   preferredLocale: Locale;
   emailVerified: boolean;
+}
+
+/** Sign-in methods the API offers besides email and password (GET /auth/providers). */
+export interface AuthProviders {
+  google: boolean;
+}
+
+/**
+ * A Google account without a Walls account, waiting for the visitor to choose what to do
+ * (GET /auth/google/pending, SPEC §3.1).
+ */
+export interface GooglePendingSignup {
+  email: string;
+  /** The name on the Google account, if it has one. */
+  name: string | null;
 }

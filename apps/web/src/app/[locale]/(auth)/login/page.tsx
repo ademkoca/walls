@@ -1,10 +1,12 @@
 import { getTranslations } from 'next-intl/server';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { AuthCard } from '@/components/auth/auth-card';
+import { GoogleOutcomeAlert } from '@/components/auth/google-outcome-alert';
+import { GoogleSignInButton, SignInMethodDivider } from '@/components/auth/google-sign-in-button';
 import { LoginForm } from '@/components/auth/login-form';
 import { DEFAULT_AFTER_LOGIN } from '@/lib/routes';
 import { Link, redirect } from '@/i18n/navigation';
-import { getCurrentUser } from '@/lib/api/server';
+import { getAuthProviders, getCurrentUser } from '@/lib/api/server';
 import { privatePageMetadata, queryParam } from '@/lib/metadata';
 import { safeRedirectPath } from '@/lib/safe-redirect';
 
@@ -14,11 +16,13 @@ export async function generateMetadata({ params }: PageProps<'/[locale]/login'>)
 
 export default async function LoginPage({ params, searchParams }: PageProps<'/[locale]/login'>) {
   const locale = await resolveLocale(params);
-  const next = queryParam((await searchParams).next) ?? undefined;
+  const query = await searchParams;
+  const next = queryParam(query.next) ?? undefined;
   if (await getCurrentUser()) {
     redirect({ href: safeRedirectPath(next, DEFAULT_AFTER_LOGIN), locale });
   }
-  const t = await getTranslations('auth.login');
+  const [t, providers] = await Promise.all([getTranslations('auth.login'), getAuthProviders()]);
+  const safeNext = next && safeRedirectPath(next, DEFAULT_AFTER_LOGIN);
 
   return (
     <AuthCard
@@ -36,7 +40,16 @@ export default async function LoginPage({ params, searchParams }: PageProps<'/[l
         </p>
       }
     >
-      <LoginForm {...(next ? { next } : {})} />
+      <div className="space-y-6">
+        <GoogleOutcomeAlert outcome={queryParam(query.google)} />
+        {providers.google && (
+          <>
+            <GoogleSignInButton next={safeNext} />
+            <SignInMethodDivider />
+          </>
+        )}
+        <LoginForm {...(next ? { next } : {})} />
+      </div>
     </AuthCard>
   );
 }

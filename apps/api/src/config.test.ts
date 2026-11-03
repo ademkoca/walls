@@ -38,3 +38,37 @@ describe('exchange rate configuration', () => {
     ).toThrow(/EXCHANGE_RATE_PROVIDER/);
   });
 });
+
+describe('Google sign-in configuration', () => {
+  const PRODUCTION = {
+    ...BASE,
+    NODE_ENV: 'production',
+    RESEND_API_KEY: 're_test',
+    CLOUDINARY_CLOUD_NAME: 'c',
+    CLOUDINARY_API_KEY: 'k',
+    CLOUDINARY_API_SECRET: 's',
+  };
+
+  it('is off without credentials, also when the variables are left empty', () => {
+    expect(loadConfig(BASE).google).toBeUndefined();
+    expect(
+      loadConfig({ ...BASE, GOOGLE_CLIENT_ID: '', GOOGLE_CLIENT_SECRET: '' }).google,
+    ).toBeUndefined();
+  });
+
+  it('uses Google with both credentials and refuses only one of them', () => {
+    expect(
+      loadConfig({ ...BASE, GOOGLE_CLIENT_ID: 'id', GOOGLE_CLIENT_SECRET: 'secret' }).google,
+    ).toEqual({ provider: 'google', clientId: 'id', clientSecret: 'secret' });
+    expect(() => loadConfig({ ...BASE, GOOGLE_CLIENT_ID: 'id' })).toThrow(/GOOGLE_CLIENT_ID/);
+  });
+
+  it('offers the fake Google account outside production only', () => {
+    expect(loadConfig({ ...BASE, GOOGLE_SIGN_IN_FAKE: 'on' }).google).toEqual({
+      provider: 'fake',
+    });
+    expect(() => loadConfig({ ...PRODUCTION, GOOGLE_SIGN_IN_FAKE: 'on' })).toThrow(
+      /GOOGLE_SIGN_IN_FAKE/,
+    );
+  });
+});

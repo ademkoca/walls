@@ -16,6 +16,7 @@ export * from './user/phone';
 export * from './user/profile';
 export * from './user/seller-type';
 export * from './user/agent-application';
+export * from './user/google-sign-in';
 export * from './media/image-rules';
 export * from './pricing/money';
 export * from './pricing/price';

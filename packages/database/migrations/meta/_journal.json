@@ -127,6 +127,13 @@
       "when": 1793357383394,
       "tag": "0017_revisions_review_text_and_new_images",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793628828970,
+      "tag": "0018_google_sign_in",
+      "breakpoints": true
     }
   ]
 }

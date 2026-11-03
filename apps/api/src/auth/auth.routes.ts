@@ -5,6 +5,7 @@ import {
   setPasswordInputSchema,
   verifyEmailInputSchema,
 } from '@walls/validation';
+import type { AuthProviders } from '@walls/shared';
 import { type RequestHandler, Router } from 'express';
 import type { Config } from '../config';
 import { requireAuth } from '../http/auth-context';
@@ -31,10 +32,17 @@ export function authRoutes(deps: {
   authService: AuthService;
   env: Config['env'];
   rateLimits: AuthRateLimits;
+  /** Whether "Continue with Google" is configured (SPEC §3.1). */
+  googleEnabled: boolean;
 }): Router {
   const { db, authService, env, rateLimits } = deps;
   const router = Router();
   const perIp: RequestHandler = limitByIp(rateLimits.perIp);
+
+  router.get('/providers', (_req, res) => {
+    const providers: AuthProviders = { google: deps.googleEnabled };
+    res.json(providers);
+  });
 
   router.post('/register', perIp, async (req, res) => {
     await authService.register(parseBody(registerInputSchema, req));

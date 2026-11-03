@@ -1,6 +1,11 @@
 'use client';
 
-import type { MyProfile } from '@walls/shared';
+import {
+  ApiErrorCode,
+  GoogleSignInIntent,
+  GoogleSignInOutcome,
+  type MyProfile,
+} from '@walls/shared';
 import { type EmailChangeInput, emailChangeInputSchema } from '@walls/validation';
 import { Button } from '@walls/ui/components/button';
 import { FieldGroup } from '@walls/ui/components/field';
@@ -9,31 +14,48 @@ import { Spinner } from '@walls/ui/components/spinner';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ApiError } from '@/lib/api/errors';
 import { profileApi } from '@/lib/api/profile';
 import { useErrorMessage } from '@/lib/use-error-message';
+import { GoogleOutcomeAlert } from '../auth/google-outcome-alert';
+import { GoogleSignInButton } from '../auth/google-sign-in-button';
 import { FormAlert } from '../forms/form-alert';
 import { FormField, fieldAria } from '../forms/form-field';
 import { PasswordInput } from '../forms/password-input';
 import { useSchemaForm } from '../forms/use-schema-form';
 
-/** Changing the sign-in email: password check, then a link to the new address (SPEC §4). */
+const PROFILE_PATH = '/dashboard/profile';
+
+/** Accounts with a password must type it (the API says the same). */
+const withPasswordSchema = emailChangeInputSchema.required({ currentPassword: true });
+
+/**
+ * Changing the sign-in email: the user proves who they are again, then a link goes to the new
+ * address (SPEC §4). Accounts with a password type it; accounts that sign in only with Google
+ * confirm with Google first (SPEC §3.1), which brings them back here with the form open.
+ */
 export function EmailChangeCard({
   profile,
   onChange,
+  googleOutcome,
 }: {
   profile: MyProfile;
   onChange: (profile: MyProfile) => void;
+  googleOutcome: string | null;
 }) {
   const t = useTranslations('profile.email');
   const tProfile = useTranslations('profile');
   const errorMessage = useErrorMessage();
-  const [open, setOpen] = useState(false);
+  const confirmedWithGoogle = googleOutcome === GoogleSignInOutcome.REAUTHENTICATED;
+  const [open, setOpen] = useState(confirmedWithGoogle && !profile.hasPassword);
+  // Shown until the user confirms again (or the confirmation runs out).
+  const [needsGoogle, setNeedsGoogle] = useState(!profile.hasPassword && !confirmedWithGoogle);
   const [error, setError] = useState<unknown>(null);
   const [cancelling, setCancelling] = useState(false);
-  const form = useSchemaForm<EmailChangeInput>(emailChangeInputSchema, {
-    newEmail: '',
-    currentPassword: '',
-  });
+  const form = useSchemaForm<EmailChangeInput>(
+    profile.hasPassword ? withPasswordSchema : emailChangeInputSchema,
+    { newEmail: '', ...(profile.hasPassword ? { currentPassword: '' } : {}) },
+  );
   const { errors, isSubmitting } = form.formState;
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -44,6 +66,10 @@ export function EmailChangeCard({
       form.reset();
       setOpen(false);
     } catch (caught) {
+      if (caught instanceof ApiError && caught.code === ApiErrorCode.REAUTHENTICATION_REQUIRED) {
+        setNeedsGoogle(true);
+        setOpen(false);
+      }
       setError(caught);
     }
   });
@@ -81,10 +107,31 @@ export function EmailChangeCard({
           </Button>
         </div>
       )}
+      {!profile.hasPassword && (
+        <div className="space-y-3">
+          <GoogleOutcomeAlert outcome={googleOutcome} />
+          {!needsGoogle && open && <FormAlert tone="success">{t('reauthenticated')}</FormAlert>}
+          {!open && error !== null && <FormAlert tone="error">{errorMessage(error)}</FormAlert>}
+          {needsGoogle && (
+            <>
+              <p className="text-muted-foreground">{t('googleOnly')}</p>
+              <GoogleSignInButton
+                intent={GoogleSignInIntent.REAUTHENTICATE}
+                next={PROFILE_PATH}
+                label={t('confirmWithGoogle')}
+                className="w-auto"
+              />
+            </>
+          )}
+          <p className="text-muted-foreground">{t('setPassword')}</p>
+        </div>
+      )}
       {!open ? (
-        <Button type="button" variant="outline" onClick={() => setOpen(true)}>
-          {t('change')}
-        </Button>
+        !needsGoogle && (
+          <Button type="button" variant="outline" onClick={() => setOpen(true)}>
+            {t('change')}
+          </Button>
+        )
       ) : (
         <form onSubmit={(event) => void onSubmit(event)} noValidate className="space-y-4">
           {profile.changesRequireApproval && (
@@ -100,17 +147,19 @@ export function EmailChangeCard({
                 {...form.register('newEmail')}
               />
             </FormField>
-            <FormField
-              id="currentPassword"
-              label={t('currentPassword')}
-              error={errors.currentPassword}
-            >
-              <PasswordInput
-                {...fieldAria('currentPassword', errors.currentPassword)}
-                autoComplete="current-password"
-                {...form.register('currentPassword')}
-              />
-            </FormField>
+            {profile.hasPassword && (
+              <FormField
+                id="currentPassword"
+                label={t('currentPassword')}
+                error={errors.currentPassword}
+              >
+                <PasswordInput
+                  {...fieldAria('currentPassword', errors.currentPassword)}
+                  autoComplete="current-password"
+                  {...form.register('currentPassword')}
+                />
+              </FormField>
+            )}
           </FieldGroup>
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={isSubmitting}>

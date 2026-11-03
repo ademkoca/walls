@@ -184,6 +184,21 @@
       "showPassword": "Prikaži lozinku",
       "hidePassword": "Sakrij lozinku"
     },
+    "google": {
+      "continue": "Nastavite uz Google",
+      "or": "ili email adresom",
+      "outcomes": {
+        "cancelled": "Prijava preko Google-a je otkazana.",
+        "failed": "Prijava preko Google-a nije uspela. Pokušajte ponovo.",
+        "email-not-verified": "Google nije potvrdio email adresu ovog Google naloga. Potvrdite je kod Google-a ili se prijavite email adresom i lozinkom.",
+        "deactivated": "Ovaj nalog je deaktiviran.",
+        "link-sent": "Ova email adresa već ima Walls nalog. Da biste ga povezali sa Google-om, otvorite link koji smo upravo poslali na tu adresu. Do tada se prijavljujte lozinkom.",
+        "wrong-account": "To nije pravi Google nalog. Koristite Google nalog sa email adresom ovog naloga.",
+        "other-google-account": "Vaš Walls nalog je povezan sa drugim Google nalogom. Nastavite tim nalogom ili se prijavite lozinkom.",
+        "google-account-in-use": "Ovaj Google nalog je već povezan sa drugim Walls nalogom.",
+        "setup-link-invalid": "Link za podešavanje naloga nije ispravan ili je istekao. Zamolite naš tim da vam pošalje novi."
+      }
+    },
     "login": {
       "title": "Prijava",
       "description": "Prijavite se da biste upravljali svojim oglasima.",
@@ -234,7 +249,7 @@
     },
     "setupAccount": {
       "title": "Podešavanje naloga",
-      "description": "Izaberite lozinku da biste aktivirali svoj nalog.",
+      "description": "Izaberite lozinku ili nastavite uz Google nalog svoje email adrese da biste aktivirali nalog.",
       "submit": "Aktiviraj nalog",
       "success": "Nalog je aktivan. Prijavite se izabranom lozinkom.",
       "goToLogin": "Prijavite se",
@@ -249,6 +264,25 @@
       "missingToken": "Ovaj link je nepotpun. Otvorite ga direktno iz emaila koji ste dobili.",
       "requestNew": "Zatražite novi link na stranici svog profila.",
       "goToProfile": "Idi na moj profil"
+    },
+    "continueWithGoogle": {
+      "title": "Dobro došli na Walls",
+      "description": "Za {email} još ne postoji Walls nalog. Šta želite da uradite?",
+      "sellerTitle": "Prodajem ili izdajem svoju nekretninu",
+      "sellerDescription": "Napravite nalog privatnog prodavca. Aktivan je odmah, a prijavljujete se Google-om, bez lozinke.",
+      "sellerSubmit": "Napravi nalog",
+      "professionalTitle": "Agent, agencija ili investitor sam",
+      "professionalDescription": "Prijavite se za profesionalni nalog. Naš tim proverava svaku prijavu pre nego što se nalog otvori.",
+      "professionalLink": "Podnesi prijavu",
+      "expired": "Ova prijava preko Google-a je istekla. Nastavite uz Google ponovo."
+    },
+    "connectGoogle": {
+      "title": "Povežite Google nalog",
+      "description": "Potvrdite da biste se na Walls nalog prijavljivali i Google-om.",
+      "submit": "Poveži Google nalog",
+      "success": "Vaš nalog je povezan sa Google-om. Od sada možete nastaviti uz Google.",
+      "missingToken": "Ovaj link je nepotpun. Otvorite ga direktno iz emaila koji ste dobili.",
+      "requestNew": "Nastavite uz Google na stranici za prijavu da biste dobili novi link."
     }
   },
   "dashboard": {
@@ -621,6 +655,7 @@
       "USER_INVITED": "Poziv korisnika",
       "USER_DEACTIVATED": "Deaktivacija naloga",
       "USER_REACTIVATED": "Ponovna aktivacija naloga",
+      "USER_GOOGLE_CONNECTED": "Povezan Google nalog",
       "LISTING_CREATED": "Novi oglas",
       "LISTING_SUBMITTED": "Slanje na proveru",
       "LISTING_REVISED": "Vraćanje u nacrt",
@@ -801,7 +836,8 @@
     "EXTERNAL_SERVICE_FAILED": "Spoljni servis trenutno nije dostupan. Pokušajte ponovo kasnije.",
     "INTERNAL_ERROR": "Došlo je do greške. Pokušajte ponovo.",
     "INVALID_FILE": "Datoteka ne ispunjava uslove.",
-    "EMAIL_IN_USE": "Ova email adresa već pripada nalogu."
+    "EMAIL_IN_USE": "Ova email adresa već pripada nalogu.",
+    "REAUTHENTICATION_REQUIRED": "Prvo ponovo potvrdite uz Google."
   },
   "agentApplication": {
     "title": "Oglašavajte kao agent, agencija ili investitor",
@@ -952,6 +988,10 @@
       "change": "Promeni email adresu",
       "newEmail": "Nova email adresa",
       "currentPassword": "Trenutna lozinka",
+      "googleOnly": "Prijavljujete se Google-om, pa umesto lozinke potvrdite svojim Google nalogom.",
+      "confirmWithGoogle": "Potvrdi uz Google",
+      "reauthenticated": "Potvrđeno. Unesite novu email adresu u narednih 10 minuta.",
+      "setPassword": "Da biste se prijavljivali i lozinkom, iskoristite „Zaboravili ste lozinku?“ na stranici za prijavu.",
       "send": "Pošalji link za potvrdu",
       "sent": "Poslali smo link za potvrdu na {email}.",
       "cancel": "Otkaži promenu",
@@ -1343,7 +1383,7 @@
         },
         "collect": {
           "title": "Šta prikupljamo",
-          "body": "Podaci o nalogu: ime, email adresa i lozinka (čuvamo je samo u obliku bezbednog heša), kao i broj telefona, profilna slika i kratka biografija ako ih dodate.\n\nPrijave za profesionalne naloge (agenti, agencije i investitori): ime i prezime ili naziv firme, email adresa, broj telefona, vrsta naloga, naziv agencije (za agente) i dokumenti koje priložite. Dokumente vide samo naši administratori.\n\nOglasi: podaci o nekretnini, slike, cena i lokacija.\n\nUpiti: ime, email adresa, broj telefona (neobavezno) i poruka koju posetilac pošalje o oglasu.\n\nPoruke sa kontakt forme: ime, email adresa, tema i poruka.\n\nPregledi oglasa: da bismo pregled brojali jednom po posetiocu dnevno, koristimo otisak IP adrese i pregledača napravljen ključem koji se menja svakog dana. Samu IP adresu ne čuvamo."
+          "body": "Podaci o nalogu: ime, email adresa i lozinka (čuvamo je samo u obliku bezbednog heša), kao i broj telefona, profilna slika i kratka biografija ako ih dodate.\n\nPrijava preko Google-a: ako izaberete „Nastavite uz Google“, Google nam šalje identifikator vašeg Google naloga, ime, email adresu i podatak da li ju je Google potvrdio, kao i adresu vaše profilne slike. Nikada ne dobijamo vašu Google lozinku niti pristup bilo čemu drugom u vašem Google nalogu. Kada ovako napravite nalog, vašu Google profilnu sliku kopiramo u naše skladište; slike agenata, agencija i investitora prikazuju se tek posle naše provere.\n\nPrijave za profesionalne naloge (agenti, agencije i investitori): ime i prezime ili naziv firme, email adresa, broj telefona, vrsta naloga, naziv agencije (za agente) i dokumenti koje priložite. Dokumente vide samo naši administratori.\n\nOglasi: podaci o nekretnini, slike, cena i lokacija.\n\nUpiti: ime, email adresa, broj telefona (neobavezno) i poruka koju posetilac pošalje o oglasu.\n\nPoruke sa kontakt forme: ime, email adresa, tema i poruka.\n\nPregledi oglasa: da bismo pregled brojali jednom po posetiocu dnevno, koristimo otisak IP adrese i pregledača napravljen ključem koji se menja svakog dana. Samu IP adresu ne čuvamo."
         },
         "use": {
           "title": "Zašto ih koristimo",
@@ -1355,11 +1395,11 @@
         },
         "providers": {
           "title": "Pružaoci usluga",
-          "body": "Za rad sajta {brand} koristimo pouzdane pružaoce usluga: Supabase (baza podataka), Render (aplikacioni server), Netlify (hosting sajta), Cloudinary (slike i dokumenti) i Resend (email). Mape se prikazuju preko servisa OpenStreetMap, koji prima zahteve vašeg pregledača za slike mape. Neki pružaoci mogu obrađivati podatke van Srbije; mere zaštite za to biće opisane ovde nakon pravne provere.\n\nLinkovi ka našim profilima na društvenim mrežama (Instagram, Facebook, LinkedIn) i dugmad za deljenje oglasa (WhatsApp, Facebook) obični su linkovi: ti servisi ne dobijaju ništa dok neki od njih sami ne otvorite."
+          "body": "Za rad sajta {brand} koristimo pouzdane pružaoce usluga: Supabase (baza podataka), Render (aplikacioni server), Netlify (hosting sajta), Cloudinary (slike i dokumenti), Resend (email) i Google (samo ako se prijavljujete Google-om). Mape se prikazuju preko servisa OpenStreetMap, koji prima zahteve vašeg pregledača za slike mape. Neki pružaoci mogu obrađivati podatke van Srbije; mere zaštite za to biće opisane ovde nakon pravne provere.\n\nLinkovi ka našim profilima na društvenim mrežama (Instagram, Facebook, LinkedIn) i dugmad za deljenje oglasa (WhatsApp, Facebook) obični su linkovi: ti servisi ne dobijaju ništa dok neki od njih sami ne otvorite."
         },
         "cookies": {
           "title": "Kolačići",
-          "body": "Koristimo samo kolačiće neophodne za rad sajta {brand}: kolačić sesije, koji vas drži prijavljenim, i kolačić koji pamti da li cene gledate u EUR ili RSD. Ne koristimo reklamne ni analitičke kolačiće."
+          "body": "Koristimo samo kolačiće neophodne za rad sajta {brand}: kolačić sesije, koji vas drži prijavljenim, kolačić koji pamti da li cene gledate u EUR ili RSD i, samo dok se prijavljujete Google-om, dva kratkotrajna kolačića koji štite prijavu. Ne koristimo reklamne ni analitičke kolačiće."
         },
         "retention": {
           "title": "Koliko dugo ih čuvamo",
@@ -1386,7 +1426,7 @@
         },
         "accounts": {
           "title": "Nalozi",
-          "body": "Dužni ste da unesete tačne podatke i čuvate svoju lozinku. Nalog privatnog prodavca postaje aktivan kada potvrdite email adresu. Nalog agenta, agencije ili investitora otvara se tek kada odobrimo prijavu uz dokaz o vašoj delatnosti. Ulogu ne možete sami izabrati ni promeniti."
+          "body": "Dužni ste da unesete tačne podatke i čuvate svoju lozinku. Nalog privatnog prodavca postaje aktivan kada potvrdite email adresu, ili odmah ako ga napravite preko Google-a. Nalog agenta, agencije ili investitora otvara se tek kada odobrimo prijavu uz dokaz o vašoj delatnosti. Ulogu ne možete sami izabrati ni promeniti."
         },
         "listings": {
           "title": "Oglasi",

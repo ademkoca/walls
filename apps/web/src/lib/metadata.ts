@@ -12,7 +12,9 @@ export async function privatePageMetadata(
     | 'forgotPassword'
     | 'resetPassword'
     | 'setupAccount'
-    | 'confirmEmail',
+    | 'confirmEmail'
+    | 'continueWithGoogle'
+    | 'connectGoogle',
 ): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'auth' });
   return { title: t(`${titleKey}.title`), robots: { index: false, follow: false } };

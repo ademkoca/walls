@@ -195,7 +195,14 @@ Phone verification status must be stored accurately. Public contact details labe
 
 Authentication and authorization must be tested independently.
 
-Design authentication so Google OAuth can be added later.
+Google sign-in ("Continue with Google", `SPEC.md` §3.1) sits behind the
+`IdentityProvider` interface (`apps/api/src/auth/google/`). Match Google
+accounts by their permanent ID (`user_identities`), never by email alone:
+connect an existing account automatically only when Google is the authority
+for its address (`isGoogleAuthoritativeFor`), otherwise by an emailed link.
+Google sign-in never creates or approves a professional account. Tests and
+local development use the fake Google screen (`GOOGLE_SIGN_IN_FAKE=on`);
+never call the real Google from tests.
 
 ------------------------------------------------------------------------
 

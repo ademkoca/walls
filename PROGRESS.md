@@ -4,7 +4,7 @@ Living handoff file. It records where the build stands, the product decisions th
 made beyond `SPEC.md`, technical choices, and gotchas. `SPEC.md` stays the authority for
 product behavior; update this file at the end of every phase.
 
-_Last updated: 2026-11-02 (social media links and listing sharing, pushed, see "Social media and sharing"). Earlier: 2026-10-30 (launch test fixes, Phases 1–4 (`8544c68`, `8b24610`, `db6ff55`, `f6cec68`) pushed, CI green, deployed to staging; the user retested every failed scenario and all pass; next: deploy production and finish the move to walls.rs, see "Next steps to launch"; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
+_Last updated: 2026-11-02 (Google sign-in built, not committed, awaiting the user's review; next: the user creates the Google OAuth clients, see "Google sign-in"). Earlier: 2026-11-02 (social media links and listing sharing, pushed, see "Social media and sharing"). Earlier: 2026-10-30 (launch test fixes, Phases 1–4 (`8544c68`, `8b24610`, `db6ff55`, `f6cec68`) pushed, CI green, deployed to staging; the user retested every failed scenario and all pass; next: deploy production and finish the move to walls.rs, see "Next steps to launch"; decisions A–E recorded under "Launch test fixes"). Earlier: 2026-10-28 (Tlocrt approved and merged into `main` (fast-forward), so preview.walls.rs deploys from `main` again; the previous orange/cream design is kept on branch `archive/design-orange-cream` in case the owner reverts. Then: two environments on the one VPS (user's decision, details under "Two environments"), built but not yet committed). Earlier: 2026-10-26 (visual identity "Tlocrt" replaces Beton: floor-plan home page, "Folding screen" logo, white/ink/green palette, Hanken Grotesk and Red Hat Mono). Earlier: 2026-10-23 (visual identity "Beton": concrete, ink and signal yellow; Archivo, Barlow Condensed and IBM Plex Mono; square corners; logo recolored, Montserrat wordmark kept; uncommitted, awaiting the user's review). Earlier: 2026-10-22 (floor shown without the total on ground and basement floors; Serbian dates in the genitive and Latin script; Next.js 16.4.2 security upgrade). Earlier: 2026-10-21 (no company details at launch, contact inbox contact@walls.rs; advertiser types pushed; phone verification labels hidden, phone verification planned after launch; link preview images). Earlier: 2026-10-13. Phase 10 in progress: deployment is live at preview.walls.rs
 (waiting for Netlify's HTTPS certificate). Last pushed commit `3b2726f`. Uncommitted, awaiting the
 user's review: cream text on orange, larger home-page CTAs, hover/cursor fixes (see "UI polish")._
 
@@ -74,6 +74,50 @@ describes behavior the code doesn't have.
 6. Invite the Novi Pazar agencies to register on walls.rs; preview.walls.rs is the demo.
 7. Public launch, when the user decides: empty production's `SITE_INDEXING` in GitHub and
    deploy production again.
+
+**Google sign-in (2026-11-02, built, not committed):** the user's request; rules in SPEC §3.1
+(SPEC §3, §4, §21, §42–46, AGENTS.md, README, `.env.example`, `deploy/api.env.example`, privacy
+policy and terms drafts updated). The user's decisions:
+
+- Everyone can use "Continue with Google". Professionals keep the Admin approval: Google sign-in
+  never creates a professional account. A Google account without a Walls account goes to a choice
+  page (`/continue-with-google`): a private-seller account (active at once, no password, name
+  from Google editable) or the professional application with name and email filled in
+  (`/for-professionals?from=google`).
+- Existing account with the same email: connected automatically when Google is the authority
+  (Gmail, or a Workspace domain via `hd`), otherwise after an emailed link (`/connect-google`,
+  token type `GOOGLE_LINK`, 24 h). Connecting is audited, and already-active accounts get a
+  "Google sign-in was added" email. An unverified registration becomes active and loses the
+  password set at registration (pre-registration takeover). Invited accounts (approved
+  professionals, Admins) can set up with Google from the setup page; the Google email must match.
+- Accounts without a password: "Forgot password" sets one; changing the email needs a fresh
+  "Confirm with Google" (10 minutes, stored per session in `user_sessions.reauthenticated_at`).
+- Google name and photo are taken at account creation/setup; the photo is copied to Walls'
+  storage, and a professional's becomes a profile change request.
+
+Implementation: migration `0018_google_sign_in` (`user_identities`, `auth_provider` enum,
+`auth_tokens` provider columns, recreated `auth_token_type` enum as in 0014). API in
+`apps/api/src/auth/google/`: `IdentityProvider` interface; `GoogleIdentityProvider` (plain
+`fetch`, code flow with PKCE, `state` and `nonce`; the ID token comes from the token endpoint
+over TLS, so its signature is not checked, audience/expiry/nonce are); `FakeIdentityProvider` and
+a fake Google screen (`GOOGLE_SIGN_IN_FAKE=on`, refused in production); `GoogleSignInService`;
+round-trip and pending-signup state in sealed (HMAC, expiring) HttpOnly cookies. Routes:
+`GET /auth/providers`, `GET /auth/google` (start), `GET /auth/google/callback`,
+`GET /auth/google/pending`, `POST /auth/google/register`, `POST /auth/google/confirm-link`.
+Redirect URI: `WEB_ORIGIN/api/v1/auth/google/callback` (Caddy sends `/api/*` to the API). The web
+app shows the button only when `/auth/providers` says so (tolerates an older API).
+`statusAfterReactivation` now asks for any sign-in method, not a password.
+
+Tests: shared and config unit tests, provider unit tests, 24 API integration tests
+(`google-sign-in.integration.test.ts`), 5 E2E (`google-sign-in.spec.ts`). Typecheck, lint, format,
+unit, all 196 integration and all 32 E2E tests pass. The local dev database was migrated.
+
+Still to do (the user, with help): create an OAuth client per environment in the Google Cloud
+console (Google Auth Platform: branding with the contact@walls.rs Google account as support
+email, audience External, scopes `openid email profile`, client type Web application with the
+redirect URI), put `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` in `/opt/walls/<env>/api.env` on
+the VPS, verify walls.rs in Search Console and submit branding verification so Google shows the
+name "Walls". The privacy policy is still a draft for the lawyer.
 
 **Social media and sharing (2026-11-02, pushed):** the user's request.
 
@@ -1155,6 +1199,9 @@ HEAD`, then with `env -i` and only CI's variables (`CI=true`, `TEST_DATABASE_URL
   suite; `AUTH_RATE_LIMIT_PER_IP` is raised only in the E2E API environment.
 - **`Intl` with locale `sr` writes month names in Cyrillic.** next-intl formats with the
   routing locale, so print month/day names with `intlLocale()` (`sr-Latn`).
+- **Helmet's `Referrer-Policy: no-referrer` makes browsers send `Origin: null` with form POSTs,**
+  which the CSRF origin check refuses. Only the fake Google screen posts an HTML form to the API;
+  it sets `same-origin` for itself.
 - **multer decodes file names as Latin-1** unless `defParamCharset: 'utf8'` is set.
 - **Public data must not be cached by `fetch`:** a prefetched `<Link>` cached an agent's old
   profile, so the approved version did not show. Public reads use `cache: 'no-store'` for now.

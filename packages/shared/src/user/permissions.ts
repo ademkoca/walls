@@ -85,13 +85,14 @@ export function canReactivateUser(
 
 /**
  * The status a reactivated account returns to: active only when it had completed signup;
- * otherwise it continues where it stopped (email verification or account setup).
+ * otherwise it continues where it stopped (email verification or account setup). An account
+ * can sign in once it has a password or a connected Google account (SPEC §3.1).
  */
 export function statusAfterReactivation(account: {
-  hasPassword: boolean;
+  hasSignInMethod: boolean;
   emailVerified: boolean;
 }): UserStatus {
-  if (!account.hasPassword) return UserStatus.PENDING_SETUP;
+  if (!account.hasSignInMethod) return UserStatus.PENDING_SETUP;
   if (!account.emailVerified) return UserStatus.PENDING_VERIFICATION;
   return UserStatus.ACTIVE;
 }

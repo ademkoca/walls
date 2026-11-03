@@ -11,6 +11,10 @@ export const AUTH_PAGE_PATHS = {
   resetPassword: '/reset-password',
   setupAccount: '/setup-account',
   confirmEmail: '/confirm-email',
+  /** A Google account without a Walls account: create one or apply as a professional. */
+  continueWithGoogle: '/continue-with-google',
+  /** The emailed link that connects a Google account to an existing Walls account. */
+  connectGoogle: '/connect-google',
 } as const;
 
 /**

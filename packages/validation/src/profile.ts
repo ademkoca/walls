@@ -68,9 +68,13 @@ export const profileInputSchema = z.strictObject({
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 
 /** Changing the sign-in email needs the current password and a verified new address. */
+/**
+ * Changing the sign-in email. Accounts with a password confirm it here; accounts that sign
+ * in only with Google confirm with Google first instead (SPEC §3.1), so it is optional.
+ */
 export const emailChangeInputSchema = z.strictObject({
   newEmail: emailSchema,
-  currentPassword: z.string().min(1).max(AUTH_INPUT_LIMITS.passwordMaxLength),
+  currentPassword: z.string().min(1).max(AUTH_INPUT_LIMITS.passwordMaxLength).optional(),
 });
 export type EmailChangeInput = z.infer<typeof emailChangeInputSchema>;
 

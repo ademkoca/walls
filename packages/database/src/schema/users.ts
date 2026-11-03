@@ -10,6 +10,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import {
+  authProviderEnum,
   citext,
   reviewStatusEnum,
   id,
@@ -27,7 +28,7 @@ export const users = pgTable(
   {
     id: id(),
     email: citext().notNull().unique(),
-    /** Null for accounts that have not completed setup (and, later, OAuth-only accounts). */
+    /** Null for accounts that have not completed setup, and for accounts that sign in only with Google. */
     passwordHash: text(),
     role: roleEnum().notNull(),
     /**
@@ -98,9 +99,39 @@ export const userSessions = pgTable(
     lastSeenAt: timestamptz().notNull().defaultNow(),
     ipAddress: text(),
     userAgent: text(),
+    /**
+     * When the user last confirmed who they are with Google in this session; accounts
+     * without a password do this before changing their email (SPEC §3.1).
+     */
+    reauthenticatedAt: timestamptz(),
     createdAt: timestamptz().notNull().defaultNow(),
   },
   (table) => [index().on(table.userId), index().on(table.expiresAt)],
+);
+
+/**
+ * External accounts a user signs in with (SPEC §3.1): at most one per provider and user, and
+ * each external account belongs to one user. Matched by the provider's permanent user ID,
+ * never by email, so changing either email keeps the connection.
+ */
+export const userIdentities = pgTable(
+  'user_identities',
+  {
+    id: id(),
+    userId: uuid()
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    provider: authProviderEnum().notNull(),
+    /** The provider's permanent user ID (Google's `sub` claim). */
+    providerUserId: text().notNull(),
+    /** The external account's email when it was connected; informational only. */
+    email: citext().notNull(),
+    createdAt: timestamptz().notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('user_identities_provider_user').on(table.provider, table.providerUserId),
+    uniqueIndex('user_identities_one_per_provider').on(table.userId, table.provider),
+  ],
 );
 
 export const authTokenTypeEnum = pgEnum('auth_token_type', [
@@ -108,6 +139,7 @@ export const authTokenTypeEnum = pgEnum('auth_token_type', [
   'PASSWORD_RESET',
   'ACCOUNT_SETUP',
   'EMAIL_CHANGE',
+  'GOOGLE_LINK',
 ]);
 
 /** Single-use tokens sent by email. Only a hash of the token is stored. */
@@ -122,6 +154,10 @@ export const authTokens = pgTable(
     tokenHash: text().notNull().unique(),
     /** The address being verified, for EMAIL_CHANGE tokens only. */
     newEmail: citext(),
+    /** The external account to connect, for GOOGLE_LINK tokens only. */
+    provider: authProviderEnum(),
+    providerUserId: text(),
+    providerEmail: citext(),
     expiresAt: timestamptz().notNull(),
     usedAt: timestamptz(),
     createdAt: timestamptz().notNull().defaultNow(),
@@ -131,6 +167,12 @@ export const authTokens = pgTable(
     check(
       'auth_tokens_new_email_only_for_email_change',
       sql`(${table.type} = 'EMAIL_CHANGE') = (${table.newEmail} IS NOT NULL)`,
+    ),
+    check(
+      'auth_tokens_identity_only_for_google_link',
+      sql`(${table.type} = 'GOOGLE_LINK') = (${table.provider} IS NOT NULL)
+        AND (${table.provider} IS NULL) = (${table.providerUserId} IS NULL)
+        AND (${table.provider} IS NULL) = (${table.providerEmail} IS NULL)`,
     ),
   ],
 );

@@ -1,4 +1,5 @@
 import {
+  AuthProvider,
   Currency,
   FurnishedStatus,
   HeatingType,
@@ -39,6 +40,7 @@ export const phoneVerificationStatusEnum = pgEnum(
 export const mediaTypeEnum = pgEnum('media_type', enumValues(MediaType));
 export const reviewStatusEnum = pgEnum('review_status', enumValues(ReviewStatus));
 export const localeEnum = pgEnum('locale', enumValues(Locale));
+export const authProviderEnum = pgEnum('auth_provider', enumValues(AuthProvider));
 
 /** Case-insensitive text (Postgres `citext` extension), used for email addresses. */
 export const citext = customType<{ data: string }>({

@@ -8,6 +8,11 @@ import { pinoHttp } from 'pino-http';
 import { type AuthRateLimits, authRoutes } from './auth/auth.routes';
 import { AuthService } from './auth/auth.service';
 import { loadSession } from './auth/session.middleware';
+import { createIdentityProvider, googleRedirectUri } from './auth/google/create-identity-provider';
+import { fakeGoogleScreenRoutes } from './auth/google/fake-google-screen';
+import { FakeIdentityProvider } from './auth/google/fake-identity-provider';
+import { GoogleSignInService } from './auth/google/google-sign-in.service';
+import { googleRoutes } from './auth/google/google.routes';
 import type { Config } from './config';
 import { ContactService } from './contact/contact.service';
 import { analyticsRoutes } from './analytics/analytics.routes';
@@ -114,6 +119,10 @@ export function createApp({
     logger,
   );
   const profilesService = new ProfilesService(db, authService, mediaStorage, logger);
+  const identityProvider = createIdentityProvider(config, logger);
+  const googleService =
+    identityProvider &&
+    new GoogleSignInService(db, config, authService, profilesService, identityProvider, logger);
   const profileChangesService = new ProfileChangesService(db, config, mediaStorage, logger);
   const publicService = new PublicService(db, mediaStorage);
   const publicListingsService = new PublicListingsService(db, exchangeRates, mediaStorage);
@@ -146,7 +155,25 @@ export function createApp({
     '/auth/confirm-email-change',
     confirmEmailChangeRoutes({ profiles: profilesService, sensitiveRateLimit: rateLimits.perIp }),
   );
-  api.use('/auth', authRoutes({ db, authService, env: config.env, rateLimits }));
+  if (identityProvider instanceof FakeIdentityProvider) {
+    api.use('/auth/google/fake', fakeGoogleScreenRoutes(googleRedirectUri(config.webOrigin)));
+  }
+  if (googleService) {
+    api.use(
+      '/auth/google',
+      googleRoutes({ google: googleService, authService, config, rateLimit: rateLimits.perIp }),
+    );
+  }
+  api.use(
+    '/auth',
+    authRoutes({
+      db,
+      authService,
+      env: config.env,
+      rateLimits,
+      googleEnabled: googleService !== undefined,
+    }),
+  );
   api.use(
     '/public',
     publicRoutes({

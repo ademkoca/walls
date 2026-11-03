@@ -25,6 +25,7 @@ import {
   deleteSessionsForUser,
   deleteUnusedTokens,
   extendSession,
+  findSessionReauthenticatedAt,
   findSessionWithUser,
   findSlugsLike,
   findUserByEmail,
@@ -35,7 +36,12 @@ import {
   updateUser,
 } from './auth.repository';
 import { hashPassword, timingSafeDummyHash, verifyPassword } from './passwords';
-import { SESSION_POLICY, TOKEN_TTL_HOURS, expiresInHours } from './token-policy';
+import {
+  GOOGLE_SIGN_IN_POLICY,
+  SESSION_POLICY,
+  TOKEN_TTL_HOURS,
+  expiresInHours,
+} from './token-policy';
 import { generateToken, hashToken } from './tokens';
 
 const STATUS_UNAUTHORIZED = 401;
@@ -93,16 +99,16 @@ export class AuthService {
     private readonly config: Pick<Config, 'sessionSecret' | 'webOrigin'>,
   ) {}
 
-  private hash(token: string): string {
+  hash(token: string): string {
     return hashToken(token, this.config.sessionSecret);
   }
 
-  private link(locale: Locale, path: string, query: Record<string, string> = {}): string {
+  link(locale: Locale, path: string, query: Record<string, string> = {}): string {
     return webPageUrl(this.config.webOrigin, locale, path, query);
   }
 
   /** A slug based on the display name that no other user has, e.g. ana-anic-2. */
-  private async uniqueSlug(db: DbExecutor, displayName: string): Promise<string> {
+  async uniqueSlug(db: DbExecutor, displayName: string): Promise<string> {
     const base = slugify(displayName) || FALLBACK_SLUG;
     return nextFreeSlug(base, new Set(await findSlugsLike(db, base)));
   }
@@ -242,16 +248,40 @@ export class AuthService {
     }
     if (user.status !== UserStatus.ACTIVE) throw invalidCredentials();
 
+    return { user: toCurrentUser(user), ...(await this.createSession(this.db, user.id, meta)) };
+  }
+
+  /** Starts a session for a user who has just proven who they are (password or Google). */
+  async createSession(
+    db: DbExecutor,
+    userId: string,
+    meta: SessionMeta,
+  ): Promise<{ sessionToken: string; expiresAt: Date }> {
     const sessionToken = generateToken();
     const expiresAt = new Date(Date.now() + SESSION_POLICY.ttlMs);
-    await insertSession(this.db, {
-      userId: user.id,
+    await insertSession(db, {
+      userId,
       tokenHash: this.hash(sessionToken),
       expiresAt,
       ...(meta.ipAddress ? { ipAddress: meta.ipAddress } : {}),
       ...(meta.userAgent ? { userAgent: meta.userAgent.slice(0, USER_AGENT_MAX_LENGTH) } : {}),
     });
-    return { user: toCurrentUser(user), sessionToken, expiresAt };
+    return { sessionToken, expiresAt };
+  }
+
+  /**
+   * Accounts without a password confirm with Google again before changing their email
+   * (SPEC §3.1); the confirmation counts for a few minutes in the session that made it.
+   */
+  async assertRecentlyReauthenticated(sessionId: string): Promise<void> {
+    const at = await findSessionReauthenticatedAt(this.db, sessionId);
+    if (!at || Date.now() - at.getTime() > GOOGLE_SIGN_IN_POLICY.reauthenticationMs) {
+      throw new AppError(
+        STATUS_FORBIDDEN,
+        ErrorCode.REAUTHENTICATION_REQUIRED,
+        'Confirm with Google again first',
+      );
+    }
   }
 
   async logout(sessionId: string): Promise<void> {

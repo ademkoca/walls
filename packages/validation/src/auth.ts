@@ -1,4 +1,4 @@
-import { Locale, enumValues } from '@walls/shared';
+import { GoogleSignInIntent, Locale, enumValues } from '@walls/shared';
 import { z } from 'zod';
 
 export const AUTH_INPUT_LIMITS = {
@@ -59,3 +59,32 @@ export const setPasswordInputSchema = z.strictObject({
   password: newPasswordSchema,
 });
 export type SetPasswordInput = z.infer<typeof setPasswordInputSchema>;
+
+/** Longest post-login path the web app may ask to return to. */
+const NEXT_PATH_MAX_LENGTH = 500;
+
+/**
+ * Starting "Continue with Google" (GET /auth/google). `next` is a path on the web app;
+ * the API only redirects to same-site paths. `token` is the setup link's token.
+ */
+export const googleStartQuerySchema = z.object({
+  intent: z.enum(enumValues(GoogleSignInIntent)).default(GoogleSignInIntent.SIGN_IN),
+  locale: z.enum(enumValues(Locale)).default(Locale.SR),
+  next: z
+    .string()
+    .max(NEXT_PATH_MAX_LENGTH)
+    .regex(/^\/(?![/\\])/, 'Must be a path on this site')
+    .optional(),
+  token: emailTokenSchema.optional(),
+});
+export type GoogleStartQuery = z.infer<typeof googleStartQuerySchema>;
+
+/**
+ * Creating a private-seller account from a Google account (SPEC §3.1). The email comes from
+ * Google, never from the request; the name is prefilled from Google and may be edited.
+ */
+export const googleSignupInputSchema = z.strictObject({
+  displayName: displayNameSchema,
+  locale: z.enum(enumValues(Locale)),
+});
+export type GoogleSignupInput = z.infer<typeof googleSignupInputSchema>;

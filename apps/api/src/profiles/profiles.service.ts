@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Database, DbExecutor } from '@walls/database';
 import {
   type Actor,
+  AuthProvider,
   ImageIssue,
   type MyProfile,
   PhoneVerificationStatus,
@@ -16,6 +17,7 @@ import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
 import {
   type UserRow,
   deleteUnusedTokens,
+  findIdentityOfUser,
   findPendingEmailChange,
   findUserByEmail,
   findUserById,
@@ -76,9 +78,10 @@ export class ProfilesService {
     assertAllowed(canEditOwnProfile(actor));
     const user = await findUserById(this.db, actor.id);
     if (!user) throw unauthenticated();
-    const [request, pendingEmail] = await Promise.all([
+    const [request, pendingEmail, google] = await Promise.all([
       findLatestChangeRequest(this.db, user.id),
       findPendingEmailChange(this.db, user.id),
+      findIdentityOfUser(this.db, user.id, AuthProvider.GOOGLE),
     ]);
     return {
       role: user.role,
@@ -91,6 +94,8 @@ export class ProfilesService {
       live: toProfileView(liveProposal(user)),
       changeRequest: request ? toChangeRequestView(user, request) : null,
       pendingEmail,
+      hasPassword: user.passwordHash !== null,
+      googleConnected: google !== undefined,
     };
   }
 
@@ -254,14 +259,24 @@ export class ProfilesService {
   }
 
   /**
-   * Starts an email change: the current password is checked and a link goes to the new
-   * address. Nothing changes until the link is used.
+   * Starts an email change: the user proves who they are again (their password, or for
+   * accounts without one, a recent confirmation with Google in this session; SPEC §3.1) and a
+   * link goes to the new address. Nothing changes until the link is used.
    */
-  async requestEmailChange(actor: Actor, input: EmailChangeInput): Promise<MyProfile> {
+  async requestEmailChange(
+    actor: Actor,
+    sessionId: string,
+    input: EmailChangeInput,
+  ): Promise<MyProfile> {
     assertAllowed(canEditOwnProfile(actor));
     const user = await findUserById(this.db, actor.id);
     if (!user) throw unauthenticated();
-    await this.auth.verifyCurrentPassword(user, input.currentPassword);
+    if (user.passwordHash) {
+      if (!input.currentPassword) throw validationFailed(['currentPassword'], 'Required');
+      await this.auth.verifyCurrentPassword(user, input.currentPassword);
+    } else {
+      await this.auth.assertRecentlyReauthenticated(sessionId);
+    }
     if (input.newEmail.toLowerCase() === user.email.toLowerCase()) {
       throw validationFailed(['newEmail'], 'This is already your email address');
     }

@@ -45,6 +45,8 @@ export const testConfig: Config = {
     localPrivateDirectory: '/nonexistent',
   },
   exchangeRates: { provider: 'fixed', eurRsd: TEST_EUR_RSD },
+  // "Continue with Google" against the fake Google (see google-sign-in tests).
+  google: { provider: 'fake' },
 };
 
 export function uniqueEmail(): string {

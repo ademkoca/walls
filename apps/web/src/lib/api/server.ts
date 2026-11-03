@@ -1,5 +1,6 @@
 import 'server-only';
 import type {
+  AuthProviders,
   AgentApplicationDetail,
   AgentApplicationSummary,
   AuditLogEntry,
@@ -52,6 +53,23 @@ async function serverGet<T>(path: string): Promise<T | null> {
   if (!response.ok) throw new Error(`GET ${path} failed with HTTP ${response.status}`);
   return (await response.json()) as T;
 }
+
+/**
+ * Sign-in methods besides email and password (SPEC §3.1). None when the API cannot say, for
+ * example an older API that does not know the endpoint yet.
+ */
+export const getAuthProviders = cache(async (): Promise<AuthProviders> => {
+  try {
+    const response = await fetch(`${apiInternalUrl()}/api/v1/auth/providers`, {
+      headers: { accept: 'application/json' },
+      cache: 'no-store',
+    });
+    if (!response.ok) return { google: false };
+    return (await response.json()) as AuthProviders;
+  } catch {
+    return { google: false };
+  }
+});
 
 /** The signed-in user for this request, or null. Deduplicated per request. */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {

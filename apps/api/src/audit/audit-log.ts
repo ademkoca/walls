@@ -9,6 +9,8 @@ export const AuditAction = {
   USER_INVITED: 'USER_INVITED',
   USER_DEACTIVATED: 'USER_DEACTIVATED',
   USER_REACTIVATED: 'USER_REACTIVATED',
+  /** A Google account connected to the user's account (SPEC §3.1). */
+  USER_GOOGLE_CONNECTED: 'USER_GOOGLE_CONNECTED',
   /** A private seller's profile change, applied immediately (SPEC §4). */
   USER_PROFILE_UPDATED: 'USER_PROFILE_UPDATED',
   USER_EMAIL_CHANGE_REQUESTED: 'USER_EMAIL_CHANGE_REQUESTED',

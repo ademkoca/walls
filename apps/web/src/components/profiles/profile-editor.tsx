@@ -54,7 +54,14 @@ function toInput(view: ProfileView): ProfileInput {
  * The signed-in seller's or agent's profile (SPEC §4). Sellers' changes apply at once;
  * agents' changes go to a single pending request that an Admin reviews.
  */
-export function ProfileEditor({ initialProfile }: { initialProfile: MyProfile }) {
+export function ProfileEditor({
+  initialProfile,
+  googleOutcome,
+}: {
+  initialProfile: MyProfile;
+  /** How a "Confirm with Google" round trip ended (`?google=`), for the email change. */
+  googleOutcome: string | null;
+}) {
   const t = useTranslations('profile');
   const errorMessage = useErrorMessage();
   const router = useRouter();
@@ -231,7 +238,7 @@ export function ProfileEditor({ initialProfile }: { initialProfile: MyProfile })
       </form>
 
       <Section title={t('sections.email')}>
-        <EmailChangeCard profile={profile} onChange={apply} />
+        <EmailChangeCard profile={profile} onChange={apply} googleOutcome={googleOutcome} />
       </Section>
 
       <ConfirmDialog

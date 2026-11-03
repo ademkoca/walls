@@ -192,10 +192,10 @@ MVP authentication:
 -   Email verification before a private seller account is activated for listing submission
 -   Password reset
 -   Separate real-estate agent application and approval workflow
+-   Google sign-in ("Continue with Google", §3.1)
 
 MVP does not include:
 
--   Google login
 -   Microsoft login
 -   MFA
 -   phone-number verification
@@ -206,9 +206,26 @@ Prospective agents, agencies and investors use a distinct “For professionals�
 
 Phone verification is not required in the MVP. Because no number can be verified before phone verification exists, public contact details show phone numbers without a verification label (decision 2026-10-21): only a number with status `VERIFIED` gets a "Verified" badge, and unverified numbers are never presented as verified. Do not implement phone verification as part of MVP; it is planned after launch (§45).
 
-However, authentication architecture MUST allow Google login to be added later without replacing the existing user model.
-
 Email addresses are identity/authentication fields and cannot be freely changed by users. Keep the existing email-change approval rule for active agent profiles unless the product specification explicitly changes it.
+
+## 3.1 Google sign-in (decision 2026-11-02)
+
+Everyone can sign in with Google ("Continue with Google" on the login, registration and account setup pages) besides email and password. Google sign-in never changes who may do what: roles and the Admin approval of professionals stay as described above.
+
+-   **Matching.** A Walls account is connected to at most one Google account, and a Google account to at most one Walls account. They are matched by Google's permanent account ID, not by email, so either email can change later. Walls stores only that ID and the Google account's email; it never stores Google tokens and asks Google for nothing but the identity (name, email, picture).
+-   **Refused.** A Google account whose email Google has not verified, and a deactivated Walls account.
+-   **A Google account without a Walls account** goes to a choice page; nothing is created until the person chooses:
+    -   a **private-seller account**: active at once (Google has proved the address) and without a password. The name comes from Google and can be edited on the choice page.
+    -   the **professional application** (agents, agencies, investors), with the name and email from Google filled in. Professional accounts are never created through Google sign-in; they still need an approved application.
+-   **An existing Walls account with the same email** is connected:
+    -   automatically when Google is the authority for the address: Gmail addresses, and addresses of a Google Workspace domain (Google's `hd` claim). Google's "verified" flag is not trusted for other addresses, since Google checked them only once, when the Google account was created.
+    -   otherwise only after the person opens a link emailed to the Walls account's address (valid 24 hours).
+    -   Connecting is audit-logged, and an account that was already active is told by email ("Google sign-in was added to your account").
+    -   Connecting finishes a signup that was waiting: an unverified private-seller registration becomes active, and the password chosen at registration is removed, because whoever registered may not own the address; an invited account (approved professional, Admin) is set up.
+-   **Account setup.** The setup link's page offers "Continue with Google" next to choosing a password. The Google account must have the invited address; the setup link itself proves control of the mailbox.
+-   **Accounts without a password** can set one with "Forgot password". To change their sign-in email they first confirm with their connected Google account; the confirmation is valid for 10 minutes in that session. Accounts with a password confirm with it, as before.
+-   **Profile picture.** When an account with a public profile is created or set up through Google and has no picture, the Google picture is copied into Walls' media storage (never linked to Google). For professionals it becomes a profile change request that an Admin approves, like any other picture change (§4).
+-   The provider sits behind an `IdentityProvider` abstraction, so other providers can be added later. Development and tests use a fake Google screen (`GOOGLE_SIGN_IN_FAKE=on`, never in production).
 
 ------------------------------------------------------------------------
 
@@ -222,7 +239,7 @@ Private sellers and agents may edit permitted profile information such as:
 -   Other approved public profile fields
 -   Contact phone number
 
-Email changes for active accounts require the email-verification flow and must not silently replace the authenticated identity. Retain administrator approval for agent email/phone changes where applicable under the existing agent-profile workflow. Private seller contact changes must be auditable.
+Email changes for active accounts require the email-verification flow and must not silently replace the authenticated identity. The user first confirms who they are: with their password, or with Google for accounts that have no password (§3.1). Retain administrator approval for agent email/phone changes where applicable under the existing agent-profile workflow. Private seller contact changes must be auditable.
 
 Phone verification is not required for MVP. Store phone verification status explicitly (for example, `UNVERIFIED` / `VERIFIED`). Public contact details label only verified numbers ("Verified"); unverified numbers carry no label (§3). The status may only be set to verified by a trusted verification process; users must not be able to mark their own phone number verified. No phone-verification process is included in MVP, so newly supplied numbers remain unverified unless a future approved verification feature is implemented.
 
@@ -821,6 +838,7 @@ The system should support transactional email for:
 -   email/phone change requests
 -   approval/rejection of profile changes
 -   account deactivated (including the reason)
+-   Google account connection link, and notice that Google sign-in was added (§3.1)
 -   contact form message (to the company inbox)
 
 Use Resend for MVP, behind an `EmailService` abstraction.
@@ -1464,6 +1482,8 @@ SESSION_SECRET
 CLOUDINARY_*
 RESEND_API_KEY
 EXCHANGE_RATE_PROVIDER
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
 ```
 
 Provide:
@@ -1496,6 +1516,7 @@ The MVP includes:
 -   admin management
 -   super-admin management
 -   authentication
+-   Google sign-in (§3.1)
 -   approved-agent account setup/invitation email
 -   agent application review
 -   profile change approval
@@ -1523,7 +1544,6 @@ Do NOT implement unless explicitly requested later:
 -   buyer-only accounts
 -   favorites
 -   saved searches
--   Google login
 -   Microsoft login
 -   MFA
 -   map-based search
@@ -1547,7 +1567,7 @@ later.
 
 Design clean extension points for:
 
--   Google authentication
+-   additional sign-in providers (Google sign-in exists since 2026-11-02, §3.1)
 -   MFA
 -   buyer-only accounts
 -   favorites
@@ -1622,6 +1642,7 @@ Open decisions:
 -   User can register with email/password.
 -   A private seller account becomes active after email verification.
 -   Public registration cannot assign the agent role.
+-   User can create a private-seller account with Google, which is active at once; signing in with Google never creates a professional account.
 -   Private seller can create, edit, submit, and manage their own listings.
 -   Private seller must provide at least three valid images before submission.
 -   Private seller cannot publish directly.

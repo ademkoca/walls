@@ -2,10 +2,11 @@ import { FOR_PROFESSIONALS_PATH } from '@walls/shared';
 import { getTranslations } from 'next-intl/server';
 import { metadataLocale, resolveLocale } from '@/i18n/locale-param';
 import { AuthCard } from '@/components/auth/auth-card';
+import { GoogleSignInButton, SignInMethodDivider } from '@/components/auth/google-sign-in-button';
 import { DemoSiteNotice } from '@/components/layout/demo-site-notice';
 import { RegisterForm } from '@/components/auth/register-form';
 import { Link, redirect } from '@/i18n/navigation';
-import { getCurrentUser } from '@/lib/api/server';
+import { getAuthProviders, getCurrentUser } from '@/lib/api/server';
 import { DEFAULT_AFTER_LOGIN } from '@/lib/routes';
 import { privatePageMetadata } from '@/lib/metadata';
 
@@ -16,7 +17,7 @@ export async function generateMetadata({ params }: PageProps<'/[locale]/register
 export default async function RegisterPage({ params }: PageProps<'/[locale]/register'>) {
   const locale = await resolveLocale(params);
   if (await getCurrentUser()) redirect({ href: DEFAULT_AFTER_LOGIN, locale });
-  const t = await getTranslations('auth.register');
+  const [t, providers] = await Promise.all([getTranslations('auth.register'), getAuthProviders()]);
   const linkClass =
     'font-medium text-foreground underline underline-offset-4 transition-colors hover:text-muted-foreground';
 
@@ -43,6 +44,12 @@ export default async function RegisterPage({ params }: PageProps<'/[locale]/regi
     >
       <div className="space-y-6">
         <DemoSiteNotice />
+        {providers.google && (
+          <>
+            <GoogleSignInButton />
+            <SignInMethodDivider />
+          </>
+        )}
         <RegisterForm />
       </div>
     </AuthCard>

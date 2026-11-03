@@ -2,6 +2,7 @@ import type { Database } from '@walls/database';
 import {
   type Actor,
   type AuditLogEntry,
+  AuthProvider,
   type Page,
   Role,
   type UserDetail,
@@ -19,6 +20,7 @@ import { AuditAction, AuditEntity, recordAudit } from '../audit/audit-log';
 import {
   type UserRow,
   deleteSessionsForUser,
+  findIdentityOfUser,
   findUserById,
   updateUser,
 } from '../auth/auth.repository';
@@ -133,7 +135,9 @@ export class UsersService {
       assertAllowed(canReactivateUser(actor, user));
 
       const status = statusAfterReactivation({
-        hasPassword: user.passwordHash !== null,
+        hasSignInMethod:
+          user.passwordHash !== null ||
+          (await findIdentityOfUser(tx, id, AuthProvider.GOOGLE)) !== undefined,
         emailVerified: user.emailVerifiedAt !== null,
       });
       await updateUser(tx, id, { status, deactivatedAt: null });

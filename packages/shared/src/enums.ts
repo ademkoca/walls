@@ -138,6 +138,12 @@ export const ReviewStatus = {
 } as const;
 export type ReviewStatus = ValueOf<typeof ReviewStatus>;
 
+/** External sign-in providers an account can be connected to (SPEC §3.1). */
+export const AuthProvider = {
+  GOOGLE: 'GOOGLE',
+} as const;
+export type AuthProvider = ValueOf<typeof AuthProvider>;
+
 export const Locale = {
   SR: 'sr',
   EN: 'en',

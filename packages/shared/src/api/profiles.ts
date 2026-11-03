@@ -57,6 +57,9 @@ export interface MyProfile {
   changeRequest: ProfileChangeRequestView | null;
   /** An email address waiting for its owner to click the verification link. */
   pendingEmail: string | null;
+  /** False for accounts that sign in only with Google (SPEC §3.1). */
+  hasPassword: boolean;
+  googleConnected: boolean;
 }
 
 export interface ProfileChangeRequestSummary {

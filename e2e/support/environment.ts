@@ -40,6 +40,10 @@ export const API_ENV = {
   EXCHANGE_RATE_FIXED_EUR_RSD: '117.2',
   // Every test browser shares one IP; the production default (30) would throttle the suite.
   AUTH_RATE_LIMIT_PER_IP: '10000',
+  // "Continue with Google" against the API's fake Google screen, never the real Google.
+  GOOGLE_CLIENT_ID: '',
+  GOOGLE_CLIENT_SECRET: '',
+  GOOGLE_SIGN_IN_FAKE: 'on',
 };
 
 export const WEB_ENV = {

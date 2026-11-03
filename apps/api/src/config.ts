@@ -37,6 +37,11 @@ const envSchema = z
     LOCAL_PRIVATE_FILES_DIR: z.string().min(1).default('.private-files'),
     /** "nbs": the National Bank of Serbia middle rate; "fixed": a set rate (development, tests). */
     EXCHANGE_RATE_PROVIDER: unsetIfEmpty(z.enum(['nbs', 'fixed']).default('nbs')),
+    /** Google sign-in (SPEC §3.1): an OAuth client of the Google Auth Platform. Both or neither. */
+    GOOGLE_CLIENT_ID: unsetIfEmpty(z.string().optional()),
+    GOOGLE_CLIENT_SECRET: unsetIfEmpty(z.string().optional()),
+    /** Development and tests only: "on" signs in with a made-up Google account instead. */
+    GOOGLE_SIGN_IN_FAKE: unsetIfEmpty(z.enum(['on', 'off']).default('off')),
     /** The EUR → RSD rate used by the "fixed" provider, e.g. 117.2. */
     EXCHANGE_RATE_FIXED_EUR_RSD: unsetIfEmpty(
       z
@@ -56,6 +61,14 @@ const envSchema = z
   .refine((env) => env.NODE_ENV !== 'production' || env.EXCHANGE_RATE_PROVIDER === 'nbs', {
     message: 'Production uses the "nbs" provider',
     path: ['EXCHANGE_RATE_PROVIDER'],
+  })
+  .refine((env) => Boolean(env.GOOGLE_CLIENT_ID) === Boolean(env.GOOGLE_CLIENT_SECRET), {
+    message: 'Set both GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET, or neither',
+    path: ['GOOGLE_CLIENT_ID'],
+  })
+  .refine((env) => env.NODE_ENV !== 'production' || env.GOOGLE_SIGN_IN_FAKE === 'off', {
+    message: 'The fake Google sign-in is never available in production',
+    path: ['GOOGLE_SIGN_IN_FAKE'],
   })
   .refine(
     (env) => {
@@ -90,6 +103,14 @@ export interface Config {
     localPrivateDirectory: string;
   };
   exchangeRates: { provider: 'nbs' } | { provider: 'fixed'; eurRsd: string };
+  /**
+   * Google sign-in: real Google with the OAuth client's credentials, a made-up Google account
+   * (development and tests), or absent (no "Continue with Google" button).
+   */
+  google:
+    | { provider: 'google'; clientId: string; clientSecret: string }
+    | { provider: 'fake' }
+    | undefined;
 }
 
 /** Parses and validates environment variables. Throws with every problem listed. */
@@ -128,5 +149,17 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       parsed.EXCHANGE_RATE_PROVIDER === 'fixed' && parsed.EXCHANGE_RATE_FIXED_EUR_RSD
         ? { provider: 'fixed', eurRsd: parsed.EXCHANGE_RATE_FIXED_EUR_RSD }
         : { provider: 'nbs' },
+    google: googleConfig(parsed),
   };
+}
+
+function googleConfig(parsed: z.infer<typeof envSchema>): Config['google'] {
+  if (parsed.GOOGLE_CLIENT_ID && parsed.GOOGLE_CLIENT_SECRET) {
+    return {
+      provider: 'google',
+      clientId: parsed.GOOGLE_CLIENT_ID,
+      clientSecret: parsed.GOOGLE_CLIENT_SECRET,
+    };
+  }
+  return parsed.GOOGLE_SIGN_IN_FAKE === 'on' ? { provider: 'fake' } : undefined;
 }

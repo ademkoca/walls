@@ -184,6 +184,21 @@
       "showPassword": "Show password",
       "hidePassword": "Hide password"
     },
+    "google": {
+      "continue": "Continue with Google",
+      "or": "or with email",
+      "outcomes": {
+        "cancelled": "Signing in with Google was cancelled.",
+        "failed": "Signing in with Google didn't work. Please try again.",
+        "email-not-verified": "Google hasn't confirmed the email address of this Google account. Confirm it with Google, or log in with your email and password.",
+        "deactivated": "This account has been deactivated.",
+        "link-sent": "This email address already has a Walls account. To connect it to Google, open the link we've just sent to that address. Until then, log in with your password.",
+        "wrong-account": "That's not the right Google account. Use the Google account with this account's email address.",
+        "other-google-account": "Your Walls account is connected to a different Google account. Continue with that one, or log in with your password.",
+        "google-account-in-use": "This Google account is already connected to another Walls account.",
+        "setup-link-invalid": "This setup link is invalid or has expired. Ask our team to send a new one."
+      }
+    },
     "login": {
       "title": "Log in",
       "description": "Log in to manage your listings.",
@@ -234,7 +249,7 @@
     },
     "setupAccount": {
       "title": "Set up your account",
-      "description": "Choose a password to activate your account.",
+      "description": "Choose a password, or continue with the Google account of your email address, to activate your account.",
       "submit": "Activate account",
       "success": "Your account is active. Log in with the password you chose.",
       "goToLogin": "Log in",
@@ -249,6 +264,25 @@
       "missingToken": "This link is incomplete. Open it directly from the email you received.",
       "requestNew": "Request a new link from your profile page.",
       "goToProfile": "Go to my profile"
+    },
+    "continueWithGoogle": {
+      "title": "Welcome to Walls",
+      "description": "There's no Walls account for {email} yet. What would you like to do?",
+      "sellerTitle": "Sell or rent out my own property",
+      "sellerDescription": "Create a private seller account. It's active right away, and you sign in with Google, no password needed.",
+      "sellerSubmit": "Create account",
+      "professionalTitle": "I'm an agent, agency or investor",
+      "professionalDescription": "Apply for a professional account. Our team checks every application before the account is created.",
+      "professionalLink": "Apply",
+      "expired": "This Google sign-in has expired. Continue with Google again."
+    },
+    "connectGoogle": {
+      "title": "Connect your Google account",
+      "description": "Confirm to also sign in to your Walls account with Google.",
+      "submit": "Connect Google account",
+      "success": "Your account is connected to Google. From now on you can continue with Google.",
+      "missingToken": "This link is incomplete. Open it directly from the email you received.",
+      "requestNew": "Continue with Google on the login page to get a new link."
     }
   },
   "dashboard": {
@@ -621,6 +655,7 @@
       "USER_INVITED": "User invited",
       "USER_DEACTIVATED": "Account deactivated",
       "USER_REACTIVATED": "Account reactivated",
+      "USER_GOOGLE_CONNECTED": "Google account connected",
       "LISTING_CREATED": "Listing created",
       "LISTING_SUBMITTED": "Submitted for review",
       "LISTING_REVISED": "Back to draft",
@@ -801,7 +836,8 @@
     "EXTERNAL_SERVICE_FAILED": "An external service is unavailable. Try again later.",
     "INTERNAL_ERROR": "Something went wrong. Please try again.",
     "INVALID_FILE": "A file doesn't meet the requirements.",
-    "EMAIL_IN_USE": "This email address already belongs to an account."
+    "EMAIL_IN_USE": "This email address already belongs to an account.",
+    "REAUTHENTICATION_REQUIRED": "Confirm with Google again first."
   },
   "agentApplication": {
     "title": "Advertise as an agent, agency or investor",
@@ -952,6 +988,10 @@
       "change": "Change email address",
       "newEmail": "New email address",
       "currentPassword": "Current password",
+      "googleOnly": "You sign in with Google, so confirm with your Google account instead of a password.",
+      "confirmWithGoogle": "Confirm with Google",
+      "reauthenticated": "Confirmed. Enter your new email address within 10 minutes.",
+      "setPassword": "To also log in with a password, use “Forgot your password?” on the login page.",
       "send": "Send confirmation link",
       "sent": "We've sent a confirmation link to {email}.",
       "cancel": "Cancel change",
@@ -1343,7 +1383,7 @@
         },
         "collect": {
           "title": "What we collect",
-          "body": "Account details: your name, email address and password (stored only as a secure hash) and, if you add them, your phone number, profile picture and short bio.\n\nProfessional account applications (agents, agencies and investors): full name or company name, email address, phone number, account type, agency name (for agents) and the proof files you upload. Proof files are visible only to our administrators.\n\nListings: the property's details, photos, price and location.\n\nInquiries: the name, email address, optional phone number and message a visitor sends about a listing.\n\nContact form messages: your name, email address, subject and message.\n\nListing views: to count a view once per visitor per day we use a fingerprint of the IP address and browser, made with a key that changes every day. We don't store the IP address itself."
+          "body": "Account details: your name, email address and password (stored only as a secure hash) and, if you add them, your phone number, profile picture and short bio.\n\nSigning in with Google: if you choose “Continue with Google”, Google tells us your Google account's identifier, name, email address and whether Google has confirmed it, and the address of your profile picture. We never receive your Google password or access to anything else in your Google account. When you create an account this way, we copy your Google profile picture to our own storage; agents', agencies' and investors' pictures are shown only after our review.\n\nProfessional account applications (agents, agencies and investors): full name or company name, email address, phone number, account type, agency name (for agents) and the proof files you upload. Proof files are visible only to our administrators.\n\nListings: the property's details, photos, price and location.\n\nInquiries: the name, email address, optional phone number and message a visitor sends about a listing.\n\nContact form messages: your name, email address, subject and message.\n\nListing views: to count a view once per visitor per day we use a fingerprint of the IP address and browser, made with a key that changes every day. We don't store the IP address itself."
         },
         "use": {
           "title": "Why we use it",
@@ -1355,11 +1395,11 @@
         },
         "providers": {
           "title": "Service providers",
-          "body": "We use trusted providers to run {brand}: Supabase (database), Render (application server), Netlify (website hosting), Cloudinary (photos and documents) and Resend (email). Maps are shown with OpenStreetMap, which receives your browser's requests for map images. Some providers may process data outside Serbia; the safeguards for that will be described here after legal review.\n\nThe links to our social media profiles (Instagram, Facebook, LinkedIn) and the buttons for sharing a listing (WhatsApp, Facebook) are plain links: those services receive nothing until you open one."
+          "body": "We use trusted providers to run {brand}: Supabase (database), Render (application server), Netlify (website hosting), Cloudinary (photos and documents), Resend (email) and Google (only if you sign in with Google). Maps are shown with OpenStreetMap, which receives your browser's requests for map images. Some providers may process data outside Serbia; the safeguards for that will be described here after legal review.\n\nThe links to our social media profiles (Instagram, Facebook, LinkedIn) and the buttons for sharing a listing (WhatsApp, Facebook) are plain links: those services receive nothing until you open one."
         },
         "cookies": {
           "title": "Cookies",
-          "body": "We use only the cookies {brand} needs to work: a session cookie that keeps you signed in, and a cookie that remembers whether you view prices in EUR or RSD. We don't use advertising or analytics cookies."
+          "body": "We use only the cookies {brand} needs to work: a session cookie that keeps you signed in, a cookie that remembers whether you view prices in EUR or RSD, and, only while you sign in with Google, two short-lived cookies that protect the sign-in. We don't use advertising or analytics cookies."
         },
         "retention": {
           "title": "How long we keep it",
@@ -1386,7 +1426,7 @@
         },
         "accounts": {
           "title": "Accounts",
-          "body": "You must give accurate details and keep your password safe. A private-seller account becomes active once you confirm your email address. An agent, agency or investor account is created only after we approve an application with proof of your business. You can't choose or change your own role."
+          "body": "You must give accurate details and keep your password safe. A private-seller account becomes active once you confirm your email address, or right away if you create it with Google. An agent, agency or investor account is created only after we approve an application with proof of your business. You can't choose or change your own role."
         },
         "listings": {
           "title": "Listings",

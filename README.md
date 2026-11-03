@@ -135,6 +135,19 @@ for now; fill them in there once registration is done. The contact form emails
 Resend only sends, so forward it with Cloudflare Email Routing (walls.rs's DNS is at
 Cloudflare).
 
+### Google sign-in
+
+"Continue with Google" appears on the login, registration and account setup pages when the API
+has `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (`GET /api/v1/auth/providers` tells the web
+app). Each environment has its own OAuth client in the Google Auth Platform, of type "Web
+application", whose authorized redirect URI is `WEB_ORIGIN` + `/api/v1/auth/google/callback`
+(for example `https://walls.rs/api/v1/auth/google/callback`). Google returns to the site's own
+origin because the browser reaches the API through the web app's `/api` proxy.
+
+Without credentials, `GOOGLE_SIGN_IN_FAKE=on` replaces Google with a fake sign-in screen where
+any Google account can be made up (development only; the E2E suite uses it). Who may connect
+which account is described in SPEC §3.1.
+
 ### First Super Admin
 
 Accounts with admin rights are never created through public registration.
@@ -183,6 +196,7 @@ Values already in the environment win over the root `.env`. Close the terminal a
 ### Authentication
 
 -   Email/password
+-   Google sign-in ("Continue with Google", SPEC §3.1)
 -   HTTP-only secure cookies
 -   Role-based access control
 
@@ -473,7 +487,7 @@ The MVP includes:
 -   responsive design
 
 The MVP does not include payments, buyer-only accounts, favorites, saved
-searches, Google login, MFA, phone verification, map-based search, full CRM
+searches, Microsoft login, MFA, phone verification, map-based search, full CRM
 functionality, or native mobile applications. Users who want to advertise a property must have a verified private-seller account or an approved agent, agency or investor account.
 
 ## Source of Truth

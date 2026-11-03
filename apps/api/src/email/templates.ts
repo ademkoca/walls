@@ -27,6 +27,8 @@ export const EmailTemplate = {
   PROFILE_CHANGES_REJECTED: 'PROFILE_CHANGES_REJECTED',
   INQUIRY_RECEIVED: 'INQUIRY_RECEIVED',
   CONTACT_MESSAGE: 'CONTACT_MESSAGE',
+  GOOGLE_LINK_CONFIRMATION: 'GOOGLE_LINK_CONFIRMATION',
+  GOOGLE_CONNECTED: 'GOOGLE_CONNECTED',
 } as const;
 export type EmailTemplate = (typeof EmailTemplate)[keyof typeof EmailTemplate];
 
@@ -75,6 +77,8 @@ export interface EmailPayloads {
     /** The language of the page the visitor wrote from. */
     pageLocale: Locale;
   };
+  GOOGLE_LINK_CONFIRMATION: { displayName: string; googleEmail: string; link: string };
+  GOOGLE_CONNECTED: { displayName: string; googleEmail: string; resetLink: string };
 }
 
 interface EmailContent {
@@ -127,7 +131,7 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Podesite svoj nalog',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `za Vas je otvoren nalog na ${brand.name}. Postavite lozinku da biste ga aktivirali.`,
+        `za Vas je otvoren nalog na ${brand.name}. Postavite lozinku ili se prijavite Google nalogom sa ovom adresom da biste ga aktivirali.`,
         `Link važi ${setupDays} dana.`,
       ],
       action: { label: 'Podesi nalog', url: link },
@@ -221,7 +225,7 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Vaša prijava za profesionalni nalog je odobrena',
       paragraphs: [
         `Zdravo ${displayName},`,
-        `Vaša prijava za profesionalni nalog na ${brand.name} je odobrena. Postavite lozinku da biste aktivirali nalog i počeli da objavljujete oglase.`,
+        `Vaša prijava za profesionalni nalog na ${brand.name} je odobrena. Postavite lozinku ili se prijavite Google nalogom sa ovom adresom da biste aktivirali nalog i počeli da objavljujete oglase.`,
         `Link važi ${setupDays} dana.`,
       ],
       action: { label: 'Podesi nalog', url: link },
@@ -242,6 +246,23 @@ const COPY: Record<Locale, Copy> = {
         `Link važi ${TOKEN_TTL_HOURS.EMAIL_CHANGE} sata. Ako niste Vi zatražili promenu, zanemarite ovu poruku.`,
       ],
       action: { label: 'Potvrdi adresu', url: link },
+    }),
+    GOOGLE_LINK_CONFIRMATION: ({ displayName, googleEmail, link }) => ({
+      subject: 'Povežite Google nalog',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `neko je pokušao da se prijavi na ${brand.name} Google nalogom ${googleEmail}. Ova adresa već ima nalog na ${brand.name}, pa ga povezujemo sa Google nalogom tek kada to potvrdite.`,
+        `Posle toga se možete prijaviti i Google nalogom. Link važi ${TOKEN_TTL_HOURS.GOOGLE_LINK} sata. Ako to niste bili Vi, zanemarite ovu poruku — Vaš nalog nije promenjen.`,
+      ],
+      action: { label: 'Poveži Google nalog', url: link },
+    }),
+    GOOGLE_CONNECTED: ({ displayName, googleEmail, resetLink }) => ({
+      subject: 'Google prijava je dodata Vašem nalogu',
+      paragraphs: [
+        `Zdravo ${displayName},`,
+        `Vaš nalog na ${brand.name} je povezan sa Google nalogom ${googleEmail}. Od sada se možete prijaviti i njime.`,
+        `Ako to niste bili Vi, odmah resetujte lozinku i odgovorite na ovaj email: ${resetLink}`,
+      ],
     }),
     EMAIL_CHANGED: ({ displayName, newEmail }) => ({
       subject: 'Email adresa naloga je promenjena',
@@ -333,7 +354,7 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Set up your account',
       paragraphs: [
         `Hi ${displayName},`,
-        `an account has been created for you on ${brand.name}. Set a password to activate it.`,
+        `an account has been created for you on ${brand.name}. Set a password, or continue with the Google account of this address, to activate it.`,
         `The link is valid for ${setupDays} days.`,
       ],
       action: { label: 'Set up account', url: link },
@@ -427,7 +448,7 @@ const COPY: Record<Locale, Copy> = {
       subject: 'Your application for a professional account was approved',
       paragraphs: [
         `Hello ${displayName},`,
-        `your application for a professional account on ${brand.name} has been approved. Set a password to activate your account and start publishing listings.`,
+        `your application for a professional account on ${brand.name} has been approved. Set a password, or continue with the Google account of this address, to activate your account and start publishing listings.`,
         `The link is valid for ${setupDays} days.`,
       ],
       action: { label: 'Set up account', url: link },
@@ -448,6 +469,23 @@ const COPY: Record<Locale, Copy> = {
         `The link is valid for ${TOKEN_TTL_HOURS.EMAIL_CHANGE} hours. If you didn't ask for this change, ignore this email.`,
       ],
       action: { label: 'Confirm address', url: link },
+    }),
+    GOOGLE_LINK_CONFIRMATION: ({ displayName, googleEmail, link }) => ({
+      subject: 'Connect your Google account',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `someone tried to sign in to ${brand.name} with the Google account ${googleEmail}. This address already has a ${brand.name} account, so we connect it to Google only once you confirm.`,
+        `After that you can also sign in with Google. The link is valid for ${TOKEN_TTL_HOURS.GOOGLE_LINK} hours. If this wasn't you, ignore this email — your account has not changed.`,
+      ],
+      action: { label: 'Connect Google account', url: link },
+    }),
+    GOOGLE_CONNECTED: ({ displayName, googleEmail, resetLink }) => ({
+      subject: 'Google sign-in was added to your account',
+      paragraphs: [
+        `Hello ${displayName},`,
+        `your ${brand.name} account is now connected to the Google account ${googleEmail}. From now on you can also sign in with it.`,
+        `If this wasn't you, reset your password right away and reply to this email: ${resetLink}`,
+      ],
     }),
     EMAIL_CHANGED: ({ displayName, newEmail }) => ({
       subject: 'Your account email address was changed',

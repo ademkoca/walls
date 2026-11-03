@@ -102,11 +102,11 @@ describe('reactivating accounts (SPEC §2.1)', () => {
   });
 
   it('returns accounts to where signup stopped', () => {
-    expect(statusAfterReactivation({ hasPassword: true, emailVerified: true })).toBe('ACTIVE');
-    expect(statusAfterReactivation({ hasPassword: true, emailVerified: false })).toBe(
+    expect(statusAfterReactivation({ hasSignInMethod: true, emailVerified: true })).toBe('ACTIVE');
+    expect(statusAfterReactivation({ hasSignInMethod: true, emailVerified: false })).toBe(
       'PENDING_VERIFICATION',
     );
-    expect(statusAfterReactivation({ hasPassword: false, emailVerified: true })).toBe(
+    expect(statusAfterReactivation({ hasSignInMethod: false, emailVerified: true })).toBe(
       'PENDING_SETUP',
     );
   });
