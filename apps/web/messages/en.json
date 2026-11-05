@@ -1369,8 +1369,6 @@
     }
   },
   "legal": {
-    "draftTitle": "Draft",
-    "draftNotice": "This text is a draft. It will be finalised after legal review, before {brand} launches.",
     "lastUpdated": "Last updated: {date}",
     "privacy": {
       "title": "Privacy policy",

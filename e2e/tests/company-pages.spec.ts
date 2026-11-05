@@ -67,10 +67,9 @@ test('a visitor reads about Walls, writes through the contact form and finds the
   expect(email).toContain('ana.visitor@example.com');
   expect(email).toContain('engleske verzije sajta');
 
-  // Legal pages are linked from every footer and marked as drafts.
+  // Legal pages are linked from every footer.
   await footer.getByRole('link', { name: 'Privacy policy' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Privacy policy' })).toBeVisible();
-  await expect(page.getByText('This text is a draft.')).toBeVisible();
   await footer.getByRole('link', { name: 'Terms of use' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Terms of use' })).toBeVisible();
 });

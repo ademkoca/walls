@@ -1369,8 +1369,6 @@
     }
   },
   "legal": {
-    "draftTitle": "Nacrt",
-    "draftNotice": "Ovaj tekst je nacrt. Konačna verzija biće objavljena nakon pravne provere, pre pokretanja sajta {brand}.",
     "lastUpdated": "Poslednja izmena: {date}",
     "privacy": {
       "title": "Politika privatnosti",

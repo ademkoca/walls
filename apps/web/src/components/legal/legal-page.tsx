@@ -1,6 +1,4 @@
 import { brand } from '@walls/ui/brand';
-import { Alert, AlertDescription, AlertTitle } from '@walls/ui/components/alert';
-import { FileWarningIcon } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { formatDate } from '@/lib/intl-locale';
 
@@ -35,7 +33,7 @@ type LegalDocument =
   | { document: 'terms'; sections: typeof TERMS_SECTIONS };
 
 /**
- * A legal text (privacy policy, terms of use), marked as a draft until it has been reviewed.
+ * A legal text (privacy policy, terms of use).
  * Section bodies separate paragraphs with blank lines.
  */
 export async function LegalPage({ document, sections }: LegalDocument) {
@@ -57,11 +55,6 @@ export async function LegalPage({ document, sections }: LegalDocument) {
           {tLegal('lastUpdated', { date: formatDate(locale, LAST_UPDATED, { dateStyle: 'long' }) })}
         </p>
       </header>
-      <Alert>
-        <FileWarningIcon />
-        <AlertTitle>{tLegal('draftTitle')}</AlertTitle>
-        <AlertDescription>{tLegal('draftNotice', values)}</AlertDescription>
-      </Alert>
       <p className="text-lg">{t('intro', values)}</p>
       {sections.map((key) => (
         <section key={key} aria-labelledby={`legal-${key}`} className="space-y-3">
